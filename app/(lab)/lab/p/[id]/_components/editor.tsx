@@ -4,12 +4,14 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SUGGESTED_PROMPTS } from "@/data/prompts";
 import { STRINGS, fmt } from "@/data/strings";
-import { autoAdjust, paramsToProps, propsToParams, recipeToClip } from "@/lib/expression";
-import type { Channel, Expression, Job, MotionProps, Project, Settings, Signature, Structure } from "@/lib/models";
+import { applyToRobot, autoAdjust, paramsToProps, propsToParams, recipeToClip } from "@/lib/expression";
+import type { Channel, Expression, Job, MotionProps, Project, Reference, SavedExpression, Settings, Signature, Structure } from "@/lib/models";
+import { ReferenceError, extractFrames } from "@/lib/reference/frames";
 import { signatureToParams } from "@/lib/signature/axes";
 import { createSoundEngine } from "@/lib/sound";
 import { ApiError, api } from "@/lib/ui/api";
 import { describeChange, emptyHistory, pushChange, undoChange, type History } from "@/lib/ui/history";
+import { uploadFile } from "@/lib/ui/upload";
 import type { JointState, SimController } from "@/components/sim/sim-controller";
 import { Viewport, type ViewportEvent } from "@/components/sim/Viewport";
 import type { LimitEvent } from "@/components/sim/limits";
@@ -17,6 +19,9 @@ import { Button } from "@/components/ui/button";
 import { Menu } from "@/components/ui/menu";
 import { ConfirmModal, Modal, PromptModal } from "@/components/ui/modal";
 import { useToast } from "@/components/ui/toast";
+import { CHANNEL_LABEL } from "@/components/ui/channel-badges";
+import { ContextPanel, type EditorContext, type PendingReference } from "./context-panel";
+import { LibraryPanel } from "./library-panel";
 import { JointTable, MotionPanel, PROP_LABELS } from "./panels";
 
 const E = STRINGS.editor;
@@ -25,9 +30,29 @@ type Tab = Channel;
 type GenResult = { expressionId: string; source: "ollama" | "demo"; fallbackReason?: string; reasoning: string };
 
 const running = (j: Job | null) => j !== null && (j.status === "queued" || j.status === "running");
+const MAX_REFERENCES = 4;
+const isVideo = (f: File) => f.type.startsWith("video/") || /\.(mp4|mov|webm)$/i.test(f.name);
 
-// W02D editor (slice ④a): viewport + playback bar + prompt/generation, Motion properties, joints,
-// limit modal, change chips + Undo, ☰ menu. Context / Library arrive in ④b, timeline and Face/Sound panels in ⑤.
+/** Context is generation input: kept per project in this browser until the next Generate writes it into the expression. */
+const contextKey = (projectId: string) => `pure.context.${projectId}`;
+function loadContext(projectId: string, e: Expression | null): EditorContext {
+  const fallback: EditorContext = {
+    currentStatus: e?.currentStatus ?? "",
+    components: e?.components ?? [],
+    pattern: e?.pattern ?? "",
+    references: e?.references ?? [],
+    lastPrompt: "",
+  };
+  try {
+    const raw = localStorage.getItem(contextKey(projectId));
+    return raw ? { ...fallback, ...JSON.parse(raw) } : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+// W02D editor: Context/Library · viewport + playback bar + prompt/generation · Motion properties, joints,
+// limit modal, change chips + Undo, ☰ menu. Timeline and Face/Sound panels arrive in ⑤.
 export function Editor({
   project,
   structure,
@@ -69,6 +94,31 @@ export function Editor({
   const [autoPlay, setAutoPlay] = useState(false);
   /** Bumped when the motion itself changes (generate, auto-adjust); prop edits don't re-cue playback. */
   const [cue, setCue] = useState(0);
+  const [context, setContext] = useState<EditorContext>(() => ({
+    currentStatus: initialExpression?.currentStatus ?? "",
+    components: initialExpression?.components ?? [],
+    pattern: initialExpression?.pattern ?? "",
+    references: initialExpression?.references ?? [],
+    lastPrompt: "",
+  }));
+  const [pending, setPending] = useState<PendingReference[]>([]);
+  const imageInput = useRef<HTMLInputElement>(null);
+
+  // localStorage only after mount (SSR renders the expression's context).
+  // Both updates land in one render, so the first write already carries the stored context.
+  const [contextLoaded, setContextLoaded] = useState(false);
+  useEffect(() => {
+    setContext(loadContext(project.id, initialExpression));
+    setContextLoaded(true);
+  }, [project.id, initialExpression]);
+  useEffect(() => {
+    if (!contextLoaded) return;
+    try {
+      localStorage.setItem(contextKey(project.id), JSON.stringify(context));
+    } catch {
+      // storage blocked: context lasts for this visit
+    }
+  }, [project.id, context, contextLoaded]);
 
   useEffect(() => sound.setQuietHours(settings.quietHours), [sound, settings.quietHours]);
 
@@ -167,27 +217,96 @@ export function Editor({
     return () => clearInterval(timer);
   }, [job, finish]);
 
-  async function generate(text = prompt) {
+  async function generate(text = prompt, ctx = context) {
     const p = text.trim();
     if (!p || running(job)) return;
     setPrompt(p);
     setFailure(null);
+    setContext((c) => ({ ...c, lastPrompt: p }));
     try {
       setJob(
         await api<Job>(`/api/projects/${project.id}/generate`, {
           method: "POST",
           body: JSON.stringify({
             prompt: p,
-            currentStatus: expression?.currentStatus || undefined,
-            components: expression?.components ?? [],
-            pattern: expression?.pattern || undefined,
-            references: expression?.references ?? [],
+            currentStatus: ctx.currentStatus.trim() || undefined,
+            components: ctx.components,
+            pattern: ctx.pattern || undefined,
+            references: ctx.references,
             expressionId: expression?.id,
           }),
         }),
       );
     } catch (err) {
       setFailure(err instanceof ApiError ? err.message : String(err));
+    }
+  }
+
+  function toggleComponent(id: string) {
+    const components = context.components.includes(id) ? context.components.filter((c) => c !== id) : [...context.components, id];
+    const next = { ...context, components };
+    setContext(next);
+    const again = context.lastPrompt || prompt;
+    if (again.trim()) void generate(again, next);
+  }
+
+  // ------------------------------------------------------------ references
+
+  async function addReference(file: File): Promise<Reference | null> {
+    const id = `ref-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+    const base = { projectId: project.id };
+    if (!isVideo(file)) {
+      const up = await uploadFile(file, { ...base, kind: "image", name: file.name });
+      return { id, kind: "image", path: up.path, thumb: up.path, status: "ok" };
+    }
+    let read: { duration: number; frames: Blob[] } | null = null;
+    try {
+      read = await extractFrames(file);
+    } catch (err) {
+      if (err instanceof ReferenceError && err.code === "TOO_LONG") {
+        toast(E.referenceTooLong);
+        return null;
+      }
+      // Unreadable codec: keep the file, mark it failed (E3); generation goes on without it.
+    }
+    const video = await uploadFile(file, { ...base, kind: "video", name: file.name });
+    if (!read) return { id, kind: "video", path: video.path, thumb: "", status: "failed" };
+    const frames: string[] = [];
+    for (const [i, blob] of read.frames.entries()) frames.push((await uploadFile(blob, { ...base, kind: "frame", name: `${id}-${i + 1}.jpg` })).path);
+    return { id, kind: "video", path: video.path, thumb: frames[Math.floor(frames.length / 2)], durationS: Math.round(read.duration * 10) / 10, frames, status: "ok" };
+  }
+
+  function addFiles(files: FileList) {
+    const room = MAX_REFERENCES - context.references.length - pending.length;
+    if (room <= 0) return toast(E.referenceLimit);
+    for (const file of Array.from(files).slice(0, room)) {
+      const tmp = { id: `${file.name}-${Date.now()}`, name: file.name };
+      setPending((p) => [...p, tmp]);
+      addReference(file)
+        .then((ref) => ref && setContext((c) => ({ ...c, references: [...c.references, ref] })))
+        .catch((err) => toast(err instanceof Error ? err.message : String(err)))
+        .finally(() => setPending((p) => p.filter((x) => x.id !== tmp.id)));
+    }
+  }
+
+  // ------------------------------------------------------------ library
+
+  async function applyLibrary(saved: SavedExpression) {
+    const { expression: input, dropped, clipDropped } = applyToRobot(saved, structure);
+    try {
+      const created = await api<Expression>(`/api/projects/${project.id}/expressions`, { method: "POST", body: JSON.stringify(input) });
+      setExpression(created);
+      setProps(created.motion.props);
+      committed.current = created.motion.props;
+      setHistory(emptyHistory());
+      setLastResult(null);
+      setAutoPlay(true);
+      setCue((c) => c + 1);
+      toast(fmt(E.libraryPanel.applied, { name: saved.name }));
+      if (dropped.length) toast(fmt(E.libraryPanel.dropped, { channels: dropped.map((c) => CHANNEL_LABEL[c]).join(", ") }));
+      if (clipDropped) toast(E.libraryPanel.clipDropped);
+    } catch {
+      toast(STRINGS.lab.toast.failed);
     }
   }
 
@@ -306,15 +425,17 @@ export function Editor({
           ))}
         </div>
         {leftTab === "context" ? (
-          <dl className="flex flex-col gap-3">
-            <div><dt className="text-xs text-neutral-500">{E.currentStatus}</dt><dd>{expression?.currentStatus || "—"}</dd></div>
-            <div><dt className="text-xs text-neutral-500">{E.component}</dt><dd>{expression?.components.join(", ") || "—"}</dd></div>
-            <div><dt className="text-xs text-neutral-500">{E.pattern}</dt><dd>{expression?.pattern || "—"}</dd></div>
-            <div><dt className="text-xs text-neutral-500">{E.reference}</dt><dd>{expression?.references.length ? expression.references.map((r) => r.path.split("/").pop()).join(", ") : "—"}</dd></div>
-            <p className="text-xs text-neutral-400">{E.contextSoon}</p>
-          </dl>
+          <ContextPanel
+            context={context}
+            pending={pending}
+            busy={busy}
+            onChange={(patch) => setContext((c) => ({ ...c, ...patch }))}
+            onToggleComponent={toggleComponent}
+            onAddFiles={addFiles}
+            onRemoveReference={(id) => setContext((c) => ({ ...c, references: c.references.filter((r) => r.id !== id) }))}
+          />
         ) : (
-          <p className="text-xs text-neutral-400">{E.librarySoon}</p>
+          <LibraryPanel busy={busy} onApply={(s) => void applyLibrary(s)} />
         )}
       </aside>
 
@@ -362,7 +483,7 @@ export function Editor({
 
         <form className="flex flex-col gap-2" onSubmit={(e) => { e.preventDefault(); void generate(); }}>
           <div className="flex gap-2">
-            <select className="rounded border border-neutral-300 px-2 text-sm" aria-label="Prompt type" defaultValue="text" onChange={(e) => { if (e.target.value === "image") { toast(E.attachHint); e.target.value = "text"; } }}>
+            <select className="rounded border border-neutral-300 px-2 text-sm" aria-label="Prompt type" defaultValue="text" onChange={(e) => { if (e.target.value === "image") { setLeftTab("context"); imageInput.current?.click(); e.target.value = "text"; } }}>
               <option value="text">{E.text}</option>
               <option value="image">{E.image}</option>
             </select>
@@ -381,6 +502,18 @@ export function Editor({
               <Button type="submit" variant="primary" disabled={!prompt.trim()}>{E.generate}</Button>
             )}
           </div>
+          {(context.references.length > 0 || pending.length > 0) && (
+            <div className="flex flex-wrap gap-1.5 text-xs" data-testid="attach-chips">
+              {context.references.map((r) => (
+                <span key={r.id} className={`flex items-center gap-1 rounded-full border px-2 py-0.5 ${r.status === "failed" ? "border-red-300 text-red-600" : "border-neutral-300"}`}>
+                  {r.kind === "video" ? "▶" : "▣"} {r.path.split("/").pop()?.replace(/^[0-9a-f]{8}-/, "")}
+                  <button aria-label={E.removeReference} onClick={() => setContext((c) => ({ ...c, references: c.references.filter((x) => x.id !== r.id) }))}>×</button>
+                </span>
+              ))}
+              {pending.map((p) => <span key={p.id} className="rounded-full border border-dashed border-neutral-300 px-2 py-0.5 text-neutral-500">{p.name} · {E.referenceUploading}</span>)}
+            </div>
+          )}
+          <input ref={imageInput} type="file" accept="image/*,video/mp4,video/quicktime,video/webm" className="hidden" onChange={(e) => { if (e.target.files?.length) addFiles(e.target.files); e.target.value = ""; }} />
           <div className="flex flex-wrap items-center gap-2 text-xs">
             <span className="text-neutral-500">{E.suggested}</span>
             {SUGGESTED_PROMPTS.map((s) => (
