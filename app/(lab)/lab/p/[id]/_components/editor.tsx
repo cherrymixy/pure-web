@@ -4,8 +4,8 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SUGGESTED_PROMPTS } from "@/data/prompts";
 import { STRINGS, fmt } from "@/data/strings";
-import { applyToRobot, autoAdjust, paramsToProps, propsToParams, recipeToClip } from "@/lib/expression";
-import type { Channel, Expression, FaceSpec, Job, MotionProps, Project, Reference, SavedExpression, Settings, Signature, SoundCue, SoundSpec, Structure } from "@/lib/models";
+import { addFaceKey, addKey, applyToRobot, autoAdjust, deleteFaceKey, deleteKey, formatTime, moveFaceKey, paramsToProps, propsToParams, recipeToClip, snapTime, updateKey } from "@/lib/expression";
+import type { Channel, Clip, Expression, FaceSpec, Key, Job, MotionProps, Project, Reference, SavedExpression, Settings, Signature, SoundCue, SoundSpec, Structure } from "@/lib/models";
 import { cueAt } from "@/data/sound-cues";
 import { ReferenceError, extractFrames } from "@/lib/reference/frames";
 import { signatureToParams } from "@/lib/signature/axes";
@@ -25,6 +25,7 @@ import { FACE_FIELDS, FacePanel, SoundPanel } from "./channel-panels";
 import { ContextPanel, type EditorContext, type PendingReference } from "./context-panel";
 import { LibraryPanel } from "./library-panel";
 import { JointTable, MotionPanel, PROP_LABELS } from "./panels";
+import { Timeline, type KeyRef, type Track } from "./timeline";
 
 const E = STRINGS.editor;
 const POLL_MS = 500;
@@ -35,7 +36,7 @@ const running = (j: Job | null) => j !== null && (j.status === "queued" || j.sta
 const MAX_REFERENCES = 4;
 
 /** One undoable edit: Motion properties, face and sound together. */
-type Snapshot = { props: MotionProps; face: FaceSpec; sound: SoundSpec };
+type Snapshot = { props: MotionProps; face: FaceSpec; sound: SoundSpec; clip: Clip | null };
 const NEUTRAL_FACE: FaceSpec = { preset: "neutral", tokens: { eyeSize: 1, eyeOpen: 1, eyeAngle: 0, browAngle: 0, brightness: 1, blinkRate: 12 } };
 const CUE_FIELDS = {
   t: { label: STRINGS.editor.sound.fields.t, digits: 2 },
@@ -45,6 +46,11 @@ const CUE_FIELDS = {
   volumeDb: { label: STRINGS.editor.sound.fields.volumeDb },
   timbre: { label: STRINGS.editor.sound.fields.timbre },
 };
+
+/** Snapshot → expression.motion: a clip means keyframe mode, none means the recipe plays. */
+function motionOf(e: Expression, snap: Snapshot, recipe = e.motion.recipe): Expression["motion"] {
+  return snap.clip ? { mode: "clip", recipe, clip: snap.clip, props: snap.props } : { mode: "recipe", recipe, props: snap.props };
+}
 
 /** "Speed 85 → 60", "Face sleepy → happy, Brow angle -12 → -6", "Sound cues 2 → 3"… */
 function describeSnapshot(a: Snapshot, b: Snapshot): string {
@@ -57,6 +63,7 @@ function describeSnapshot(a: Snapshot, b: Snapshot): string {
       const ca = a.sound.cues.find((c) => c.id === cb.id);
       if (ca) parts.push(...describeFields(ca, cb, CUE_FIELDS).map((d) => `${STRINGS.editor.sound.label} ${d}`));
     }
+  if (!parts.length && a.clip !== b.clip) parts.push(STRINGS.editor.timeline.title);
   return parts.join(", ");
 }
 const isVideo = (f: File) => f.type.startsWith("video/") || /\.(mp4|mov|webm)$/i.test(f.name);
@@ -108,7 +115,11 @@ export function Editor({
   const [soundSpec, setSoundSpec] = useState<SoundSpec>(initialExpression?.sound ?? { cues: [] });
   const [selectedCue, setSelectedCue] = useState<string | null>(null);
   const [quietHours, setQuietHours] = useState(settings.quietHours);
-  const committed = useRef<Snapshot>({ props, face, sound: soundSpec });
+  const [clip, setClip] = useState<Clip | null>(initialExpression?.motion.mode === "clip" ? initialExpression.motion.clip ?? null : null);
+  const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
+  const [selectedKey, setSelectedKey] = useState<KeyRef | null>(null);
+  const [loop, setLoop] = useState(false);
+  const committed = useRef<Snapshot>({ props, face, sound: soundSpec, clip });
   const [history, setHistory] = useState<History<Snapshot>>(emptyHistory);
   const [prompt, setPrompt] = useState("");
   const [job, setJob] = useState<Job | null>(null);
@@ -179,26 +190,37 @@ export function Editor({
     setProps(snap.props);
     setFace(snap.face);
     setSoundSpec(snap.sound);
+    setClip(snap.clip);
     ctrl.current?.setFace(snap.face);
     ctrl.current?.setSound(snap.sound);
   }, []);
 
+  /** Show an edited clip at the playhead (paused) without waiting for the save. */
+  const showClip = useCallback((c: Clip) => {
+    const t = ctrl.current?.getTime().t ?? 0;
+    ctrl.current?.playClip(c, undefined, { autoplay: false });
+    ctrl.current?.seek(Math.min(t, c.duration));
+    setPaused(true);
+  }, []);
+
   /** New baseline after generate / library apply: no undo across expressions. */
   const resetTo = useCallback((e: Expression) => {
-    const snap = { props: e.motion.props, face: e.face, sound: e.sound };
+    const snap = { props: e.motion.props, face: e.face, sound: e.sound, clip: e.motion.mode === "clip" ? e.motion.clip ?? null : null };
     setProps(snap.props);
     setFace(snap.face);
     setSoundSpec(snap.sound);
+    setClip(snap.clip);
     setSelectedCue(null);
+    setSelectedKey(null);
     committed.current = snap;
     setHistory(emptyHistory());
   }, []);
 
   /** Release / pick: one change chip, one saved version. */
-  async function commit(override: Partial<Snapshot> = {}) {
+  async function commit(override: Partial<Snapshot> = {}, label = "") {
     const before = committed.current;
-    const after: Snapshot = { props, face, sound: soundSpec, ...override };
-    const label = describeSnapshot(before, after);
+    const after: Snapshot = { props, face, sound: soundSpec, clip, ...override };
+    label ||= describeSnapshot(before, after);
     if (!label) return;
     committed.current = after;
     setHistory((h) => pushChange(h, label, before, after));
@@ -206,7 +228,7 @@ export function Editor({
     if (expression) {
       // A hand-edited face owns the face channel: per-step recipe faces would override it during playback.
       const recipe = after.face !== before.face ? { ...expression.motion.recipe, steps: expression.motion.recipe.steps.map(({ face: _f, ...st }) => st) } : expression.motion.recipe;
-      await patchExpression({ motion: { ...expression.motion, recipe, props: after.props }, face: after.face, sound: after.sound }).catch(() => toast(STRINGS.lab.toast.failed));
+      await patchExpression({ motion: motionOf(expression, after, recipe), face: after.face, sound: after.sound }).catch(() => toast(STRINGS.lab.toast.failed));
       if (recipe !== expression.motion.recipe) setCue((c) => c + 1);
     }
   }
@@ -218,9 +240,109 @@ export function Editor({
     applySnapshot(u.restore);
     committed.current = u.restore;
     if (expression) {
-      await patchExpression({ motion: { ...expression.motion, props: u.restore.props }, face: u.restore.face, sound: u.restore.sound }).catch(() => {});
+      await patchExpression({ motion: motionOf(expression, u.restore), face: u.restore.face, sound: u.restore.sound }).catch(() => {});
+      if (u.restore.clip !== u.change.after.clip) {
+        if (u.restore.clip) showClip(u.restore.clip);
+        else setCue((c) => c + 1);
+      }
     }
-  }, [history, expression, patchExpression, applySnapshot]);
+  }, [history, expression, patchExpression, applySnapshot, showClip]);
+
+  // ------------------------------------------------------------ timeline edits
+
+  /** Recipe keys shown before the first edit (sampled like the playback). */
+  const previewClip = useMemo(
+    () => (expression && !clip ? recipeToClip(expression.motion.recipe, params, structure) : null),
+    // Recipe and playback params decide the sampled keys.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [expression?.id, expression?.version, clip, params, structure],
+  );
+  const timelineClip = clip ?? previewClip;
+  const jointLabel = (id: string) => structure.joints.find((j) => j.id === id)?.label ?? id;
+  const isJoint = (track: Track) => track !== "face" && track !== "sound";
+
+  useEffect(() => {
+    ctrl.current?.highlightJoint(selectedTrack && isJoint(selectedTrack) ? selectedTrack : null);
+  }, [selectedTrack]);
+
+  /** Joint key edit: the first one turns the recipe into keyframes. */
+  function editClip(fn: (c: Clip) => Clip, label: string, done = true) {
+    if (!timelineClip) return;
+    const next = fn(timelineClip);
+    if (next === timelineClip) return;
+    setClip(next);
+    if (done) {
+      showClip(next);
+      void commit({ clip: next }, label);
+    }
+  }
+
+  function addTimelineKey() {
+    if (!timelineClip || !selectedTrack) return;
+    const t = time.t;
+    if (selectedTrack === "face") {
+      const { face: next, index } = addFaceKey(face, t, timelineClip.duration, face.tokens);
+      changeFace(next);
+      setSelectedKey({ track: "face", index });
+      void commit({ face: next }, fmt(E.timeline.faceKey, { time: formatTime(snapTime(t, timelineClip.duration)) }));
+      return;
+    }
+    if (!isJoint(selectedTrack)) return;
+    const { clip: next, index } = addKey(timelineClip, selectedTrack, t, structure);
+    setSelectedKey({ track: selectedTrack, index });
+    editClip(() => next, `+ ${fmt(E.timeline.edited, { joint: jointLabel(selectedTrack), time: formatTime(next.tracks[selectedTrack][index].t) })}`);
+  }
+
+  function dragKey(key: KeyRef, t: number, done: boolean) {
+    if (!timelineClip) return;
+    const dur = timelineClip.duration;
+    if (key.track === "face") {
+      const next = moveFaceKey(face, key.index, t, dur);
+      changeFace(next);
+      if (done) void commit({ face: next }, fmt(E.timeline.faceKey, { time: formatTime(next.keys![key.index].t) }));
+    } else if (key.track === "sound") {
+      const cue = soundSpec.cues[key.index];
+      if (!cue) return;
+      const next = { cues: soundSpec.cues.map((c, i) => (i === key.index ? { ...c, t: snapTime(t, dur) } : c)) };
+      setSoundSpec(next);
+      if (done) void commit({ sound: next }, fmt(E.timeline.cueMoved, { cue: cue.id.split("-")[0], time: formatTime(snapTime(t, dur)) }));
+    } else {
+      editClip((c) => updateKey(c, key.track, key.index, { t }, structure), fmt(E.timeline.edited, { joint: jointLabel(key.track), time: formatTime(snapTime(t, dur)) }), done);
+    }
+  }
+
+  function applyKey(key: KeyRef, patch: Partial<Key>) {
+    if (!timelineClip) return;
+    if (!isJoint(key.track)) return dragKey(key, patch.t ?? 0, true);
+    editClip((c) => updateKey(c, key.track, key.index, patch, structure), fmt(E.timeline.edited, { joint: jointLabel(key.track), time: formatTime(patch.t ?? timelineClip.tracks[key.track][key.index].t) }));
+  }
+
+  function deleteTimelineKey(key: KeyRef) {
+    setSelectedKey(null);
+    if (key.track === "face") {
+      const next = deleteFaceKey(face, key.index);
+      changeFace(next);
+      void commit({ face: next });
+    } else if (key.track === "sound") {
+      const cue = soundSpec.cues[key.index];
+      if (cue) removeCue(cue.id);
+    } else {
+      editClip((c) => deleteKey(c, key.track, key.index), `− ${jointLabel(key.track)}`);
+    }
+  }
+
+  function faceKeyFromCurrent(index: number) {
+    const keys = (face.keys ?? []).map((k, i) => (i === index ? { ...k, tokens: { ...face.tokens } } : k));
+    const next = { ...face, keys };
+    changeFace(next);
+    void commit({ face: next });
+  }
+
+  function seekTo(t: number) {
+    ctrl.current?.pause();
+    ctrl.current?.seek(t);
+    setPaused(true);
+  }
 
   // ------------------------------------------------------------ face & sound edits
 
@@ -427,10 +549,11 @@ export function Editor({
 
   async function autoAdjustLimits() {
     if (!expression) return setLimit(null);
-    const clip = expression.motion.clip ?? recipeToClip(expression.motion.recipe, params, structure);
-    const adjusted = autoAdjust(clip, structure);
+    const base = clip ?? recipeToClip(expression.motion.recipe, params, structure);
+    const adjusted = autoAdjust(base, structure);
     setLimit(null);
-    await patchExpression({ motion: { ...expression.motion, mode: "clip", clip: adjusted.clip, props } });
+    setClip(adjusted.clip);
+    await commit({ clip: adjusted.clip }, E.limit.autoAdjust);
     toast(fmt(E.adjusted, { n: adjusted.changes.length }));
     setAutoPlay(true);
     setCue((c) => c + 1);
@@ -658,10 +781,29 @@ export function Editor({
       </aside>
 
       {/* Bottom: Edit Detail (⑤) */}
-      {timelineOpen && (
-        <section className="col-span-3 border-t border-neutral-200 p-4 text-sm text-neutral-500" data-testid="timeline">
-          <b className="text-neutral-900">{E.timeline.title}</b> · {E.timelineSoon}
-        </section>
+      {timelineOpen && timelineClip && (
+        <Timeline
+          clip={timelineClip}
+          fromRecipe={!clip}
+          structure={structure}
+          face={face}
+          sound={soundSpec}
+          t={time.t}
+          playing={!paused}
+          loop={loop}
+          selectedTrack={selectedTrack}
+          selectedKey={selectedKey}
+          onSeek={seekTo}
+          onTogglePlay={togglePlay}
+          onLoop={(on) => { setLoop(on); ctrl.current?.setLoop(on); }}
+          onSelectTrack={(track) => { setSelectedTrack(track); if (selectedKey?.track !== track) setSelectedKey(null); }}
+          onSelectKey={(key) => { setSelectedKey(key); if (key) setSelectedTrack(key.track); }}
+          onAddKey={addTimelineKey}
+          onDragKey={dragKey}
+          onApplyKey={applyKey}
+          onDeleteKey={deleteTimelineKey}
+          onFaceKeyFromCurrent={faceKeyFromCurrent}
+        />
       )}
 
       <Modal open={failure !== null} onClose={() => setFailure(null)} title={E.failed.title}>
@@ -688,7 +830,7 @@ export function Editor({
               </tbody>
             </table>
             <div className="flex justify-end gap-2">
-              <Button onClick={() => { setLimit(null); setTimelineOpen(true); }}>{E.limit.editTimeline}</Button>
+              <Button onClick={() => { setLimit(null); setTimelineOpen(true); setSelectedTrack(limit.joint); seekTo(limit.t); }}>{E.limit.editTimeline}</Button>
               <Button variant="primary" onClick={() => void autoAdjustLimits()}>{E.limit.autoAdjust}</Button>
             </div>
           </>
