@@ -6,7 +6,10 @@ import { FACE_RANGES, type FaceParams } from "@/components/sim/face-canvas";
 import { DEFAULT_PARAMS, type JointState, type PlaybackParams, type SimController } from "@/components/sim/sim-controller";
 import { Viewport, type ViewportEvent } from "@/components/sim/Viewport";
 import { FACE_PRESETS, type FacePresetName } from "@/data/face-presets";
-import { DEV_RECIPES, DEV_STRUCTURE, DEV_STRUCTURE_NARROW } from "@/data/dev-samples";
+import { DEV_FACE_KEYS, DEV_RECIPES, DEV_SOUND, DEV_STRUCTURE, DEV_STRUCTURE_NARROW } from "@/data/dev-samples";
+import { SOUND_CUES, cueAt } from "@/data/sound-cues";
+import { createSoundEngine } from "@/lib/sound";
+import type { SoundCue } from "@/lib/models";
 
 const FACE_SLIDERS: (keyof FaceParams)[] = ["eyeSize", "eyeOpen", "eyeAngle", "browAngle", "brightness", "blinkRate"];
 const PARAM_SLIDERS: { key: keyof PlaybackParams; min: number; max: number }[] = [
@@ -15,6 +18,13 @@ const PARAM_SLIDERS: { key: keyof PlaybackParams; min: number; max: number }[] =
   { key: "settle", min: 0, max: 1 },
   { key: "antic", min: 0, max: 1 },
   { key: "rhythm", min: 0.25, max: 3 },
+];
+type CueToken = "pitchSt" | "tempo" | "lengthS" | "volumeDb";
+const CUE_SLIDERS: { key: CueToken; min: number; max: number; step: number }[] = [
+  { key: "pitchSt", min: -12, max: 12, step: 1 },
+  { key: "tempo", min: 0.5, max: 2, step: 0.05 },
+  { key: "lengthS", min: 0.1, max: 2, step: 0.05 },
+  { key: "volumeDb", min: -30, max: 0, step: 1 },
 ];
 
 // Gray-box bench for the sim contract (STEP 3): everything goes through SimController.
@@ -34,6 +44,10 @@ export function SimLab() {
   const [highlight, setHighlight] = useState<string>("");
   const [shot, setShot] = useState<string | null>(null);
   const [events, setEvents] = useState<string[]>([]);
+  const [sound] = useState(createSoundEngine);
+  const [cue, setCue] = useState<SoundCue>(() => cueAt(SOUND_CUES[0].id, 0, SOUND_CUES[0].id));
+  const [masterDb, setMasterDb] = useState(0);
+  const [quiet, setQuiet] = useState(false);
 
   function onEvent(e: ViewportEvent) {
     switch (e.type) {
@@ -87,6 +101,25 @@ export function SimLab() {
     ctrl.current?.setFace({ preset, tokens: next });
   }
 
+  function pickCue(id: string) {
+    const next = cueAt(id, 0, id);
+    setCue(next);
+    sound.preview(next);
+  }
+
+  function changeCue<K extends keyof SoundCue>(key: K, value: SoundCue[K]) {
+    setCue((c) => ({ ...c, [key]: value }));
+  }
+
+  /** greeting recipe + DEV_SOUND cues + DEV_FACE_KEYS (eyes close from 1s to 3s). */
+  function playWithSound() {
+    setFaceMode("neutral");
+    setFace(FACE_PRESETS.neutral);
+    ctrl.current?.setFace(DEV_FACE_KEYS);
+    ctrl.current?.setSound(DEV_SOUND);
+    ctrl.current?.playRecipe(DEV_RECIPES.greeting);
+  }
+
   function toggleNarrow() {
     const next = !narrow;
     setNarrow(next);
@@ -108,7 +141,7 @@ export function SimLab() {
             t {time.t.toFixed(2)} / {finite ? time.duration.toFixed(2) : "∞"}
           </span>
         </div>
-        <Viewport controllerRef={ctrl} structure={DEV_STRUCTURE} mode="editor" onEvent={onEvent} className="aspect-[4/3] w-full rounded border border-neutral-200" />
+        <Viewport controllerRef={ctrl} structure={DEV_STRUCTURE} mode="editor" sound={sound} onEvent={onEvent} className="aspect-[4/3] w-full rounded border border-neutral-200" />
         <table className="text-sm">
           <thead className="text-left text-neutral-500">
             <tr><th>Joint</th><th>Command</th><th>Actual</th><th>Structure range</th></tr>
@@ -146,6 +179,8 @@ export function SimLab() {
               <button key={name} className={btn} onClick={() => ctrl.current?.playRecipe(recipe)}>{name}</button>
             ))}
             <button className={btn} onClick={() => ctrl.current?.debugCommand({ shoulder_pitch: 80 })}>Overdrive pose</button>
+            <button className={btn} onClick={playWithSound}>greeting + sound + face keys</button>
+            <button className={btn} onClick={() => { ctrl.current?.setSound(null); ctrl.current?.setFace({ preset: "neutral", tokens: FACE_PRESETS.neutral }); }}>Clear sound/keys</button>
           </div>
         </div>
 
@@ -201,6 +236,38 @@ export function SimLab() {
               </label>
             );
           })}
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <h2 className="font-semibold">Sound</h2>
+          <div className="flex flex-wrap gap-1.5">
+            {SOUND_CUES.map((c) => (
+              <button key={c.id} className={`${btn} ${cue.id === c.id ? on : ""}`} onClick={() => pickCue(c.id)}>▶ {c.label}</button>
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-20">timbre</span>
+            {(["bright", "soft"] as const).map((t) => (
+              <button key={t} className={`${btn} ${cue.timbre === t ? on : ""}`} onClick={() => changeCue("timbre", t)}>{t}</button>
+            ))}
+            <button className={`${btn} ml-auto`} onClick={() => sound.preview(cue)}>▶ Preview</button>
+          </div>
+          {CUE_SLIDERS.map(({ key, min, max, step }) => (
+            <label key={key} className="flex items-center gap-2">
+              <span className="w-20">{key}</span>
+              <input type="range" min={min} max={max} step={step} value={cue[key]} onChange={(e) => changeCue(key, Number(e.target.value))} onPointerUp={() => sound.preview(cue)} className="flex-1" />
+              <span className="w-12 text-right font-mono">{cue[key].toFixed(key === "pitchSt" || key === "volumeDb" ? 0 : 2)}</span>
+            </label>
+          ))}
+          <label className="flex items-center gap-2">
+            <span className="w-20">master dB</span>
+            <input type="range" min={-24} max={12} step={1} value={masterDb} onChange={(e) => { setMasterDb(Number(e.target.value)); sound.setMasterDb(Number(e.target.value)); }} className="flex-1" />
+            <span className="w-12 text-right font-mono">{masterDb}</span>
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" checked={quiet} onChange={(e) => { setQuiet(e.target.checked); sound.setQuietHours(e.target.checked); }} />
+            Quiet hours (−12 dB)
+          </label>
         </div>
 
         <div className="flex flex-col gap-1">

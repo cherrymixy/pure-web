@@ -49,6 +49,32 @@ export function clampFace(p: Partial<FaceParams>): Partial<FaceParams> {
   return out;
 }
 
+/**
+ * Timeline face keys → params at time t. Per token, `base` is the value at t = 0,
+ * keys that set the token are linear points after it, the last one holds.
+ */
+export function faceAt(base: FaceParams, keys: { t: number; tokens: Partial<FaceParams> }[], t: number): FaceParams {
+  const sorted = [...keys].sort((a, b) => a.t - b.t);
+  const out = { ...base };
+  for (const k of Object.keys(base) as (keyof FaceParams)[]) {
+    let t0 = 0;
+    let v0 = base[k];
+    for (const key of sorted) {
+      const v1 = key.tokens[k];
+      if (typeof v1 !== 'number' || !Number.isFinite(v1)) continue;
+      if (key.t <= t) {
+        t0 = key.t;
+        v0 = v1;
+        continue;
+      }
+      v0 += (v1 - v0) * ((t - t0) / (key.t - t0));
+      break;
+    }
+    out[k] = v0;
+  }
+  return { ...out, ...clampFace(out) };
+}
+
 export const FACE_WIDTH = 540;
 export const FACE_HEIGHT = 324;
 const BLINK_SECONDS = 0.16;

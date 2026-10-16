@@ -1,4 +1,5 @@
-import type { Recipe, Structure } from "@/lib/models";
+import type { FaceSpec, Recipe, SoundSpec, Structure } from "@/lib/models";
+import { cueAt } from "./sound-cues";
 
 // /dev/sim test fixtures (not product content; real seeds arrive in STEP 4).
 export const DEV_RECIPES: Record<string, Recipe> = {
@@ -37,4 +38,18 @@ export const DEV_STRUCTURE: Structure = {
 export const DEV_STRUCTURE_NARROW: Structure = {
   ...DEV_STRUCTURE,
   joints: DEV_STRUCTURE.joints.map((j) => (j.id === "shoulder_pitch" ? { ...j, min: -20, max: 40 } : j)),
+};
+
+// STEP 9: "greeting" with cues on the motion clock and a face that dozes off along the timeline.
+export const DEV_SOUND: SoundSpec = {
+  cues: [cueAt("rising-chirp", 0.3), cueAt("signature", 1.6), cueAt("low-warm", 3.2)],
+};
+
+export const DEV_FACE_KEYS: FaceSpec = {
+  preset: "neutral",
+  tokens: { eyeSize: 1, eyeOpen: 1, eyeAngle: 0, browAngle: 0, brightness: 1, blinkRate: 12 },
+  keys: [
+    { t: 1, tokens: { eyeOpen: 1, browAngle: 0 } },
+    { t: 3, tokens: { eyeOpen: 0.2, browAngle: -12, eyeAngle: -8, brightness: 0.45 } },
+  ],
 };

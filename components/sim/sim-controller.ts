@@ -14,7 +14,7 @@ import { retargetMotion, type CameraView } from '@/lib/sim/robots';
 import { SequencePlayer, clipPlayable, motionPlayable } from '@/lib/sim/sequence';
 import type { Clip, FaceSpec, Recipe, SoundCue, SoundSpec, Structure } from '@/lib/models';
 import { FACE_PRESETS } from '@/data/face-presets';
-import { FACE_DEFAULTS, type FaceParams } from './face-canvas';
+import { FACE_DEFAULTS, faceAt, type FaceParams } from './face-canvas';
 import { LEAD_IN, SimRuntime, type JointState as RuntimeJointState, type PlaybackSource, type SimRuntimeOptions } from './runtime';
 import type { LimitEvent } from './limits';
 
@@ -48,6 +48,8 @@ export interface SoundEngine {
   pause(): void;
   seek(t: number): void;
   stop(): void;
+  /** Every sim tick (30 Hz) with the playback time and speed — keeps cues on the motion clock. */
+  sync?(t: number, speed: number): void;
 }
 
 const silentSound: SoundEngine = {
@@ -87,6 +89,9 @@ export class SimController {
   private params: Required<PlaybackParams> = { ...DEFAULT_PARAMS };
   private source: PlaybackSource | null = null;
   private recipe: Recipe | null = null;
+  /** Face with timeline keys, re-evaluated on every tick while an expression plays. */
+  private faceSpec: FaceSpec | null = null;
+  private expressionActive = false;
   private view: ViewParams = {};
   private orbit: { on: boolean; pan?: boolean; zoom?: boolean } = { on: true };
   private highlighted: string | null = null;
@@ -111,6 +116,7 @@ export class SimController {
           if (!e.name.startsWith('idle:')) this.emit('playing', { name: e.name });
           break;
         case 'ended':
+          this.expressionActive = false;
           this.sound.stop();
           this.emit('ended', { name: e.name });
           break;
@@ -118,6 +124,8 @@ export class SimController {
           this.applyStepFace(e.name, e.index);
           break;
         case 'tick':
+          this.sound.sync?.(e.t, this.params.speed);
+          if (this.expressionActive) this.applyFaceKeys(e.t);
           this.emit('tick', { t: e.t, duration: e.duration });
           break;
         case 'limitExceeded': {
@@ -215,14 +223,16 @@ export class SimController {
 
   private start(source: PlaybackSource, opts: { autoplay?: boolean } = {}): void {
     this.source = source;
+    this.expressionActive = true;
     this.runtime.setSpeed(this.params.speed);
     this.runtime.play(source, opts);
+    this.sound.sync?.(0, this.params.speed);
     if (opts.autoplay === false) this.sound.seek(0);
     else this.sound.play(0);
   }
 
   private applyStepFace(name: string, index: number): void {
-    if (name !== 'recipe' || !this.recipe) return;
+    if (name !== 'recipe' || !this.recipe || this.faceSpec?.keys?.length) return;
     const preset = this.recipe.steps[index]?.face;
     if (!preset) return;
     if (preset === 'video') this.runtime.setFace({ kind: 'video' });
@@ -272,6 +282,7 @@ export class SimController {
   stop(): void {
     this.source = null;
     this.recipe = null;
+    this.expressionActive = false;
     this.sound.stop();
     this.runtime.stop();
   }
@@ -296,8 +307,16 @@ export class SimController {
   // ---------------------------------------------------------------- face & sound
 
   setFace(spec: FaceSpec): void {
+    this.faceSpec = spec.preset !== 'video' && spec.keys?.length ? spec : null;
     if (spec.preset === 'video') this.runtime.setFace({ kind: 'video' });
+    else if (this.faceSpec && this.expressionActive) this.applyFaceKeys(this.runtime.getTime().t);
     else this.runtime.setFace({ kind: 'canvas', params: faceSpecToParams(spec) });
+  }
+
+  private applyFaceKeys(t: number): void {
+    const spec = this.faceSpec;
+    if (!spec?.keys) return;
+    this.runtime.setFace({ kind: 'canvas', params: faceAt(faceSpecToParams(spec), spec.keys, t) });
   }
 
   setSound(spec: SoundSpec | null): void {
