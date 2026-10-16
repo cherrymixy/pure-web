@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+/* Design tokens arrive in STEP 20 (Figma Dev Mode). Until then: gray-box. */
+body {
+  background: white;
+}

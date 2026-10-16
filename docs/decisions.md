@@ -1,0 +1,13 @@
+# Decisions
+
+STEP마다 한 줄. `날짜 · STEP · 결정 · 근거`
+
+| 날짜 | STEP | 결정 | 근거 |
+|---|---|---|---|
+| 2026-10-16 | 0-setup | 레포 구조 세팅(CLAUDE.md 루트, docs/, `_ref/` gitignore) | BuildPlay_Book §0 |
+| 2026-10-16 | 0 | 스택 확정(_ref 버전 + lowdb 7 · pdf-parse 1.1.1 · cheerio 1 · zod 4 · vitest), Node 22 LTS(.nvmrc) | Node 25 전역 localStorage 리스크 |
+| 2026-10-16 | 0 | Ollama: OLLAMA_MODEL=qwen3:8b(think:false) · OLLAMA_VISION_MODEL=gemma3:4b | 18GB 메모리, pure-app 실측 7~10s |
+| 2026-10-16 | 0 | sim 이식: state-motion·exporters·LeLamp 스펙 버림, robots는 pure-desk만(리타겟 유지), viewer3d 스테이지 색 옵션화 | 새 설계는 시그니처+레시피, 디자인 패스에서 sim 수정 불가 |
+| 2026-10-16 | 0 | 한계 정책: 레시피 진폭은 validateRecipe가 리그 범위 안으로 선클램프, limitExceeded 모달은 구조 범위(Edit limits·타임라인 입력) 초과 시만 | 진폭 1.04↑ focus head_tilt 초과(pure-app 측정) |
+| 2026-10-16 | 0 | 부록 D 🟡 전부 추천대로. 가이드라인 라우트 [[...slug]]. STEP10② 확인값 shoulder_pitch −20~40 | 리그 범위 −35~55 |
+| 2026-10-16 | 1 | 스캐폴드 + /dev. 구현 표시는 page.tsx 첫 줄 `// @implemented`(화면 ID는 `// @screen`)로 변경, 데모 모드는 쿠키 `pure_demo` | `export const implemented`는 next build 타입 검사 실패("not a valid Page export field") |

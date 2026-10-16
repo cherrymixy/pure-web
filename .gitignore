@@ -1,0 +1,26 @@
+# reference repo (참고용, 빌드·git 제외)
+/_ref/
+
+# dependencies
+/node_modules
+
+# next.js
+/.next/
+/out/
+/build
+next-env.d.ts
+*.tsbuildinfo
+
+# local data (db + uploads)
+/data/db.json
+/data/uploads/
+
+# env
+.env
+.env*.local
+
+# misc
+.DS_Store
+npm-debug.log*
+.omc/
+.vercel
