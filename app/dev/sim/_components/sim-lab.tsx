@@ -1,101 +1,131 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { BEHAVIORS } from "@/lib/sim/behaviors";
 import { FACE_RANGES, type FaceParams } from "@/components/sim/face-canvas";
-import { SimRuntime, type JointState, type SimEvent } from "@/components/sim/runtime";
+import { DEFAULT_PARAMS, type JointState, type PlaybackParams, type SimController } from "@/components/sim/sim-controller";
+import { Viewport, type ViewportEvent } from "@/components/sim/Viewport";
 import { FACE_PRESETS, type FacePresetName } from "@/data/face-presets";
+import { DEV_RECIPES, DEV_STRUCTURE, DEV_STRUCTURE_NARROW } from "@/data/dev-samples";
 
-const SLIDERS: (keyof FaceParams)[] = ["eyeSize", "eyeOpen", "eyeAngle", "browAngle", "brightness", "blinkRate"];
+const FACE_SLIDERS: (keyof FaceParams)[] = ["eyeSize", "eyeOpen", "eyeAngle", "browAngle", "brightness", "blinkRate"];
+const PARAM_SLIDERS: { key: keyof PlaybackParams; min: number; max: number }[] = [
+  { key: "speed", min: 0.25, max: 2 },
+  { key: "amplitude", min: 0, max: 2 },
+  { key: "settle", min: 0, max: 1 },
+  { key: "antic", min: 0, max: 1 },
+  { key: "rhythm", min: 0.25, max: 3 },
+];
 
-// Gray-box test bench for the sim module (STEP 2). Not a product screen.
+// Gray-box bench for the sim contract (STEP 3): everything goes through SimController.
 export function SimLab() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const simRef = useRef<SimRuntime | null>(null);
+  const ctrl = useRef<SimController | null>(null);
   const [status, setStatus] = useState("Loading…");
   const [active, setActive] = useState<string | null>(null);
+  const [time, setTime] = useState({ t: 0, duration: 0 });
+  const [paused, setPaused] = useState(false);
+  const [joints, setJoints] = useState<JointState[]>([]);
+  const [params, setParams] = useState<Required<PlaybackParams>>(DEFAULT_PARAMS);
   const [face, setFace] = useState<FaceParams>(FACE_PRESETS.neutral);
   const [faceMode, setFaceMode] = useState<FacePresetName | "video">("neutral");
-  const [speed, setSpeed] = useState(1);
-  const [joints, setJoints] = useState<JointState[]>([]);
+  const [narrow, setNarrow] = useState(false);
+  const [loop, setLoop] = useState(false);
+  const [seekTo, setSeekTo] = useState(1.2);
+  const [highlight, setHighlight] = useState<string>("");
   const [shot, setShot] = useState<string | null>(null);
   const [events, setEvents] = useState<string[]>([]);
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const sim = new SimRuntime(canvas);
-    simRef.current = sim;
-    const off = sim.on((e: SimEvent) => {
-      if (e.type === "progress") setStatus(`${e.progress.phase} ${e.progress.loaded}/${e.progress.total}`);
-      if (e.type === "ready") {
+  function onEvent(e: ViewportEvent) {
+    switch (e.type) {
+      case "ready":
         setStatus("Ready");
-        sim.setFace({ kind: "canvas", params: FACE_PRESETS.neutral });
-      }
-      if (e.type === "error") setStatus(`Error: ${e.message}`);
-      if (e.type === "playing") setActive(e.name);
-      if (e.type === "ended") setActive((a) => (a === e.name ? null : a));
-      if (e.type === "limitExceeded") {
+        ctrl.current?.setFace({ preset: "neutral", tokens: FACE_PRESETS.neutral });
+        break;
+      case "error":
+        setStatus(`Error: ${e.message}`);
+        break;
+      case "playing":
+        setActive(e.name);
+        setPaused(false);
+        break;
+      case "ended":
+        setActive((a) => (a === e.name ? null : a));
+        break;
+      case "tick":
+        setTime({ t: e.t, duration: e.duration });
+        break;
+      case "jointState":
+        setJoints(e.joints);
+        setPaused(ctrl.current?.isPaused() ?? false);
+        break;
+      case "limitExceeded": {
         console.warn("limitExceeded", e);
         const line = `limitExceeded ${e.joint} ${e.value.toFixed(1)} → limit ${e.limit.toFixed(1)} @ ${e.t.toFixed(2)}s`;
         setEvents((list) => [line, ...list].slice(0, 6));
+        break;
       }
-    });
-    sim.ready.catch(() => {});
-    const ro = new ResizeObserver(([entry]) => sim.resize(entry.contentRect.width, entry.contentRect.height));
-    ro.observe(canvas);
-    const timer = setInterval(() => setJoints(sim.getJointState()), 100);
-    return () => {
-      clearInterval(timer);
-      ro.disconnect();
-      off();
-      sim.dispose();
-      simRef.current = null;
-    };
-  }, []);
+    }
+  }
+
+  function changeParam(key: keyof PlaybackParams, value: number) {
+    setParams((p) => ({ ...p, [key]: value }));
+    ctrl.current?.setParams({ [key]: value });
+  }
 
   function applyPreset(name: FacePresetName | "video") {
     setFaceMode(name);
-    if (name === "video") {
-      simRef.current?.setFace({ kind: "video" });
-      return;
-    }
+    if (name === "video") return ctrl.current?.setFace({ preset: "video", tokens: FACE_PRESETS.neutral });
     setFace(FACE_PRESETS[name]);
-    simRef.current?.setFace({ kind: "canvas", params: FACE_PRESETS[name] });
+    ctrl.current?.setFace({ preset: name, tokens: FACE_PRESETS[name] });
   }
 
-  function setFaceParam(key: keyof FaceParams, value: number) {
+  function changeFace(key: keyof FaceParams, value: number) {
     const next = { ...face, [key]: value };
     setFace(next);
+    const preset = faceMode === "video" ? "neutral" : faceMode;
     if (faceMode === "video") setFaceMode("neutral");
-    simRef.current?.setFace({ kind: "canvas", params: next });
+    ctrl.current?.setFace({ preset, tokens: next });
   }
 
-  const btn = "rounded border border-neutral-300 px-2 py-1 text-sm hover:bg-neutral-100";
+  function toggleNarrow() {
+    const next = !narrow;
+    setNarrow(next);
+    ctrl.current?.load(next ? DEV_STRUCTURE_NARROW : DEV_STRUCTURE);
+  }
+
+  const btn = "rounded border border-neutral-300 px-2 py-1 text-sm hover:bg-neutral-100 disabled:opacity-40";
   const on = "border-neutral-900 bg-neutral-900 text-white hover:bg-neutral-800";
+  const finite = Number.isFinite(time.duration);
 
   return (
-    <main className="grid min-h-screen grid-cols-[1fr_380px] gap-6 p-6">
+    <main className="grid min-h-screen grid-cols-[1fr_400px] gap-6 p-6">
       <section className="flex flex-col gap-3">
-        <div className="flex items-center gap-3 text-sm">
+        <div className="flex items-center gap-4 text-sm">
           <h1 className="font-semibold">/dev/sim</h1>
           <span data-testid="sim-status" className="text-neutral-500">{status}</span>
-          <span className="text-neutral-500">Playing: {active ?? "—"}</span>
+          <span>Playing: <b>{active ?? (time.duration === 0 ? "holding" : "idle")}</b>{paused ? " (paused)" : ""}</span>
+          <span className="font-mono text-neutral-500">
+            t {time.t.toFixed(2)} / {finite ? time.duration.toFixed(2) : "∞"}
+          </span>
         </div>
-        <canvas ref={canvasRef} className="aspect-[4/3] w-full rounded border border-neutral-200" />
+        <Viewport controllerRef={ctrl} structure={DEV_STRUCTURE} mode="editor" onEvent={onEvent} className="aspect-[4/3] w-full rounded border border-neutral-200" />
         <table className="text-sm">
           <thead className="text-left text-neutral-500">
-            <tr><th>Joint</th><th>Command</th><th>Actual</th><th>Range</th></tr>
+            <tr><th>Joint</th><th>Command</th><th>Actual</th><th>Structure range</th></tr>
           </thead>
           <tbody className="font-mono">
-            {joints.map((j) => (
-              <tr key={j.id} className="border-t border-neutral-100">
-                <td>{j.id}</td>
-                <td className={j.command < j.min || j.command > j.max ? "text-red-600" : ""}>{j.command.toFixed(1)}</td>
-                <td>{j.actual.toFixed(1)}</td>
-                <td className="text-neutral-400">{j.min.toFixed(0)} … {j.max.toFixed(0)}</td>
-              </tr>
-            ))}
+            {joints.map((j) => {
+              const range = (narrow ? DEV_STRUCTURE_NARROW : DEV_STRUCTURE).joints.find((x) => x.id === j.id);
+              const out = range && (j.command < range.min || j.command > range.max);
+              return (
+                <tr key={j.id} className="border-t border-neutral-100">
+                  <td>{j.id}</td>
+                  <td className={out ? "text-red-600" : ""}>{j.command.toFixed(1)}</td>
+                  <td>{j.actual.toFixed(1)}</td>
+                  <td className="text-neutral-400">{range ? `${range.min} … ${range.max}` : ""}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </section>
@@ -105,21 +135,53 @@ export function SimLab() {
           <h2 className="font-semibold">Behaviors</h2>
           <div className="flex flex-wrap gap-1.5">
             {BEHAVIORS.map((b) => (
-              <button key={b.name} className={`${btn} ${active === b.name ? on : ""}`} onClick={() => simRef.current?.playBehavior(b.name)}>
+              <button key={b.name} className={`${btn} ${active === b.name ? on : ""}`} onClick={() => ctrl.current?.playBehavior(b.name)}>
                 {b.name}
               </button>
             ))}
           </div>
-          <div className="flex gap-1.5">
-            <button className={btn} onClick={() => simRef.current?.stop()}>Stop</button>
-            <button className={btn} onClick={() => simRef.current?.commandPose({ base_pitch: 80 }, "overdrive")}>Overdrive</button>
-            <button className={btn} onClick={() => setShot(simRef.current?.capture() ?? null)}>Capture</button>
+          <h2 className="mt-2 font-semibold">Recipes</h2>
+          <div className="flex flex-wrap gap-1.5">
+            {Object.entries(DEV_RECIPES).map(([name, recipe]) => (
+              <button key={name} className={btn} onClick={() => ctrl.current?.playRecipe(recipe)}>{name}</button>
+            ))}
+            <button className={btn} onClick={() => ctrl.current?.debugCommand({ shoulder_pitch: 80 })}>Overdrive pose</button>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <h2 className="font-semibold">Transport</h2>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button className={btn} onClick={() => ctrl.current?.play()}>Play</button>
+            <button className={btn} onClick={() => ctrl.current?.pause()}>Pause</button>
+            <input type="number" step={0.1} min={0} value={seekTo} onChange={(e) => setSeekTo(Number(e.target.value))} className="w-16 rounded border border-neutral-300 px-1 py-1" />
+            <button className={btn} onClick={() => { ctrl.current?.pause(); ctrl.current?.seek(seekTo); }}>Seek</button>
+            <button className={btn} onClick={() => ctrl.current?.stop()}>Stop</button>
+            <button className={`${btn} ${loop ? on : ""}`} onClick={() => { setLoop(!loop); ctrl.current?.setLoop(!loop); }}>Loop</button>
+            <button className={btn} onClick={() => setShot(ctrl.current?.capture() || null)}>Capture</button>
           </div>
           <label className="flex items-center gap-2">
-            Speed
-            <input type="range" min={0.25} max={2} step={0.05} value={speed} onChange={(e) => { const v = Number(e.target.value); setSpeed(v); simRef.current?.setSpeed(v); }} className="flex-1" />
-            <span className="w-10 font-mono">{speed.toFixed(2)}</span>
+            <input type="checkbox" checked={narrow} onChange={toggleNarrow} />
+            Narrow shoulder_pitch to −20…40 (Edit limits)
           </label>
+          <label className="flex items-center gap-2">
+            Highlight
+            <select value={highlight} onChange={(e) => { setHighlight(e.target.value); ctrl.current?.highlightJoint(e.target.value || null); }} className="rounded border border-neutral-300 px-1 py-1">
+              <option value="">—</option>
+              {DEV_STRUCTURE.joints.map((j) => <option key={j.id} value={j.id}>{j.id}</option>)}
+            </select>
+          </label>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <h2 className="font-semibold">Playback params</h2>
+          {PARAM_SLIDERS.map(({ key, min, max }) => (
+            <label key={key} className="flex items-center gap-2">
+              <span className="w-20">{key}</span>
+              <input type="range" min={min} max={max} step={(max - min) / 100} value={params[key]} onChange={(e) => changeParam(key, Number(e.target.value))} className="flex-1" />
+              <span className="w-12 text-right font-mono">{params[key].toFixed(2)}</span>
+            </label>
+          ))}
         </div>
 
         <div className="flex flex-col gap-2">
@@ -129,12 +191,12 @@ export function SimLab() {
               <button key={name} className={`${btn} ${faceMode === name ? on : ""}`} onClick={() => applyPreset(name)}>{name}</button>
             ))}
           </div>
-          {SLIDERS.map((key) => {
+          {FACE_SLIDERS.map((key) => {
             const [min, max] = FACE_RANGES[key];
             return (
               <label key={key} className="flex items-center gap-2">
-                <span className="w-24">{key}</span>
-                <input type="range" min={min} max={max} step={(max - min) / 100} value={face[key]} onChange={(e) => setFaceParam(key, Number(e.target.value))} className="flex-1" />
+                <span className="w-20">{key}</span>
+                <input type="range" min={min} max={max} step={(max - min) / 100} value={face[key]} onChange={(e) => changeFace(key, Number(e.target.value))} className="flex-1" />
                 <span className="w-12 text-right font-mono">{face[key].toFixed(2)}</span>
               </label>
             );
@@ -150,7 +212,7 @@ export function SimLab() {
           <div className="flex flex-col gap-1">
             <h2 className="font-semibold">Capture</h2>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={shot} alt="Capture" data-testid="capture" className="w-full rounded border border-neutral-200" />
+            <img src={shot} alt="Capture" className="w-full rounded border border-neutral-200" />
           </div>
         )}
       </aside>

@@ -11,7 +11,8 @@
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import type { LampSim } from './lamp';
+import { SERVO_ID, type LampSim } from './lamp';
+import { JOINT_NAMES, type JointName } from '@/lib/sim/motion';
 import type { CameraView, FaceDisplay } from '@/lib/sim/robots';
 
 export type { CameraView };
@@ -26,6 +27,17 @@ export interface ViewerOptions {
   grid?: [string, string];
   rim?: string;
   fill?: string;
+  /** Emissive tint for highlightJoint */
+  highlight?: string;
+}
+
+export interface JointScreenPoint {
+  joint: JointName;
+  /** CSS pixels from the canvas top-left */
+  x: number;
+  y: number;
+  /** false when behind the camera or outside the canvas */
+  visible: boolean;
 }
 
 const DEFAULT_OPTIONS: Required<ViewerOptions> = {
@@ -34,6 +46,7 @@ const DEFAULT_OPTIONS: Required<ViewerOptions> = {
   grid: ['#33333a', '#212127'],
   rim: '#f0126b',
   fill: '#785cff',
+  highlight: '#f0126b',
 };
 
 const GEOM = {
@@ -91,6 +104,8 @@ export class LampViewer {
   private canvasTexture: THREE.CanvasTexture | null = null;
   private readonly tmpMat = new THREE.Matrix4();
   private readonly options: Required<ViewerOptions>;
+  private readonly jointIds: Record<JointName, number>;
+  private highlighted: JointName | null = null;
 
   constructor(canvas: HTMLCanvasElement, lamp: LampSim, options: ViewerOptions = {}) {
     this.lamp = lamp;
@@ -110,6 +125,12 @@ export class LampViewer {
     this.root.rotation.x = MJ_TO_WORLD;
     this.scene.add(this.root);
     this.root.add(this.headGroup);
+
+    const objJnt = lamp.mj.mjtObj.mjOBJ_JOINT.value;
+    this.jointIds = {} as Record<JointName, number>;
+    for (const name of JOINT_NAMES) {
+      this.jointIds[name] = lamp.mj.mj_name2id(lamp.model, objJnt, String(SERVO_ID[name]));
+    }
 
     this.addLights();
     this.addFloor();
@@ -428,6 +449,46 @@ export class LampViewer {
         data.xquat[b * 4],
       );
     }
+  }
+
+  /**
+   * Tint the body a joint drives (the joint's child body). null clears.
+   * The model's tree root is the lower arm, so "child" follows the MJCF tree, not the table.
+   */
+  highlightJoint(joint: JointName | null): void {
+    if (joint === this.highlighted) return;
+    this.highlighted = joint;
+    const { model } = this.lamp;
+    const body = joint ? model.jnt_bodyid[this.jointIds[joint]] : -1;
+    const tint = new THREE.Color(this.options.highlight);
+    for (const { geomId, node } of this.geomNodes) {
+      const material = (node as THREE.Mesh).material as THREE.MeshStandardMaterial;
+      const on = body >= 0 && model.geom_bodyid[geomId] === body;
+      material.emissive.copy(on ? tint : new THREE.Color(0x000000));
+      material.emissiveIntensity = on ? 0.6 : 0;
+    }
+  }
+
+  /** Joint anchors projected to canvas pixels (structure screen joint numbers). */
+  projectJoints(): JointScreenPoint[] {
+    const { data } = this.lamp;
+    const canvas = this.renderer.domElement;
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+    return JOINT_NAMES.map((joint) => {
+      const j = this.jointIds[joint];
+      const v = toWorld(data.xanchor[j * 3], data.xanchor[j * 3 + 1], data.xanchor[j * 3 + 2]).project(this.camera);
+      const x = (v.x * 0.5 + 0.5) * w;
+      const y = (-v.y * 0.5 + 0.5) * h;
+      return { joint, x, y, visible: v.z < 1 && x >= 0 && x <= w && y >= 0 && y <= h };
+    });
+  }
+
+  enableOrbit(on: boolean, opts: { pan?: boolean; zoom?: boolean } = {}): void {
+    this.controls.enabled = on;
+    this.controls.enableRotate = on;
+    this.controls.enablePan = on && (opts.pan ?? true);
+    this.controls.enableZoom = on && (opts.zoom ?? true);
   }
 
   setBeamEnabled(on: boolean): void {

@@ -54,6 +54,16 @@ export class LimitMonitor {
     return out;
   }
 
+  /** Clamp a pose into the current limits (start pose of a new playback). */
+  clamp(pose: Pose): Pose {
+    const out = { ...pose };
+    for (const joint of JOINT_NAMES) {
+      const [lo, hi] = this.limits[joint];
+      out[joint] = Math.min(Math.max(out[joint], lo), hi);
+    }
+    return out;
+  }
+
   /** Start of a new playback — every joint may report again. */
   reset(): void {
     this.reported.clear();
