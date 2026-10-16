@@ -307,6 +307,8 @@ export const SettingsSchema = z.object({
   demoMode: z.boolean(),
   /** Sound −12 dB (STEP 9) */
   quietHours: z.boolean(),
+  /** STEP 12 experiment: vision model writes the keyframe clip directly (default off; env FLAG_DIRECT_CLIP=1 also turns it on) */
+  directClip: z.boolean().optional(),
 });
 export type Settings = z.infer<typeof SettingsSchema>;
 

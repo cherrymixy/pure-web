@@ -9,3 +9,4 @@ export * from "./build";
 export { sampleRecipe, recipePlayer, MAX_DEG_PER_S } from "./sample";
 export * from "./retarget";
 export * from "./keys";
+export * from "./direct";

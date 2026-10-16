@@ -3,6 +3,7 @@
 import { notFound, redirect } from "next/navigation";
 import { PURE_DEFAULT_SIGNATURE } from "@/data/signature";
 import { isRepoError } from "@/lib/repo";
+import { FLAGS } from "@/lib/env";
 import { getRepo } from "@/lib/repo-server";
 import { Editor } from "./_components/editor";
 
@@ -32,6 +33,7 @@ export default async function Page({ params, searchParams }: { params: Promise<{
       initialExpression={expressions[0] ?? null}
       settings={settings}
       incomingReference={incoming}
+      directClip={!!settings.directClip || FLAGS.directClip}
     />
   );
 }

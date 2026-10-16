@@ -6,9 +6,12 @@ import { SUGGESTED_PROMPTS } from "@/data/prompts";
 import { STRINGS, fmt } from "@/data/strings";
 import { addFaceKey, addKey, applyToRobot, autoAdjust, deleteFaceKey, deleteKey, formatTime, matchTiming, moveFaceKey, paramsToProps, propsToParams, recipeToClip, snapTime, updateKey } from "@/lib/expression";
 import { diffEnergy, energySamples } from "@/lib/reference/energy";
+import { flowEnergy } from "@/lib/reference/flow";
 import type { Channel, Clip, Expression, FaceSpec, Key, Job, MotionProps, Project, Reference, SavedExpression, Settings, Signature, SoundCue, SoundSpec, Structure } from "@/lib/models";
 import { cueAt } from "@/data/sound-cues";
 import { ReferenceError, extractFrames, readFramePixels } from "@/lib/reference/frames";
+
+const FRAME_PX = 64;
 import { signatureToParams } from "@/lib/signature/axes";
 import { createSoundEngine } from "@/lib/sound";
 import { ApiError, api } from "@/lib/ui/api";
@@ -34,7 +37,13 @@ import { Timeline, type KeyRef, type Track } from "./timeline";
 const E = STRINGS.editor;
 const POLL_MS = 500;
 type Tab = Channel;
-type GenResult = { expressionId: string; source: "ollama" | "demo"; fallbackReason?: string; reasoning: string };
+type GenResult = {
+  expressionId: string;
+  source: "ollama" | "demo";
+  fallbackReason?: string;
+  reasoning: string;
+  directClip?: { used: boolean; reason?: string };
+};
 
 const running = (j: Job | null) => j !== null && (j.status === "queued" || j.status === "running");
 const MAX_REFERENCES = 4;
@@ -99,7 +108,10 @@ export function Editor({
   initialExpression,
   settings,
   incomingReference = null,
+  directClip = false,
 }: {
+  /** STEP 12 experiment flag: Tier 2 clips + flow-based Match timing */
+  directClip?: boolean;
   incomingReference?: { id: string; name: string } | null;
   project: Project;
   structure: Structure;
@@ -361,8 +373,10 @@ export function Editor({
     if (!activeRef?.frames?.length || !timelineClip) return;
     setMatching(true);
     try {
-      const pixels = await readFramePixels(activeRef.frames.map(fileUrl));
-      const energy = energySamples(diffEnergy(pixels), activeRef.durationS ?? timelineClip.duration);
+      const pixels = await readFramePixels(activeRef.frames.map(fileUrl), FRAME_PX);
+      // Flag on: block-matching flow (movement, not lighting); off: luma difference.
+      const raw = directClip ? flowEnergy(pixels, FRAME_PX) : diffEnergy(pixels);
+      const energy = energySamples(raw, activeRef.durationS ?? timelineClip.duration);
       const { clip: next, moved } = matchTiming(timelineClip, energy);
       if (!moved) return toast(E.sync.nothing);
       setClip(next);
@@ -731,6 +745,11 @@ export function Editor({
               <span className="font-semibold">{E.generating}</span>
               <span className="text-sm text-neutral-500">{job.stepLabel} · {job.progress}%</span>
             </div>
+          )}
+          {lastResult?.directClip && expression && !busy && (
+            <span className="absolute left-3 top-3 rounded bg-sky-100 px-2 py-0.5 text-xs text-sky-800" title={lastResult.directClip.reason}>
+              {lastResult.directClip.used ? E.directClip.used : fmt(E.directClip.fallback, { reason: lastResult.directClip.reason ?? "" })}
+            </span>
           )}
           {lastResult?.source === "demo" && expression && !busy && (
             <span className="absolute right-3 top-3 rounded bg-amber-100 px-2 py-0.5 text-xs text-amber-800">{E.demoBadge}</span>

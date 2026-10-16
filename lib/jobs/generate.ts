@@ -3,9 +3,12 @@ import path from "node:path";
 import { PURE_DEFAULT_SIGNATURE } from "@/data/signature";
 import { STRINGS } from "@/data/strings";
 import { buildExpression, type BuiltExpression } from "../expression/build";
+import { clipFromDirect } from "../expression/direct";
+import { FLAGS } from "../env";
+import { LlmError } from "../llm/client";
 import type { Issue } from "../expression/validate";
-import type { GenerationClient } from "../llm/generation";
-import type { MotionProps, Reference } from "../models";
+import type { GenerationClient, GenerationOutput } from "../llm/generation";
+import type { Clip, MotionProps, Reference } from "../models";
 import { UPLOADS_DIR } from "../paths";
 import type { Repo } from "../repo";
 
@@ -29,6 +32,8 @@ export interface GenerateResult {
   referenceSummary?: string;
   issues: Issue[];
   ms: number;
+  /** STEP 12: present when the directClip flag tried Tier 2 */
+  directClip?: { used: boolean; reason?: string; ms: number; issues: number };
 }
 
 export const GENERATE_STEPS = STRINGS.editor.genSteps;
@@ -75,23 +80,42 @@ export async function runGeneration(opts: {
   const motionRefs = await userDataSummary(repo, input.references ?? []);
 
   await report(2, 30);
-  const result = await client.generate(
-    {
-      prompt: input.prompt,
-      currentStatus: input.currentStatus,
-      components: input.components,
-      pattern: input.pattern,
-      structure: project.structure,
-      signature,
-      images: images.length ? images : undefined,
-      // No images to describe: User Data motions go in as text instead.
-      referenceSummary: images.length ? undefined : motionRefs,
-    },
-    { signal },
-  );
+  const request = {
+    prompt: input.prompt,
+    currentStatus: input.currentStatus,
+    components: input.components,
+    pattern: input.pattern,
+    structure: project.structure,
+    signature,
+    images: images.length ? images : undefined,
+    // No images to describe: User Data motions go in as text instead.
+    referenceSummary: images.length ? undefined : motionRefs,
+  };
+
+  // Tier 2 (flag): the vision model writes keyframes + recipe in one answer; unusable keyframes → its recipe.
+  let output: GenerationOutput | null = null;
+  let clip: Clip | null = null;
+  let direct: GenerateResult["directClip"];
+  const settings = await repo.settings.get();
+  if ((settings.directClip || FLAGS.directClip) && images.length && client.directClip) {
+    const started = Date.now();
+    try {
+      const d = await client.directClip({ ...request, images, structure: project.structure }, { signal });
+      const checked = clipFromDirect(d.output.clip, project.structure);
+      output = d.output;
+      clip = checked.clip;
+      direct = { used: !!clip, reason: checked.reason, ms: d.ms, issues: checked.issues.length };
+    } catch (err) {
+      if (err instanceof LlmError && err.kind === "canceled") throw err;
+      direct = { used: false, reason: err instanceof Error ? err.message : String(err), ms: Date.now() - started, issues: 0 };
+    }
+  }
+  const result = output
+    ? { output, source: "ollama" as const, fallbackReason: undefined, referenceSummary: undefined, ms: direct?.ms ?? 0 }
+    : await client.generate(request, { signal });
 
   await report(3, 85);
-  const { expression, issues } = buildExpression(result.output, {
+  const built = buildExpression(result.output, {
     structure: project.structure,
     signature,
     components: input.components,
@@ -99,6 +123,8 @@ export async function runGeneration(opts: {
     references: input.references,
     props: input.props,
   });
+  const { issues } = built;
+  const expression: BuiltExpression = clip ? { ...built.expression, motion: { ...built.expression.motion, mode: "clip", clip } } : built.expression;
 
   // Stop keeps the previous result, even when the fallback finished instantly.
   if (signal?.aborted) throw Object.assign(new Error("canceled"), { code: "CANCELED" });
@@ -112,6 +138,7 @@ export async function runGeneration(opts: {
     referenceSummary: result.referenceSummary,
     issues,
     ms: result.ms,
+    ...(direct ? { directClip: direct } : {}),
   };
 }
 

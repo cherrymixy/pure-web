@@ -232,6 +232,7 @@ export const STRINGS = {
     },
     noCues: "No sound cues",
     stopped: "Stopped. The previous result is kept.",
+    directClip: { used: "Experiment · direct clip from reference", fallback: "Experiment · direct clip unusable → recipe ({reason})" },
   },
   test: {
     title: "Test on your robot",

@@ -8,6 +8,8 @@ import { OLLAMA_MODEL, OLLAMA_VISION_MODEL } from "../env";
 import { LlmError, type LlmClient } from "./client";
 import { DESCRIBE_SYSTEM, GENERATION_SYSTEM, generationUser, type GenerationPromptInput } from "./prompts";
 import { chatValidated } from "./retry";
+import { generateDirectClip, type DirectClipOutput } from "./direct-clip";
+import type { Structure } from "../models";
 
 const ids = <T extends { id: string }>(xs: readonly T[]) => xs.map((x) => x.id) as [string, ...string[]];
 const BehaviorEnum = z.enum(ids(COMPONENTS));
@@ -62,6 +64,8 @@ export interface GenerateOptions {
 
 export interface GenerationClient {
   generate(req: GenerationRequest, opts?: GenerateOptions): Promise<GenerationResult>;
+  /** STEP 12 Tier 2 (flag directClip): recipe + keyframes from reference frames. Throws on any failure. */
+  directClip?(req: GenerationRequest & { images: string[]; structure: Structure }, opts?: GenerateOptions): Promise<{ output: DirectClipOutput; ms: number; model?: string }>;
   /** Vision step on its own (cached per reference by callers). */
   describe(images: string[], opts?: GenerateOptions): Promise<{ summary: string; ms: number }>;
 }
@@ -121,6 +125,11 @@ export class OllamaGeneration implements GenerationClient {
     private readonly model = OLLAMA_MODEL,
     private readonly visionModel = OLLAMA_VISION_MODEL,
   ) {}
+
+  async directClip(req: GenerationRequest & { images: string[]; structure: Structure }, opts: GenerateOptions = {}) {
+    if (!(await this.client.available())) throw new LlmError("network", "Ollama unreachable");
+    return generateDirectClip(this.client, req, opts, this.visionModel);
+  }
 
   async describe(images: string[], opts: GenerateOptions = {}) {
     const res = await chatValidated(this.client, DescribeSchema, {

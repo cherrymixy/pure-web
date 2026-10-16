@@ -7,6 +7,7 @@ import { getRepo } from "@/lib/repo-server";
 import { OllamaStatus } from "./_components/ollama-status";
 import { DemoToggle } from "./_components/demo-toggle";
 import { ResetButton } from "./_components/reset-button";
+import { FlagToggle } from "./_components/flag-toggle";
 
 export const dynamic = "force-dynamic";
 
@@ -73,7 +74,8 @@ export default async function DevPage({ searchParams }: { searchParams: Promise<
 
       <section className="flex flex-col gap-3">
         <h2 className="font-semibold">Flags</h2>
-        <pre className="rounded bg-neutral-50 p-3 text-sm">{JSON.stringify(FLAGS, null, 2)}</pre>
+        <FlagToggle initial={!!db.settings.directClip} forced={FLAGS.directClip} />
+        <DirectClipStats jobs={db.jobs} />
       </section>
       </>}
     </main>
@@ -127,5 +129,34 @@ function DbTab({ db }: { db: Awaited<ReturnType<ReturnType<typeof getRepo>["dev"
         </details>
       ))}
     </section>
+  );
+}
+
+type DirectInfo = { used: boolean; reason?: string; ms: number };
+
+/** Tier 2 outcomes from finished generate jobs: how often keyframes were used vs fell back to the recipe. */
+function DirectClipStats({ jobs }: { jobs: { kind: string; status: string; result?: unknown; updatedAt: string }[] }) {
+  const runs = jobs
+    .filter((j) => j.kind === "generate" && j.status === "done")
+    .map((j) => ({ at: j.updatedAt, info: (j.result as { directClip?: DirectInfo } | undefined)?.directClip }))
+    .filter((r): r is { at: string; info: DirectInfo } => !!r.info)
+    .sort((a, b) => b.at.localeCompare(a.at));
+  const used = runs.filter((r) => r.info.used).length;
+  const pct = (n: number) => (runs.length ? `${Math.round((n / runs.length) * 100)}%` : "—");
+  return (
+    <div className="flex flex-col gap-2 text-sm">
+      <table className="w-80" data-testid="directclip-stats">
+        <tbody>
+          <tr className="border-t border-neutral-100"><td className="py-1">Tier 2 attempts</td><td className="font-mono">{runs.length}</td></tr>
+          <tr className="border-t border-neutral-100"><td className="py-1">Keyframes used</td><td className="font-mono">{used} ({pct(used)})</td></tr>
+          <tr className="border-t border-neutral-100"><td className="py-1">Fell back to recipe</td><td className="font-mono">{runs.length - used} ({pct(runs.length - used)})</td></tr>
+        </tbody>
+      </table>
+      {runs.slice(0, 6).map((r, i) => (
+        <p key={i} className="font-mono text-xs text-neutral-500">
+          {r.at.slice(11, 19)} · {r.info.used ? "used" : `fallback: ${r.info.reason ?? "?"}`} · {(r.info.ms / 1000).toFixed(1)}s
+        </p>
+      ))}
+    </div>
   );
 }
