@@ -160,7 +160,7 @@ export const STRINGS = {
     component: "Component",
     pattern: "Situation Pattern",
     reference: "Reference",
-    promptPlaceholder: "Describe the moment…",
+    promptPlaceholder: "What state should the robot express?",
     text: "Text",
     image: "Image",
     generate: "Generate",

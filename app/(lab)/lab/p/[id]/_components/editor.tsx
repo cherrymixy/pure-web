@@ -21,6 +21,7 @@ import type { JointState, SimController } from "@/components/sim/sim-controller"
 import { Viewport, type ViewportEvent } from "@/components/sim/Viewport";
 import type { LimitEvent } from "@/components/sim/limits";
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icons/icon";
 import { Menu } from "@/components/ui/menu";
 import { ConfirmModal, Modal, PromptModal } from "@/components/ui/modal";
 import { useToast } from "@/components/ui/toast";
@@ -694,15 +695,77 @@ export function Editor({
     />
   );
 
+  const ended = time.duration > 0 && time.t >= time.duration - 0.01;
+  const progress = Number.isFinite(time.duration) && time.duration > 0 ? Math.min(time.t / time.duration, 1) : 0;
+  const clock = (sec: number) => (Number.isFinite(sec) ? `${String(Math.floor(sec / 60)).padStart(2, "0")}:${String(Math.floor(sec % 60)).padStart(2, "0")}` : "--:--");
+  const chip = "rounded-[var(--radius-full)] bg-[var(--bg-surface)] px-[var(--space-16)] py-[var(--space-8)] text-[14px] leading-[18px]";
+  const tabTint: Record<Tab, string> = { motion: "text-[var(--text-primary)]", face: "text-[var(--web-e2a1c1)]", sound: "text-[var(--web-ecc377)]" };
+
+  // W02D-1/3/4/5 (Figma 901:9691 · 10163 · 10631 · 11097, ×2): full-bleed stage behind floating panels —
+  // left Context/Library 343×1016 at 32,32 · right channel panel 380×1016 at right 32 · play bar 634,868 · composer 513,918.
   return (
-    <div className="grid h-screen grid-cols-[280px_1fr_340px] grid-rows-[auto_1fr_auto] overflow-hidden">
-      {/* Header */}
-      <header className="col-span-3 flex items-center justify-between border-b border-neutral-200 px-4 py-2">
-        <div className="flex items-center gap-3">
+    <div className="relative h-screen overflow-hidden">
+      {/* Stage (Frame 2147240453 ×2: full width, 265 → bottom), same slot as structure / signature. Never zoom/transform the Viewport. */}
+      <div className={`absolute bottom-0 left-0 top-[265px] ${activeRef && sideBySide ? "w-[958px]" : "right-0"}`}>
+        <Viewport
+          controllerRef={ctrl}
+          structure={structure}
+          signatureParams={params}
+          expression={playable}
+          autoPlay={autoPlay}
+          sound={sound}
+          mode="editor"
+          onEvent={onEvent}
+          className="block size-full"
+        />
+      </div>
+      {activeRef && sideBySide && (
+        <div className="absolute left-[958px] top-[265px] h-[560px] w-[518px] overflow-hidden rounded-[var(--radius-xl)] bg-[var(--bg-surface)]">{referencePlayer}</div>
+      )}
+      {activeRef && !sideBySide && <div className="absolute bottom-[230px] left-[407px] z-10">{referencePlayer}</div>}
+
+      {/* Top of the stage (no Figma equivalent): signature, result badges, change chips + Undo, reasoning, empty hint */}
+      <div className="pointer-events-none absolute left-[407px] right-[444px] top-[32px] z-10 flex flex-col items-center gap-[var(--space-12)]">
+        <div className="pointer-events-auto flex flex-wrap items-center justify-center gap-[var(--space-8)]">
+          <span className={`${chip} text-[var(--text-secondary)]`}>{signature.name} · v0.{signature.version}</span>
+          {lastResult?.directClip && expression && !busy && (
+            <span className={`${chip} text-[var(--web-3f77a1)]`} title={lastResult.directClip.reason}>
+              {lastResult.directClip.used ? E.directClip.used : fmt(E.directClip.fallback, { reason: lastResult.directClip.reason ?? "" })}
+            </span>
+          )}
+          {lastResult?.source === "demo" && expression && !busy && <span className={`${chip} text-[var(--web-ae7d24)]`}>{E.demoBadge}</span>}
+          <div className="flex items-center gap-[var(--space-8)]" data-testid="change-chips">
+            {history.changes.slice(-3).map((c, i, list) => (
+              <span key={c.id} className={`${chip} flex items-center gap-[var(--space-8)] text-[var(--text-primary)]`}>
+                {c.label}
+                {i === list.length - 1 && (
+                  <button className="font-semibold underline" onClick={() => void undo()}>{E.undo}</button>
+                )}
+              </span>
+            ))}
+          </div>
+        </div>
+        {expression && lastResult?.reasoning && (
+          <p className="max-w-[760px] text-center text-[14px] leading-[18px] text-[var(--text-secondary)]">
+            <b className="font-semibold text-[var(--text-primary)]">{E.reasoning}</b> · {lastResult.reasoning}
+          </p>
+        )}
+        {!expression && !busy && (
+          <div className="flex flex-col items-center gap-[var(--space-4)] text-center">
+            <span className="text-[22px] font-medium leading-[28px] text-[var(--text-primary)]">{E.empty.title}</span>
+            <span className="text-[16px] leading-[20px] text-[var(--text-secondary)]">{E.empty.body}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Left panel: Context / Library (Frame 2147240454 ×2) */}
+      <aside className="absolute left-[32px] top-[32px] z-10 flex h-[1016px] w-[343px] flex-col overflow-hidden rounded-[var(--radius-xl)] bg-[var(--bg-surface)]">
+        <div className="flex items-center gap-[21px] pl-[21px] pt-[20px]">
           <Menu
             label="Project menu"
             align="left"
-            trigger="☰"
+            trigger={<Icon name="menu" size={24} />}
+            triggerClassName="flex size-[24px] items-center justify-center text-[var(--neutral-800)]"
             items={[
               { label: `← ${E.menu.home}`, onSelect: () => router.push("/lab") },
               { label: E.menu.rename, onSelect: () => setRenaming(true) },
@@ -712,213 +775,241 @@ export function Editor({
               { label: E.menu.delete, onSelect: () => setDeleting(true), danger: true },
             ]}
           />
-          <span className="font-semibold">{name}</span>
-          <span className="text-xs text-neutral-500">{signature.name} · v0.{signature.version}</span>
+          <h1 className="min-w-0 truncate pr-[var(--space-20)] text-[20px] leading-[25px] text-[var(--text-primary)]">{name}</h1>
         </div>
-        <div className="flex items-center gap-2" data-testid="change-chips">
-          {history.changes.slice(-3).map((c, i, list) => (
-            <span key={c.id} className="flex items-center gap-2 rounded-full border border-neutral-300 px-3 py-0.5 text-xs">
-              {c.label}
-              {i === list.length - 1 && (
-                <button className="font-semibold underline" onClick={() => void undo()}>{E.undo}</button>
-              )}
-            </span>
-          ))}
-        </div>
-      </header>
-
-      {/* Left: Context / Library (④b) */}
-      <aside className="flex flex-col gap-3 overflow-y-auto border-r border-neutral-200 p-4 text-sm">
-        <div className="flex gap-1">
+        <div className="ml-[13px] mt-[27px] flex gap-[var(--space-16)]" role="tablist">
           {(["context", "library"] as const).map((t) => (
-            <button key={t} onClick={() => setLeftTab(t)} className={`rounded px-3 py-1 ${leftTab === t ? "bg-neutral-900 text-white" : "hover:bg-neutral-100"}`}>
+            <button
+              key={t}
+              role="tab"
+              aria-selected={leftTab === t}
+              onClick={() => setLeftTab(t)}
+              className={`p-[var(--space-12)] text-[20px] leading-[25px] ${leftTab === t ? "font-semibold text-[var(--text-primary)]" : "text-[var(--text-link)]"}`}
+            >
               {t === "context" ? E.context : E.library}
             </button>
           ))}
         </div>
-        {leftTab === "context" ? (
-          <ContextPanel
-            context={context}
-            behaviors={expression?.motion.recipe.steps.map((st) => st.behavior) ?? []}
-            busy={busy}
-            onChange={(patch) => setContext((c) => ({ ...c, ...patch }))}
-            onToggleComponent={toggleComponent}
-            onOpenReference={(r) => r.kind !== "userData" && setActiveRef(activeRef?.id === r.id ? null : r)}
-            activeReference={activeRef?.id ?? null}
-            reading={reading}
-          />
-        ) : (
-          <LibraryPanel busy={busy} onApply={(s) => void applyLibrary(s)} />
-        )}
+        <div className="mt-[20px] min-h-0 flex-1 overflow-y-auto pb-[var(--space-32)] pl-[19px] pr-[23px]">
+          {leftTab === "context" ? (
+            <ContextPanel
+              context={context}
+              behaviors={expression?.motion.recipe.steps.map((st) => st.behavior) ?? []}
+              busy={busy}
+              onChange={(patch) => setContext((c) => ({ ...c, ...patch }))}
+              onToggleComponent={toggleComponent}
+              onOpenReference={(r) => r.kind !== "userData" && setActiveRef(activeRef?.id === r.id ? null : r)}
+              activeReference={activeRef?.id ?? null}
+              reading={reading}
+            />
+          ) : (
+            <LibraryPanel busy={busy} onApply={(s) => void applyLibrary(s)} />
+          )}
+        </div>
       </aside>
 
-      {/* Center: viewport, playback bar, prompt */}
-      <main className="flex min-h-0 flex-col gap-3 p-4">
-        <div className="flex min-h-0 flex-1 gap-2">
-        <div className="relative min-h-0 flex-1 overflow-hidden rounded border border-neutral-200">
-          <Viewport
-            controllerRef={ctrl}
-            structure={structure}
-            signatureParams={params}
-            expression={playable}
-            autoPlay={autoPlay}
-            sound={sound}
-            mode="editor"
-            onEvent={onEvent}
-            className="h-full w-full"
-          />
-          {!expression && !busy && (
-            <div className="pointer-events-none absolute inset-x-0 top-6 flex flex-col items-center gap-1 text-center">
-              <span className="font-semibold">{E.empty.title}</span>
-              <span className="text-sm text-neutral-500">{E.empty.body}</span>
-            </div>
-          )}
-          {busy && job && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-white/70" data-testid="generating">
-              <span className="font-semibold">{E.generating}</span>
-              <span className="text-sm text-neutral-500">{job.stepLabel} · {job.progress}%</span>
-            </div>
-          )}
-          {lastResult?.directClip && expression && !busy && (
-            <span className="absolute left-3 top-3 rounded bg-sky-100 px-2 py-0.5 text-xs text-sky-800" title={lastResult.directClip.reason}>
-              {lastResult.directClip.used ? E.directClip.used : fmt(E.directClip.fallback, { reason: lastResult.directClip.reason ?? "" })}
+      {/* Generating (901:11082 ×2): pill at 665,784 with Stop */}
+      {busy && job && (
+        <div
+          className="absolute left-[665px] top-[784px] z-10 flex items-center gap-[var(--space-16)] rounded-[var(--radius-full)] bg-[var(--bg-surface)] px-[var(--space-24)] py-[var(--space-16)] shadow-[var(--pure-shadow-modal)]"
+          data-testid="generating"
+          title={`${job.stepLabel} · ${job.progress}%`}
+        >
+          <Icon name="spinner" size={20} className="shrink-0 animate-spin text-[var(--text-primary)]" />
+          <span className="text-[16px] font-medium leading-[20px] text-[var(--text-primary)]">{E.generating}</span>
+          <span className="sr-only" aria-live="polite">{job.stepLabel} · {job.progress}%</span>
+          <button type="button" onClick={stop} className="text-[16px] font-medium leading-[20px] text-[var(--text-secondary)] hover:text-[var(--text-primary)]">{E.stop}</button>
+        </div>
+      )}
+
+      {/* Play bar (Frame 2087331925 ×2) — the Play button (901:10012) rides the progress as the playhead, kept inside the track so it never covers the time labels */}
+      <div className="absolute left-[634px] top-[868px] z-10 h-[30px] w-[613px]">
+        <span data-testid="time" className="sr-only">{fmtT(time.t)} / {fmtT(time.duration)}</span>
+        <span className="absolute right-[559px] top-[3px] text-[14px] leading-[18px] text-[var(--text-tertiary)]">{clock(time.t)}</span>
+        <div className="absolute left-[59px] top-[12px] h-[6px] w-[495px] rounded-[var(--radius-full)] bg-[var(--neutral-150)]">
+          <div className="h-full rounded-[var(--radius-full)] bg-[var(--primary)]" style={{ width: `${progress * 100}%` }} />
+        </div>
+        <span className="absolute left-[564px] top-[3px] text-[14px] leading-[18px] text-[var(--text-tertiary)]">{clock(time.duration)}</span>
+        <button
+          type="button"
+          disabled={!expression}
+          onClick={togglePlay}
+          aria-label={paused ? (ended ? E.replay : E.play) : E.pause}
+          title={paused ? (ended ? E.replay : E.play) : E.pause}
+          className="absolute top-[-5px] flex size-[40px] -translate-x-1/2 items-center justify-center rounded-[var(--radius-full)] bg-[var(--primary)] text-[var(--bg-canvas)] disabled:cursor-not-allowed"
+          style={{ left: Math.min(Math.max(59 + progress * 495, 79), 534) }}
+        >
+          {paused ? (
+            <Icon name="play-glyph" size={40} />
+          ) : (
+            <span className="flex gap-[4px]" aria-hidden>
+              <span className="h-[13px] w-[4px] rounded-[var(--radius-2xs)] bg-current" />
+              <span className="h-[13px] w-[4px] rounded-[var(--radius-2xs)] bg-current" />
             </span>
           )}
-          {lastResult?.source === "demo" && expression && !busy && (
-            <span className="absolute right-3 top-3 rounded bg-amber-100 px-2 py-0.5 text-xs text-amber-800">{E.demoBadge}</span>
-          )}
-          {activeRef && !sideBySide && <div className="absolute bottom-3 left-3">{referencePlayer}</div>}
-        </div>
-        {activeRef && sideBySide && <div className="w-1/2 min-w-0 overflow-hidden rounded border border-neutral-200">{referencePlayer}</div>}
-        </div>
+        </button>
+      </div>
 
-        <div className="flex items-center gap-3 text-sm">
-          <Button disabled={!expression} onClick={togglePlay}>{paused ? (time.duration > 0 && time.t >= time.duration - 0.01 ? E.replay : E.play) : E.pause}</Button>
-          <span className="font-mono text-neutral-600" data-testid="time">{fmtT(time.t)} / {fmtT(time.duration)}</span>
-          <div className="h-1 flex-1 overflow-hidden rounded bg-neutral-200">
-            <div className="h-full bg-neutral-700" style={{ width: `${Number.isFinite(time.duration) && time.duration > 0 ? (time.t / time.duration) * 100 : 0}%` }} />
-          </div>
-          <Button variant={timelineOpen ? "primary" : "default"} onClick={() => setTimelineOpen(!timelineOpen)}>{E.timeline.title}</Button>
-        </div>
-
-        {expression && lastResult?.reasoning && <p className="text-xs text-neutral-500"><b>{E.reasoning}</b> · {lastResult.reasoning}</p>}
-
-        <form className="flex flex-col gap-2" onSubmit={(e) => { e.preventDefault(); void generate(); }}>
-          <div className="flex gap-2">
-            <select className="rounded border border-neutral-300 px-2 text-sm" aria-label="Prompt type" defaultValue="text" onChange={(e) => { if (e.target.value === "image") { imageInput.current?.click(); e.target.value = "text"; } }}>
-              <option value="text">{E.text}</option>
-              <option value="image">{E.image}</option>
-            </select>
-            <Button type="button" disabled={busy || context.references.length + pending.length >= MAX_REFERENCES} title={E.referenceRules} onClick={() => imageInput.current?.click()}>
-              + {E.attach}
-            </Button>
+      {/* Composer (Frame 56 ×2): prompt box 856×92 + suggestions */}
+      <form
+        className="absolute left-[513px] top-[918px] z-10 flex w-[856px] flex-col items-center gap-[var(--space-24)]"
+        onSubmit={(e) => { e.preventDefault(); void generate(); }}
+      >
+        <div className="flex h-[92px] w-full items-center justify-between gap-[var(--space-12)] rounded-[var(--radius-xl)] bg-[var(--bg-surface)] px-[var(--space-8)]">
+          <div className="flex min-w-0 flex-1 items-center gap-[var(--space-20)]">
+            <div className="relative shrink-0">
+              <select
+                className="appearance-none rounded-[var(--radius-full)] bg-[var(--bg-surface)] py-[var(--space-12)] pl-[var(--space-20)] pr-[56px] text-[22px] leading-[28px] text-[var(--text-primary)] outline-none"
+                aria-label="Prompt type"
+                defaultValue="text"
+                onChange={(e) => { if (e.target.value === "image") { imageInput.current?.click(); e.target.value = "text"; } }}
+              >
+                <option value="text">{E.text}</option>
+                <option value="image">{E.image}</option>
+              </select>
+              <Icon name="chevron-down" size={24} className="pointer-events-none absolute right-[var(--space-20)] top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" />
+            </div>
+            <button
+              type="button"
+              aria-label={`+ ${E.attach}`}
+              disabled={busy || context.references.length + pending.length >= MAX_REFERENCES}
+              title={E.referenceRules}
+              onClick={() => imageInput.current?.click()}
+              className="-ml-[var(--space-12)] flex size-[36px] shrink-0 items-center justify-center rounded-[var(--radius-full)] text-[var(--text-secondary)] hover:bg-[var(--bg-canvas)] disabled:opacity-40"
+            >
+              <Icon name="add" size={24} />
+            </button>
+            {(context.references.length > 0 || pending.length > 0) && (
+              <div className="flex shrink-0 items-center gap-[var(--space-8)] text-[14px] leading-[18px]" data-testid="attach-chips">
+                {context.references.map((r) => (
+                  <span
+                    key={r.id}
+                    className={`flex max-w-[160px] items-center gap-[var(--space-4)] rounded-[var(--radius-full)] border px-[var(--space-12)] py-[var(--space-4)] ${r.status === "failed" ? "border-[var(--border-error)] text-[var(--text-error)]" : "border-[var(--border-default)] text-[var(--text-primary)]"}`}
+                  >
+                    <span className="truncate">{r.kind === "video" ? "▶" : "▣"} {r.path.split("/").pop()?.replace(/^[0-9a-f]{8}-/, "")}</span>
+                    <button type="button" aria-label={E.removeReference} onClick={() => setContext((c) => ({ ...c, references: c.references.filter((x) => x.id !== r.id) }))}>×</button>
+                  </span>
+                ))}
+                {pending.map((p) => (
+                  <span key={p.id} className="max-w-[160px] truncate rounded-[var(--radius-full)] border border-dashed border-[var(--border-default)] px-[var(--space-12)] py-[var(--space-4)] text-[var(--text-tertiary)]">
+                    {p.name} · {E.referenceUploading}
+                  </span>
+                ))}
+              </div>
+            )}
             <input
               type="text"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               disabled={busy}
               placeholder={E.promptPlaceholder}
+              aria-label={E.promptPlaceholder}
               maxLength={500}
-              className="flex-1 rounded border border-neutral-300 px-3 py-2 text-sm disabled:bg-neutral-100"
+              className="min-w-0 flex-1 bg-transparent text-[22px] leading-[28px] text-[var(--text-primary)] outline-none placeholder:text-[var(--text-tertiary)] disabled:opacity-60"
             />
-            {busy ? (
-              <Button type="button" onClick={stop}>{E.stop}</Button>
-            ) : (
-              <Button type="submit" variant="primary" disabled={!prompt.trim()}>{E.generate}</Button>
-            )}
           </div>
-          {(context.references.length > 0 || pending.length > 0) && (
-            <div className="flex flex-wrap gap-1.5 text-xs" data-testid="attach-chips">
-              {context.references.map((r) => (
-                <span key={r.id} className={`flex items-center gap-1 rounded-full border px-2 py-0.5 ${r.status === "failed" ? "border-red-300 text-red-600" : "border-neutral-300"}`}>
-                  {r.kind === "video" ? "▶" : "▣"} {r.path.split("/").pop()?.replace(/^[0-9a-f]{8}-/, "")}
-                  <button aria-label={E.removeReference} onClick={() => setContext((c) => ({ ...c, references: c.references.filter((x) => x.id !== r.id) }))}>×</button>
-                </span>
-              ))}
-              {pending.map((p) => <span key={p.id} className="rounded-full border border-dashed border-neutral-300 px-2 py-0.5 text-neutral-500">{p.name} · {E.referenceUploading}</span>)}
-            </div>
-          )}
-          <input ref={imageInput} type="file" multiple accept="image/*,video/mp4,video/quicktime,video/webm" className="hidden" onChange={(e) => { if (e.target.files?.length) addFiles(e.target.files); e.target.value = ""; }} />
-          <div className="flex flex-wrap items-center gap-2 text-xs">
-            <span className="text-neutral-500">{E.suggested}</span>
-            {SUGGESTED_PROMPTS.map((s) => (
-              <button key={s.id} type="button" disabled={busy} onClick={() => void generate(s.text)} className="rounded-full border border-neutral-300 px-2.5 py-0.5 hover:bg-neutral-100 disabled:opacity-40">
-                {s.text}
-              </button>
-            ))}
-          </div>
-        </form>
-      </main>
+          <button
+            type="submit"
+            aria-label={E.generate}
+            title={E.generate}
+            disabled={busy || !prompt.trim()}
+            className="flex shrink-0 items-center justify-center rounded-[var(--radius-full)] bg-[var(--sage-50)] px-[var(--space-16)] py-[var(--space-12)] text-[var(--neutral-800)] disabled:cursor-not-allowed"
+          >
+            <Icon name="arrow-up" size={30} />
+          </button>
+        </div>
+        <input ref={imageInput} type="file" multiple accept="image/*,video/mp4,video/quicktime,video/webm" className="hidden" onChange={(e) => { if (e.target.files?.length) addFiles(e.target.files); e.target.value = ""; }} />
+        <div className="flex items-center gap-[var(--space-28)] text-[14px] leading-[18px]">
+          <span className="sr-only">{E.suggested}</span>
+          {SUGGESTED_PROMPTS.map((s) => (
+            <button key={s.id} type="button" disabled={busy} onClick={() => void generate(s.text)} className="text-center text-[var(--neutral-500)] hover:text-[var(--text-primary)] disabled:opacity-40">
+              {s.text}
+            </button>
+          ))}
+        </div>
+      </form>
 
-      {/* Right: channel tabs + joints */}
-      <aside className="flex flex-col gap-4 overflow-y-auto border-l border-neutral-200 p-4">
-        <div className="flex gap-1 text-sm">
+      {/* Right panel: channel tabs + panel + joints + Edit Detail (Frame 29 ×2) */}
+      <aside className="absolute right-[32px] top-[32px] z-10 flex h-[1016px] w-[380px] flex-col gap-[var(--space-32)] overflow-hidden rounded-[var(--radius-xl)] bg-[var(--bg-surface)] px-[var(--space-24)] pb-[var(--space-32)] pt-[var(--space-24)]">
+        <div className="grid h-[49px] w-[330px] shrink-0 grid-cols-3 gap-[var(--space-8)] rounded-[var(--radius-sm)] bg-[var(--bg-canvas)] px-[var(--space-8)] py-[7px]" role="tablist">
           {(["motion", "face", "sound"] as const).map((c) => (
             <button
               key={c}
+              role="tab"
+              aria-selected={tab === c}
               disabled={!hasChannel(c)}
               title={hasChannel(c) ? undefined : fmt(E.noChannel, { channel: E.tabs[c] })}
               onClick={() => setTab(c)}
-              className={`flex-1 rounded px-2 py-1 disabled:cursor-not-allowed disabled:opacity-40 ${tab === c ? "bg-neutral-900 text-white" : "hover:bg-neutral-100"}`}
+              className={`flex h-[36px] items-center justify-center rounded-[var(--radius-xs)] text-[16px] leading-[20px] disabled:cursor-not-allowed disabled:opacity-40 ${tabTint[c]} ${tab === c ? "bg-[var(--neutral-300)]" : ""}`}
             >
               {E.tabs[c]}
             </button>
           ))}
         </div>
 
-        {tab === "motion" && (
-          <MotionPanel
-            props={props}
-            warnings={warnings}
-            onChange={(key, value) => setProps((p) => ({ ...p, [key]: value }))}
-            onCommit={() => void commit()}
-          />
-        )}
-        {tab === "face" && <FacePanel face={face} onChange={changeFace} onCommit={(next) => void commit(next ? { face: next } : {})} />}
-        {tab === "sound" && (
-          <SoundPanel
-            sound={soundSpec}
-            selected={selectedCue}
-            quietHours={quietHours}
-            onSelect={setSelectedCue}
-            onPreview={(c) => ctrl.current?.previewCue(c)}
-            onChange={setSoundSpec}
-            onCommit={(next) => void commit(next ? { sound: next } : {})}
-            onAdd={addCue}
-            onRemove={removeCue}
-            onQuietHours={(on) => void toggleQuietHours(on)}
-          />
-        )}
-
-        <div className="flex flex-col gap-2 border-t border-neutral-200 pt-4">
+        <div className="-mr-[var(--space-16)] flex min-h-0 flex-1 flex-col gap-[56px] overflow-y-auto pr-[var(--space-16)]">
+          {tab === "motion" && (
+            <MotionPanel
+              props={props}
+              warnings={warnings}
+              onChange={(key, value) => setProps((p) => ({ ...p, [key]: value }))}
+              onCommit={() => void commit()}
+            />
+          )}
+          {tab === "face" && <FacePanel face={face} onChange={changeFace} onCommit={(next) => void commit(next ? { face: next } : {})} />}
+          {tab === "sound" && (
+            <SoundPanel
+              sound={soundSpec}
+              selected={selectedCue}
+              quietHours={quietHours}
+              onSelect={setSelectedCue}
+              onPreview={(c) => ctrl.current?.previewCue(c)}
+              onChange={setSoundSpec}
+              onCommit={(next) => void commit(next ? { sound: next } : {})}
+              onAdd={addCue}
+              onRemove={removeCue}
+              onQuietHours={(on) => void toggleQuietHours(on)}
+            />
+          )}
           <JointTable joints={joints} structure={structure} flagged={limit?.joint} />
         </div>
+
+        <button
+          type="button"
+          aria-pressed={timelineOpen}
+          onClick={() => setTimelineOpen(!timelineOpen)}
+          className="h-[55px] w-[332px] shrink-0 rounded-[var(--radius-lg)] bg-[var(--neutral-800)] text-[22px] leading-[28px] text-[var(--text-on-inverse)]"
+        >
+          {E.timeline.title}
+        </button>
       </aside>
 
-      {/* Bottom: Edit Detail (⑤) */}
+      {/* Edit Detail timeline (Figma Timeline Panel sits below the frame — collapsed; translated in W02E-4) */}
       {timelineOpen && timelineClip && (
-        <Timeline
-          clip={timelineClip}
-          fromRecipe={!clip}
-          structure={structure}
-          face={face}
-          sound={soundSpec}
-          t={time.t}
-          playing={!paused}
-          loop={loop}
-          selectedTrack={selectedTrack}
-          selectedKey={selectedKey}
-          onSeek={seekTo}
-          onTogglePlay={togglePlay}
-          onLoop={(on) => { setLoop(on); ctrl.current?.setLoop(on); }}
-          onSelectTrack={(track) => { setSelectedTrack(track); if (selectedKey?.track !== track) setSelectedKey(null); }}
-          onSelectKey={(key) => { setSelectedKey(key); if (key) setSelectedTrack(key.track); }}
-          onAddKey={addTimelineKey}
-          onDragKey={dragKey}
-          onApplyKey={applyKey}
-          onDeleteKey={deleteTimelineKey}
-          onFaceKeyFromCurrent={faceKeyFromCurrent}
-        />
+        <div className="absolute inset-x-[32px] bottom-[32px] z-20 max-h-[520px] overflow-auto rounded-[var(--radius-xl)] bg-[var(--bg-surface)] shadow-[var(--pure-shadow-float)]">
+          <Timeline
+            clip={timelineClip}
+            fromRecipe={!clip}
+            structure={structure}
+            face={face}
+            sound={soundSpec}
+            t={time.t}
+            playing={!paused}
+            loop={loop}
+            selectedTrack={selectedTrack}
+            selectedKey={selectedKey}
+            onSeek={seekTo}
+            onTogglePlay={togglePlay}
+            onLoop={(on) => { setLoop(on); ctrl.current?.setLoop(on); }}
+            onSelectTrack={(track) => { setSelectedTrack(track); if (selectedKey?.track !== track) setSelectedKey(null); }}
+            onSelectKey={(key) => { setSelectedKey(key); if (key) setSelectedTrack(key.track); }}
+            onAddKey={addTimelineKey}
+            onDragKey={dragKey}
+            onApplyKey={applyKey}
+            onDeleteKey={deleteTimelineKey}
+            onFaceKeyFromCurrent={faceKeyFromCurrent}
+          />
+        </div>
       )}
 
       <Modal open={failure !== null} onClose={() => setFailure(null)} title={E.failed.title}>
