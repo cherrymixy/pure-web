@@ -6,7 +6,7 @@ import { STRINGS } from "@/data/strings";
 import { Menu } from "@/components/ui/menu";
 import { ConfirmModal } from "@/components/ui/modal";
 
-// Sidebar user block → Library / Profile & team / Log out (confirm → landing).
+// Sidebar user block (avatar mark + name, Figma 901:8325/8332) → Library / Profile & team / Log out (confirm → landing).
 export function UserMenu({ name, email }: { name: string; email: string }) {
   const router = useRouter();
   const [logOut, setLogOut] = useState(false);
@@ -16,11 +16,17 @@ export function UserMenu({ name, email }: { name: string; email: string }) {
       <Menu
         label={STRINGS.common.userMenu}
         align="left"
+        triggerClassName="flex w-full items-center gap-[11px] rounded-[var(--radius-xs)] text-left hover:bg-[var(--neutral-50)]"
         trigger={
-          <span className="flex flex-col text-left">
-            <span className="font-semibold">{name}</span>
-            <span className="text-neutral-500">{email}</span>
-          </span>
+          <>
+            <span aria-hidden className="relative size-[36px] shrink-0 rounded-[var(--radius-full)] bg-[var(--neutral-800)]">
+              <span className="absolute left-[8px] top-[8px] size-[8.4px] rounded-[var(--radius-2xs)] bg-[var(--bg-canvas)]" />
+              <span className="absolute left-[16.4px] top-[16.4px] size-[11.6px] rounded-[var(--radius-2xs)] bg-[var(--bg-canvas)]" />
+            </span>
+            <span className="truncate text-[20px] font-medium leading-[26px] text-[var(--text-primary)]" title={email}>
+              {name}
+            </span>
+          </>
         }
         items={[
           { label: STRINGS.sidebar.library, onSelect: () => router.push("/lab/user-data") },

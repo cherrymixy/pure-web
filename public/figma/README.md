@@ -11,8 +11,8 @@
 | type-joint-driving@2x.png | 901:8405 | image 398665326 | W02B-1 |
 | type-jointless-driving@2x.png | 901:8422 | image 398665321 | W02B-1 |
 | type-joint-fixed@2x.png | 901:8453 | image 398665273 | W02B-1 |
-| project-thumb-desk@2x.png | 901:7849 | image 398665316 | W02A-1 project card |
-| project-thumb-bear@2x.png | 901:7938 | image 398665345 | W02A-1 project card |
+| project-thumb-desk@2x.png | 901:7849 | image 398665316 — note: shows the bear robot (name kept, referenced by code) | W02A-1 project card |
+| project-thumb-bear@2x.png | 901:7938 | image 398665345 — note: shows the desk-lamp robot | W02A-1 project card |
 | stage-shadow@2x.png | 901:8700 | image 398665274 | W02B-4 … W02F viewport floor |
 | robot-pure-desk@2x.png | 901:8705 | image 398665290 | W02B-4 … W02F |
 

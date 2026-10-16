@@ -44,6 +44,13 @@
   --alpha-black-35: #00000059;
   --alpha-black-55: #0000008c;
   --alpha-white-08: #ffffff14;
+  /* Web channel colors (Figma variables web/*, W02A-1 lab home channel chips), 2026-10-17 */
+  --web-75add7: #75add7;
+  --web-3f77a1: #3f77a1;
+  --web-e2a1c1: #e2a1c1;
+  --web-c35d8f: #c35d8f;
+  --web-ecc377: #ecc377;
+  --web-ae7d24: #ae7d24;
 
   /* Semantic, Light (F / Color → Semantic 458:4462). Resolved values as get_variable_defs returns them;
      which primitive each one aliases isn't exposed, so none is assumed. */

@@ -5,7 +5,19 @@ import { useEffect, useRef, useState } from "react";
 // Dropdown menu (card ⋮, user menu). Closes on outside click / Escape.
 export type MenuItem = { label: string; onSelect: () => void; danger?: boolean };
 
-export function Menu({ trigger, label, items, align = "right" }: { trigger: React.ReactNode; label: string; items: MenuItem[]; align?: "left" | "right" }) {
+export function Menu({
+  trigger,
+  label,
+  items,
+  align = "right",
+  triggerClassName = "rounded px-2 py-1 text-sm hover:bg-neutral-100",
+}: {
+  trigger: React.ReactNode;
+  label: string;
+  items: MenuItem[];
+  align?: "left" | "right";
+  triggerClassName?: string;
+}) {
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
 
@@ -31,7 +43,7 @@ export function Menu({ trigger, label, items, align = "right" }: { trigger: Reac
           e.stopPropagation();
           setOpen((o) => !o);
         }}
-        className="rounded px-2 py-1 text-sm hover:bg-neutral-100"
+        className={triggerClassName}
       >
         {trigger}
       </button>

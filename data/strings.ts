@@ -19,7 +19,7 @@ export const STRINGS = {
     noMatch: "No projects use all the selected channels.",
     clearFilter: "Clear filter",
     status: { analyzing: "Analyzing", draft: "Draft", ready: "Ready" },
-    updated: "Edited {when}",
+    updated: "{when}",
     rename: { title: "Rename project", label: "Project name", save: "Rename" },
     deleteConfirm: { title: "Delete \"{name}\"?", body: "This project and its expressions will be deleted. This can't be undone." },
     toast: { renamed: "Renamed to \"{name}\"", duplicated: "Duplicated \"{name}\"", deleted: "Deleted \"{name}\"", failed: "Something went wrong. Try again." },
