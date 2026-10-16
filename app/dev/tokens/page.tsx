@@ -1,6 +1,12 @@
 // @implemented
 import Link from "next/link";
 import { EFFECTS, PRIMITIVES, RADIUS, SEMANTIC, SPACE, TYPOGRAPHY, cssVar } from "@/lib/ui/tokens";
+import { ICONS, Icon, type IconName } from "@/components/ui/icons/icon";
+
+const FIGMA_IMAGES = [
+  "landing-hero", "landing-robot", "type-full-body", "type-joint-walking", "type-joint-driving",
+  "type-jointless-driving", "type-joint-fixed", "project-thumb-desk", "project-thumb-bear", "stage-shadow", "robot-pure-desk",
+];
 
 // STEP 20 check page: every token rendered from its CSS variable, to compare 1:1 with Figma.
 export default function DevTokensPage() {
@@ -31,6 +37,36 @@ export default function DevTokensPage() {
               </span>
               <span className="ml-auto shrink-0 font-mono text-xs text-neutral-400">{t.size}/{t.lineHeight} · {t.weight}</span>
             </div>
+          ))}
+        </div>
+      </Section>
+
+      <Section title={`Icons — ${Object.keys(ICONS).length} (F / Icon + web prototype)`}>
+        <div className="grid grid-cols-8 gap-3" data-testid="icon-grid">
+          {(Object.keys(ICONS) as IconName[]).map((name) => (
+            <div key={name} className="flex flex-col items-center gap-2 rounded p-3" style={{ background: cssVar("bg/surface-muted") }}>
+              <span style={{ color: cssVar("icon/primary") }}><Icon name={name} size={24} /></span>
+              <span className="font-mono text-[10px]">{name}</span>
+              <span className="font-mono text-[10px] text-neutral-400">{ICONS[name].width}×{ICONS[name].height}</span>
+            </div>
+          ))}
+        </div>
+        <div className="flex items-center gap-4 text-sm">
+          <span style={{ color: cssVar("icon/brand") }}><Icon name="smart_toy" /></span>
+          <span style={{ color: cssVar("icon/secondary") }}><Icon name="settings" /></span>
+          <span className="rounded p-1" style={{ background: cssVar("bg/brand"), color: cssVar("icon/on-brand") }}><Icon name="play_arrow" /></span>
+          <span className="font-mono text-xs text-neutral-400">icon/brand · icon/secondary · icon/on-brand (currentColor)</span>
+        </div>
+      </Section>
+
+      <Section title="Images — Figma @2x exports (public/figma)">
+        <div className="grid grid-cols-4 gap-4">
+          {FIGMA_IMAGES.map((name) => (
+            <figure key={name} className="flex flex-col gap-1 text-xs">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={`/figma/${name}@2x.png`} alt={name} className="h-40 w-full rounded object-contain" style={{ background: cssVar("bg/canvas") }} />
+              <figcaption className="font-mono">{name}@2x.png</figcaption>
+            </figure>
           ))}
         </div>
       </Section>

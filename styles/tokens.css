@@ -80,8 +80,8 @@
   --status-error: #e5484d;
   --effect-shadow: #0000000f;
 
-  /* Typography (F / Typography 458:4812) — Google Sans Flex, loaded in STEP 21 */
-  --font-family-pure: "Google Sans Flex", ui-sans-serif, system-ui, sans-serif;
+  /* Typography (F / Typography 458:4812) — Google Sans Flex via next/font/local (app/layout.tsx) */
+  --font-family-pure: var(--font-google-sans-flex), "Google Sans Flex", ui-sans-serif, system-ui, sans-serif;
   --pure-title-l-size: 30px; --pure-title-l-line-height: 38px; --pure-title-l-weight: 500; /* PURE/Title/L */
   --pure-title-m-size: 22px; --pure-title-m-line-height: 29px; --pure-title-m-weight: 500; /* PURE/Title/M */
   --pure-title-s-size: 18px; --pure-title-s-line-height: 24px; --pure-title-s-weight: 500; /* PURE/Title/S */
