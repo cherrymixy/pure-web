@@ -5,10 +5,11 @@ const STEP = 166; // Figma 901:8687… dots 83 apart in the 960 frame (×2)
 
 // Bottom stage indicator for the setup flow: Structure → Signature → Editor (Figma 901:8685–8698 ×2).
 // Dots on a 2px track; reached steps show the check dot, the track fills up to the next step.
-// `className` positions the footer (default: centered row in flow).
-export function StageSteps({ current, className }: { current: 0 | 1 | 2; className?: string }) {
-  const stages = STRINGS.structure.stages;
-  const filled = Math.min(current + 1, stages.length - 1) * STEP;
+// `className` positions the footer (default: centered row in flow). `labels` swaps the stages for another sequence
+// (W02C signature reading: Reading → Colors → Type → Tone → Signature); `current` −1 = nothing reached yet.
+export function StageSteps({ current, className, labels }: { current: number; className?: string; labels?: readonly string[] }) {
+  const stages = labels ?? STRINGS.structure.stages;
+  const filled = Math.max(0, Math.min(current + 1, stages.length - 1)) * STEP;
   return (
     <footer className={className ?? "flex justify-center py-[var(--space-24)]"}>
       <ol className="relative flex" aria-label="Stages">

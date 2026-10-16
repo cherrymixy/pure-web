@@ -13,13 +13,22 @@ const googleSansFlex = localFont({
   variable: "--font-google-sans-flex",
 });
 
+// Figma mono text (signature "How it maps", versions): Roboto Mono (OFL, app/fonts/OFL-RobotoMono.txt), local for offline.
+const robotoMono = localFont({
+  src: "./fonts/RobotoMono.ttf",
+  weight: "100 700",
+  style: "normal",
+  display: "swap",
+  variable: "--font-roboto-mono",
+});
+
 export const metadata: Metadata = {
   title: "PURE Expert Lab",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={googleSansFlex.variable}>
+    <html lang="en" className={`${googleSansFlex.variable} ${robotoMono.variable}`}>
       <body className="min-h-screen bg-white text-neutral-900 antialiased">
         <ToastProvider>{children}</ToastProvider>
         <MobileNotice />

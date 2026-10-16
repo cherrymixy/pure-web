@@ -49,6 +49,12 @@ export const ICONS = {
     "height": 10,
     "body": "<path d=\"M8.33464 2.5L3.7513 7.08333L1.66797 5\" stroke=\"currentColor\" stroke-width=\"1.04167\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>"
   },
+  "check-thin": {
+    "viewBox": "0 0 9 7",
+    "width": 9,
+    "height": 7,
+    "body": "<path d=\"M0.5 3.5L3.5 6.5L8.5 0.5\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>"
+  },
   "check": {
     "viewBox": "0 0 24 24",
     "width": 24,
@@ -114,6 +120,12 @@ export const ICONS = {
     "width": 13,
     "height": 13,
     "body": "<path d=\"M6.49967 11.9173C9.49122 11.9173 11.9163 9.49219 11.9163 6.50065C11.9163 3.50911 9.49122 1.08398 6.49967 1.08398C3.50813 1.08398 1.08301 3.50911 1.08301 6.50065C1.08301 9.49219 3.50813 11.9173 6.49967 11.9173Z\" stroke=\"currentColor\" stroke-width=\"0.975\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n<path d=\"M4.33301 7.58398C4.33301 7.58398 5.14551 8.66732 6.49967 8.66732C7.85384 8.66732 8.66634 7.58398 8.66634 7.58398\" stroke=\"currentColor\" stroke-width=\"0.975\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n<path d=\"M4.875 4.875H4.88\" stroke=\"currentColor\" stroke-width=\"0.975\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n<path d=\"M8.125 4.875H8.13\" stroke=\"currentColor\" stroke-width=\"0.975\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>"
+  },
+  "file-doc": {
+    "viewBox": "0 0 12.7883 14.4932",
+    "width": 12.7883,
+    "height": 14.4932,
+    "body": "<path d=\"M9.31703 0H2.55762C1.14508 0 0 1.14508 0 2.55762V11.9355C0 13.3481 1.14508 14.4932 2.55762 14.4932H10.2305C11.643 14.4932 12.7881 13.3481 12.7881 11.9355V3.17038L9.31703 0Z\" fill-rule=\"evenodd\" clip-rule=\"evenodd\" fill=\"currentColor\"/>\n<path d=\"M9.37813 1.06567V0L12.7883 3.19702H11.5095C10.3324 3.19702 9.37813 2.24278 9.37813 1.06567Z\" style=\"fill: var(--text-tertiary)\"/>"
   },
   "folder_open": {
     "viewBox": "0 0 24 24",
