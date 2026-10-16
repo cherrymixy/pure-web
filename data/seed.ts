@@ -1,4 +1,4 @@
-import type { Expression, Profile, Project, RobotDevice, SavedExpression, Share, Signature, UserDataMotion } from "@/lib/models";
+import type { Db, Expression, Profile, Project, RobotDevice, SavedExpression, Share, Signature, UserDataMotion } from "@/lib/models";
 import { COMPONENTS } from "./components";
 import { COMPONENT_DEMOS, PROMPT_DEMOS, type DemoExpression } from "./demo-recipes";
 import { PURE_DESK_STRUCTURE } from "./pure-desk";
@@ -123,3 +123,19 @@ export const SEED_ROBOTS: RobotDevice[] = [
 export const SEED_SHARES: Share[] = [];
 
 export const SEED_SIGNATURES: Signature[] = [PURE_DEFAULT_SIGNATURE, PUREBOT_SIGNATURE];
+
+/** A fresh database built from the seed (deep copy, safe to mutate). */
+export function seedDb(): Db {
+  return structuredClone({
+    schemaVersion: 1,
+    profile: SEED_PROFILE,
+    projects: SEED_PROJECTS,
+    expressions: SEED_EXPRESSIONS,
+    library: SEED_LIBRARY,
+    shares: SEED_SHARES,
+    userData: SEED_USER_DATA,
+    robots: SEED_ROBOTS,
+    settings: { demoMode: false, quietHours: false },
+    jobs: [],
+  } satisfies Db);
+}

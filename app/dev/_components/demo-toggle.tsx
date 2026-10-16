@@ -3,14 +3,15 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export function DemoToggle({ cookieName, initial }: { cookieName: string; initial: boolean }) {
+export function DemoToggle({ initial }: { initial: boolean }) {
   const router = useRouter();
   const [on, setOn] = useState(initial);
 
-  function toggle() {
+  async function toggle() {
     const next = !on;
-    document.cookie = `${cookieName}=${next ? "1" : "0"}; path=/; max-age=31536000; samesite=lax`;
     setOn(next);
+    const res = await fetch("/api/settings", { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ demoMode: next }) });
+    if (!res.ok) setOn(!next);
     router.refresh();
   }
 

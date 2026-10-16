@@ -8,5 +8,4 @@ export const FLAGS = {
   directClip: process.env.FLAG_DIRECT_CLIP === "1",
 } as const;
 
-// Demo mode is a per-browser cookie toggled from /dev; LLM routes read it in STEP 6.
-export const DEMO_COOKIE = "pure_demo";
+// Demo mode lives in the DB (settings.demoMode), toggled from /dev.

@@ -1,12 +1,12 @@
 // @implemented
 import Link from "next/link";
-import { cookies } from "next/headers";
 import { collectRoutes } from "@/lib/dev/routes";
 import { contentSummary } from "@/lib/dev/content";
-import { DEMO_COOKIE, FLAGS } from "@/lib/env";
+import { FLAGS } from "@/lib/env";
+import { getRepo } from "@/lib/repo-server";
 import { OllamaStatus } from "./_components/ollama-status";
 import { DemoToggle } from "./_components/demo-toggle";
-
+import { ResetButton } from "./_components/reset-button";
 
 export const dynamic = "force-dynamic";
 
@@ -14,22 +14,22 @@ export default async function DevPage({ searchParams }: { searchParams: Promise<
   const { tab = "routes" } = await searchParams;
   const routes = collectRoutes();
   const done = routes.filter((r) => r.implemented).length;
-  const demo = (await cookies()).get(DEMO_COOKIE)?.value === "1";
+  const db = await getRepo().dev.dump();
 
   return (
     <main className="mx-auto flex max-w-5xl flex-col gap-10 p-10">
       <div className="flex items-end gap-6">
         <h1 className="text-2xl font-semibold">/dev</h1>
         <nav className="flex gap-4 text-sm">
-          {["routes", "content"].map((t) => (
+          {["routes", "content", "db"].map((t) => (
             <Link key={t} href={`/dev?tab=${t}`} className={t === tab ? "font-semibold underline" : "text-neutral-500"}>
-              {t === "routes" ? "Routes" : "Content"}
+              {t === "routes" ? "Routes" : t === "content" ? "Content" : "DB"}
             </Link>
           ))}
         </nav>
       </div>
 
-      {tab === "content" ? <ContentTab /> : <>
+      {tab === "content" ? <ContentTab /> : tab === "db" ? <DbTab db={db} /> : <>
       <section className="flex flex-col gap-3">
         <h2 className="font-semibold">
           Routes <span className="text-neutral-500">{done}/{routes.length} implemented</span>
@@ -67,13 +67,8 @@ export default async function DevPage({ searchParams }: { searchParams: Promise<
 
       <section className="flex flex-col gap-3">
         <h2 className="font-semibold">Demo</h2>
-        <DemoToggle cookieName={DEMO_COOKIE} initial={demo} />
-        <div className="flex items-center gap-3">
-          <button disabled className="rounded border border-neutral-300 px-3 py-1 text-sm text-neutral-400">
-            Reset demo data
-          </button>
-          <span className="text-sm text-neutral-400">Connected in STEP 5 (DB)</span>
-        </div>
+        <DemoToggle initial={db.settings.demoMode} />
+        <ResetButton />
       </section>
 
       <section className="flex flex-col gap-3">
@@ -108,6 +103,29 @@ function ContentTab() {
           ))}
         </tbody>
       </table>
+    </section>
+  );
+}
+
+function DbTab({ db }: { db: Awaited<ReturnType<ReturnType<typeof getRepo>["dev"]["dump"]>> }) {
+  const collections = Object.entries(db).filter(([, v]) => typeof v === "object");
+  return (
+    <section className="flex flex-col gap-3">
+      <div className="flex items-center gap-4">
+        <h2 className="font-semibold">DB <span className="font-mono text-sm text-neutral-500">data/db.json</span></h2>
+        <ResetButton />
+      </div>
+      {collections.map(([name, value]) => (
+        <details key={name} className="rounded border border-neutral-200">
+          <summary className="flex cursor-pointer gap-3 px-3 py-2 text-sm">
+            <span className="font-medium">{name}</span>
+            <span data-testid={`db-count-${name}`} className="font-mono text-neutral-500">
+              {Array.isArray(value) ? value.length : "{…}"}
+            </span>
+          </summary>
+          <pre className="max-h-96 overflow-auto border-t border-neutral-200 bg-neutral-50 p-3 text-xs">{JSON.stringify(value, null, 2)}</pre>
+        </details>
+      ))}
     </section>
   );
 }

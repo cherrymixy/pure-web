@@ -203,6 +203,9 @@ const ExpressionBase = z.object({
   createdAt: IsoDate,
 });
 
+/** Expression body for create/update (the server assigns id, projectId, version, history, createdAt). */
+export const ExpressionInputSchema = ExpressionBase.omit({ id: true, projectId: true, version: true, createdAt: true });
+
 export type Expression = z.infer<typeof ExpressionBase> & { history: Expression[] };
 export const ExpressionSchema: z.ZodType<Expression> = ExpressionBase.extend({
   history: z.lazy(() => z.array(ExpressionSchema)),
@@ -223,9 +226,13 @@ export const ShareSchema = z.object({
   signatureVersion: z.number().int(),
   type: RobotTypeSchema,
   expiresAt: IsoDate,
-  password: z.string().optional(),
+  /** PRD `password`: stored as "salt:scrypt-hash", never plain text */
+  passwordHash: z.string().optional(),
   allowDownload: z.boolean(),
   attempts: z.number().int().min(0),
+  /** 5 wrong passwords → locked for 5 minutes */
+  lockedUntil: IsoDate.optional(),
+  createdAt: IsoDate,
 });
 export type Share = z.infer<typeof ShareSchema>;
 
@@ -270,3 +277,46 @@ export const RobotDeviceSchema = z.object({
   online: z.boolean(),
 });
 export type RobotDevice = z.infer<typeof RobotDeviceSchema>;
+
+// ------------------------------------------------------------------ jobs · settings · db (not in PRD §7)
+
+export const JOB_KINDS = ["dev-echo", "analyze-model", "signature-extract", "generate"] as const;
+export const JobSchema = z.object({
+  id: z.string(),
+  kind: z.enum(JOB_KINDS),
+  projectId: z.string().nullable(),
+  status: z.enum(["queued", "running", "done", "failed", "canceled"]),
+  /** 0–100 */
+  progress: z.number().min(0).max(100),
+  /** Current step index — a restarted runner resumes from here */
+  step: z.number().int().min(0),
+  stepLabel: z.string().optional(),
+  input: z.unknown(),
+  result: z.unknown().optional(),
+  error: z.string().optional(),
+  createdAt: IsoDate,
+  updatedAt: IsoDate,
+});
+export type Job = z.infer<typeof JobSchema>;
+export type JobKind = Job["kind"];
+
+export const SettingsSchema = z.object({
+  /** LLM routes use the demo fallback instead of Ollama */
+  demoMode: z.boolean(),
+  /** Sound −12 dB (STEP 9) */
+  quietHours: z.boolean(),
+});
+export type Settings = z.infer<typeof SettingsSchema>;
+
+export interface Db {
+  schemaVersion: 1;
+  profile: Profile;
+  projects: Project[];
+  expressions: Expression[];
+  library: SavedExpression[];
+  shares: Share[];
+  userData: UserDataMotion[];
+  robots: RobotDevice[];
+  settings: Settings;
+  jobs: Job[];
+}
