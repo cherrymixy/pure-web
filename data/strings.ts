@@ -199,6 +199,8 @@ export const STRINGS = {
     addReference: "Add image or video",
     referenceRules: "Images up to 20MB · videos up to 30s and 200MB (8 frames are read).",
     referenceUploading: "Uploading…",
+    referenceReading: "Reading…",
+    referenceRead: "Read ✓",
     referenceTooLong: "Videos must be 30 seconds or shorter.",
     referenceLimit: "Up to 4 references.",
     removeReference: "Remove reference",

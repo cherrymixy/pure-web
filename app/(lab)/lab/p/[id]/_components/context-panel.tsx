@@ -32,7 +32,9 @@ export function ContextPanel({
   onRemoveReference,
   onOpenReference,
   activeReference,
+  reading = [],
 }: {
+  reading?: string[];
   context: EditorContext;
   pending: PendingReference[];
   busy: boolean;
@@ -102,9 +104,10 @@ export function ContextPanel({
               <span className="h-10 w-14 rounded bg-neutral-100" />
             )}
             <span className="flex min-w-0 flex-1 flex-col">
-              <span className="truncate text-xs">{r.kind === "userData" ? fmt(STRINGS.userData.referenceLabel, { name: r.path }) : r.path.split("/").pop()?.replace(/^[0-9a-f]{8}-/, "")}</span>
+              <span className="truncate text-xs" title={r.summary}>{r.kind === "userData" ? fmt(STRINGS.userData.referenceLabel, { name: r.path }) : r.path.split("/").pop()?.replace(/^[0-9a-f]{8}-/, "")}</span>
               <span className={`text-xs ${r.status === "failed" ? "text-red-600" : "text-neutral-500"}`}>
                 {r.status === "failed" ? E.referenceFailed : r.durationS ? `${r.durationS.toFixed(1)}s · ${r.frames?.length ?? 0} frames` : r.kind === "userData" ? STRINGS.userData.title : r.kind}
+                {reading.includes(r.id) ? ` · ${E.referenceReading}` : r.summary ? ` · ${E.referenceRead}` : ""}
               </span>
             </span>
             </button>

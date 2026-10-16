@@ -103,3 +103,16 @@ describe("userDataSummary", () => {
     expect(await userDataSummary(r, [])).toBeUndefined();
   });
 });
+
+describe("cached reference summaries", () => {
+  it("skip the vision step: one text call, summary in the prompt, no images", async () => {
+    const fake = new FakeClient([JSON.stringify(good)]);
+    const ref = { id: "r", kind: "video" as const, path: "p/video/cat.mp4", thumb: "", frames: ["p/frame/1.jpg"], summary: "A tabby cat yawns slowly.", status: "ok" as const };
+    const res = await runGeneration({ repo: repo(), client: new OllamaGeneration(fake, "text", "vision"), input: { ...input, references: [ref] } });
+    expect(res.source).toBe("ollama");
+    expect(fake.calls).toHaveLength(1);
+    expect(fake.calls[0].model).toBe("text");
+    expect(fake.calls[0].images).toBeUndefined();
+    expect(fake.calls[0].user).toContain("A tabby cat yawns slowly.");
+  });
+});

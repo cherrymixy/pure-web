@@ -76,8 +76,13 @@ export async function runGeneration(opts: {
   const signature = (await repo.signatures.current(input.projectId)) ?? PURE_DEFAULT_SIGNATURE;
 
   await report(1, 15);
-  const images = await referenceImages(input.references ?? [], opts.root);
-  const motionRefs = await userDataSummary(repo, input.references ?? []);
+  const refs = input.references ?? [];
+  // Summaries made at upload time stand in for the frames; only refs without one need the vision step.
+  const visual = refs.filter((r) => r.status === "ok" && (r.kind === "image" || r.kind === "video"));
+  const cached = visual.length > 0 && visual.every((r) => r.summary);
+  const images = cached ? [] : await referenceImages(refs, opts.root);
+  const motionRefs = await userDataSummary(repo, refs);
+  const textRefs = [cached ? visual.map((r) => r.summary).join(" ") : undefined, motionRefs].filter(Boolean).join("; ") || undefined;
 
   await report(2, 30);
   const request = {
@@ -88,8 +93,8 @@ export async function runGeneration(opts: {
     structure: project.structure,
     signature,
     images: images.length ? images : undefined,
-    // No images to describe: User Data motions go in as text instead.
-    referenceSummary: images.length ? undefined : motionRefs,
+    // No images to describe: cached summaries and User Data motions go in as text.
+    referenceSummary: images.length ? undefined : textRefs,
   };
 
   // Tier 2 (flag): the vision model writes keyframes + recipe in one answer; unusable keyframes → its recipe.
@@ -97,10 +102,11 @@ export async function runGeneration(opts: {
   let clip: Clip | null = null;
   let direct: GenerateResult["directClip"];
   const settings = await repo.settings.get();
-  if ((settings.directClip || FLAGS.directClip) && images.length && client.directClip) {
+  const directImages = cached ? await referenceImages(refs, opts.root) : images;
+  if ((settings.directClip || FLAGS.directClip) && directImages.length && client.directClip) {
     const started = Date.now();
     try {
-      const d = await client.directClip({ ...request, images, structure: project.structure }, { signal });
+      const d = await client.directClip({ ...request, images: directImages, structure: project.structure }, { signal });
       const checked = clipFromDirect(d.output.clip, project.structure);
       output = d.output;
       clip = checked.clip;

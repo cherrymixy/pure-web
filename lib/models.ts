@@ -178,6 +178,8 @@ export const ReferenceSchema = z.object({
   thumb: z.string(),
   durationS: z.number().optional(),
   frames: z.array(z.string()).optional(),
+  /** Vision summary, made right after upload and reused by every Generate (keeps describe off the critical path) */
+  summary: z.string().optional(),
   status: z.enum(["ok", "failed"]),
 });
 export type Reference = z.infer<typeof ReferenceSchema>;

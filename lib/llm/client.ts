@@ -37,4 +37,6 @@ export interface LlmClient {
   chatJson(req: ChatJsonRequest): Promise<ChatJsonResponse>;
   /** Cheap reachability check (cached). */
   available(): Promise<boolean>;
+  /** Load a model into memory ahead of use (fire-and-forget). */
+  preload?(model: string): Promise<void>;
 }

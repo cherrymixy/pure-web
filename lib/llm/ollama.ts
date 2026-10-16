@@ -18,6 +18,16 @@ export class OllamaClient implements LlmClient {
     private readonly defaultModel = OLLAMA_MODEL,
   ) {}
 
+  /** Ollama loads a model on an empty /api/generate; keeps it for the same 10 minutes as chat calls. */
+  async preload(model: string): Promise<void> {
+    await fetch(`${this.url}/api/generate`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ model, keep_alive: "10m" }),
+      signal: AbortSignal.timeout(60_000),
+    }).catch(() => {});
+  }
+
   async available(): Promise<boolean> {
     const now = Date.now();
     if (this.availability && now - this.availability.at < AVAILABILITY_TTL) return this.availability.ok;

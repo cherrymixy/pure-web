@@ -168,6 +168,8 @@ export function Editor({
     lastPrompt: "",
   }));
   const [pending, setPending] = useState<PendingReference[]>([]);
+  /** Reference ids whose vision summary is being made in the background */
+  const [reading, setReading] = useState<string[]>([]);
   const imageInput = useRef<HTMLInputElement>(null);
 
   // localStorage only after mount (SSR renders the expression's context).
@@ -444,7 +446,15 @@ export function Editor({
   const finish = useCallback(
     async (done: Job) => {
       if (done.status === "done") {
-        const result = done.result as GenResult;
+        const result = done.result as GenResult & { referenceSummary?: string };
+        // Generate described the frames itself: keep that summary on the (single) reference for next time.
+        if (result.referenceSummary) {
+          setContext((c) => {
+            const visual = c.references.filter((r) => r.status === "ok" && (r.kind === "image" || r.kind === "video"));
+            if (visual.length !== 1 || visual[0].summary) return c;
+            return { ...c, references: c.references.map((r) => (r.id === visual[0].id ? { ...r, summary: result.referenceSummary } : r)) };
+          });
+        }
         const e = await api<Expression>(`/api/expressions/${result.expressionId}`);
         setLastResult(result);
         setExpression(e);
@@ -539,6 +549,17 @@ export function Editor({
     return { id, kind: "video", path: video.path, thumb: frames[Math.floor(frames.length / 2)], durationS: Math.round(read.duration * 10) / 10, frames, status: "ok" };
   }
 
+  /** Summarize a fresh reference now, so Generate later only sends text (vision step off the critical path). */
+  function describeReference(ref: Reference) {
+    if (ref.status !== "ok" || ref.summary) return;
+    setReading((r) => [...r, ref.id]);
+    api<{ summary: string | null }>(`/api/projects/${project.id}/references/describe`, { method: "POST", body: JSON.stringify({ reference: ref }) })
+      .then(({ summary }) => {
+        if (summary) setContext((c) => ({ ...c, references: c.references.map((r) => (r.id === ref.id ? { ...r, summary } : r)) }));
+      }, () => {})
+      .finally(() => setReading((r) => r.filter((id) => id !== ref.id)));
+  }
+
   function addFiles(files: FileList) {
     const room = MAX_REFERENCES - context.references.length - pending.length;
     if (room <= 0) return toast(E.referenceLimit);
@@ -546,7 +567,11 @@ export function Editor({
       const tmp = { id: `${file.name}-${Date.now()}`, name: file.name };
       setPending((p) => [...p, tmp]);
       addReference(file)
-        .then((ref) => ref && setContext((c) => ({ ...c, references: [...c.references, ref] })))
+        .then((ref) => {
+          if (!ref) return;
+          setContext((c) => ({ ...c, references: [...c.references, ref] }));
+          describeReference(ref);
+        })
         .catch((err) => toast(err instanceof Error ? err.message : String(err)))
         .finally(() => setPending((p) => p.filter((x) => x.id !== tmp.id)));
     }
@@ -713,6 +738,7 @@ export function Editor({
             }}
             onOpenReference={(r) => r.kind !== "userData" && setActiveRef(activeRef?.id === r.id ? null : r)}
             activeReference={activeRef?.id ?? null}
+            reading={reading}
           />
         ) : (
           <LibraryPanel busy={busy} onApply={(s) => void applyLibrary(s)} />
