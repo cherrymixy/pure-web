@@ -17,6 +17,7 @@ Build the expression only from these parts:
 - motion.steps: 1 to 6 steps played in order. "behavior" must be one of: ${COMPONENTS.map((c) => c.id).join(", ")}.
   speed 0.5–1.5 (1 = normal), amplitude 0.3–1.3 (1 = normal), repeat 1–3, optional face preset per step.
 - face.preset: one of ${Object.keys(FACE_PRESETS).join(", ")}. face.tokens: eyeSize 0.4–1.6, eyeOpen 0–1, eyeAngle −30–30, browAngle −30–30, brightness 0.1–1, blinkRate 0–40 blinks per minute.
+  Looping behaviors (idle, doze, sleep, sad, sweep, focus) last 5–13 seconds per cycle: give them repeat 1. Keep the whole expression under 15 seconds.
 - sound.cues: 0 to 4 cues, "preset" one of ${SOUND_CUES.map((c) => c.id).join(", ")}, "t" = start time in seconds from the beginning.
 
 Rules:

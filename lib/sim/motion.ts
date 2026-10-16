@@ -184,10 +184,12 @@ export class MotionPlayer {
       const s = span(kf);
       if (local < s || i === frames.length - 1) {
         // 반복 재생이면 마지막 키프레임 다음이 첫 키프레임으로 이어진다.
+        // 키프레임이 하나뿐인 반복 동작(focus·sleep)은 그 자세를 유지한다 — 진입은 leadIn 이 맡는다.
+        // (계약 변경 2026-10-16: 이전엔 사이클마다 startPose 로 튀었다. docs/decisions.md STEP 8)
         const prev =
           i > 0
             ? this.absolute[i - 1]
-            : this.motion.loop && this.absolute.length > 1
+            : this.motion.loop
               ? this.absolute[this.absolute.length - 1]
               : this.startPose;
         const next = this.absolute[i];

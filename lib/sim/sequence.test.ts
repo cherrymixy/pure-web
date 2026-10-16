@@ -39,3 +39,17 @@ describe("SequencePlayer", () => {
     expect(motionPlayable(m("greet"), HOME, 0.8).duration).toBeCloseTo(0.8 + cycleTime(m("greet")));
   });
 });
+
+describe("loop continuity (contract change, STEP 8)", () => {
+  it.each(["focus", "sleep", "idle", "doze", "sad", "sweep"])("%s has no jump at cycle boundaries", (name) => {
+    const motion = m(name);
+    const player = motionPlayable(motion, HOME, 0.8);
+    const cycle = cycleTime(motion);
+    for (const k of [1, 2]) {
+      const t = 0.8 + cycle * k;
+      const a = player.target(t - 1 / 120);
+      const b = player.target(t + 1 / 120);
+      for (const j of JOINT_NAMES) expect(Math.abs(b[j] - a[j])).toBeLessThan(1.5);
+    }
+  });
+});
