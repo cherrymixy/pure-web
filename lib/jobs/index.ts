@@ -67,6 +67,8 @@ export async function startJob(kind: JobKind, projectId: string | null, input: u
 
 export async function cancelJob(id: string): Promise<Job> {
   const repo = getRepo();
+  const job = await repo.jobs.get(id);
+  if (job.status !== "queued" && job.status !== "running") return job;
   state.controllers.get(id)?.abort();
   return repo.jobs.update(id, { status: "canceled" });
 }

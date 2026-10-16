@@ -1,6 +1,7 @@
 import { STRINGS } from "@/data/strings";
 import { PURE_DESK_STRUCTURE } from "@/data/pure-desk";
-import { getExtraction } from "../llm";
+import { getExtraction, getGeneration, recordCall } from "../llm";
+import { runGeneration, type GenerateInput } from "./generate";
 import { ANALYZE_STEP_MS, structureFromReading, type ModelReading } from "../robot/analyze";
 import type { JobKind } from "../models";
 import { SignatureError } from "../signature/errors";
@@ -92,7 +93,15 @@ const analyzeModel: Runner = async ({ repo, job, signal, report }) => {
   return { joints: structure!.joints.length, type: structure!.type };
 };
 
+/** W02D: prompt → expression (Ollama, demo fallback). Re-running a resumed job just generates again. */
+const generate: Runner = async ({ repo, job, signal, report }) => {
+  const result = await runGeneration({ repo, client: await getGeneration(), input: job.input as GenerateInput, signal, report });
+  recordCall({ kind: "generate", ms: result.ms, source: result.source });
+  return result;
+};
+
 export const RUNNERS: Partial<Record<JobKind, Runner>> = {
+  generate,
   "dev-echo": devEcho,
   "analyze-model": analyzeModel,
   "signature-extract": signatureExtract,
