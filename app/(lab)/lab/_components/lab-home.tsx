@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ROBOT_TYPES } from "@/data/robot-types";
 import { STRINGS, fmt } from "@/data/strings";
 import type { Channel, Job, Project } from "@/lib/models";
+import { api } from "@/lib/ui/api";
 import { timeAgo } from "@/lib/ui/time";
 import { Button } from "@/components/ui/button";
 import { CHANNEL_LABEL, ChannelBadges } from "@/components/ui/channel-badges";
@@ -34,12 +35,6 @@ function writeFilter(channels: Channel[]) {
   } catch {
     // storage blocked: filter just won't persist
   }
-}
-
-async function api<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, { ...init, headers: { "content-type": "application/json", ...init?.headers } });
-  if (!res.ok) throw new Error(`${res.status}`);
-  return res.json() as Promise<T>;
 }
 
 function projectHref(p: Project) {

@@ -151,11 +151,12 @@ export class LowRepo implements Repo {
       });
       await this.opts.removeUploads?.(id);
     },
-    setStructure: (id, structure) =>
+    setStructure: (id, structure, opts) =>
       this.write((data) => {
         const project = found(data.projects.find((p) => p.id === id), "Project");
         const stored = project.structure;
-        if (stored) {
+        if (opts?.replace) project.type = structure.type;
+        else if (stored) {
           for (const joint of structure.joints) {
             const rig = stored.joints.find((j) => j.id === joint.id);
             if (!rig) throw new RepoError("CONFLICT", `Unknown joint ${joint.id}`);

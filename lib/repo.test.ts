@@ -80,6 +80,14 @@ describe("LowRepo", () => {
     expect(await code(t.repo.projects.setStructure(id, widened))).toBe("CONFLICT");
   });
 
+  it("structure: replace swaps the rig and the project type (new 3D file)", async () => {
+    const id = "p-test-01";
+    const imported = { ...PURE_DESK_STRUCTURE, type: "joint-walking" as const, source: "import" as const, joints: [{ id: "hip", label: "hip", min: -90, max: 90, rigMin: -90, rigMax: 90 }] };
+    const p = await t.repo.projects.setStructure(id, imported, { replace: true });
+    expect(p.type).toBe("joint-walking");
+    expect(p.structure!.joints.map((j) => j.id)).toEqual(["hip"]);
+  });
+
   it("share links expire after 7 days by default", async () => {
     const s = await t.repo.shares.create({ expressionIds: ["e-sleepy-nod"], allowDownload: true });
     expect(new Date(s.expiresAt).getTime() - new Date("2026-10-16T12:00:00.000Z").getTime()).toBe(7 * DAY);

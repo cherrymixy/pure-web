@@ -1,6 +1,7 @@
+// @implemented
 // @screen W02B-1
-import { Placeholder } from "@/components/ui/placeholder";
+import { TypePicker } from "./_components/type-picker";
 
 export default function Page() {
-  return <Placeholder screen="W02B-1" route="/lab/new/type" />;
+  return <TypePicker />;
 }

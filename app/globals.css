@@ -4,3 +4,18 @@
 body {
   background: white;
 }
+
+/* W02B-3 scan line over the analyzing preview (gray-box; motion polish in STEP 24). */
+@keyframes scan {
+  0% { top: 0%; }
+  100% { top: 100%; }
+}
+.scan-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: currentColor;
+  opacity: 0.6;
+  animation: scan 2s linear infinite alternate;
+}

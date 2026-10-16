@@ -41,7 +41,8 @@ export interface Repo {
     duplicate(id: string): Promise<Project>;
     delete(id: string): Promise<void>;
     /** Edit limits can only narrow: the rig ranges must stay as stored. */
-    setStructure(id: string, structure: Structure): Promise<Project>;
+    /** Edit limits keep the rig; `replace` (new 3D file / analysis) swaps the whole rig and the project type. */
+    setStructure(id: string, structure: Structure, opts?: { replace?: boolean }): Promise<Project>;
   };
   signatures: {
     list(projectId: string): Promise<Signature[]>;

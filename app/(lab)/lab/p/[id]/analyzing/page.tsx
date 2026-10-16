@@ -1,6 +1,7 @@
+// @implemented
 // @screen W02B-3
-import { Placeholder } from "@/components/ui/placeholder";
+import { Analyzing } from "./_components/analyzing";
 
-export default function Page() {
-  return <Placeholder screen="W02B-3" route="/lab/p/[id]/analyzing" />;
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+  return <Analyzing id={(await params).id} />;
 }

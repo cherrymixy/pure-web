@@ -1,4 +1,7 @@
+import { STRINGS } from "@/data/strings";
+import { PURE_DESK_STRUCTURE } from "@/data/pure-desk";
 import { getExtraction } from "../llm";
+import { ANALYZE_STEP_MS, structureFromReading, type ModelReading } from "../robot/analyze";
 import type { JobKind } from "../models";
 import { SignatureError } from "../signature/errors";
 import type { Extracted, SourceInput } from "../signature/extract";
@@ -56,8 +59,41 @@ const signatureExtract: Runner = async ({ repo, job, signal, report }) => {
   }
 };
 
-// Remaining runners arrive in their STEPs: analyze-model (10), generate (8/10).
+export type AnalyzeInput =
+  | { source: "pure-desk" }
+  | { source: "import"; file: { name: string; size: number; path: string }; reading: ModelReading };
+
+/**
+ * W02B-3: Reading the mesh → Finding joints → Checking joint limits → Detecting channels.
+ * The bones were read in the browser (three.js); the job stages, validates and saves.
+ */
+const analyzeModel: Runner = async ({ repo, job, signal, report }) => {
+  const input = job.input as AnalyzeInput;
+  const projectId = job.projectId!;
+  const steps = STRINGS.analyzing.steps;
+  const ms = ANALYZE_STEP_MS[input.source];
+  // Build first: a model without bones fails at "Finding joints" (E2).
+  let structure: ReturnType<typeof structureFromReading> | null = null;
+  let failure: unknown = null;
+  try {
+    structure = input.source === "pure-desk" ? PURE_DESK_STRUCTURE : structureFromReading(input.reading, input.file);
+  } catch (err) {
+    failure = err;
+  }
+  for (let step = job.step; step < steps.length; step++) {
+    const progress = Math.round((step / steps.length) * 100);
+    await report({ progress, step, stepLabel: steps[step] });
+    await repo.projects.update(projectId, { progress });
+    if (step === 1 && failure) throw failure;
+    await wait(ms, signal);
+  }
+  await repo.projects.setStructure(projectId, structure!, { replace: true });
+  await repo.projects.update(projectId, { status: "draft", progress: 100 });
+  return { joints: structure!.joints.length, type: structure!.type };
+};
+
 export const RUNNERS: Partial<Record<JobKind, Runner>> = {
   "dev-echo": devEcho,
+  "analyze-model": analyzeModel,
   "signature-extract": signatureExtract,
 };
