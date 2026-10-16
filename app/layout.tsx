@@ -4,7 +4,7 @@ import { MobileNotice } from "@/components/ui/mobile-notice";
 import { ToastProvider } from "@/components/ui/toast";
 import "./globals.css";
 
-// Figma F / Typography: Google Sans Flex only (OFL, app/fonts/OFL.txt). Variable: wght 1–1000, wdth, opsz, ROND, slnt.
+// Figma F / Typography: Google Sans Flex only (OFL, app/fonts/OFL-GoogleSansFlex.txt). Variable: wght 1–1000, wdth, opsz, ROND, slnt.
 const googleSansFlex = localFont({
   src: "./fonts/GoogleSansFlex.ttf",
   weight: "1 1000",

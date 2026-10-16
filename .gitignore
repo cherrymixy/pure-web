@@ -24,3 +24,6 @@ next-env.d.ts
 npm-debug.log*
 .omc/
 .vercel
+
+# STEP 22 comparison images (local review only)
+docs/review/step22/*.png

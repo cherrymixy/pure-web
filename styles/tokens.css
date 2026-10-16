@@ -105,13 +105,18 @@
   --space-32: 32px;
   --space-40: 40px;
   --space-48: 48px;
+  /* Bound in the W00-1 landing prototype (get_design_context fallbacks), 2026-10-17 */
+  --space-28: 28px;
+  --space-36: 36px;
 
   /* Radius (F / Spacing & Radius 458:4922) */
+  --radius-2xs: 4px; /* W00-1 landing (get_design_context fallback) */
   --radius-xs: 8px;
   --radius-sm: 12px;
   --radius-md: 16px;
   --radius-lg: 20px;
   --radius-xl: 28px;
+  --radius-2xl: 40px; /* W00-1 landing (get_design_context fallback) */
   --radius-full: 999px;
 
   /* Effect (F / Effect 458:4952) */
