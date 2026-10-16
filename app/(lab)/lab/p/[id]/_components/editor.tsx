@@ -5,12 +5,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SUGGESTED_PROMPTS } from "@/data/prompts";
 import { STRINGS, fmt } from "@/data/strings";
 import { applyToRobot, autoAdjust, paramsToProps, propsToParams, recipeToClip } from "@/lib/expression";
-import type { Channel, Expression, Job, MotionProps, Project, Reference, SavedExpression, Settings, Signature, Structure } from "@/lib/models";
+import type { Channel, Expression, FaceSpec, Job, MotionProps, Project, Reference, SavedExpression, Settings, Signature, SoundCue, SoundSpec, Structure } from "@/lib/models";
+import { cueAt } from "@/data/sound-cues";
 import { ReferenceError, extractFrames } from "@/lib/reference/frames";
 import { signatureToParams } from "@/lib/signature/axes";
 import { createSoundEngine } from "@/lib/sound";
 import { ApiError, api } from "@/lib/ui/api";
-import { describeChange, emptyHistory, pushChange, undoChange, type History } from "@/lib/ui/history";
+import { describeChange, describeFields, emptyHistory, pushChange, undoChange, type History } from "@/lib/ui/history";
 import { uploadFile } from "@/lib/ui/upload";
 import type { JointState, SimController } from "@/components/sim/sim-controller";
 import { Viewport, type ViewportEvent } from "@/components/sim/Viewport";
@@ -20,6 +21,7 @@ import { Menu } from "@/components/ui/menu";
 import { ConfirmModal, Modal, PromptModal } from "@/components/ui/modal";
 import { useToast } from "@/components/ui/toast";
 import { CHANNEL_LABEL } from "@/components/ui/channel-badges";
+import { FACE_FIELDS, FacePanel, SoundPanel } from "./channel-panels";
 import { ContextPanel, type EditorContext, type PendingReference } from "./context-panel";
 import { LibraryPanel } from "./library-panel";
 import { JointTable, MotionPanel, PROP_LABELS } from "./panels";
@@ -31,6 +33,32 @@ type GenResult = { expressionId: string; source: "ollama" | "demo"; fallbackReas
 
 const running = (j: Job | null) => j !== null && (j.status === "queued" || j.status === "running");
 const MAX_REFERENCES = 4;
+
+/** One undoable edit: Motion properties, face and sound together. */
+type Snapshot = { props: MotionProps; face: FaceSpec; sound: SoundSpec };
+const NEUTRAL_FACE: FaceSpec = { preset: "neutral", tokens: { eyeSize: 1, eyeOpen: 1, eyeAngle: 0, browAngle: 0, brightness: 1, blinkRate: 12 } };
+const CUE_FIELDS = {
+  t: { label: STRINGS.editor.sound.fields.t, digits: 2 },
+  pitchSt: { label: STRINGS.editor.sound.fields.pitchSt, digits: 1 },
+  tempo: { label: STRINGS.editor.sound.fields.tempo, digits: 2 },
+  lengthS: { label: STRINGS.editor.sound.fields.lengthS, digits: 2 },
+  volumeDb: { label: STRINGS.editor.sound.fields.volumeDb },
+  timbre: { label: STRINGS.editor.sound.fields.timbre },
+};
+
+/** "Speed 85 → 60", "Face sleepy → happy, Brow angle -12 → -6", "Sound cues 2 → 3"… */
+function describeSnapshot(a: Snapshot, b: Snapshot): string {
+  const parts = [describeChange(a.props, b.props, PROP_LABELS)].filter(Boolean);
+  parts.push(...describeFields({ preset: a.face.preset }, { preset: b.face.preset }, { preset: { label: STRINGS.editor.face.label } }));
+  if (a.face.preset === b.face.preset) parts.push(...describeFields(a.face.tokens, b.face.tokens, FACE_FIELDS));
+  if (a.sound.cues.length !== b.sound.cues.length) parts.push(`${STRINGS.editor.sound.label} cues ${a.sound.cues.length} → ${b.sound.cues.length}`);
+  else
+    for (const cb of b.sound.cues) {
+      const ca = a.sound.cues.find((c) => c.id === cb.id);
+      if (ca) parts.push(...describeFields(ca, cb, CUE_FIELDS).map((d) => `${STRINGS.editor.sound.label} ${d}`));
+    }
+  return parts.join(", ");
+}
 const isVideo = (f: File) => f.type.startsWith("video/") || /\.(mp4|mov|webm)$/i.test(f.name);
 
 /** Context is generation input: kept per project in this browser until the next Generate writes it into the expression. */
@@ -76,8 +104,12 @@ export function Editor({
   const [name, setName] = useState(project.name);
   const [expression, setExpression] = useState(initialExpression);
   const [props, setProps] = useState<MotionProps>(initialExpression?.motion.props ?? signatureProps);
-  const committed = useRef(props);
-  const [history, setHistory] = useState<History<MotionProps>>(emptyHistory);
+  const [face, setFace] = useState<FaceSpec>(initialExpression?.face ?? NEUTRAL_FACE);
+  const [soundSpec, setSoundSpec] = useState<SoundSpec>(initialExpression?.sound ?? { cues: [] });
+  const [selectedCue, setSelectedCue] = useState<string | null>(null);
+  const [quietHours, setQuietHours] = useState(settings.quietHours);
+  const committed = useRef<Snapshot>({ props, face, sound: soundSpec });
+  const [history, setHistory] = useState<History<Snapshot>>(emptyHistory);
   const [prompt, setPrompt] = useState("");
   const [job, setJob] = useState<Job | null>(null);
   const [lastResult, setLastResult] = useState<GenResult | null>(null);
@@ -120,7 +152,7 @@ export function Editor({
     }
   }, [project.id, context, contextLoaded]);
 
-  useEffect(() => sound.setQuietHours(settings.quietHours), [sound, settings.quietHours]);
+  useEffect(() => sound.setQuietHours(quietHours), [sound, quietHours]);
 
   const { params, warnings } = useMemo(() => propsToParams(props, axes), [props, axes]);
   const playable = useMemo(
@@ -142,24 +174,83 @@ export function Editor({
     [expression],
   );
 
-  /** Slider released: one change chip, one saved version. */
-  async function commitProps(next = props) {
+  /** Show a snapshot on the robot (props reach it through signatureParams). */
+  const applySnapshot = useCallback((snap: Snapshot) => {
+    setProps(snap.props);
+    setFace(snap.face);
+    setSoundSpec(snap.sound);
+    ctrl.current?.setFace(snap.face);
+    ctrl.current?.setSound(snap.sound);
+  }, []);
+
+  /** New baseline after generate / library apply: no undo across expressions. */
+  const resetTo = useCallback((e: Expression) => {
+    const snap = { props: e.motion.props, face: e.face, sound: e.sound };
+    setProps(snap.props);
+    setFace(snap.face);
+    setSoundSpec(snap.sound);
+    setSelectedCue(null);
+    committed.current = snap;
+    setHistory(emptyHistory());
+  }, []);
+
+  /** Release / pick: one change chip, one saved version. */
+  async function commit(override: Partial<Snapshot> = {}) {
     const before = committed.current;
-    const label = describeChange(before, next, PROP_LABELS);
+    const after: Snapshot = { props, face, sound: soundSpec, ...override };
+    const label = describeSnapshot(before, after);
     if (!label) return;
-    committed.current = next;
-    setHistory((h) => pushChange(h, label, before, next));
-    if (expression) await patchExpression({ motion: { ...expression.motion, props: next } }).catch(() => toast(STRINGS.lab.toast.failed));
+    committed.current = after;
+    setHistory((h) => pushChange(h, label, before, after));
+    if (after.sound !== before.sound) ctrl.current?.setSound(after.sound);
+    if (expression) {
+      // A hand-edited face owns the face channel: per-step recipe faces would override it during playback.
+      const recipe = after.face !== before.face ? { ...expression.motion.recipe, steps: expression.motion.recipe.steps.map(({ face: _f, ...st }) => st) } : expression.motion.recipe;
+      await patchExpression({ motion: { ...expression.motion, recipe, props: after.props }, face: after.face, sound: after.sound }).catch(() => toast(STRINGS.lab.toast.failed));
+      if (recipe !== expression.motion.recipe) setCue((c) => c + 1);
+    }
   }
 
   const undo = useCallback(async () => {
     const u = undoChange(history);
     if (!u) return;
     setHistory(u.history);
-    setProps(u.restore);
+    applySnapshot(u.restore);
     committed.current = u.restore;
-    if (expression) await patchExpression({ motion: { ...expression.motion, props: u.restore } }).catch(() => {});
-  }, [history, expression, patchExpression]);
+    if (expression) {
+      await patchExpression({ motion: { ...expression.motion, props: u.restore.props }, face: u.restore.face, sound: u.restore.sound }).catch(() => {});
+    }
+  }, [history, expression, patchExpression, applySnapshot]);
+
+  // ------------------------------------------------------------ face & sound edits
+
+  function changeFace(next: FaceSpec) {
+    setFace(next);
+    ctrl.current?.setFace(next);
+  }
+
+  function addCue(presetId: string) {
+    const pitch = signatureToParams(axes).sound.pitchSt;
+    const base = cueAt(presetId, Math.round(time.t * 100) / 100, `${presetId}-${Date.now().toString(36)}`);
+    const cue: SoundCue = { ...base, pitchSt: Math.round((base.pitchSt + pitch) * 10) / 10 };
+    const next = { cues: [...soundSpec.cues, cue].sort((a, b) => a.t - b.t) };
+    setSoundSpec(next);
+    setSelectedCue(cue.id);
+    ctrl.current?.previewCue(cue);
+    void commit({ sound: next });
+  }
+
+  function removeCue(id: string) {
+    const next = { cues: soundSpec.cues.filter((c) => c.id !== id) };
+    setSoundSpec(next);
+    if (selectedCue === id) setSelectedCue(null);
+    void commit({ sound: next });
+  }
+
+  async function toggleQuietHours(on: boolean) {
+    setQuietHours(on);
+    await api("/api/settings", { method: "PATCH", body: JSON.stringify({ quietHours: on }) }).catch(() => toast(STRINGS.lab.toast.failed));
+  }
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -183,9 +274,7 @@ export function Editor({
         const e = await api<Expression>(`/api/expressions/${result.expressionId}`);
         setLastResult(result);
         setExpression(e);
-        setProps(e.motion.props);
-        committed.current = e.motion.props;
-        setHistory(emptyHistory());
+        resetTo(e);
         setAutoPlay(true);
         setCue((c) => c + 1);
         if (result.source === "demo" && !settings.demoMode) setFailure(result.fallbackReason ?? "");
@@ -195,7 +284,7 @@ export function Editor({
         toast(E.stopped);
       }
     },
-    [settings.demoMode, toast],
+    [settings.demoMode, toast, resetTo],
   );
 
   // Resume a generation that was running when the page was left (rule 12).
@@ -296,9 +385,7 @@ export function Editor({
     try {
       const created = await api<Expression>(`/api/projects/${project.id}/expressions`, { method: "POST", body: JSON.stringify(input) });
       setExpression(created);
-      setProps(created.motion.props);
-      committed.current = created.motion.props;
-      setHistory(emptyHistory());
+      resetTo(created);
       setLastResult(null);
       setAutoPlay(true);
       setCue((c) => c + 1);
@@ -546,34 +633,23 @@ export function Editor({
             props={props}
             warnings={warnings}
             onChange={(key, value) => setProps((p) => ({ ...p, [key]: value }))}
-            onCommit={() => void commitProps()}
+            onCommit={() => void commit()}
           />
         )}
-        {tab === "face" && (
-          <div className="flex flex-col gap-1 text-sm">
-            {expression ? (
-              <>
-                <span>{fmt(E.readOnlyFace, { preset: expression.face.preset })}</span>
-                {Object.entries(expression.face.tokens).map(([k, v]) => (
-                  <span key={k} className="font-mono text-xs text-neutral-600">{k} {Number(v).toFixed(2)}</span>
-                ))}
-              </>
-            ) : "—"}
-            <p className="text-xs text-neutral-400">{E.timelineSoon}</p>
-          </div>
-        )}
+        {tab === "face" && <FacePanel face={face} onChange={changeFace} onCommit={(next) => void commit(next ? { face: next } : {})} />}
         {tab === "sound" && (
-          <div className="flex flex-col gap-1 text-sm">
-            {expression?.sound.cues.length
-              ? expression.sound.cues.map((c) => (
-                  <button key={c.id} className="flex justify-between rounded px-2 py-1 text-left hover:bg-neutral-100" onClick={() => ctrl.current?.previewCue(c)}>
-                    <span>▶ {c.id}</span>
-                    <span className="font-mono text-xs">{c.t.toFixed(2)}s</span>
-                  </button>
-                ))
-              : <span className="text-neutral-500">{E.noCues}</span>}
-            <p className="text-xs text-neutral-400">{E.timelineSoon}</p>
-          </div>
+          <SoundPanel
+            sound={soundSpec}
+            selected={selectedCue}
+            quietHours={quietHours}
+            onSelect={setSelectedCue}
+            onPreview={(c) => ctrl.current?.previewCue(c)}
+            onChange={setSoundSpec}
+            onCommit={(next) => void commit(next ? { sound: next } : {})}
+            onAdd={addCue}
+            onRemove={removeCue}
+            onQuietHours={(on) => void toggleQuietHours(on)}
+          />
         )}
 
         <div className="flex flex-col gap-2 border-t border-neutral-200 pt-4">

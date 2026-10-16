@@ -36,3 +36,25 @@ export function describeChange<T extends Record<string, number>>(before: T, afte
     .map((k) => `${labels[k] ?? String(k)} ${Math.round(before[k])} → ${Math.round(after[k])}`)
     .join(", ");
 }
+
+const num = (v: number, digits: number) => (Number.isInteger(v) && digits === 0 ? String(v) : v.toFixed(digits));
+
+/** "Brow angle −12 → −6" style labels with per-field precision. */
+export function describeFields<T extends Record<string, unknown>>(
+  before: T,
+  after: T,
+  fields: Partial<Record<keyof T, { label: string; digits?: number }>>,
+): string[] {
+  const out: string[] = [];
+  for (const k of Object.keys(fields) as (keyof T)[]) {
+    const a = before[k];
+    const b = after[k];
+    if (a === b) continue;
+    const f = fields[k]!;
+    if (typeof a === "number" && typeof b === "number") {
+      const d = f.digits ?? 0;
+      if (num(a, d) !== num(b, d)) out.push(`${f.label} ${num(a, d)} → ${num(b, d)}`);
+    } else out.push(`${f.label} ${String(a ?? "—")} → ${String(b ?? "—")}`);
+  }
+  return out;
+}
