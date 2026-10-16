@@ -25,8 +25,20 @@ export const STRINGS = {
     toast: { renamed: "Renamed to \"{name}\"", duplicated: "Duplicated \"{name}\"", deleted: "Deleted \"{name}\"", failed: "Something went wrong. Try again." },
   },
   newType: {
-    title: "Select robot type",
-    body: "Pick the class that matches your robot. Joint Fixed runs on PURE Desk in this demo.",
+    title: "Select type to simulate",
+    body: "The type sets joints, limits and which channels PURE can use. Pick the closest one.",
+    note: "Not sure? Pick the closest type. You can adjust joints after upload.",
+    jointsLabel: "Joints",
+    channelsLabel: "Channels",
+    /** Card order and card copy (Figma W02B-1 901:8370). Keys are data/robot-types.ts ids. */
+    order: ["jointless-driving", "joint-driving", "joint-fixed", "joint-walking", "full-body"],
+    cards: {
+      "jointless-driving": { summary: "Wheeled bodies, no joints", joints: "0 joints · wheels" },
+      "joint-driving": { summary: "Wheeled bodies with joints", joints: "2–6 joints + wheels" },
+      "joint-fixed": { summary: "Desk, service and industrial arms", joints: "5–9 DoF" },
+      "joint-walking": { summary: "Two-legged walkers", joints: "10–14 DoF" },
+      "full-body": { summary: "Two arms, two legs, a face", joints: "23–43 DoF" },
+    },
     continue: "Continue with Joint Fixed",
     onlyFixed: "Only Joint Fixed is available in this demo.",
     untitled: "Untitled robot",

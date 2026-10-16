@@ -37,6 +37,12 @@ export const ICONS = {
     "height": 6,
     "body": "<path d=\"M4.18606 4.62469L2.6443 3.74368L1.10254 4.62469V1.10066C1.10254 0.983831 1.14895 0.871787 1.23156 0.789177C1.31417 0.706566 1.42621 0.660156 1.54304 0.660156H3.74556C3.86239 0.660156 3.97443 0.706566 4.05704 0.789177C4.13965 0.871787 4.18606 0.983831 4.18606 1.10066V4.62469Z\" stroke=\"currentColor\" stroke-width=\"0.440503\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>"
   },
+  "check-badge": {
+    "viewBox": "0 0 10.2024 10.2024",
+    "width": 10.2024,
+    "height": 10.2024,
+    "body": "<path d=\"M8.50276 2.55078L3.82667 7.22687L1.70117 5.10138\" stroke=\"currentColor\" stroke-width=\"1.2753\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>"
+  },
   "check-small": {
     "viewBox": "0 0 10 10",
     "width": 10,
