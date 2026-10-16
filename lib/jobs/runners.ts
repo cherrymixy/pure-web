@@ -1,8 +1,6 @@
-import { STRINGS } from "@/data/strings";
-import { PURE_DESK_STRUCTURE } from "@/data/pure-desk";
 import { getExtraction, getGeneration, recordCall } from "../llm";
 import { runGeneration, type GenerateInput } from "./generate";
-import { ANALYZE_STEP_MS, structureFromReading, type ModelReading } from "../robot/analyze";
+import { runAnalysis, type AnalyzeInput } from "../robot/run-analysis";
 import type { JobKind } from "../models";
 import { SignatureError } from "../signature/errors";
 import type { Extracted, SourceInput } from "../signature/extract";
@@ -60,38 +58,9 @@ const signatureExtract: Runner = async ({ repo, job, signal, report }) => {
   }
 };
 
-export type AnalyzeInput =
-  | { source: "pure-desk" }
-  | { source: "import"; file: { name: string; size: number; path: string }; reading: ModelReading };
-
-/**
- * W02B-3: Reading the mesh → Finding joints → Checking joint limits → Detecting channels.
- * The bones were read in the browser (three.js); the job stages, validates and saves.
- */
-const analyzeModel: Runner = async ({ repo, job, signal, report }) => {
-  const input = job.input as AnalyzeInput;
-  const projectId = job.projectId!;
-  const steps = STRINGS.analyzing.steps;
-  const ms = ANALYZE_STEP_MS[input.source];
-  // Build first: a model without bones fails at "Finding joints" (E2).
-  let structure: ReturnType<typeof structureFromReading> | null = null;
-  let failure: unknown = null;
-  try {
-    structure = input.source === "pure-desk" ? PURE_DESK_STRUCTURE : structureFromReading(input.reading, input.file);
-  } catch (err) {
-    failure = err;
-  }
-  for (let step = job.step; step < steps.length; step++) {
-    const progress = Math.round((step / steps.length) * 100);
-    await report({ progress, step, stepLabel: steps[step] });
-    await repo.projects.update(projectId, { progress });
-    if (step === 1 && failure) throw failure;
-    await wait(ms, signal);
-  }
-  await repo.projects.setStructure(projectId, structure!, { replace: true });
-  await repo.projects.update(projectId, { status: "draft", progress: 100 });
-  return { joints: structure!.joints.length, type: structure!.type };
-};
+/** W02B-3 analysis (lib/robot/run-analysis.ts), resumable from the job's step. */
+const analyzeModel: Runner = async ({ repo, job, signal, report }) =>
+  runAnalysis({ repo, projectId: job.projectId!, input: job.input as AnalyzeInput, fromStep: job.step, signal, report });
 
 /** W02D: prompt → expression (Ollama, demo fallback). Re-running a resumed job just generates again. */
 const generate: Runner = async ({ repo, job, signal, report }) => {
