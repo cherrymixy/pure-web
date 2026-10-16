@@ -20,10 +20,9 @@ import { fileUrl, uploadFile } from "@/lib/ui/upload";
 import type { JointState, SimController } from "@/components/sim/sim-controller";
 import { Viewport, type ViewportEvent } from "@/components/sim/Viewport";
 import type { LimitEvent } from "@/components/sim/limits";
-import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icons/icon";
 import { Menu } from "@/components/ui/menu";
-import { ConfirmModal, Modal, PromptModal } from "@/components/ui/modal";
+import { ConfirmModal, Modal, ModalActions, ModalButton, PromptModal } from "@/components/ui/modal";
 import { useToast } from "@/components/ui/toast";
 import { CHANNEL_LABEL } from "@/components/ui/channel-badges";
 import { FACE_FIELDS, FacePanel, SoundPanel } from "./channel-panels";
@@ -1025,33 +1024,32 @@ export function Editor({
         </div>
       )}
 
-      <Modal open={failure !== null} onClose={() => setFailure(null)} title={E.failed.title}>
-        <p className="text-sm text-neutral-600">{E.failed.body}</p>
-        {failure && <p className="font-mono text-xs text-neutral-400">{fmt(E.failedReason, { reason: failure })}</p>}
-        <div className="flex justify-end gap-2">
-          <Button onClick={() => router.push("/lab/user-data")}>{E.failedActions.browse}</Button>
-          <Button variant="primary" onClick={() => { setFailure(null); void generate(); }}>{E.failedActions.retry}</Button>
-        </div>
+      <Modal open={failure !== null} onClose={() => setFailure(null)} title={E.failed.title} description={E.failed.body}>
+        {failure && <p className="font-mono text-[14px] leading-[18px] text-[var(--text-tertiary)]">{fmt(E.failedReason, { reason: failure })}</p>}
+        <ModalActions>
+          <ModalButton onClick={() => router.push("/lab/user-data")}>{E.failedActions.browse}</ModalButton>
+          <ModalButton variant="primary" onClick={() => { setFailure(null); void generate(); }}>{E.failedActions.retry}</ModalButton>
+        </ModalActions>
       </Modal>
 
       <Modal open={limit !== null} onClose={() => setLimit(null)} title={E.limit.title}>
         {limit && (
           <>
-            <p className="text-sm text-neutral-600">
+            <p className="text-[16px] leading-[20px] text-[var(--text-secondary)]">
               {fmt(E.limitBody, { joint: structure.joints.find((j) => j.id === limit.joint)?.label ?? limit.joint, value: limit.value.toFixed(1), limit: limit.limit.toFixed(1), t: limit.t.toFixed(2) })}
             </p>
-            <table className="text-sm">
-              <thead className="text-left text-xs text-neutral-500">
+            <table className="text-[16px] leading-[20px]">
+              <thead className="text-left text-[14px] leading-[18px] text-[var(--text-secondary)]">
                 <tr><th className="font-normal">{E.limitColumns.joint}</th><th className="font-normal">{E.limitColumns.value}</th><th className="font-normal">{E.limitColumns.limit}</th></tr>
               </thead>
               <tbody className="font-mono">
-                <tr className="text-red-600"><td>{limit.joint}</td><td>{limit.value.toFixed(1)}°</td><td>{limit.limit.toFixed(1)}°</td></tr>
+                <tr className="text-[var(--text-error)]"><td>{limit.joint}</td><td>{limit.value.toFixed(1)}°</td><td>{limit.limit.toFixed(1)}°</td></tr>
               </tbody>
             </table>
-            <div className="flex justify-end gap-2">
-              <Button onClick={() => { setLimit(null); setTimelineOpen(true); setSelectedTrack(limit.joint); seekTo(limit.t); }}>{E.limit.editTimeline}</Button>
-              <Button variant="primary" onClick={() => void autoAdjustLimits()}>{E.limit.autoAdjust}</Button>
-            </div>
+            <ModalActions>
+              <ModalButton onClick={() => { setLimit(null); setTimelineOpen(true); setSelectedTrack(limit.joint); seekTo(limit.t); }}>{E.limit.editTimeline}</ModalButton>
+              <ModalButton variant="primary" onClick={() => void autoAdjustLimits()}>{E.limit.autoAdjust}</ModalButton>
+            </ModalActions>
           </>
         )}
       </Modal>
@@ -1060,6 +1058,7 @@ export function Editor({
         open={testOpen}
         projectType={project.type}
         t={time.t}
+        duration={time.duration}
         playing={!paused}
         limitHit={limit !== null}
         onPlay={() => { ctrl.current?.seek(0); ctrl.current?.play(); setPaused(false); }}

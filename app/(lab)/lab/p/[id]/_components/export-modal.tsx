@@ -7,9 +7,9 @@ import { buildPureJson, compatibility, type CompatIssue } from "@/lib/expression
 import type { Channel, Clip, Expression, Profile, Project, RobotDevice, SavedExpression } from "@/lib/models";
 import { api } from "@/lib/ui/api";
 import { downloadText, slug } from "@/lib/ui/download";
-import { Button } from "@/components/ui/button";
 import { CHANNEL_LABEL } from "@/components/ui/channel-badges";
-import { Modal } from "@/components/ui/modal";
+import { Icon } from "@/components/ui/icons/icon";
+import { Modal, ModalActions, ModalButton } from "@/components/ui/modal";
 import { useToast } from "@/components/ui/toast";
 
 const X = STRINGS.export;
@@ -17,7 +17,7 @@ const SH = STRINGS.share;
 type Destination = "robot" | "file" | "share";
 const DAYS = [1, 7, 30] as const;
 
-type Done = { destination: Destination; robot: string; bytes: number; url?: string; text: string; filename: string };
+type Done = { destination: Destination; robot: string; bytes: number; url?: string; text: string; filename: string; library: boolean };
 
 /** W02F-3~4 Export: destination, options, real compatibility check, exported summary, share link. */
 export function ExportModal({
@@ -89,7 +89,7 @@ export function ExportModal({
         url = `${location.origin}${share.url}`;
       }
       if (saved && toLibrary) toast(fmt(X.savedToLibrary, { name: saved.name }));
-      setDone({ destination, robot: robot?.name ?? "", bytes: pure.bytes, url, text: pure.text, filename });
+      setDone({ destination, robot: robot?.name ?? "", bytes: pure.bytes, url, text: pure.text, filename, library: Boolean(saved && toLibrary) || destination === "share" });
     } catch (err) {
       toast(err instanceof Error ? err.message : STRINGS.lab.toast.failed);
     } finally {
@@ -99,86 +99,150 @@ export function ExportModal({
 
   const channels: Channel[] = ["motion", ...(expression.face.preset ? (["face"] as const) : []), ...(expression.sound.cues.length ? (["sound"] as const) : [])];
   const actionLabel = destination === "robot" ? fmt(X.actions.robot, { robot: robot?.name ?? "" }) : X.actions[destination];
+  const sig = expression.signatureSnapshot;
+  const toRobot = done?.destination === "robot";
 
   return (
-    <Modal open={open} onClose={onClose} title={done ? X.exported : X.title}>
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={done ? (toRobot ? fmt(X.exportedRobot, { robot: done.robot }) : X.exported) : X.title}
+      description={done ? (toRobot ? X.exportedRobotBody : undefined) : X.subtitle}
+    >
       {done ? (
-        <div className="flex flex-col gap-3 text-sm" data-testid="exported">
-          {done.destination === "robot" && <p className="text-green-700">✓ {fmt(X.exportedRobot, { robot: done.robot })}</p>}
-          <p>{fmt(X.summary, { name: expression.name, channels: channels.map((c) => CHANNEL_LABEL[c]).join(" · "), kb: (done.bytes / 1024).toFixed(1) })}</p>
-          {done.url && (
-            <div className="flex gap-2">
-              <input readOnly value={done.url} className="flex-1 rounded border border-neutral-300 px-2 py-1 font-mono text-xs" onFocus={(e) => e.target.select()} />
-              <Button onClick={() => navigator.clipboard.writeText(done.url!).then(() => toast(X.copied), () => {})}>{X.copyLink}</Button>
-            </div>
-          )}
-          <div className="flex justify-end gap-2">
-            <Button onClick={() => downloadText(done.filename, done.text)}>{X.download}</Button>
-            <Button variant="primary" onClick={() => (location.href = "/lab")}>{X.backToLab}</Button>
+        <div className="flex flex-col gap-[var(--space-40)]" data-testid="exported">
+          <div className="flex flex-col gap-[var(--space-12)]">
+            <Row label={X.rows.expression} value={expression.name} />
+            <Row label={X.rows.signature} value={fmt(X.signatureValue, { name: sig.name, v: sig.version })} />
+            <Row label={X.rows.channels} value={channels.map((c) => CHANNEL_LABEL[c]).join(" · ")} />
+            <Row label={X.rows.specFile} value={fmt(X.specFileValue, { kb: (done.bytes / 1024).toFixed(1) })} />
+            {done.library && <Row label={X.rows.savedTo} value={X.library} />}
           </div>
+          {done.url && (
+            <input readOnly value={done.url} className={`${FIELD} w-full font-mono`} onFocus={(e) => e.target.select()} aria-label={X.copyLink} />
+          )}
+          <ModalActions>
+            <ModalButton onClick={() => (location.href = "/lab")}>{X.backToLab}</ModalButton>
+            {done.url && <ModalButton onClick={() => navigator.clipboard.writeText(done.url!).then(() => toast(X.copied), () => {})}>{X.copyLink}</ModalButton>}
+            <ModalButton variant="primary" onClick={() => downloadText(done.filename, done.text)}>{X.download}</ModalButton>
+          </ModalActions>
         </div>
       ) : (
-        <div className="flex flex-col gap-4 text-sm">
-          <fieldset className="flex flex-col gap-1.5">
-            <legend className="mb-1 text-xs text-neutral-500">{X.destination}</legend>
-            {(["robot", "file", "share"] as const).map((d) => (
-              <label key={d} className={`flex items-center gap-2 rounded border p-2 ${destination === d ? "border-neutral-900" : "border-neutral-200"}`}>
-                <input type="radio" name="destination" checked={destination === d} onChange={() => setDestination(d)} />
-                <span className="font-semibold">{X.destinations[d]}</span>
-                <span className="text-xs text-neutral-500">{X.destinationNotes[d]}</span>
-              </label>
-            ))}
-          </fieldset>
+        <>
+          <section className="flex flex-col gap-[var(--space-16)]">
+            <h3 className={SECTION}>{X.destination}</h3>
+            <div className="flex gap-[var(--space-12)]" role="radiogroup" aria-label={X.destination}>
+              {(["robot", "file", "share"] as const).map((d) => (
+                <button
+                  key={d}
+                  type="button"
+                  role="radio"
+                  aria-checked={destination === d}
+                  onClick={() => setDestination(d)}
+                  className={`flex min-w-0 flex-1 flex-col items-start gap-[var(--space-4)] rounded-[var(--radius-md)] border-[1.5px] p-[var(--space-16)] text-left ${destination === d ? "border-[var(--border-strong)] bg-[var(--bg-canvas)]" : "border-[var(--border-default)] bg-[var(--bg-surface)] hover:bg-[var(--bg-canvas)]"}`}
+                >
+                  <span className="text-[16px] font-medium leading-[20px] text-[var(--text-primary)]">{X.destinations[d]}</span>
+                  <span className="max-w-full truncate text-[14px] leading-[18px] text-[var(--text-secondary)]">{fmt(X.destinationNotes[d], { robot: robot?.name ?? "" })}</span>
+                </button>
+              ))}
+            </div>
+          </section>
 
-          <div className="flex flex-col gap-1.5">
-            <label className="flex items-center justify-between gap-2">
+          <section className="flex flex-col gap-[var(--space-16)]">
+            <h3 className={SECTION}>{X.optionsTitle}</h3>
+            <label className="flex items-center justify-between gap-[var(--space-12)] text-[16px] leading-[20px] text-[var(--text-link)]">
               <span>{X.options.target}</span>
-              <select value={target} onChange={(e) => setTarget(e.target.value)} className="rounded border border-neutral-300 px-2 py-1">
+              <select value={target} onChange={(e) => setTarget(e.target.value)} className={FIELD}>
                 {robots.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
               </select>
             </label>
-            <label className="flex items-center gap-2"><input type="checkbox" checked={includeFallback} onChange={(e) => setIncludeFallback(e.target.checked)} />{X.options.fallback}</label>
-            <label className="flex items-center gap-2"><input type="checkbox" checked={loop} onChange={(e) => setLoop(e.target.checked)} />{X.options.loop}</label>
-            <label className="flex items-center gap-2"><input type="checkbox" checked={toLibrary || destination === "share"} disabled={destination === "share"} onChange={(e) => setToLibrary(e.target.checked)} />{X.options.library}</label>
-          </div>
+            <Check checked={includeFallback} onChange={setIncludeFallback} label={X.options.fallback} />
+            <Check checked={loop} onChange={setLoop} label={X.options.loop} />
+            <Check checked={toLibrary || destination === "share"} disabled={destination === "share"} onChange={setToLibrary} label={X.options.library} />
+            {destination === "share" && (
+              <>
+                <label className="flex items-center justify-between gap-[var(--space-12)] text-[16px] leading-[20px] text-[var(--text-link)]">
+                  <span>{SH.expiresIn}</span>
+                  <select value={days} onChange={(e) => setDays(Number(e.target.value) as (typeof DAYS)[number])} className={FIELD}>
+                    {DAYS.map((d) => <option key={d} value={d}>{SH.days[d]}</option>)}
+                  </select>
+                </label>
+                <Check checked={protect} onChange={setProtect} label={SH.passwordProtect} />
+                {protect && <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder={SH.password} maxLength={64} className={FIELD} />}
+                <Check checked={allowDownload} onChange={setAllowDownload} label={SH.allowDownload} />
+              </>
+            )}
+          </section>
 
-          {destination === "share" && (
-            <div className="flex flex-col gap-1.5 rounded bg-neutral-50 p-2">
-              <label className="flex items-center justify-between gap-2">
-                <span>{SH.expiresIn}</span>
-                <select value={days} onChange={(e) => setDays(Number(e.target.value) as (typeof DAYS)[number])} className="rounded border border-neutral-300 px-2 py-1">
-                  {DAYS.map((d) => <option key={d} value={d}>{SH.days[d]}</option>)}
-                </select>
-              </label>
-              <label className="flex items-center gap-2"><input type="checkbox" checked={protect} onChange={(e) => setProtect(e.target.checked)} />{SH.passwordProtect}</label>
-              {protect && <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder={SH.password} maxLength={64} className="rounded border border-neutral-300 px-2 py-1" />}
-              <label className="flex items-center gap-2"><input type="checkbox" checked={allowDownload} onChange={(e) => setAllowDownload(e.target.checked)} />{SH.allowDownload}</label>
-            </div>
-          )}
-
-          <div className={`flex flex-col gap-1.5 rounded border p-2 ${open_.length ? "border-amber-300" : "border-green-300"}`} data-testid="compat">
-            <b className={open_.length ? "text-amber-700" : "text-green-700"}>
-              {open_.length === 0 ? `✓ ${X.ready}` : fmt(open_.length === 1 ? X.issues : X.issuesN, { n: open_.length })}
-            </b>
-            {open_.map((i, n) => (
-              <div key={n} className="flex items-center gap-2 text-xs">
-                <span className="flex-1">{i.message}</span>
-                {i.fix === "editor" ? (
-                  <Button onClick={() => onFix(i)}>{X.fix}</Button>
-                ) : (
-                  <Button onClick={() => setIncludeFallback(true)}>{X.fallback}</Button>
-                )}
+          <div
+            className={`flex flex-col gap-[var(--space-12)] rounded-[var(--radius-md)] border-[1.5px] bg-[var(--bg-surface)] px-[var(--space-20)] py-[var(--space-16)] ${open_.length ? "border-[var(--border-error)]" : "border-[var(--border-default)]"}`}
+            data-testid="compat"
+          >
+            {open_.length === 0 ? (
+              <div className="flex items-center gap-[var(--space-16)]">
+                <span className="flex min-w-0 flex-1 flex-col gap-[var(--space-4)]">
+                  <b className="text-[16px] font-medium leading-[20px] text-[var(--text-primary)]">{X.ready}</b>
+                  <span className="text-[14px] leading-[18px] text-[var(--text-secondary)]">{X.readyBody}</span>
+                </span>
+                <span className="text-[14px] font-medium leading-[18px] text-[var(--status-success)]" aria-hidden>✓</span>
               </div>
-            ))}
-            {blocked && <span className="text-xs text-neutral-500">{X.blockRobot}</span>}
+            ) : (
+              <>
+                <b className="text-[16px] font-medium leading-[20px] text-[var(--text-error)]">{fmt(open_.length === 1 ? X.issues : X.issuesN, { n: open_.length })}</b>
+                {open_.map((i, n) => (
+                  <div key={n} className="flex items-center gap-[var(--space-12)]">
+                    <span className="min-w-0 flex-1 text-[14px] leading-[18px] text-[var(--text-link)]">{i.message}</span>
+                    {i.fix === "editor" ? (
+                      <ModalButton onClick={() => onFix(i)}>{X.fix}</ModalButton>
+                    ) : (
+                      <ModalButton onClick={() => setIncludeFallback(true)}>{X.fallback}</ModalButton>
+                    )}
+                  </div>
+                ))}
+                {blocked && <span className="text-[14px] leading-[18px] text-[var(--text-secondary)]">{X.blockRobot}</span>}
+              </>
+            )}
           </div>
 
-          <div className="flex justify-end gap-2">
-            <Button onClick={onClose}>{STRINGS.common.cancel}</Button>
-            <Button variant="primary" disabled={busy || blocked || (destination === "share" && protect && !password)} onClick={() => void run()}>{actionLabel}</Button>
-          </div>
-        </div>
+          <ModalActions>
+            <ModalButton onClick={onClose}>{STRINGS.common.cancel}</ModalButton>
+            <ModalButton variant="primary" disabled={busy || blocked || (destination === "share" && protect && !password)} onClick={() => void run()}>{actionLabel}</ModalButton>
+          </ModalActions>
+        </>
       )}
     </Modal>
+  );
+}
+
+const SECTION = "text-[16px] font-medium leading-[20px] text-[var(--text-link)]";
+const FIELD =
+  "rounded-[var(--radius-full)] border-[1.5px] border-[var(--border-default)] bg-[var(--bg-surface)] px-[var(--space-16)] py-[var(--space-8)] text-[16px] leading-[20px] text-[var(--text-primary)] outline-none focus:border-[var(--border-strong)]";
+
+/** W02F-3 option row: 16px checkbox (radius 2xs, filled inverse when on) · gap 12 · Body 16 link. */
+function Check({ checked, onChange, label, disabled }: { checked: boolean; onChange: (v: boolean) => void; label: string; disabled?: boolean }) {
+  return (
+    <label className={`flex items-center gap-[var(--space-12)] text-[16px] leading-[20px] text-[var(--text-link)] ${disabled ? "opacity-60" : "cursor-pointer"}`}>
+      <span className="relative size-[16px] shrink-0">
+        <input
+          type="checkbox"
+          checked={checked}
+          disabled={disabled}
+          onChange={(e) => onChange(e.target.checked)}
+          className="peer absolute inset-0 m-0 appearance-none rounded-[var(--radius-2xs)] border-[1.5px] border-[var(--border-default)] bg-[var(--bg-surface)] checked:border-[var(--bg-inverse)] checked:bg-[var(--bg-inverse)]"
+        />
+        <Icon name="checkbox-tick" size={16} className="pointer-events-none absolute inset-0 hidden text-[var(--text-on-inverse)] peer-checked:block" />
+      </span>
+      {label}
+    </label>
+  );
+}
+
+/** Exported summary row: Body 16 secondary · Label 16 medium primary. */
+function Row({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-start justify-between gap-[var(--space-16)] text-[16px] leading-[20px]">
+      <span className="shrink-0 text-[var(--text-secondary)]">{label}</span>
+      <span className="truncate text-right font-medium text-[var(--text-primary)]">{value}</span>
+    </div>
   );
 }
