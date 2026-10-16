@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { collectRoutes } from "@/lib/dev/routes";
+import { contentSummary } from "@/lib/dev/content";
 import { DEMO_COOKIE, FLAGS } from "@/lib/env";
 import { OllamaStatus } from "./_components/ollama-status";
 import { DemoToggle } from "./_components/demo-toggle";
@@ -9,15 +10,26 @@ import { DemoToggle } from "./_components/demo-toggle";
 
 export const dynamic = "force-dynamic";
 
-export default async function DevPage() {
+export default async function DevPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
+  const { tab = "routes" } = await searchParams;
   const routes = collectRoutes();
   const done = routes.filter((r) => r.implemented).length;
   const demo = (await cookies()).get(DEMO_COOKIE)?.value === "1";
 
   return (
     <main className="mx-auto flex max-w-5xl flex-col gap-10 p-10">
-      <h1 className="text-2xl font-semibold">/dev</h1>
+      <div className="flex items-end gap-6">
+        <h1 className="text-2xl font-semibold">/dev</h1>
+        <nav className="flex gap-4 text-sm">
+          {["routes", "content"].map((t) => (
+            <Link key={t} href={`/dev?tab=${t}`} className={t === tab ? "font-semibold underline" : "text-neutral-500"}>
+              {t === "routes" ? "Routes" : "Content"}
+            </Link>
+          ))}
+        </nav>
+      </div>
 
+      {tab === "content" ? <ContentTab /> : <>
       <section className="flex flex-col gap-3">
         <h2 className="font-semibold">
           Routes <span className="text-neutral-500">{done}/{routes.length} implemented</span>
@@ -68,6 +80,34 @@ export default async function DevPage() {
         <h2 className="font-semibold">Flags</h2>
         <pre className="rounded bg-neutral-50 p-3 text-sm">{JSON.stringify(FLAGS, null, 2)}</pre>
       </section>
+      </>}
     </main>
+  );
+}
+
+function ContentTab() {
+  const rows = contentSummary();
+  const placeholders = rows.reduce((n, r) => n + (r.placeholders ?? 0), 0);
+  return (
+    <section className="flex flex-col gap-3">
+      <h2 className="font-semibold">
+        Content <span className="text-neutral-500">{placeholders} placeholder entries</span>
+      </h2>
+      <table className="w-full text-sm">
+        <thead className="text-left text-neutral-500">
+          <tr><th className="py-1">Item</th><th>Count</th><th>Placeholders</th><th>File</th></tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.item} className="border-t border-neutral-100">
+              <td className="py-1.5">{r.item}</td>
+              <td className="font-mono">{r.count}</td>
+              <td className={`font-mono ${r.placeholders ? "text-amber-600" : "text-neutral-400"}`}>{r.placeholders ?? "—"}</td>
+              <td className="font-mono text-xs text-neutral-400">{r.file}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
   );
 }

@@ -1,86 +1,272 @@
-// Data model (PRD §7). Pure TS — no React, no I/O.
-// STEP 3 defines the subset the simulator contract needs; STEP 4 adds the rest + zod schemas.
+// Data model (PRD §7). Types are inferred from the zod schemas so validation and
+// typing never drift. Pure: no React, no I/O.
 
-import type { EasingName } from "./sim/motion";
+import { z } from "zod";
 
-export type RobotType = "full-body" | "joint-walking" | "joint-driving" | "jointless-driving" | "joint-fixed";
-export type Channel = "motion" | "face" | "sound";
+// ------------------------------------------------------------------ primitives
+
+export const ROBOT_TYPES = ["full-body", "joint-walking", "joint-driving", "jointless-driving", "joint-fixed"] as const;
+export const RobotTypeSchema = z.enum(ROBOT_TYPES);
+export type RobotType = z.infer<typeof RobotTypeSchema>;
+
+export const CHANNELS = ["motion", "face", "sound"] as const;
+export const ChannelSchema = z.enum(CHANNELS);
+export type Channel = z.infer<typeof ChannelSchema>;
+
+/** Same names as lib/sim/motion.ts EasingName (kept literal here so models stay standalone). */
+export const EASINGS = [
+  "linear",
+  "ease_in_out",
+  "ease_in",
+  "ease_out",
+  "ease_out_back",
+  "ease_out_elastic",
+  "ease_out_bounce",
+] as const;
+export const EasingSchema = z.enum(EASINGS);
 
 /** Robot joint id, e.g. `shoulder_pitch` (PURE Desk `jointKeys`). */
 export type JointId = string;
 
-export interface Joint {
-  id: JointId;
-  label: string;
-  /** Structure range (Edit limits can only narrow the rig range) */
-  min: number;
-  max: number;
-  rigMin: number;
-  rigMax: number;
-}
+const IsoDate = z.string().datetime();
 
-export interface Structure {
-  type: RobotType;
-  joints: Joint[];
-  channels: Channel[];
-  source: "pure-desk" | "import";
-  file?: { name: string; size: number; path: string };
-}
+// ------------------------------------------------------------------ structure
 
-export interface RecipeStep {
-  behavior: string;
-  speed: number;
-  amplitude: number;
-  repeat: number;
+export const JointSchema = z
+  .object({
+    id: z.string().min(1),
+    label: z.string(),
+    /** Structure range (Edit limits can only narrow the rig range) */
+    min: z.number(),
+    max: z.number(),
+    rigMin: z.number(),
+    rigMax: z.number(),
+  })
+  .refine((j) => j.rigMin <= j.min && j.min < j.max && j.max <= j.rigMax, {
+    message: "Joint range must sit inside the rig range (rigMin ≤ min < max ≤ rigMax)",
+  });
+export type Joint = z.infer<typeof JointSchema>;
+
+export const StructureSchema = z.object({
+  type: RobotTypeSchema,
+  joints: z.array(JointSchema),
+  channels: z.array(ChannelSchema),
+  source: z.enum(["pure-desk", "import"]),
+  file: z.object({ name: z.string(), size: z.number(), path: z.string() }).optional(),
+});
+export type Structure = z.infer<typeof StructureSchema>;
+
+// ------------------------------------------------------------------ signature
+
+export const AXES = ["tempo", "amp", "settle", "antic", "rhythm", "eyes", "pitch", "density"] as const;
+export const AxisSchema = z.enum(AXES);
+export type Axis = z.infer<typeof AxisSchema>;
+const AxisValue = z.number().min(0).max(100);
+
+export const SourceSchema = z.object({
+  kind: z.enum(["pdf", "url", "figma", "default"]),
+  name: z.string(),
+  path: z.string().optional(),
+  url: z.string().optional(),
+});
+export type Source = z.infer<typeof SourceSchema>;
+
+export const SignatureSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  version: z.number().int().min(1),
+  axes: z.record(AxisSchema, AxisValue),
+  tone: z.array(z.string()),
+  mapping: z.array(z.object({ axis: AxisSchema, value: AxisValue, reason: z.string(), page: z.number().int().optional() })),
+  sources: z.array(SourceSchema),
+  note: z.string(),
+  createdAt: IsoDate,
+});
+export type Signature = z.infer<typeof SignatureSchema>;
+
+// ------------------------------------------------------------------ project
+
+export const ProjectSchema = z.object({
+  id: z.string(),
+  name: z.string().min(1),
+  type: RobotTypeSchema,
+  status: z.enum(["analyzing", "draft", "ready"]),
+  progress: z.number().min(0).max(100).optional(),
+  structure: StructureSchema.optional(),
+  signatureId: z.string().optional(),
+  signatureHistory: z.array(SignatureSchema),
+  channelsUsed: z.array(ChannelSchema),
+  updatedAt: IsoDate,
+});
+export type Project = z.infer<typeof ProjectSchema>;
+
+// ------------------------------------------------------------------ expression
+
+export const RecipeStepSchema = z.object({
+  behavior: z.string(),
+  speed: z.number().positive(),
+  amplitude: z.number().min(0),
+  repeat: z.number().int().min(1),
   /** Face preset name applied when this step starts */
-  face?: string;
-}
+  face: z.string().optional(),
+});
+export type RecipeStep = z.infer<typeof RecipeStepSchema>;
 
-export interface Recipe {
-  steps: RecipeStep[];
-  loop?: boolean;
-}
+export const RecipeSchema = z.object({
+  steps: z.array(RecipeStepSchema),
+  loop: z.boolean().optional(),
+});
+export type Recipe = z.infer<typeof RecipeSchema>;
 
-export interface Key {
-  t: number;
-  value: number;
-  easing: EasingName;
-}
+export const KeySchema = z.object({ t: z.number().min(0), value: z.number(), easing: EasingSchema });
+export type Key = z.infer<typeof KeySchema>;
 
-export interface Clip {
-  format: "lelamp.clip/1";
-  duration: number;
-  tracks: Record<JointId, Key[]>;
-  loop?: boolean;
-}
+export const ClipSchema = z.object({
+  format: z.literal("lelamp.clip/1"),
+  duration: z.number().positive(),
+  tracks: z.record(z.string(), z.array(KeySchema)),
+  loop: z.boolean().optional(),
+});
+export type Clip = z.infer<typeof ClipSchema>;
 
-export interface FaceTokens {
-  eyeSize: number;
-  eyeAngle: number;
-  browAngle: number;
-  brightness: number;
-  blinkRate: number;
+export const FaceTokensSchema = z.object({
+  eyeSize: z.number(),
+  eyeAngle: z.number(),
+  browAngle: z.number(),
+  brightness: z.number(),
+  blinkRate: z.number(),
   /** Lid openness 0…1, default 1 (added in STEP 3, see docs/decisions.md) */
-  eyeOpen?: number;
-}
+  eyeOpen: z.number().optional(),
+});
+export type FaceTokens = z.infer<typeof FaceTokensSchema>;
 
-export interface FaceSpec {
+export const FaceSpecSchema = z.object({
   /** Canvas preset name, or "video" for the per-behavior mp4 faces */
-  preset: string;
-  tokens: FaceTokens;
-  keys?: { t: number; tokens: Partial<FaceTokens> }[];
-}
+  preset: z.string(),
+  tokens: FaceTokensSchema,
+  keys: z.array(z.object({ t: z.number(), tokens: FaceTokensSchema.partial() })).optional(),
+});
+export type FaceSpec = z.infer<typeof FaceSpecSchema>;
 
-export interface SoundCue {
-  id: string;
-  t: number;
-  pitchSt: number;
-  tempo: number;
-  lengthS: number;
-  timbre: "bright" | "soft";
-  volumeDb: number;
-}
+export const SoundCueSchema = z.object({
+  id: z.string(),
+  t: z.number().min(0),
+  pitchSt: z.number(),
+  tempo: z.number().positive(),
+  lengthS: z.number().positive(),
+  timbre: z.enum(["bright", "soft"]),
+  volumeDb: z.number(),
+});
+export type SoundCue = z.infer<typeof SoundCueSchema>;
 
-export interface SoundSpec {
-  cues: SoundCue[];
-}
+export const SoundSpecSchema = z.object({ cues: z.array(SoundCueSchema) });
+export type SoundSpec = z.infer<typeof SoundSpecSchema>;
+
+export const MotionPropsSchema = z.object({
+  amplitude: z.number().min(0).max(100),
+  duration: z.number().min(0).max(100),
+  smoothness: z.number().min(0).max(100),
+  speed: z.number().min(0).max(100),
+  frequency: z.number().min(0).max(100),
+});
+export type MotionProps = z.infer<typeof MotionPropsSchema>;
+
+export const ReferenceSchema = z.object({
+  id: z.string(),
+  kind: z.enum(["video", "image", "userData"]),
+  path: z.string(),
+  thumb: z.string(),
+  durationS: z.number().optional(),
+  frames: z.array(z.string()).optional(),
+  status: z.enum(["ok", "failed"]),
+});
+export type Reference = z.infer<typeof ReferenceSchema>;
+
+const ExpressionBase = z.object({
+  id: z.string(),
+  projectId: z.string(),
+  name: z.string(),
+  currentStatus: z.string(),
+  components: z.array(z.string()),
+  pattern: z.string(),
+  references: z.array(ReferenceSchema),
+  motion: z.object({
+    mode: z.enum(["recipe", "clip"]),
+    recipe: RecipeSchema,
+    clip: ClipSchema.optional(),
+    props: MotionPropsSchema,
+  }),
+  face: FaceSpecSchema,
+  sound: SoundSpecSchema,
+  signatureSnapshot: SignatureSchema,
+  version: z.number().int().min(1),
+  createdAt: IsoDate,
+});
+
+export type Expression = z.infer<typeof ExpressionBase> & { history: Expression[] };
+export const ExpressionSchema: z.ZodType<Expression> = ExpressionBase.extend({
+  history: z.lazy(() => z.array(ExpressionSchema)),
+});
+
+export type SavedExpression = Expression & { savedAt: string; channels: Channel[] };
+export const SavedExpressionSchema: z.ZodType<SavedExpression> = ExpressionBase.extend({
+  history: z.lazy(() => z.array(ExpressionSchema)),
+  savedAt: IsoDate,
+  channels: z.array(ChannelSchema),
+});
+
+// ------------------------------------------------------------------ share · user data · profile
+
+export const ShareSchema = z.object({
+  id: z.string(),
+  expressionIds: z.array(z.string()),
+  signatureVersion: z.number().int(),
+  type: RobotTypeSchema,
+  expiresAt: IsoDate,
+  password: z.string().optional(),
+  allowDownload: z.boolean(),
+  attempts: z.number().int().min(0),
+});
+export type Share = z.infer<typeof ShareSchema>;
+
+export const USER_DATA_CATEGORIES = ["Idle", "Approach", "Interaction", "Task", "Expressive", "Other"] as const;
+
+export const UserDataMotionSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  category: z.enum(USER_DATA_CATEGORIES),
+  uses: z.number().int().min(0),
+  preview: RecipeSchema,
+  source: z.enum(["seed", "user"]),
+});
+export type UserDataMotion = z.infer<typeof UserDataMotionSchema>;
+
+export const TEAM_ROLES = ["Owner", "Admin", "Editor", "Viewer"] as const;
+
+export const TeamMemberSchema = z.object({
+  name: z.string(),
+  email: z.string().email(),
+  role: z.enum(TEAM_ROLES),
+  pending: z.boolean().optional(),
+  expiresAt: IsoDate.optional(),
+});
+export type TeamMember = z.infer<typeof TeamMemberSchema>;
+
+export const ProfileSchema = z.object({
+  /** W05 Edit profile: 1–20 characters */
+  name: z.string().min(1).max(20),
+  email: z.string().email(),
+  company: z.string(),
+  signedInWith: z.string(),
+  team: z.array(TeamMemberSchema),
+});
+export type Profile = z.infer<typeof ProfileSchema>;
+
+/** Dummy robots for "Test on your robot" (W02F-1). Not in PRD §7; seed only. */
+export const RobotDeviceSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  type: RobotTypeSchema,
+  online: z.boolean(),
+});
+export type RobotDevice = z.infer<typeof RobotDeviceSchema>;
