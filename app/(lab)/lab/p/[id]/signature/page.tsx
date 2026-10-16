@@ -1,6 +1,17 @@
+// @implemented
 // @screen W02C-1~3
-import { Placeholder } from "@/components/ui/placeholder";
+import { notFound } from "next/navigation";
+import { RepoError } from "@/lib/repo";
+import { getRepo } from "@/lib/repo-server";
+import { SignatureStudio } from "./_components/signature-studio";
 
-export default function Page() {
-  return <Placeholder screen="W02C-1~3" route="/lab/p/[id]/signature" />;
+export const dynamic = "force-dynamic";
+
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const project = await getRepo().projects.get(id).catch((err) => {
+    if (err instanceof RepoError && err.code === "NOT_FOUND") notFound();
+    throw err;
+  });
+  return <SignatureStudio projectId={id} name={project.name} initialVersions={project.signatureHistory} initialCurrentId={project.signatureId ?? null} />;
 }

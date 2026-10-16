@@ -10,6 +10,7 @@ import type { SimController } from "@/components/sim/sim-controller";
 import { Viewport } from "@/components/sim/Viewport";
 import { Button } from "@/components/ui/button";
 import { CHANNEL_LABEL } from "@/components/ui/channel-badges";
+import { StageSteps } from "@/components/ui/stage-steps";
 import { useToast } from "@/components/ui/toast";
 import { useUnsavedChanges } from "@/components/ui/use-unsaved";
 
@@ -178,11 +179,7 @@ export function StructureEditor({ projectId, name, initial }: { projectId: strin
         </div>
       </div>
 
-      <footer className="flex justify-center gap-6 border-t border-neutral-200 py-4 text-sm">
-        {S.stages.map((s, i) => (
-          <span key={s} className={i === 0 ? "font-semibold" : "text-neutral-400"}>{i + 1}. {s}</span>
-        ))}
-      </footer>
+      <StageSteps current={0} />
     </div>
   );
 }
