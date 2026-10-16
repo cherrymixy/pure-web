@@ -58,8 +58,12 @@ export const HOW_IT_MAPS_TEMPLATE = "“{keyword}” on p.{page} {direction} {ax
 export const HOW_IT_MAPS_NO_PAGE = "“{keyword}” {direction} {axis} to {value}.";
 export const MAP_DIRECTION = { up: "raises", down: "lowers" } as const;
 
-/** Signature → playback parameter ranges (PRD §6 rule 7). */
+/** Signature axis → playback / face / sound ranges (PRD §6 rule 7). lerp(lo, hi, axis/100). */
 export const PARAM_MAPPING = {
   speed: [0.7, 1.4],
   amplitude: [0.6, 1.3],
+  rhythm: [0.6, 1.6],
+  eyeSize: [0.8, 1.25],
+  pitchSt: [-4, 4],
+  maxCues: [1, 4],
 } as const;

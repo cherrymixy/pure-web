@@ -31,7 +31,7 @@ export interface ExtractionResult {
 }
 
 export interface ExtractionClient {
-  extract(req: ExtractionRequest, opts?: { signal?: AbortSignal }): Promise<ExtractionResult>;
+  extract(req: ExtractionRequest, opts?: { signal?: AbortSignal; temperature?: number }): Promise<ExtractionResult>;
 }
 
 /** Purebot brand guide tone (matches the seeded "Purebot Brand" signature). */
@@ -53,7 +53,7 @@ export class DemoExtraction implements ExtractionClient {
 export class OllamaExtraction implements ExtractionClient {
   constructor(private readonly client: LlmClient, private readonly model = OLLAMA_MODEL) {}
 
-  async extract(req: ExtractionRequest, opts: { signal?: AbortSignal } = {}): Promise<ExtractionResult> {
+  async extract(req: ExtractionRequest, opts: { signal?: AbortSignal; temperature?: number } = {}): Promise<ExtractionResult> {
     try {
       if (!(await this.client.available())) throw new LlmError("network", "Ollama unreachable");
       const body = req.pages.map((p) => `--- page ${p.page} ---\n${p.text}`).join("\n").slice(0, 12_000);
@@ -63,7 +63,7 @@ export class OllamaExtraction implements ExtractionClient {
         req.colors?.length ? `Colors: ${req.colors.join(", ")}` : "",
         body,
       ].filter(Boolean).join("\n");
-      const res = await chatValidated(this.client, ExtractionOutputSchema, { system: EXTRACTION_SYSTEM, user, model: this.model, signal: opts.signal, temperature: 0.2 });
+      const res = await chatValidated(this.client, ExtractionOutputSchema, { system: EXTRACTION_SYSTEM, user, model: this.model, signal: opts.signal, temperature: opts.temperature ?? 0.2 });
       return { output: res.value, source: "ollama", raw: res.raw, ms: res.ms };
     } catch (err) {
       if (err instanceof LlmError && err.kind === "canceled") throw err;

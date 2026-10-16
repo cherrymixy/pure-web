@@ -44,7 +44,12 @@ function run(repo: Repo, job: Job): void {
       if (!controller.signal.aborted) await repo.jobs.update(job.id, { status: "done", progress: 100, result });
     } catch (err) {
       if (!controller.signal.aborted) {
-        await repo.jobs.update(job.id, { status: "failed", error: err instanceof Error ? err.message : String(err) });
+        const code = (err as { code?: unknown }).code;
+        await repo.jobs.update(job.id, {
+          status: "failed",
+          error: err instanceof Error ? err.message : String(err),
+          ...(typeof code === "string" ? { errorCode: code } : {}),
+        });
       }
     } finally {
       state.controllers.delete(job.id);

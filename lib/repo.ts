@@ -30,7 +30,7 @@ export type NewExpression = Omit<Expression, "id" | "projectId" | "version" | "h
 export type NewShare = { expressionIds: string[]; days?: number; password?: string; allowDownload: boolean };
 export type ShareState = "ok" | "password" | "expired" | "locked";
 export type UserDataQuery = { tab?: "all" | "popular" | "recent" | "uploaded"; category?: string; q?: string };
-export type JobPatch = Partial<Pick<Job, "status" | "progress" | "step" | "stepLabel" | "result" | "error">>;
+export type JobPatch = Partial<Pick<Job, "status" | "progress" | "step" | "stepLabel" | "result" | "error" | "errorCode">>;
 
 export interface Repo {
   projects: {

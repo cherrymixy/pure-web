@@ -294,6 +294,8 @@ export const JobSchema = z.object({
   input: z.unknown(),
   result: z.unknown().optional(),
   error: z.string().optional(),
+  /** Machine-readable failure, e.g. E1 codes FIGMA_UNSUPPORTED / NO_TEXT */
+  errorCode: z.string().optional(),
   createdAt: IsoDate,
   updatedAt: IsoDate,
 });

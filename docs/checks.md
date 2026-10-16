@@ -10,3 +10,4 @@ STEP별 localhost 확인 기록.
 | 2026-10-16 | 4 | http://localhost:3000/dev?tab=content | SeungA Jeon | OK | 타입5·관절5·동작15·패턴7, 가이드라인 3/5/18/16/7/5/13, placeholder 0 |
 | 2026-10-16 | 5 | http://localhost:3000/dev?tab=db | SeungA Jeon | OK | 프로젝트5·라이브러리4·유저데이터15, Reset 동작, /api/projects JSON |
 | 2026-10-16 | 6 | http://localhost:3000/dev/llm | SeungA Jeon | OK | ollama 배지·허용 목록 JSON, 데모 모드 시 demo 배지, 샘플 5개 docs/samples |
+| 2026-10-16 | 7 | http://localhost:3000/dev/signature | SeungA Jeon | OK | 데모 PDF 톤·8축·How it maps p.N, URL, Figma/스캔 E1, Regenerate v0.N·Compare |

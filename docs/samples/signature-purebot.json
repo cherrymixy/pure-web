@@ -1,0 +1,111 @@
+{
+  "source": "public/demo/Purebot_Brand_Guide.pdf",
+  "llm": "ollama",
+  "seconds": 12.176,
+  "extracted": {
+    "name": "Purebot_Brand_Guide.pdf",
+    "kind": "pdf",
+    "colors": [
+      "#2B2B30",
+      "#F0126B",
+      "#785CFF",
+      "#E8C9A0"
+    ],
+    "fonts": [
+      "Purebot Sans",
+      "Helvetica",
+      "Helvetica-Bold"
+    ],
+    "pageCount": 12
+  },
+  "evidence": [
+    {
+      "keyword": "warm",
+      "page": 4,
+      "quote": "Purebot speaks warmly, like a friend at your desk."
+    },
+    {
+      "keyword": "calm",
+      "page": 6,
+      "quote": "Purebot is attentive and calm. It notices you, then gets out of the way."
+    },
+    {
+      "keyword": "precise",
+      "page": 12,
+      "quote": "Purebot is precise: no wobble, no overshoot, a clean and soft stop."
+    },
+    {
+      "keyword": "playful",
+      "page": 7,
+      "quote": "Purebot is playful in small doses: a quick bounce, a curious tilt, a cheerful chirp."
+    }
+  ],
+  "signature": {
+    "name": "Purebot Brand Guide",
+    "axes": {
+      "tempo": 26,
+      "amp": 54,
+      "settle": 82,
+      "antic": 50,
+      "rhythm": 46,
+      "eyes": 56,
+      "pitch": 50,
+      "density": 42
+    },
+    "tone": [
+      "warm",
+      "calm",
+      "precise",
+      "playful"
+    ],
+    "mapping": [
+      {
+        "axis": "tempo",
+        "value": 26,
+        "reason": "\u201ccalm\u201d on p.6 lowers Tempo to 26 (speed \u00d70.88).",
+        "page": 6
+      },
+      {
+        "axis": "amp",
+        "value": 54,
+        "reason": "\u201cplayful\u201d on p.7 raises Amplitude to 54 (amplitude \u00d70.98).",
+        "page": 7
+      },
+      {
+        "axis": "settle",
+        "value": 82,
+        "reason": "\u201cprecise\u201d on p.12 raises Settle to 82 (soft landing).",
+        "page": 12
+      },
+      {
+        "axis": "rhythm",
+        "value": 46,
+        "reason": "\u201ccalm\u201d on p.6 lowers Rhythm to 46 (rhythm \u00d71.06).",
+        "page": 6
+      },
+      {
+        "axis": "eyes",
+        "value": 56,
+        "reason": "\u201cwarm\u201d on p.4 raises Eyes to 56 (eye size \u00d71.05).",
+        "page": 4
+      },
+      {
+        "axis": "density",
+        "value": 42,
+        "reason": "\u201ccalm\u201d on p.6 lowers Density to 42 (up to 2 cues).",
+        "page": 6
+      }
+    ],
+    "sources": [
+      {
+        "kind": "pdf",
+        "name": "Purebot_Brand_Guide.pdf",
+        "path": "p-test-final/pdf/2eef51e0-Purebot_Brand_Guide.pdf"
+      }
+    ],
+    "note": "Type: Purebot Sans, Helvetica \u00b7 Colors: #2B2B30 #F0126B #785CFF #E8C9A0",
+    "id": "sig-p-test-final-2",
+    "version": 2,
+    "createdAt": "2026-10-16T13:06:50.453Z"
+  }
+}
