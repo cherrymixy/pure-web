@@ -11,3 +11,4 @@ STEP마다 한 줄. `날짜 · STEP · 결정 · 근거`
 | 2026-10-16 | 0 | 한계 정책: 레시피 진폭은 validateRecipe가 리그 범위 안으로 선클램프, limitExceeded 모달은 구조 범위(Edit limits·타임라인 입력) 초과 시만 | 진폭 1.04↑ focus head_tilt 초과(pure-app 측정) |
 | 2026-10-16 | 0 | 부록 D 🟡 전부 추천대로. 가이드라인 라우트 [[...slug]]. STEP10② 확인값 shoulder_pitch −20~40 | 리그 범위 −35~55 |
 | 2026-10-16 | 1 | 스캐폴드 + /dev. 구현 표시는 page.tsx 첫 줄 `// @implemented`(화면 ID는 `// @screen`)로 변경, 데모 모드는 쿠키 `pure_demo` | `export const implemented`는 next build 타입 검사 실패("not a valid Page export field") |
+| 2026-10-16 | 2 | sim 이식: SimRuntime(React 없는 재생 루프)로 Provider 대체, 범위 감지는 runtime이 setPose 직전, 얼굴 파라미터에 eyeOpen 추가, 프리셋은 data/face-presets.ts, TimelineEditor는 W02E로 미룸 | exporters·useLeLamp 의존 제거, STEP 3 SimController가 감쌀 단일 런타임 |
