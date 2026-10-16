@@ -163,3 +163,13 @@ describe("LowRepo", () => {
     expect((await t.repo.settings.get()).demoMode).toBe(false);
   });
 });
+
+describe("isRepoError", () => {
+  it("accepts any Error carrying a known code (hot-reloaded classes) and rejects others", async () => {
+    const { isRepoError } = await import("./repo");
+    expect(isRepoError(new RepoError("NOT_FOUND", "x"))).toBe(true);
+    expect(isRepoError(Object.assign(new Error("x"), { code: "WRONG_PASSWORD" }))).toBe(true);
+    expect(isRepoError(Object.assign(new Error("x"), { code: "NO_RIG" }))).toBe(false);
+    expect(isRepoError({ code: "NOT_FOUND" })).toBe(false);
+  });
+});

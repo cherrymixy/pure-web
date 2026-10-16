@@ -1,6 +1,6 @@
 import "server-only";
 import { z } from "zod";
-import { RepoError } from "./repo";
+import { ERROR_STATUS, RepoError, isRepoError } from "./repo";
 
 // Route helpers: every error is { error: { code, message } }.
 
@@ -13,7 +13,7 @@ export async function handle(fn: () => Promise<unknown>): Promise<Response> {
     const result = await fn();
     return result instanceof Response ? result : Response.json(result ?? { ok: true });
   } catch (err) {
-    if (err instanceof RepoError) return errorResponse(err.status, err.code, err.message);
+    if (isRepoError(err)) return errorResponse(ERROR_STATUS[err.code], err.code, err.message);
     if (err instanceof z.ZodError) return errorResponse(400, "VALIDATION", z.prettifyError(err));
     console.error(err);
     return errorResponse(500, "INTERNAL", err instanceof Error ? err.message : String(err));

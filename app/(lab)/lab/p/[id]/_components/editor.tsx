@@ -26,7 +26,9 @@ import { FACE_FIELDS, FacePanel, SoundPanel } from "./channel-panels";
 import { ContextPanel, type EditorContext, type PendingReference } from "./context-panel";
 import { LibraryPanel } from "./library-panel";
 import { JointTable, MotionPanel, PROP_LABELS } from "./panels";
+import { ExportModal } from "./export-modal";
 import { ReferencePlayer } from "./reference-player";
+import { TestModal } from "./test-modal";
 import { Timeline, type KeyRef, type Track } from "./timeline";
 
 const E = STRINGS.editor;
@@ -124,6 +126,8 @@ export function Editor({
   const [activeRef, setActiveRef] = useState<Reference | null>(null);
   const [sideBySide, setSideBySide] = useState(false);
   const [matching, setMatching] = useState(false);
+  const [testOpen, setTestOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState<null | "robot" | "file" | "share">(null);
   const committed = useRef<Snapshot>({ props, face, sound: soundSpec, clip });
   const [history, setHistory] = useState<History<Snapshot>>(emptyHistory);
   const [prompt, setPrompt] = useState("");
@@ -643,8 +647,8 @@ export function Editor({
               { label: `← ${E.menu.home}`, onSelect: () => router.push("/lab") },
               { label: E.menu.rename, onSelect: () => setRenaming(true) },
               { label: E.menu.changeSignature, onSelect: () => router.push(`/lab/p/${project.id}/signature`) },
-              { label: `${E.menu.test} (⑥)`, onSelect: () => toast(`${E.menu.test}: ⑥`) },
-              { label: `${E.menu.export} (⑥)`, onSelect: () => toast(`${E.menu.export}: ⑥`) },
+              { label: E.menu.test, onSelect: () => (expression ? setTestOpen(true) : toast(STRINGS.export.noExpression)) },
+              { label: E.menu.export, onSelect: () => (expression ? setExportOpen("file") : toast(STRINGS.export.noExpression)) },
               { label: E.menu.delete, onSelect: () => setDeleting(true), danger: true },
             ]}
           />
@@ -883,6 +887,33 @@ export function Editor({
           </>
         )}
       </Modal>
+
+      <TestModal
+        open={testOpen}
+        projectType={project.type}
+        t={time.t}
+        playing={!paused}
+        limitHit={limit !== null}
+        onPlay={() => { ctrl.current?.seek(0); ctrl.current?.play(); setPaused(false); }}
+        onStop={() => { ctrl.current?.pause(); setPaused(true); }}
+        onExportInstead={() => { setTestOpen(false); setExportOpen("file"); }}
+        onClose={() => setTestOpen(false)}
+      />
+      {expression && timelineClip && (
+        <ExportModal
+          open={exportOpen !== null}
+          initialDestination={exportOpen ?? "file"}
+          project={{ name, type: project.type, structure }}
+          expression={expression}
+          clip={timelineClip}
+          onFix={(issue) => {
+            setExportOpen(null);
+            setTimelineOpen(true);
+            if (issue.joint) setSelectedTrack(issue.joint);
+          }}
+          onClose={() => setExportOpen(null)}
+        />
+      )}
 
       <PromptModal open={renaming} title={STRINGS.lab.rename.title} label={STRINGS.lab.rename.label} initial={name} maxLength={60} submitLabel={STRINGS.lab.rename.save} onSubmit={rename} onCancel={() => setRenaming(false)} />
       <ConfirmModal open={deleting} title={E.deleteConfirm.title} body={E.deleteConfirm.body} confirmLabel={STRINGS.common.delete} danger onConfirm={remove} onCancel={() => setDeleting(false)} />

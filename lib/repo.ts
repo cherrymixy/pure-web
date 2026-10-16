@@ -24,6 +24,15 @@ export class RepoError extends Error {
   }
 }
 
+/**
+ * Code-based check: in `next dev` the repo singleton lives on globalThis and can outlive a
+ * hot-reloaded lib/repo.ts, so its errors may come from an older RepoError class.
+ */
+export function isRepoError(err: unknown): err is RepoError {
+  const code = err instanceof Error ? (err as Error & { code?: unknown }).code : undefined;
+  return typeof code === "string" && code in ERROR_STATUS;
+}
+
 export type NewProject = { name: string; type: RobotType; source: Structure["source"]; status?: Project["status"] };
 export type SignatureDraft = Omit<Signature, "id" | "version" | "createdAt">;
 export type NewExpression = Omit<Expression, "id" | "projectId" | "version" | "history" | "createdAt">;
