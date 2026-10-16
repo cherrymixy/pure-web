@@ -10,6 +10,7 @@ import { ApiError, api } from "@/lib/ui/api";
 import { downloadText, slug } from "@/lib/ui/download";
 import { Viewport } from "@/components/sim/Viewport";
 import { Button } from "@/components/ui/button";
+import { ReferencedSets } from "@/components/ui/referenced-sets";
 import { Loading } from "@/components/ui/states";
 
 const SH = STRINGS.share;
@@ -133,6 +134,7 @@ export function ShareViewer({ id }: { id: string }) {
               </li>
             ))}
           </ul>
+          {expr && <ReferencedSets key={expr.id} behaviors={expr.motion.recipe.steps.map((st) => st.behavior)} />}
           {view.allowDownload && <Button variant="primary" disabled={!view.robot} onClick={download}>{STRINGS.export.download}</Button>}
           {!view.allowDownload && <span className="text-xs text-neutral-400">{STRINGS.common.viewOnly}</span>}
         </aside>

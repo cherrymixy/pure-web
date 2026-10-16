@@ -3,6 +3,7 @@ import { FACE_PRESETS } from "@/data/face-presets";
 import { SITUATION_PATTERNS } from "@/data/patterns";
 import { AXIS_INFO, AXIS_ORDER } from "@/data/signature";
 import { SOUND_CUES } from "@/data/sound-cues";
+import { REFERENCE_SETS, type ReferenceSet } from "@/data/reference-sets";
 import type { Signature, Structure } from "../models";
 
 // Prompt skeleton inherited from _ref app/api/analyze/route.ts:
@@ -73,8 +74,17 @@ export function generationUser(input: GenerationPromptInput): string {
   if (pattern) parts.push(`Situation: ${pattern.label} — ${pattern.hint}`);
   if (input.referenceSummary) parts.push(`Reference (what the designer showed): ${input.referenceSummary}`);
   if (input.signature) parts.push(`Brand signature: ${signatureText(input.signature)}`);
+  const library = referenceLibraryText(REFERENCE_SETS);
+  if (library) parts.push(`Reference library (what each behavior is modeled on; pick behaviors whose references fit this moment):\n${library}`);
   if (input.structure) {
     parts.push(`Joint ranges (degrees): ${input.structure.joints.map((j) => `${j.id} ${j.min}…${j.max}`).join(", ")}`);
   }
   return parts.join("\n");
+}
+
+/** One short line per behavior: "doze — face: Cat slow blink; motion: …; sound: …" (titles only, ~15 lines). */
+export function referenceLibraryText(sets: ReferenceSet[]): string {
+  return sets
+    .map((set) => `${set.behavior} — ${set.items.map((it) => `${it.channel}: ${it.title}`).join("; ")}`)
+    .join("\n");
 }

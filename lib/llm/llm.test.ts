@@ -97,3 +97,20 @@ describe("extraction", () => {
     expect((await new DemoExtraction().extract()).source).toBe("demo");
   });
 });
+
+describe("reference library in the prompt", async () => {
+  const { referenceLibraryText } = await import("./prompts");
+  it("one line per behavior with face / motion / sound titles", () => {
+    const text = referenceLibraryText([
+      {
+        behavior: "doze",
+        items: [
+          { channel: "face", title: "Cat slow blink", note: "", file: "", poster: null, source: { title: "", page: "", author: "", license: "", excerpt: "" } },
+          { channel: "sound", title: "Soft sigh", note: "", file: "", poster: null, source: { title: "", page: "", author: "", license: "", excerpt: "" } },
+        ],
+      },
+    ]);
+    expect(text).toBe("doze — face: Cat slow blink; sound: Soft sigh");
+    expect(referenceLibraryText([])).toBe("");
+  });
+});

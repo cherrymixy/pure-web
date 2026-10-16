@@ -10,6 +10,7 @@ import type { RobotType, UserDataMotion } from "@/lib/models";
 import { api } from "@/lib/ui/api";
 import { Viewport } from "@/components/sim/Viewport";
 import { Button } from "@/components/ui/button";
+import { ReferencedSets } from "@/components/ui/referenced-sets";
 import { Modal } from "@/components/ui/modal";
 import { useToast } from "@/components/ui/toast";
 
@@ -46,6 +47,7 @@ export function MotionDetail({ motion, projects }: { motion: UserDataMotion; pro
             <p>{motion.preview.steps.map((s) => s.behavior).join(" → ")}</p>
           </div>
           <Button variant="primary" onClick={() => setPicking(true)}>{U.useAsReference}</Button>
+          <ReferencedSets behaviors={motion.preview.steps.map((st) => st.behavior)} />
         </aside>
       </div>
 

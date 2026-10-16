@@ -4,6 +4,9 @@ import {
   AxisSchema, type Expression, type Project, type Signature,
 } from "../models";
 
+import type { ReferenceSet } from "@/data/reference-sets";
+import { referenceCredits } from "./references";
+
 // pure.json: the exported expression package (PRD rule 13).
 export const PURE_JSON_FORMAT = "pure.json/1";
 
@@ -21,6 +24,18 @@ export const PureJsonSchema = z.object({
   }),
   options: z.object({ includeFallback: z.boolean(), loop: z.boolean() }),
   fallback: z.object({ motion: ClipSchema }).optional(),
+  /** What the AI referenced (face / motion / sound per behavior), with attribution for CC BY / BY-SA media */
+  references: z
+    .array(
+      z.object({
+        behavior: z.string(),
+        channel: z.enum(["face", "motion", "sound"]),
+        title: z.string(),
+        note: z.string(),
+        source: z.object({ title: z.string(), page: z.string(), author: z.string(), license: z.string(), excerpt: z.string() }),
+      }),
+    )
+    .optional(),
 });
 export type PureJson = z.infer<typeof PureJsonSchema>;
 
@@ -29,6 +44,8 @@ export interface PureJsonOptions {
   loop?: boolean;
   team?: string;
   now?: Date;
+  /** Defaults to data/reference-sets (tests inject their own) */
+  referenceSets?: ReferenceSet[];
 }
 
 /** `clip` is the expression's playback clip (recipeToClip or the edited timeline clip). */
@@ -40,6 +57,7 @@ export function buildPureJson(
   options: PureJsonOptions = {},
 ): { json: PureJson; text: string; bytes: number } {
   if (!project.structure) throw new Error("Project has no confirmed structure");
+  const credits = referenceCredits(expression.motion.recipe.steps.map((s) => s.behavior), options.referenceSets);
   const json: PureJson = {
     format: PURE_JSON_FORMAT,
     meta: {
@@ -60,6 +78,7 @@ export function buildPureJson(
     },
     options: { includeFallback: !!options.includeFallback, loop: !!options.loop },
     ...(options.includeFallback ? { fallback: { motion: clip } } : {}),
+    ...(credits.length ? { references: credits } : {}),
   };
   const text = JSON.stringify(json, null, 2);
   return { json, text, bytes: new TextEncoder().encode(text).length };
