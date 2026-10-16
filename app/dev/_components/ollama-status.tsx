@@ -12,6 +12,7 @@ type Status = {
   hasVisionModel: boolean;
   models: { name: string; size: number }[];
   error?: string;
+  lastCall: { at: string; ms: number; model?: string; source: string; kind: string } | null;
 };
 
 export function OllamaStatus() {
@@ -21,7 +22,7 @@ export function OllamaStatus() {
   const check = useCallback(async () => {
     const res = await fetch("/api/dev/ollama", { cache: "no-store" });
     setStatus(await res.json());
-    setCheckedAt(new Date().toLocaleTimeString());
+    setCheckedAt(new Date().toLocaleTimeString("en-US"));
   }, []);
 
   useEffect(() => {
@@ -59,6 +60,12 @@ export function OllamaStatus() {
               <dd className="text-red-600">{status.error}</dd>
             </>
           )}
+          <dt className="text-neutral-500">Last response</dt>
+          <dd>
+            {status.lastCall
+              ? `${(status.lastCall.ms / 1000).toFixed(1)}s · ${status.lastCall.kind} · ${status.lastCall.source}${status.lastCall.model ? ` · ${status.lastCall.model}` : ""} · ${new Date(status.lastCall.at).toLocaleTimeString("en-US")}`
+              : "—"}
+          </dd>
           <dt className="text-neutral-500">Checked</dt>
           <dd>{checkedAt}</dd>
         </dl>

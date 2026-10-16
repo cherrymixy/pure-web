@@ -1,0 +1,44 @@
+{
+  "prompt": "Make it feel like this",
+  "image": "robot screenshot (sleepy face), 640px",
+  "model": "qwen3:8b",
+  "source": "ollama",
+  "describeMs": 9211,
+  "ms": 18627,
+  "referenceSummary": "The scene features a white, robotic camera with a pink arm, set against a dark, neutral background. The camera maintains a static pose throughout the frames, exhibiting a calm and deliberate stillness. There is no movement or change in the subject's position, creating a paused and contemplative mood.",
+  "raw": "{\n  \"name\": \"calm_pause\",\n  \"currentStatus\": \"I am still and quiet, absorbing the moment.\",\n  \"reasoning\": \"I hold stillness to mirror the calm and reflective mood of the scene.\",\n  \"motion\": {\n    \"steps\": [\n      {\n        \"behavior\": \"idle\",\n        \"speed\": 0.8,\n        \"amplitude\": 0.6,\n        \"repeat\": 1\n      }\n    ]\n  },\n  \"face\": {\n    \"preset\": \"neutral\",\n    \"tokens\": {\n      \"eyeSize\": 1.2,\n      \"eyeOpen\": 0.8,\n      \"eyeAngle\": 0,\n      \"browAngle\": 0,\n      \"brightness\": 0.7,\n      \"blinkRate\": 10\n    }\n  },\n  \"sound\": {\n    \"cues\": [\n      {\n        \"preset\": \"soft-breath\",\n        \"t\": 0\n      }\n    ]\n  }\n}",
+  "output": {
+    "name": "calm_pause",
+    "currentStatus": "I am still and quiet, absorbing the moment.",
+    "reasoning": "I hold stillness to mirror the calm and reflective mood of the scene.",
+    "motion": {
+      "steps": [
+        {
+          "behavior": "idle",
+          "speed": 0.8,
+          "amplitude": 0.6,
+          "repeat": 1
+        }
+      ]
+    },
+    "face": {
+      "preset": "neutral",
+      "tokens": {
+        "eyeSize": 1.2,
+        "eyeOpen": 0.8,
+        "eyeAngle": 0,
+        "browAngle": 0,
+        "brightness": 0.7,
+        "blinkRate": 10
+      }
+    },
+    "sound": {
+      "cues": [
+        {
+          "preset": "soft-breath",
+          "t": 0
+        }
+      ]
+    }
+  }
+}

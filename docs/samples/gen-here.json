@@ -1,0 +1,58 @@
+{
+  "prompt": "Hey, I'm here!",
+  "model": "qwen3:8b",
+  "source": "ollama",
+  "ms": 20892,
+  "retried": false,
+  "raw": "{\n  \"name\": \"welcome back\",\n  \"currentStatus\": \"I'm excited to see you again\",\n  \"reasoning\": \"I'm showing joy by moving my head and eyes to meet your gaze while smiling\",\n  \"motion\": {\n    \"steps\": [\n      {\n        \"behavior\": \"greet\",\n        \"speed\": 1.2,\n        \"amplitude\": 0.8,\n        \"repeat\": 2\n      },\n      {\n        \"behavior\": \"look_around\",\n        \"speed\": 1.0,\n        \"amplitude\": 0.6,\n        \"repeat\": 1\n      },\n      {\n        \"behavior\": \"focus\",\n        \"speed\": 1.0,\n        \"amplitude\": 0.7,\n        \"repeat\": 1\n      }\n    ]\n  },\n  \"face\": {\n    \"preset\": \"happy\",\n    \"tokens\": {\n      \"eyeSize\": 1.2,\n      \"eyeOpen\": 0.9,\n      \"eyeAngle\": 15,\n      \"browAngle\": -10,\n      \"brightness\": 0.8,\n      \"blinkRate\": 15\n    }\n  },\n  \"sound\": {\n    \"cues\": [\n      {\n        \"preset\": \"rising-chirp\",\n        \"t\": 0\n      },\n      {\n        \"preset\": \"signature\",\n        \"t\": 2\n      }\n    ]\n  }\n}",
+  "output": {
+    "name": "welcome back",
+    "currentStatus": "I'm excited to see you again",
+    "reasoning": "I'm showing joy by moving my head and eyes to meet your gaze while smiling",
+    "motion": {
+      "steps": [
+        {
+          "behavior": "greet",
+          "speed": 1.2,
+          "amplitude": 0.8,
+          "repeat": 2
+        },
+        {
+          "behavior": "look_around",
+          "speed": 1,
+          "amplitude": 0.6,
+          "repeat": 1
+        },
+        {
+          "behavior": "focus",
+          "speed": 1,
+          "amplitude": 0.7,
+          "repeat": 1
+        }
+      ]
+    },
+    "face": {
+      "preset": "happy",
+      "tokens": {
+        "eyeSize": 1.2,
+        "eyeOpen": 0.9,
+        "eyeAngle": 15,
+        "browAngle": -10,
+        "brightness": 0.8,
+        "blinkRate": 15
+      }
+    },
+    "sound": {
+      "cues": [
+        {
+          "preset": "rising-chirp",
+          "t": 0
+        },
+        {
+          "preset": "signature",
+          "t": 2
+        }
+      ]
+    }
+  }
+}

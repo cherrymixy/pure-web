@@ -1,4 +1,5 @@
 import { OLLAMA_MODEL, OLLAMA_URL, OLLAMA_VISION_MODEL } from "@/lib/env";
+import { lastCall } from "@/lib/llm";
 
 export const dynamic = "force-dynamic";
 
@@ -6,7 +7,7 @@ type Tag = { name: string; size: number };
 
 export async function GET() {
   const started = Date.now();
-  const base = { url: OLLAMA_URL, model: OLLAMA_MODEL, visionModel: OLLAMA_VISION_MODEL };
+  const base = { url: OLLAMA_URL, model: OLLAMA_MODEL, visionModel: OLLAMA_VISION_MODEL, lastCall: lastCall() };
   try {
     const res = await fetch(`${OLLAMA_URL}/api/tags`, {
       signal: AbortSignal.timeout(3000),

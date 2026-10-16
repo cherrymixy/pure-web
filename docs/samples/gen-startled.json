@@ -1,0 +1,50 @@
+{
+  "prompt": "Wow, that startled me!",
+  "model": "qwen3:8b",
+  "source": "ollama",
+  "ms": 16711,
+  "retried": false,
+  "raw": "{\n  \"name\": \"startled_reaction\",\n  \"currentStatus\": \"I just got surprised by something unexpected\",\n  \"reasoning\": \"I react to the sudden noise by quickly turning my head and blinking to show my surprise\",\n  \"motion\": {\n    \"steps\": [\n      {\n        \"behavior\": \"alert\",\n        \"speed\": 1.2,\n        \"amplitude\": 1.0,\n        \"repeat\": 1,\n        \"face\": \"blink\"\n      },\n      {\n        \"behavior\": \"look_around\",\n        \"speed\": 1.0,\n        \"amplitude\": 1.2,\n        \"repeat\": 2,\n        \"face\": \"neutral\"\n      }\n    ]\n  },\n  \"face\": {\n    \"preset\": \"blink\",\n    \"tokens\": {\n      \"eyeSize\": 1.2,\n      \"eyeOpen\": 0.9,\n      \"eyeAngle\": 0,\n      \"browAngle\": -10,\n      \"brightness\": 0.8,\n      \"blinkRate\": 30\n    }\n  },\n  \"sound\": {\n    \"cues\": [\n      {\n        \"preset\": \"rising-chirp\",\n        \"t\": 0.5\n      }\n    ]\n  }\n}",
+  "output": {
+    "name": "startled_reaction",
+    "currentStatus": "I just got surprised by something unexpected",
+    "reasoning": "I react to the sudden noise by quickly turning my head and blinking to show my surprise",
+    "motion": {
+      "steps": [
+        {
+          "behavior": "alert",
+          "speed": 1.2,
+          "amplitude": 1,
+          "repeat": 1,
+          "face": "blink"
+        },
+        {
+          "behavior": "look_around",
+          "speed": 1,
+          "amplitude": 1.2,
+          "repeat": 2,
+          "face": "neutral"
+        }
+      ]
+    },
+    "face": {
+      "preset": "blink",
+      "tokens": {
+        "eyeSize": 1.2,
+        "eyeOpen": 0.9,
+        "eyeAngle": 0,
+        "browAngle": -10,
+        "brightness": 0.8,
+        "blinkRate": 30
+      }
+    },
+    "sound": {
+      "cues": [
+        {
+          "preset": "rising-chirp",
+          "t": 0.5
+        }
+      ]
+    }
+  }
+}

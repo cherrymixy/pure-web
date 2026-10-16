@@ -1,0 +1,84 @@
+{
+  "prompt": "The presentation went well today!",
+  "model": "qwen3:8b",
+  "source": "ollama",
+  "ms": 27996,
+  "retried": false,
+  "raw": "{\n  \"name\": \"sunshine_morning\",\n  \"currentStatus\": \"I feel proud of today's work\",\n  \"reasoning\": \"I'm showing appreciation for a successful task by expressing calm joy through gentle movements and a warm tone\",\n  \"motion\": {\n    \"steps\": [\n      {\n        \"behavior\": \"greet\",\n        \"speed\": 1.2,\n        \"amplitude\": 0.8,\n        \"repeat\": 2\n      },\n      {\n        \"behavior\": \"nod\",\n        \"speed\": 1.0,\n        \"amplitude\": 0.6,\n        \"repeat\": 3\n      },\n      {\n        \"behavior\": \"focus\",\n        \"speed\": 1.0,\n        \"amplitude\": 0.5,\n        \"repeat\": 1\n      },\n      {\n        \"behavior\": \"sweep\",\n        \"speed\": 0.8,\n        \"amplitude\": 0.7,\n        \"repeat\": 2\n      },\n      {\n        \"behavior\": \"look_around\",\n        \"speed\": 1.0,\n        \"amplitude\": 0.6,\n        \"repeat\": 1\n      },\n      {\n        \"behavior\": \"happy\",\n        \"speed\": 1.1,\n        \"amplitude\": 0.9,\n        \"repeat\": 2\n      }\n    ]\n  },\n  \"face\": {\n    \"preset\": \"happy\",\n    \"tokens\": {\n      \"eyeSize\": 1.2,\n      \"eyeOpen\": 0.9,\n      \"eyeAngle\": 15,\n      \"browAngle\": 5,\n      \"brightness\": 0.9,\n      \"blinkRate\": 15\n    }\n  },\n  \"sound\": {\n    \"cues\": [\n      {\n        \"preset\": \"rising-chirp\",\n        \"t\": 0.5\n      },\n      {\n        \"preset\": \"signature\",\n        \"t\": 2.0\n      },\n      {\n        \"preset\": \"soft-breath\",\n        \"t\": 4.0\n      },\n      {\n        \"preset\": \"falling-tone\",\n        \"t\": 5.5\n      }\n    ]\n  }\n}",
+  "output": {
+    "name": "sunshine_morning",
+    "currentStatus": "I feel proud of today's work",
+    "reasoning": "I'm showing appreciation for a successful task by expressing calm joy through gentle movements and a warm tone",
+    "motion": {
+      "steps": [
+        {
+          "behavior": "greet",
+          "speed": 1.2,
+          "amplitude": 0.8,
+          "repeat": 2
+        },
+        {
+          "behavior": "nod",
+          "speed": 1,
+          "amplitude": 0.6,
+          "repeat": 3
+        },
+        {
+          "behavior": "focus",
+          "speed": 1,
+          "amplitude": 0.5,
+          "repeat": 1
+        },
+        {
+          "behavior": "sweep",
+          "speed": 0.8,
+          "amplitude": 0.7,
+          "repeat": 2
+        },
+        {
+          "behavior": "look_around",
+          "speed": 1,
+          "amplitude": 0.6,
+          "repeat": 1
+        },
+        {
+          "behavior": "happy",
+          "speed": 1.1,
+          "amplitude": 0.9,
+          "repeat": 2
+        }
+      ]
+    },
+    "face": {
+      "preset": "happy",
+      "tokens": {
+        "eyeSize": 1.2,
+        "eyeOpen": 0.9,
+        "eyeAngle": 15,
+        "browAngle": 5,
+        "brightness": 0.9,
+        "blinkRate": 15
+      }
+    },
+    "sound": {
+      "cues": [
+        {
+          "preset": "rising-chirp",
+          "t": 0.5
+        },
+        {
+          "preset": "signature",
+          "t": 2
+        },
+        {
+          "preset": "soft-breath",
+          "t": 4
+        },
+        {
+          "preset": "falling-tone",
+          "t": 5.5
+        }
+      ]
+    }
+  }
+}

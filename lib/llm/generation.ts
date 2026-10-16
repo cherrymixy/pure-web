@@ -1,0 +1,166 @@
+import { z } from "zod";
+import { COMPONENTS } from "@/data/components";
+import { COMPONENT_DEMOS, PROMPT_DEMOS, type DemoExpression } from "@/data/demo-recipes";
+import { FACE_PRESETS } from "@/data/face-presets";
+import { SUGGESTED_PROMPTS, type SuggestedPromptId } from "@/data/prompts";
+import { SOUND_CUES } from "@/data/sound-cues";
+import { OLLAMA_MODEL, OLLAMA_VISION_MODEL } from "../env";
+import { LlmError, type LlmClient } from "./client";
+import { DESCRIBE_SYSTEM, GENERATION_SYSTEM, generationUser, type GenerationPromptInput } from "./prompts";
+import { chatValidated } from "./retry";
+
+const ids = <T extends { id: string }>(xs: readonly T[]) => xs.map((x) => x.id) as [string, ...string[]];
+const BehaviorEnum = z.enum(ids(COMPONENTS));
+const FaceEnum = z.enum(Object.keys(FACE_PRESETS) as [string, ...string[]]);
+const CueEnum = z.enum(ids(SOUND_CUES));
+
+/**
+ * What the model returns (PRD §6 rule 6, Tier 1 recipe). Only names are enforced here;
+ * numeric ranges are clamped by lib/expression validation (STEP 8), not rejected.
+ */
+export const GenerationOutputSchema = z.object({
+  name: z.string().min(1),
+  currentStatus: z.string().min(1),
+  reasoning: z.string().min(1),
+  motion: z.object({
+    steps: z
+      .array(z.object({ behavior: BehaviorEnum, speed: z.number(), amplitude: z.number(), repeat: z.number().int(), face: FaceEnum.optional() }))
+      .min(1)
+      .max(6),
+  }),
+  face: z.object({
+    preset: FaceEnum,
+    tokens: z.object({ eyeSize: z.number(), eyeOpen: z.number(), eyeAngle: z.number(), browAngle: z.number(), brightness: z.number(), blinkRate: z.number() }),
+  }),
+  sound: z.object({ cues: z.array(z.object({ preset: CueEnum, t: z.number() })).max(4) }),
+});
+export type GenerationOutput = z.infer<typeof GenerationOutputSchema>;
+
+const DescribeSchema = z.object({ summary: z.string().min(1) });
+
+export interface GenerationRequest extends GenerationPromptInput {
+  /** Reference images or video frames (data URLs / base64). Summarized by the vision model first. */
+  images?: string[];
+}
+
+export interface GenerationResult {
+  output: GenerationOutput;
+  source: "ollama" | "demo";
+  fallbackReason?: string;
+  raw?: string;
+  ms: number;
+  model?: string;
+  retried?: boolean;
+  referenceSummary?: string;
+  describeMs?: number;
+}
+
+export interface GenerateOptions {
+  signal?: AbortSignal;
+  onDelay?: () => void;
+}
+
+export interface GenerationClient {
+  generate(req: GenerationRequest, opts?: GenerateOptions): Promise<GenerationResult>;
+  /** Vision step on its own (cached per reference by callers). */
+  describe(images: string[], opts?: GenerateOptions): Promise<{ summary: string; ms: number }>;
+}
+
+// ---------------------------------------------------------------- demo
+
+export function demoToOutput(demo: DemoExpression): GenerationOutput {
+  return {
+    name: demo.name,
+    currentStatus: demo.currentStatus,
+    reasoning: demo.reasoning,
+    motion: {
+      steps: demo.motion.recipe.steps.map(({ behavior, speed, amplitude, repeat, face }) => ({ behavior, speed, amplitude, repeat, ...(face ? { face } : {}) })),
+    },
+    face: { preset: demo.face.preset, tokens: { eyeOpen: 1, ...demo.face.tokens } },
+    sound: { cues: demo.sound.cues.map((c) => ({ preset: c.id.split("@")[0], t: c.t })) },
+  };
+}
+
+const KEYWORDS: [RegExp, SuggestedPromptId][] = [
+  [/tired|sleep|nod(ding)? off|yawn|exhaust/i, "tired"],
+  [/startl|surpris|wow|shock|scare/i, "startled"],
+  [/went well|great|proud|yay|success|happy|excit/i, "presentation"],
+  [/hey|hello|\bhi\b|i'?m here|arriv|welcome/i, "here"],
+];
+
+const normalize = (s: string) => s.toLowerCase().replace(/[…!.?,]/g, "").replace(/\s+/g, " ").trim();
+
+/** Pick the demo for a request: suggested prompt → component chip → keyword → greeting. */
+export function pickDemo(req: Pick<GenerationRequest, "prompt" | "components">): DemoExpression {
+  const text = normalize(req.prompt);
+  const exact = SUGGESTED_PROMPTS.find((p) => normalize(p.text) === text || text.startsWith(normalize(p.text)));
+  if (exact) return PROMPT_DEMOS[exact.id];
+  const component = req.components?.find((c) => c in COMPONENT_DEMOS);
+  if (component) return COMPONENT_DEMOS[component];
+  const hit = KEYWORDS.find(([re]) => re.test(req.prompt));
+  return PROMPT_DEMOS[hit?.[1] ?? "here"];
+}
+
+export class DemoGeneration implements GenerationClient {
+  constructor(private readonly reason = "Demo mode") {}
+
+  async generate(req: GenerationRequest): Promise<GenerationResult> {
+    return { output: demoToOutput(pickDemo(req)), source: "demo", fallbackReason: this.reason, ms: 0 };
+  }
+
+  async describe(): Promise<{ summary: string; ms: number }> {
+    return { summary: "", ms: 0 };
+  }
+}
+
+// ---------------------------------------------------------------- ollama
+
+export class OllamaGeneration implements GenerationClient {
+  constructor(
+    private readonly client: LlmClient,
+    private readonly model = OLLAMA_MODEL,
+    private readonly visionModel = OLLAMA_VISION_MODEL,
+  ) {}
+
+  async describe(images: string[], opts: GenerateOptions = {}) {
+    const res = await chatValidated(this.client, DescribeSchema, {
+      system: DESCRIBE_SYSTEM,
+      user: images.length > 1 ? `${images.length} frames of one video, in time order.` : "One reference image.",
+      images,
+      model: this.visionModel,
+      signal: opts.signal,
+      temperature: 0.3,
+    });
+    return { summary: res.value.summary, ms: res.ms };
+  }
+
+  /**
+   * Text model generates; with images, the vision model summarizes them first
+   * (qwen3 is text-only). Any failure except cancel falls back to the demo.
+   */
+  async generate(req: GenerationRequest, opts: GenerateOptions = {}): Promise<GenerationResult> {
+    let referenceSummary = req.referenceSummary;
+    let describeMs: number | undefined;
+    try {
+      if (!(await this.client.available())) throw new LlmError("network", "Ollama unreachable");
+      if (req.images?.length && !referenceSummary) {
+        const d = await this.describe(req.images, opts);
+        referenceSummary = d.summary;
+        describeMs = d.ms;
+      }
+      const res = await chatValidated(this.client, GenerationOutputSchema, {
+        system: GENERATION_SYSTEM,
+        user: generationUser({ ...req, referenceSummary }),
+        model: this.model,
+        signal: opts.signal,
+        onDelay: opts.onDelay,
+      });
+      return { output: res.value, source: "ollama", raw: res.raw, ms: res.ms, model: res.model, retried: res.retried, referenceSummary, describeMs };
+    } catch (err) {
+      if (err instanceof LlmError && err.kind === "canceled") throw err;
+      const reason = err instanceof Error ? err.message : String(err);
+      const demo = await new DemoGeneration(reason).generate(req);
+      return { ...demo, referenceSummary, describeMs };
+    }
+  }
+}

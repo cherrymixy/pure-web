@@ -1,0 +1,82 @@
+{
+  "prompt": "I'm so tired, I keep nodding off",
+  "model": "qwen3:8b",
+  "source": "ollama",
+  "ms": 28313,
+  "retried": false,
+  "raw": "{\n  \"name\": \"drowsy nod\",\n  \"currentStatus\": \"I'm so tired, I keep nodding off\",\n  \"reasoning\": \"I'm letting my body relax into a slow, soft rhythm to signal I need rest\",\n  \"motion\": {\n    \"steps\": [\n      {\n        \"behavior\": \"nod\",\n        \"speed\": 0.8,\n        \"amplitude\": 0.6,\n        \"repeat\": 2,\n        \"face\": \"sleepy\"\n      },\n      {\n        \"behavior\": \"doze\",\n        \"speed\": 0.5,\n        \"amplitude\": 0.4,\n        \"repeat\": 3,\n        \"face\": \"neutral\"\n      },\n      {\n        \"behavior\": \"idle\",\n        \"speed\": 0.3,\n        \"amplitude\": 0.2,\n        \"repeat\": 4,\n        \"face\": \"soft\"\n      },\n      {\n        \"behavior\": \"nod\",\n        \"speed\": 0.6,\n        \"amplitude\": 0.5,\n        \"repeat\": 2,\n        \"face\": \"sleepy\"\n      },\n      {\n        \"behavior\": \"idle\",\n        \"speed\": 0.4,\n        \"amplitude\": 0.3,\n        \"repeat\": 3,\n        \"face\": \"neutral\"\n      },\n      {\n        \"behavior\": \"doze\",\n        \"speed\": 0.5,\n        \"amplitude\": 0.4,\n        \"repeat\": 2,\n        \"face\": \"soft\"\n      }\n    ]\n  },\n  \"face\": {\n    \"preset\": \"sleepy\",\n    \"tokens\": {\n      \"eyeSize\": 0.8,\n      \"eyeOpen\": 0.6,\n      \"eyeAngle\": 0,\n      \"browAngle\": -10,\n      \"brightness\": 0.5,\n      \"blinkRate\": 10\n    }\n  },\n  \"sound\": {\n    \"cues\": [\n      {\n        \"preset\": \"soft-breath\",\n        \"t\": 0\n      },\n      {\n        \"preset\": \"falling-tone\",\n        \"t\": 4\n      }\n    ]\n  }\n}",
+  "output": {
+    "name": "drowsy nod",
+    "currentStatus": "I'm so tired, I keep nodding off",
+    "reasoning": "I'm letting my body relax into a slow, soft rhythm to signal I need rest",
+    "motion": {
+      "steps": [
+        {
+          "behavior": "nod",
+          "speed": 0.8,
+          "amplitude": 0.6,
+          "repeat": 2,
+          "face": "sleepy"
+        },
+        {
+          "behavior": "doze",
+          "speed": 0.5,
+          "amplitude": 0.4,
+          "repeat": 3,
+          "face": "neutral"
+        },
+        {
+          "behavior": "idle",
+          "speed": 0.3,
+          "amplitude": 0.2,
+          "repeat": 4,
+          "face": "soft"
+        },
+        {
+          "behavior": "nod",
+          "speed": 0.6,
+          "amplitude": 0.5,
+          "repeat": 2,
+          "face": "sleepy"
+        },
+        {
+          "behavior": "idle",
+          "speed": 0.4,
+          "amplitude": 0.3,
+          "repeat": 3,
+          "face": "neutral"
+        },
+        {
+          "behavior": "doze",
+          "speed": 0.5,
+          "amplitude": 0.4,
+          "repeat": 2,
+          "face": "soft"
+        }
+      ]
+    },
+    "face": {
+      "preset": "sleepy",
+      "tokens": {
+        "eyeSize": 0.8,
+        "eyeOpen": 0.6,
+        "eyeAngle": 0,
+        "browAngle": -10,
+        "brightness": 0.5,
+        "blinkRate": 10
+      }
+    },
+    "sound": {
+      "cues": [
+        {
+          "preset": "soft-breath",
+          "t": 0
+        },
+        {
+          "preset": "falling-tone",
+          "t": 4
+        }
+      ]
+    }
+  }
+}
