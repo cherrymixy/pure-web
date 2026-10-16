@@ -9,7 +9,7 @@ import { FakeClient } from "../llm/fake";
 import { DemoGeneration, OllamaGeneration, type GenerationOutput } from "../llm/generation";
 import type { Db } from "../models";
 import { LowRepo } from "../repo-lowdb";
-import { referenceImages, runGeneration } from "./generate";
+import { referenceImages, runGeneration, userDataSummary } from "./generate";
 
 const good: GenerationOutput = {
   name: "Sleepy drift",
@@ -91,5 +91,15 @@ describe("referenceImages", () => {
       root,
     );
     expect(imgs).toEqual([Buffer.from("AAA").toString("base64")]);
+  });
+});
+
+describe("userDataSummary", () => {
+  it("turns User Data references into a text summary", async () => {
+    const r = repo();
+    const motion = (await r.userData.list())[0];
+    const text = await userDataSummary(r, [{ id: "u", kind: "userData", path: motion.id, thumb: "", status: "ok" }]);
+    expect(text).toContain(motion.name);
+    expect(await userDataSummary(r, [])).toBeUndefined();
   });
 });

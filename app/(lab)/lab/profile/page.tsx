@@ -1,6 +1,10 @@
+// @implemented
 // @screen W05
-import { Placeholder } from "@/components/ui/placeholder";
+import { getRepo } from "@/lib/repo-server";
+import { ProfileView } from "./_components/profile-view";
 
-export default function Page() {
-  return <Placeholder screen="W05" route="/lab/profile" />;
+export const dynamic = "force-dynamic";
+
+export default async function Page() {
+  return <ProfileView initial={await getRepo().profile.get()} />;
 }

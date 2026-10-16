@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import { COMPONENTS } from "@/data/components";
 import { SITUATION_PATTERNS } from "@/data/patterns";
-import { STRINGS } from "@/data/strings";
+import { STRINGS, fmt } from "@/data/strings";
 import type { Reference } from "@/lib/models";
 import { fileUrl } from "@/lib/ui/upload";
 import { Button } from "@/components/ui/button";
@@ -102,9 +102,9 @@ export function ContextPanel({
               <span className="h-10 w-14 rounded bg-neutral-100" />
             )}
             <span className="flex min-w-0 flex-1 flex-col">
-              <span className="truncate text-xs">{r.path.split("/").pop()?.replace(/^[0-9a-f]{8}-/, "")}</span>
+              <span className="truncate text-xs">{r.kind === "userData" ? fmt(STRINGS.userData.referenceLabel, { name: r.path }) : r.path.split("/").pop()?.replace(/^[0-9a-f]{8}-/, "")}</span>
               <span className={`text-xs ${r.status === "failed" ? "text-red-600" : "text-neutral-500"}`}>
-                {r.status === "failed" ? E.referenceFailed : r.durationS ? `${r.durationS.toFixed(1)}s · ${r.frames?.length ?? 0} frames` : r.kind}
+                {r.status === "failed" ? E.referenceFailed : r.durationS ? `${r.durationS.toFixed(1)}s · ${r.frames?.length ?? 0} frames` : r.kind === "userData" ? STRINGS.userData.title : r.kind}
               </span>
             </span>
             </button>

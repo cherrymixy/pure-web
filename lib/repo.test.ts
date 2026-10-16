@@ -173,3 +173,21 @@ describe("isRepoError", () => {
     expect(isRepoError({ code: "NOT_FOUND" })).toBe(false);
   });
 });
+
+describe("library ↔ user data, ownership", () => {
+  it("saving to the library exposes it in User Data (uploaded); deleting removes it", async () => {
+    const t = setup();
+    const saved = await t.repo.library.save("e-sleepy-nod", "My nod");
+    const uploaded = await t.repo.userData.list({ tab: "uploaded" });
+    expect(uploaded.map((u) => u.name)).toContain("My nod");
+    await t.repo.library.delete(saved.id);
+    expect((await t.repo.userData.list({ tab: "uploaded" })).map((u) => u.name)).not.toContain("My nod");
+  });
+
+  it("transferring ownership demotes the old owner to Admin", async () => {
+    const t = setup();
+    const p = await t.repo.profile.setRole("minjun@purebot.com", "Owner");
+    expect(p.team.find((m) => m.email === "minjun@purebot.com")?.role).toBe("Owner");
+    expect(p.team.find((m) => m.email === "SeungA@purebot.com")?.role).toBe("Admin");
+  });
+});

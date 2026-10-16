@@ -98,7 +98,9 @@ export function Editor({
   signature,
   initialExpression,
   settings,
+  incomingReference = null,
 }: {
+  incomingReference?: { id: string; name: string } | null;
   project: Project;
   structure: Structure;
   signature: Signature;
@@ -160,9 +162,16 @@ export function Editor({
   // Both updates land in one render, so the first write already carries the stored context.
   const [contextLoaded, setContextLoaded] = useState(false);
   useEffect(() => {
-    setContext(loadContext(project.id, initialExpression));
+    const loaded = loadContext(project.id, initialExpression);
+    if (incomingReference && !loaded.references.some((r) => r.kind === "userData" && r.path === incomingReference.id)) {
+      const ref: Reference = { id: `ref-${incomingReference.id}`, kind: "userData", path: incomingReference.id, thumb: "", status: "ok" };
+      loaded.references = [...loaded.references, ref].slice(-MAX_REFERENCES);
+      setLeftTab("context");
+    }
+    setContext(loaded);
     setContextLoaded(true);
-  }, [project.id, initialExpression]);
+    if (incomingReference) router.replace(`/lab/p/${project.id}`);
+  }, [project.id, initialExpression, incomingReference, router]);
   useEffect(() => {
     if (!contextLoaded) return;
     try {
@@ -688,7 +697,7 @@ export function Editor({
               setContext((c) => ({ ...c, references: c.references.filter((r) => r.id !== id) }));
               if (activeRef?.id === id) setActiveRef(null);
             }}
-            onOpenReference={(r) => setActiveRef(activeRef?.id === r.id ? null : r)}
+            onOpenReference={(r) => r.kind !== "userData" && setActiveRef(activeRef?.id === r.id ? null : r)}
             activeReference={activeRef?.id ?? null}
           />
         ) : (

@@ -2,21 +2,28 @@
 // @screen W02D·W02E
 import { notFound, redirect } from "next/navigation";
 import { PURE_DEFAULT_SIGNATURE } from "@/data/signature";
-import { RepoError } from "@/lib/repo";
+import { isRepoError } from "@/lib/repo";
 import { getRepo } from "@/lib/repo-server";
 import { Editor } from "./_components/editor";
 
 export const dynamic = "force-dynamic";
 
-export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+export default async function Page({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ ref?: string }> }) {
   const { id } = await params;
+  const { ref } = await searchParams;
   const repo = getRepo();
   const project = await repo.projects.get(id).catch((err) => {
-    if (err instanceof RepoError && err.code === "NOT_FOUND") notFound();
+    if (isRepoError(err) && err.code === "NOT_FOUND") notFound();
     throw err;
   });
   if (!project.structure) redirect(`/lab/p/${id}/${project.status === "analyzing" ? "analyzing" : "structure"}`);
-  const [expressions, signature, settings] = await Promise.all([repo.expressions.listByProject(id), repo.signatures.current(id), repo.settings.get()]);
+  const [expressions, signature, settings, incoming] = await Promise.all([
+    repo.expressions.listByProject(id),
+    repo.signatures.current(id),
+    repo.settings.get(),
+    // User Data → "Use as reference" lands here with ?ref=<motion id>.
+    ref ? repo.userData.get(ref).then((m) => ({ id: m.id, name: m.name }), () => null) : null,
+  ]);
   return (
     <Editor
       project={project}
@@ -24,6 +31,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
       signature={signature ?? PURE_DEFAULT_SIGNATURE}
       initialExpression={expressions[0] ?? null}
       settings={settings}
+      incomingReference={incoming}
     />
   );
 }

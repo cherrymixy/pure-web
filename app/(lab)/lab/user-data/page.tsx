@@ -1,6 +1,7 @@
+// @implemented
 // @screen W04-1~3
-import { Placeholder } from "@/components/ui/placeholder";
+import { UserDataBrowser } from "./_components/user-data-browser";
 
 export default function Page() {
-  return <Placeholder screen="W04-1~3" route="/lab/user-data" />;
+  return <UserDataBrowser />;
 }

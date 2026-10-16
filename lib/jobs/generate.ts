@@ -72,6 +72,7 @@ export async function runGeneration(opts: {
 
   await report(1, 15);
   const images = await referenceImages(input.references ?? [], opts.root);
+  const motionRefs = await userDataSummary(repo, input.references ?? []);
 
   await report(2, 30);
   const result = await client.generate(
@@ -83,6 +84,8 @@ export async function runGeneration(opts: {
       structure: project.structure,
       signature,
       images: images.length ? images : undefined,
+      // No images to describe: User Data motions go in as text instead.
+      referenceSummary: images.length ? undefined : motionRefs,
     },
     { signal },
   );
@@ -110,6 +113,16 @@ export async function runGeneration(opts: {
     issues,
     ms: result.ms,
   };
+}
+
+/** User Data references (`kind: "userData"`, path = motion id) → "Reference motion …" text. */
+export async function userDataSummary(repo: Repo, refs: Reference[]): Promise<string | undefined> {
+  const lines: string[] = [];
+  for (const r of refs.filter((x) => x.kind === "userData" && x.status === "ok")) {
+    const m = await repo.userData.get(r.path).catch(() => null);
+    if (m) lines.push(`Reference motion "${m.name}" (${m.category}): ${m.preview.steps.map((s) => s.behavior).join(" → ")}`);
+  }
+  return lines.length ? lines.join("; ") : undefined;
 }
 
 async function save(repo: Repo, input: GenerateInput, expression: BuiltExpression) {

@@ -248,12 +248,15 @@ export class LowRepo implements Repo {
           channels: channelsOf(e),
         };
         data.library.push(saved);
+        // Saved expressions show up in User Data → "User uploaded" (PRD flow end).
+        data.userData.push({ id: `ud-${saved.id}`, name: saved.name, category: "Other", uses: 0, preview: saved.motion.recipe, source: "user" });
         return saved;
       }),
     delete: (id) =>
       this.write((data) => {
         found(data.library.find((e) => e.id === id), "Library item");
         data.library = data.library.filter((e) => e.id !== id);
+        data.userData = data.userData.filter((u) => u.id !== `ud-${id}`);
       }),
   };
 
@@ -375,6 +378,11 @@ export class LowRepo implements Repo {
       this.write((data) => {
         const member = found(data.profile.team.find((m) => m.email === email), "Team member");
         if (member.role === "Owner") throw new RepoError("CONFLICT", "The owner's role can't change");
+        if (role === "Owner") {
+          // Transfer ownership: the previous owner becomes an Admin.
+          if (member.pending) throw new RepoError("CONFLICT", "Pending invites can't own the team");
+          for (const m of data.profile.team) if (m.role === "Owner") m.role = "Admin";
+        }
         member.role = role;
         return data.profile;
       }),
