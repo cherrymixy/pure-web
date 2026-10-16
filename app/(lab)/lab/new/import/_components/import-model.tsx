@@ -8,6 +8,7 @@ import type { Project } from "@/lib/models";
 import { estimateType, type ModelReading } from "@/lib/robot/analyze";
 import { api } from "@/lib/ui/api";
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icons/icon";
 import { ConfirmModal } from "@/components/ui/modal";
 import { useToast } from "@/components/ui/toast";
 
@@ -109,64 +110,97 @@ export function ImportModel() {
   }
 
   const busy = phase.kind === "reading" || phase.kind === "uploading";
+  const percent = phase.kind === "uploading" ? Math.round((phase.loaded / Math.max(phase.total, 1)) * 100) : 0;
 
+  // No Figma frame: same language as W02B-1 type select (back pill at 48/40, 1714 column at x 103, title 52 semibold)
+  // and the W02B-3 analysis card (white radius 2xl card, border 2, 6px bar on neutral-150 with bg/inverse fill).
   return (
-    <div className="flex flex-col gap-6 p-10">
-      <Link href="/lab" className="text-sm text-neutral-500">← {STRINGS.sidebar.lab}</Link>
-      <h1 className="text-2xl font-semibold">{replaceId ? S.replaceTitle : S.title}</h1>
-
-      <div
-        data-testid="dropzone"
-        onDragOver={(e) => {
-          e.preventDefault();
-          if (!busy) setDragging(true);
-        }}
-        onDragLeave={() => setDragging(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setDragging(false);
-          if (!busy) pick(e.dataTransfer.files);
-        }}
-        className={`flex min-h-72 flex-col items-center justify-center gap-4 rounded border-2 border-dashed p-10 text-center ${
-          dragging ? "border-neutral-900 bg-neutral-100" : phase.kind === "error" ? "border-red-400" : "border-neutral-300"
-        }`}
+    <div className="flex min-h-screen flex-col pl-[48px] pt-[var(--space-40)]">
+      <Link
+        href="/lab"
+        className="flex h-[48px] w-fit items-center gap-[var(--space-12)] rounded-[var(--radius-full)] border-2 border-[var(--border-default)] bg-[var(--bg-surface)] px-[var(--space-16)] text-[16px] font-medium leading-[20px] text-[var(--text-link)] hover:bg-[var(--neutral-50)]"
       >
-        {phase.kind === "idle" && (
-          <>
-            <p className="text-neutral-600">{dragging ? S.dropHere : S.drop}</p>
-            <Button onClick={() => input.current?.click()}>{S.browse}</Button>
-          </>
-        )}
-        {phase.kind === "reading" && <p className="text-neutral-600">{S.reading} · {phase.name}</p>}
-        {phase.kind === "uploading" && (
-          <div className="flex w-full max-w-md flex-col gap-2">
-            <div className="flex justify-between text-sm">
-              <span className="truncate">{S.uploading} · {phase.name}</span>
-              <span className="font-mono">{Math.round((phase.loaded / Math.max(phase.total, 1)) * 100)}%</span>
-            </div>
-            <div className="h-1.5 overflow-hidden rounded bg-neutral-200">
-              <div className="h-full bg-neutral-700" style={{ width: `${(phase.loaded / Math.max(phase.total, 1)) * 100}%` }} />
-            </div>
-            <Button className="self-center" onClick={() => setConfirmCancel(true)}>{S.cancel}</Button>
-          </div>
-        )}
-        {phase.kind === "error" && (
-          <div role="alert" className="flex flex-col items-center gap-2">
-            <p className="font-semibold text-red-600">{phase.title}</p>
-            <p className="text-sm text-neutral-600">{phase.body}</p>
-            <Button onClick={() => { setPhase({ kind: "idle" }); input.current?.click(); }}>{S.tryAnother}</Button>
-          </div>
-        )}
-        <input ref={input} type="file" className="hidden" onChange={(e) => { pick(e.target.files); e.target.value = ""; }} />
-      </div>
+        <span aria-hidden>←</span>
+        <span>{STRINGS.sidebar.lab}</span>
+      </Link>
 
-      <div className="grid grid-cols-3 gap-4">
-        {S.formats.map((f) => (
-          <div key={f.ext} className="flex flex-col gap-1 rounded border border-neutral-200 p-4">
-            <span className="font-semibold">{f.ext}</span>
-            <span className="text-xs text-neutral-500">{f.note}</span>
-          </div>
-        ))}
+      <div className="ml-[55px] flex w-[1714px] flex-col pb-[65px]">
+        <header className="mt-[21px] flex flex-col gap-[12px]">
+          <h1 className="text-[52px] font-semibold leading-[66px] text-[var(--sage-800)]">{replaceId ? S.replaceTitle : S.title}</h1>
+        </header>
+
+        <div
+          data-testid="dropzone"
+          onDragOver={(e) => {
+            e.preventDefault();
+            if (!busy) setDragging(true);
+          }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragging(false);
+            if (!busy) pick(e.dataTransfer.files);
+          }}
+          className={`mt-[72px] flex h-[480px] flex-col items-center justify-center rounded-[var(--radius-2xl)] border-2 border-dashed px-[var(--space-48)] text-center transition-colors ${
+            dragging
+              ? "border-[var(--border-strong)] bg-[var(--sage-50)]"
+              : phase.kind === "error"
+                ? "border-[var(--border-error)] bg-[var(--bg-surface)]"
+                : "border-[var(--border-default)] bg-[var(--bg-surface)]"
+          }`}
+        >
+          {phase.kind === "idle" && (
+            <div className="flex flex-col items-center gap-[var(--space-24)]">
+              <span className={`flex size-[96px] items-center justify-center rounded-[var(--radius-full)] ${dragging ? "bg-[var(--bg-surface)]" : "bg-[var(--bg-canvas)]"} text-[var(--icon-primary)]`}>
+                <Icon name="folder_open" size={40} />
+              </span>
+              <p className="text-[22px] font-medium leading-[28px] text-[var(--text-primary)]">{dragging ? S.dropHere : S.drop}</p>
+              <Button variant="primary" onClick={() => input.current?.click()}>{S.browse}</Button>
+            </div>
+          )}
+          {phase.kind === "reading" && (
+            <div className="flex items-center gap-[var(--space-12)] text-[18px] leading-[22px] text-[var(--text-secondary)]">
+              <span className="flex animate-spin text-[var(--icon-secondary)]"><Icon name="spinner" size={22} /></span>
+              <span>{S.reading}</span>
+              <span className="max-w-[600px] truncate font-medium text-[var(--text-primary)]">{phase.name}</span>
+            </div>
+          )}
+          {phase.kind === "uploading" && (
+            <div className="flex w-[600px] flex-col gap-[var(--space-24)] text-left">
+              <div className="flex flex-col gap-[var(--space-8)]">
+                <p className="truncate text-[22px] font-semibold leading-[28px] text-[var(--text-primary)]">{phase.name}</p>
+                <p className="text-[16px] leading-[20px] text-[var(--text-secondary)]">{S.uploading}</p>
+              </div>
+              <div className="flex flex-col gap-[var(--space-12)]">
+                <span className="text-[18px] font-semibold leading-[22px] text-[var(--text-primary)]">{percent}%</span>
+                <div className="relative h-[6px] w-full overflow-hidden rounded-[var(--radius-full)] bg-[var(--neutral-150)]">
+                  <div className="absolute inset-y-0 left-0 rounded-[var(--radius-full)] bg-[var(--bg-inverse)] transition-[width]" style={{ width: `${percent}%` }} />
+                </div>
+              </div>
+              <Button className="self-start" onClick={() => setConfirmCancel(true)}>{S.cancel}</Button>
+            </div>
+          )}
+          {phase.kind === "error" && (
+            <div role="alert" className="flex flex-col items-center gap-[var(--space-12)]">
+              <span className="mb-[var(--space-12)] flex size-[96px] items-center justify-center rounded-[var(--radius-full)] bg-[var(--bg-error-subtle)] text-[var(--status-error)]">
+                <Icon name="error_outline" size={40} />
+              </span>
+              <p className="text-[22px] font-semibold leading-[28px] text-[var(--text-error)]">{phase.title}</p>
+              <p className="text-[16px] leading-[20px] text-[var(--text-secondary)]">{phase.body}</p>
+              <Button className="mt-[var(--space-12)]" onClick={() => { setPhase({ kind: "idle" }); input.current?.click(); }}>{S.tryAnother}</Button>
+            </div>
+          )}
+          <input ref={input} type="file" className="hidden" onChange={(e) => { pick(e.target.files); e.target.value = ""; }} />
+        </div>
+
+        <div className="mt-[var(--space-24)] grid grid-cols-3 gap-[20.4px]">
+          {S.formats.map((f) => (
+            <div key={f.ext} className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-xl)] bg-[var(--bg-surface)] px-[28.5px] py-[var(--space-24)]">
+              <span className="text-[28px] font-semibold leading-[36px] text-[var(--sage-800)]">{f.ext}</span>
+              <span className="text-[16px] leading-[20px] text-[var(--sage-500)]">{f.note}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
       <ConfirmModal

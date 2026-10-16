@@ -22,12 +22,18 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={show}>
       {children}
-      <div className="pointer-events-none fixed inset-x-0 bottom-6 z-50 flex flex-col items-center gap-2" role="status" aria-live="polite">
+      {/* Figma C / Web "Web/Toast" (916:635) ×2: bg/inverse, radius md, px 24 · py 16, gap 16, 16px on-inverse;
+          shadow from DS Toast (454:4257) PURE/Shadow/Float. */}
+      <div className="pointer-events-none fixed inset-x-0 bottom-[var(--space-40)] z-50 flex flex-col items-center gap-[var(--space-12)]" role="status" aria-live="polite">
         {toasts.map((t) => (
-          <div key={t.id} data-testid="toast" className="pointer-events-auto flex items-center gap-4 rounded bg-neutral-900 px-4 py-2 text-sm text-white shadow">
+          <div
+            key={t.id}
+            data-testid="toast"
+            className="pointer-events-auto flex max-w-[720px] items-center gap-[var(--space-16)] rounded-[var(--radius-md)] bg-[var(--bg-inverse)] px-[var(--space-24)] py-[var(--space-16)] text-[16px] leading-[20px] text-[var(--text-on-inverse)] shadow-[var(--pure-shadow-float)]"
+          >
             <span>{t.text}</span>
             {t.action && (
-              <button className="font-semibold underline" onClick={t.action.onClick}>{t.action.label}</button>
+              <button className="shrink-0 font-medium text-[var(--text-on-inverse)] hover:underline" onClick={t.action.onClick}>{t.action.label}</button>
             )}
           </div>
         ))}

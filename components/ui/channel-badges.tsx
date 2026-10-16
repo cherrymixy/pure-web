@@ -1,18 +1,17 @@
 import type { Channel } from "@/lib/models";
+import { Icon, type IconName } from "@/components/ui/icons/icon";
 
 const LABEL: Record<Channel, string> = { motion: "Motion", face: "Face", sound: "Sound" };
+// Same channel glyphs as the lab-home cards (Figma 901:8309).
+const ICON: Record<Channel, IconName> = { motion: "running-round", face: "smile-square", sound: "volume-loud" };
 
-// Channel icons on cards (gray-box: text badges).
+// Channel icons on cards: used channels in icon/primary, unused dimmed.
 export function ChannelBadges({ channels }: { channels: Channel[] }) {
   return (
-    <div className="flex gap-1">
+    <div className="flex shrink-0 items-center gap-[var(--space-8)]">
       {(["motion", "face", "sound"] as Channel[]).map((c) => (
-        <span
-          key={c}
-          title={LABEL[c]}
-          className={`rounded border px-1.5 text-xs ${channels.includes(c) ? "border-neutral-700 text-neutral-900" : "border-neutral-200 text-neutral-300"}`}
-        >
-          {LABEL[c][0]}
+        <span key={c} title={LABEL[c]} className={channels.includes(c) ? "text-[var(--icon-primary)]" : "text-[var(--neutral-300)]"}>
+          <Icon name={ICON[c]} size={18} label={LABEL[c]} />
         </span>
       ))}
     </div>
