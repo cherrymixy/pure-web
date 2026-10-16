@@ -1,6 +1,7 @@
+// @implemented
 // @screen W02A-1~3
-import { Placeholder } from "@/components/ui/placeholder";
+import { LabHome } from "./_components/lab-home";
 
 export default function Page() {
-  return <Placeholder screen="W02A-1~3" route="/lab" />;
+  return <LabHome />;
 }
