@@ -4,15 +4,16 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SUGGESTED_PROMPTS } from "@/data/prompts";
 import { STRINGS, fmt } from "@/data/strings";
-import { addFaceKey, addKey, applyToRobot, autoAdjust, deleteFaceKey, deleteKey, formatTime, moveFaceKey, paramsToProps, propsToParams, recipeToClip, snapTime, updateKey } from "@/lib/expression";
+import { addFaceKey, addKey, applyToRobot, autoAdjust, deleteFaceKey, deleteKey, formatTime, matchTiming, moveFaceKey, paramsToProps, propsToParams, recipeToClip, snapTime, updateKey } from "@/lib/expression";
+import { diffEnergy, energySamples } from "@/lib/reference/energy";
 import type { Channel, Clip, Expression, FaceSpec, Key, Job, MotionProps, Project, Reference, SavedExpression, Settings, Signature, SoundCue, SoundSpec, Structure } from "@/lib/models";
 import { cueAt } from "@/data/sound-cues";
-import { ReferenceError, extractFrames } from "@/lib/reference/frames";
+import { ReferenceError, extractFrames, readFramePixels } from "@/lib/reference/frames";
 import { signatureToParams } from "@/lib/signature/axes";
 import { createSoundEngine } from "@/lib/sound";
 import { ApiError, api } from "@/lib/ui/api";
 import { describeChange, describeFields, emptyHistory, pushChange, undoChange, type History } from "@/lib/ui/history";
-import { uploadFile } from "@/lib/ui/upload";
+import { fileUrl, uploadFile } from "@/lib/ui/upload";
 import type { JointState, SimController } from "@/components/sim/sim-controller";
 import { Viewport, type ViewportEvent } from "@/components/sim/Viewport";
 import type { LimitEvent } from "@/components/sim/limits";
@@ -25,6 +26,7 @@ import { FACE_FIELDS, FacePanel, SoundPanel } from "./channel-panels";
 import { ContextPanel, type EditorContext, type PendingReference } from "./context-panel";
 import { LibraryPanel } from "./library-panel";
 import { JointTable, MotionPanel, PROP_LABELS } from "./panels";
+import { ReferencePlayer } from "./reference-player";
 import { Timeline, type KeyRef, type Track } from "./timeline";
 
 const E = STRINGS.editor;
@@ -119,6 +121,9 @@ export function Editor({
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
   const [selectedKey, setSelectedKey] = useState<KeyRef | null>(null);
   const [loop, setLoop] = useState(false);
+  const [activeRef, setActiveRef] = useState<Reference | null>(null);
+  const [sideBySide, setSideBySide] = useState(false);
+  const [matching, setMatching] = useState(false);
   const committed = useRef<Snapshot>({ props, face, sound: soundSpec, clip });
   const [history, setHistory] = useState<History<Snapshot>>(emptyHistory);
   const [prompt, setPrompt] = useState("");
@@ -336,6 +341,26 @@ export function Editor({
     const next = { ...face, keys };
     changeFace(next);
     void commit({ face: next });
+  }
+
+  /** Peaks of frame-to-frame motion in the reference → nearest keyframe times move there (undoable). */
+  async function matchToReference() {
+    if (!activeRef?.frames?.length || !timelineClip) return;
+    setMatching(true);
+    try {
+      const pixels = await readFramePixels(activeRef.frames.map(fileUrl));
+      const energy = energySamples(diffEnergy(pixels), activeRef.durationS ?? timelineClip.duration);
+      const { clip: next, moved } = matchTiming(timelineClip, energy);
+      if (!moved) return toast(E.sync.nothing);
+      setClip(next);
+      setTimelineOpen(true);
+      showClip(next);
+      await commit({ clip: next }, fmt(E.sync.matched, { n: moved }));
+    } catch (err) {
+      toast(err instanceof Error ? err.message : String(err));
+    } finally {
+      setMatching(false);
+    }
   }
 
   function seekTo(t: number) {
@@ -591,6 +616,19 @@ export function Editor({
   const busy = running(job);
   const fmtT = (s: number) => (Number.isFinite(s) ? s.toFixed(2) : "∞");
   const hasChannel = (c: Channel) => structure.channels.includes(c);
+  const referencePlayer = activeRef && (
+    <ReferencePlayer
+      reference={activeRef}
+      t={time.t}
+      duration={timelineClip?.duration ?? time.duration}
+      playing={!paused}
+      side={sideBySide}
+      busy={matching || busy}
+      onSide={setSideBySide}
+      onMatch={() => void matchToReference()}
+      onClose={() => setActiveRef(null)}
+    />
+  );
 
   return (
     <div className="grid h-screen grid-cols-[280px_1fr_340px] grid-rows-[auto_1fr_auto] overflow-hidden">
@@ -642,7 +680,12 @@ export function Editor({
             onChange={(patch) => setContext((c) => ({ ...c, ...patch }))}
             onToggleComponent={toggleComponent}
             onAddFiles={addFiles}
-            onRemoveReference={(id) => setContext((c) => ({ ...c, references: c.references.filter((r) => r.id !== id) }))}
+            onRemoveReference={(id) => {
+              setContext((c) => ({ ...c, references: c.references.filter((r) => r.id !== id) }));
+              if (activeRef?.id === id) setActiveRef(null);
+            }}
+            onOpenReference={(r) => setActiveRef(activeRef?.id === r.id ? null : r)}
+            activeReference={activeRef?.id ?? null}
           />
         ) : (
           <LibraryPanel busy={busy} onApply={(s) => void applyLibrary(s)} />
@@ -651,6 +694,7 @@ export function Editor({
 
       {/* Center: viewport, playback bar, prompt */}
       <main className="flex min-h-0 flex-col gap-3 p-4">
+        <div className="flex min-h-0 flex-1 gap-2">
         <div className="relative min-h-0 flex-1 overflow-hidden rounded border border-neutral-200">
           <Viewport
             controllerRef={ctrl}
@@ -678,6 +722,9 @@ export function Editor({
           {lastResult?.source === "demo" && expression && !busy && (
             <span className="absolute right-3 top-3 rounded bg-amber-100 px-2 py-0.5 text-xs text-amber-800">{E.demoBadge}</span>
           )}
+          {activeRef && !sideBySide && <div className="absolute bottom-3 left-3">{referencePlayer}</div>}
+        </div>
+        {activeRef && sideBySide && <div className="w-1/2 min-w-0 overflow-hidden rounded border border-neutral-200">{referencePlayer}</div>}
         </div>
 
         <div className="flex items-center gap-3 text-sm">

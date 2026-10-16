@@ -60,3 +60,23 @@ export async function extractFrames(file: File): Promise<{ duration: number; fra
     video.removeAttribute("src");
   }
 }
+
+/** Load frame images and read them as small RGBA buffers (for diffEnergy). */
+export async function readFramePixels(urls: string[], size = 64): Promise<Uint8ClampedArray[]> {
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  if (!ctx) throw new ReferenceError("UNREADABLE", "2D canvas unavailable");
+  const out: Uint8ClampedArray[] = [];
+  for (const url of urls) {
+    const img = new Image();
+    img.src = url;
+    await img.decode().catch(() => {
+      throw new ReferenceError("UNREADABLE", "A reference frame couldn't be loaded");
+    });
+    ctx.drawImage(img, 0, 0, size, size);
+    out.push(ctx.getImageData(0, 0, size, size).data);
+  }
+  return out;
+}

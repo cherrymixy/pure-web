@@ -30,6 +30,8 @@ export function ContextPanel({
   onToggleComponent,
   onAddFiles,
   onRemoveReference,
+  onOpenReference,
+  activeReference,
 }: {
   context: EditorContext;
   pending: PendingReference[];
@@ -38,6 +40,8 @@ export function ContextPanel({
   onToggleComponent: (id: string) => void;
   onAddFiles: (files: FileList) => void;
   onRemoveReference: (id: string) => void;
+  onOpenReference: (r: Reference) => void;
+  activeReference: string | null;
 }) {
   const input = useRef<HTMLInputElement>(null);
   const full = context.references.length + pending.length >= 4;
@@ -89,7 +93,8 @@ export function ContextPanel({
       <div className="flex flex-col gap-2">
         <span className="text-xs text-neutral-500">{E.reference}</span>
         {context.references.map((r) => (
-          <div key={r.id} data-testid="reference" className={`flex items-center gap-2 rounded border p-1.5 ${r.status === "failed" ? "border-red-300" : "border-neutral-200"}`}>
+          <div key={r.id} data-testid="reference" className={`flex items-center gap-2 rounded border p-1.5 ${r.status === "failed" ? "border-red-300" : activeReference === r.id ? "border-neutral-900" : "border-neutral-200"}`}>
+            <button title={E.sync.open} className="flex min-w-0 flex-1 items-center gap-2 text-left" onClick={() => onOpenReference(r)}>
             {r.thumb ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={fileUrl(r.thumb)} alt="" className="h-10 w-14 rounded object-cover" />
@@ -102,6 +107,7 @@ export function ContextPanel({
                 {r.status === "failed" ? E.referenceFailed : r.durationS ? `${r.durationS.toFixed(1)}s · ${r.frames?.length ?? 0} frames` : r.kind}
               </span>
             </span>
+            </button>
             <button aria-label={E.removeReference} className="px-1 text-neutral-400 hover:text-neutral-900" onClick={() => onRemoveReference(r.id)}>×</button>
           </div>
         ))}
