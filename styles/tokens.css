@@ -131,6 +131,7 @@
   --pure-shadow-card: 0 4px 16px 0 #0000000f; /* PURE/Shadow/Card: DROP_SHADOW #0000000F (0,4) r16 s0 */
   --pure-shadow-float: 0 8px 28px 0 #0000001f; /* PURE/Shadow/Float: DROP_SHADOW #0000001F (0,8) r28 s0 */
   --pure-shadow-modal: 0 4px 14px 0 #00000024; /* PURE/Shadow/Modal: DROP_SHADOW #00000024 (0,4) r14 s0 (W02D-4 Generating pill) */
+  --pure-shadow-chip: 0 6px 20px 0 #0000001f; /* W02E-1 Change chip 901:12020: DROP_SHADOW rgba(0,0,0,.12) (0,3) r10 at 960 → ×2 */
   --analyzing-scan: #3673fc; /* W02B-3 Analysis card scan line / glow: rgba(54,115,252,·) (no Figma variable) */
   /* W02C-3 Signature draft channel dots (901:9504/9509/9514, no Figma variable) */
   --channel-motion: #46ceff;

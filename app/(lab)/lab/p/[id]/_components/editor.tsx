@@ -705,8 +705,9 @@ export function Editor({
   // left Context/Library 343×1016 at 32,32 · right channel panel 380×1016 at right 32 · play bar 634,868 · composer 513,918.
   return (
     <div className="relative h-screen overflow-hidden">
-      {/* Stage (Frame 2147240453 ×2: full width, 265 → bottom), same slot as structure / signature. Never zoom/transform the Viewport. */}
-      <div className={`absolute bottom-0 left-0 top-[265px] ${activeRef && sideBySide ? "w-[958px]" : "right-0"}`}>
+      {/* Stage (Frame 2147240453 ×2: full width, 265 → bottom), same slot as structure / signature. Never zoom/transform the Viewport.
+          W02E-4: with the timeline open the robot sits 100px higher (Group 2147229381 187 → 137.5) — the slot moves up, same height. */}
+      <div className={`absolute left-0 ${timelineOpen ? "bottom-[100px] top-[165px]" : "bottom-0 top-[265px]"} ${activeRef && sideBySide ? "w-[958px]" : "right-0"}`}>
         <Viewport
           controllerRef={ctrl}
           structure={structure}
@@ -724,7 +725,25 @@ export function Editor({
       )}
       {activeRef && !sideBySide && <div className="absolute bottom-[230px] left-[407px] z-10">{referencePlayer}</div>}
 
-      {/* Top of the stage (no Figma equivalent): signature, result badges, change chips + Undo, reasoning, empty hint */}
+      {/* Change chip (W02E-1 901:12020 ×2): centered at top 300 above the robot — "Speed  85 → 60  Undo" (Caption Strong 14, shadow 0 6 20 #0000001f).
+          Up to the last three changes; Undo on the newest. Moves up with the robot when the timeline is open. */}
+      {history.changes.length > 0 && (
+        <div className={`absolute left-1/2 z-10 flex -translate-x-1/2 items-center gap-[var(--space-8)] ${timelineOpen ? "top-[200px]" : "top-[300px]"}`} data-testid="change-chips">
+          {history.changes.slice(-3).map((c, i, list) => (
+            <span
+              key={c.id}
+              className="flex items-center gap-[var(--space-12)] whitespace-pre rounded-[var(--radius-full)] bg-[var(--bg-surface)] px-[var(--space-16)] py-[var(--space-8)] text-[14px] font-medium leading-[18px] text-[var(--text-primary)] shadow-[var(--pure-shadow-chip)]"
+            >
+              {c.label}
+              {i === list.length - 1 && (
+                <button type="button" className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]" onClick={() => void undo()}>{E.undo}</button>
+              )}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* Top of the stage (no Figma equivalent): signature, result badges, reasoning, empty hint */}
       <div className="pointer-events-none absolute left-[407px] right-[444px] top-[32px] z-10 flex flex-col items-center gap-[var(--space-12)]">
         <div className="pointer-events-auto flex flex-wrap items-center justify-center gap-[var(--space-8)]">
           <span className={`${chip} text-[var(--text-secondary)]`}>{signature.name} · v0.{signature.version}</span>
@@ -734,16 +753,6 @@ export function Editor({
             </span>
           )}
           {lastResult?.source === "demo" && expression && !busy && <span className={`${chip} text-[var(--web-ae7d24)]`}>{E.demoBadge}</span>}
-          <div className="flex items-center gap-[var(--space-8)]" data-testid="change-chips">
-            {history.changes.slice(-3).map((c, i, list) => (
-              <span key={c.id} className={`${chip} flex items-center gap-[var(--space-8)] text-[var(--text-primary)]`}>
-                {c.label}
-                {i === list.length - 1 && (
-                  <button className="font-semibold underline" onClick={() => void undo()}>{E.undo}</button>
-                )}
-              </span>
-            ))}
-          </div>
         </div>
         {expression && lastResult?.reasoning && (
           <p className="max-w-[760px] text-center text-[14px] leading-[18px] text-[var(--text-secondary)]">
@@ -759,7 +768,7 @@ export function Editor({
       </div>
 
       {/* Left panel: Context / Library (Frame 2147240454 ×2) */}
-      <aside className="absolute left-[32px] top-[32px] z-10 flex h-[1016px] w-[343px] flex-col overflow-hidden rounded-[var(--radius-xl)] bg-[var(--bg-surface)]">
+      <aside className={`absolute left-[32px] top-[32px] z-10 flex ${timelineOpen ? "h-[651px]" : "h-[1016px]"} w-[343px] flex-col overflow-hidden rounded-[var(--radius-xl)] bg-[var(--bg-surface)]`}>
         <div className="flex items-center gap-[21px] pl-[21px] pt-[20px]">
           <Menu
             label="Project menu"
@@ -823,6 +832,8 @@ export function Editor({
       )}
 
       {/* Play bar (Frame 2087331925 ×2) — the Play button (901:10012) rides the progress as the playhead, kept inside the track so it never covers the time labels */}
+      {/* W02E-4: hidden under the Timeline Panel while it's open (its transport takes over) */}
+      {!timelineOpen && (
       <div className="absolute left-[634px] top-[868px] z-10 h-[30px] w-[613px]">
         <span data-testid="time" className="sr-only">{fmtT(time.t)} / {fmtT(time.duration)}</span>
         <span className="absolute right-[559px] top-[3px] text-[14px] leading-[18px] text-[var(--text-tertiary)]">{clock(time.t)}</span>
@@ -849,9 +860,11 @@ export function Editor({
           )}
         </button>
       </div>
+      )}
 
-      {/* Composer (Frame 56 ×2): prompt box 856×92 + suggestions */}
+      {/* Composer (Frame 56 ×2): prompt box 856×92 + suggestions. W02E-4 collapses it while the timeline is open. */}
       <form
+        hidden={timelineOpen}
         className="absolute left-[513px] top-[918px] z-10 flex w-[856px] flex-col items-center gap-[var(--space-24)]"
         onSubmit={(e) => { e.preventDefault(); void generate(); }}
       >
@@ -930,7 +943,7 @@ export function Editor({
       </form>
 
       {/* Right panel: channel tabs + panel + joints + Edit Detail (Frame 29 ×2) */}
-      <aside className="absolute right-[32px] top-[32px] z-10 flex h-[1016px] w-[380px] flex-col gap-[var(--space-32)] overflow-hidden rounded-[var(--radius-xl)] bg-[var(--bg-surface)] px-[var(--space-24)] pb-[var(--space-32)] pt-[var(--space-24)]">
+      <aside className={`absolute right-[32px] top-[32px] z-10 flex ${timelineOpen ? "h-[651px]" : "h-[1016px]"} w-[380px] flex-col gap-[var(--space-32)] overflow-hidden rounded-[var(--radius-xl)] bg-[var(--bg-surface)] px-[var(--space-24)] pb-[var(--space-32)] pt-[var(--space-24)]`}>
         <div className="grid h-[49px] w-[330px] shrink-0 grid-cols-3 gap-[var(--space-8)] rounded-[var(--radius-sm)] bg-[var(--bg-canvas)] px-[var(--space-8)] py-[7px]" role="tablist">
           {(["motion", "face", "sound"] as const).map((c) => (
             <button
@@ -984,9 +997,9 @@ export function Editor({
         </button>
       </aside>
 
-      {/* Edit Detail timeline (Figma Timeline Panel sits below the frame — collapsed; translated in W02E-4) */}
+      {/* Edit Detail timeline (W02E-4 Timeline Panel 901:12348 ×2): 32,703 · 1856 wide, down to 10 above the bottom */}
       {timelineOpen && timelineClip && (
-        <div className="absolute inset-x-[32px] bottom-[32px] z-20 max-h-[520px] overflow-auto rounded-[var(--radius-xl)] bg-[var(--bg-surface)] shadow-[var(--pure-shadow-float)]">
+        <div className="absolute bottom-[10px] left-[32px] right-[32px] top-[703px] z-20 overflow-hidden rounded-[var(--radius-xl)] bg-[var(--bg-surface)]">
           <Timeline
             clip={timelineClip}
             fromRecipe={!clip}

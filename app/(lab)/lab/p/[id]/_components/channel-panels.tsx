@@ -7,7 +7,7 @@ import { STRINGS } from "@/data/strings";
 import type { FaceSpec, SoundCue, SoundSpec } from "@/lib/models";
 import { FACE_DEFAULTS, FACE_RANGES, FaceCanvas, type FaceParams } from "@/components/sim/face-canvas";
 import { faceSpecToParams } from "@/components/sim/sim-controller";
-import { Button } from "@/components/ui/button";
+import { BarSlider, PANEL_BOX, PanelSection } from "./panels";
 
 const F = STRINGS.editor.face;
 const SND = STRINGS.editor.sound;
@@ -41,20 +41,12 @@ function FacePreview({ spec }: { spec: FaceSpec }) {
     face.current.setParams(spec.preset === "video" ? FACE_DEFAULTS : faceSpecToParams(spec));
   }, [spec]);
 
-  return <canvas ref={view} width={270} height={162} data-testid="face-preview" className="w-full rounded bg-black" />;
+  return <canvas ref={view} width={270} height={162} data-testid="face-preview" className="w-full rounded-[var(--radius-md)] bg-[var(--neutral-1000)]" />;
 }
 
-function Slider({ label, value, min, max, step, digits, onChange, onCommit }: { label: string; value: number; min: number; max: number; step: number; digits: number; onChange: (v: number) => void; onCommit: () => void }) {
-  return (
-    <label className="flex flex-col gap-1 text-sm">
-      <span className="flex justify-between">
-        <span>{label}</span>
-        <span className="font-mono">{value.toFixed(digits)}</span>
-      </span>
-      <input type="range" min={min} max={max} step={step} value={value} aria-label={label} onChange={(e) => onChange(Number(e.target.value))} onPointerUp={onCommit} onKeyUp={onCommit} />
-    </label>
-  );
-}
+/** Pill used for presets / timbre (no dedicated frame; same scale as the W02E-1 tabs and chips). */
+const pill = (on: boolean) =>
+  `rounded-[var(--radius-full)] px-[var(--space-16)] py-[var(--space-8)] text-[14px] leading-[18px] ${on ? "bg-[var(--neutral-800)] text-[var(--text-on-inverse)]" : "bg-[var(--bg-canvas)] text-[var(--text-primary)] hover:bg-[var(--bg-surface-muted)]"}`;
 
 // W02E Face: preview, presets, tokens, display. Edits apply live; release commits one change.
 export function FacePanel({ face, onChange, onCommit }: { face: FaceSpec; onChange: (next: FaceSpec) => void; onCommit: (next?: FaceSpec) => void }) {
@@ -68,7 +60,7 @@ export function FacePanel({ face, onChange, onCommit }: { face: FaceSpec; onChan
   const slider = (k: keyof FaceParams) => {
     const [min, max] = FACE_RANGES[k];
     return (
-      <Slider
+      <BarSlider
         key={k}
         label={F.fields[k]}
         value={face.tokens[k] ?? FACE_DEFAULTS[k]}
@@ -83,32 +75,28 @@ export function FacePanel({ face, onChange, onCommit }: { face: FaceSpec; onChan
   };
 
   return (
-    <div className="flex flex-col gap-4">
-      <section className="flex flex-col gap-2">
-        <h3 className="text-xs text-neutral-500">{F.expression}</h3>
+    <div className="flex flex-col gap-[56px]">
+      <PanelSection title={F.expression}>
         <FacePreview spec={face} />
-      </section>
-      <section className="flex flex-col gap-2">
-        <h3 className="text-xs text-neutral-500">{F.preset}</h3>
-        <div className="flex flex-wrap gap-1.5">
+      </PanelSection>
+      <PanelSection title={F.preset}>
+        <div className="flex flex-wrap gap-[var(--space-8)]">
           {[...Object.keys(FACE_PRESETS), "video"].map((p) => (
-            <button key={p} aria-pressed={face.preset === p} onClick={() => pick(p)} className={`rounded-full border px-2.5 py-0.5 text-xs ${face.preset === p ? "border-neutral-900 bg-neutral-900 text-white" : "border-neutral-300 hover:bg-neutral-100"}`}>
+            <button key={p} type="button" aria-pressed={face.preset === p} onClick={() => pick(p)} className={pill(face.preset === p)}>
               {p === "video" ? F.video : p}
             </button>
           ))}
         </div>
-        {isVideo && <p className="text-xs text-neutral-500">{F.videoNote}</p>}
-      </section>
+        {isVideo && <p className="text-[14px] leading-[18px] text-[var(--text-secondary)]">{F.videoNote}</p>}
+      </PanelSection>
       {!isVideo && (
         <>
-          <section className="flex flex-col gap-2">
-            <h3 className="text-xs text-neutral-500">{F.tokens}</h3>
-            {TOKENS.map(slider)}
-          </section>
-          <section className="flex flex-col gap-2">
-            <h3 className="text-xs text-neutral-500">{F.display}</h3>
-            {DISPLAY.map(slider)}
-          </section>
+          <PanelSection title={F.tokens}>
+            <div className={PANEL_BOX}>{TOKENS.map(slider)}</div>
+          </PanelSection>
+          <PanelSection title={F.display}>
+            <div className={PANEL_BOX}>{DISPLAY.map(slider)}</div>
+          </PanelSection>
         </>
       )}
     </div>
@@ -149,63 +137,78 @@ export function SoundPanel({
   const setCue = (patch: Partial<SoundCue>) => onChange({ cues: sound.cues.map((c) => (c.id === selected ? { ...c, ...patch } : c)) });
   const label = (c: SoundCue) => SOUND_CUES.find((p) => c.id.startsWith(p.id))?.label ?? c.id;
 
+  const empty = "text-[16px] leading-[20px] text-[var(--text-secondary)]";
   return (
-    <div className="flex flex-col gap-4">
-      <section className="flex flex-col gap-1.5">
-        <h3 className="text-xs text-neutral-500">{SND.cues}</h3>
-        {sound.cues.length === 0 && <span className="text-sm text-neutral-500">{STRINGS.editor.noCues}</span>}
-        {[...sound.cues].sort((a, b) => a.t - b.t).map((c) => (
-          <div key={c.id} data-testid="cue" className={`flex items-center gap-2 rounded border px-2 py-1 text-sm ${c.id === selected ? "border-neutral-900" : "border-neutral-200"}`}>
-            <button aria-label={`Preview ${label(c)}`} onClick={() => onPreview(c)} className="px-1">▶</button>
-            <button className="flex-1 text-left" onClick={() => onSelect(c.id)}>{label(c)}</button>
-            <span className="font-mono text-xs text-neutral-500">{c.t.toFixed(2)}s</span>
-            <button aria-label={SND.remove} className="px-1 text-neutral-400 hover:text-neutral-900" onClick={() => onRemove(c.id)}>×</button>
-          </div>
-        ))}
-        <select value="" onChange={(e) => e.target.value && onAdd(e.target.value)} className="rounded border border-neutral-300 px-2 py-1 text-sm" aria-label={SND.add}>
-          <option value="">+ {SND.add}</option>
-          {SOUND_CUES.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}
-        </select>
-      </section>
-
-      <section className="flex flex-col gap-2">
-        <h3 className="text-xs text-neutral-500">{SND.tokens}</h3>
-        {!cue ? (
-          <span className="text-sm text-neutral-500">{SND.select}</span>
-        ) : (
-          <>
-            {CUE_SLIDERS.map(({ key, min, max, step, digits }) => (
-              <Slider key={key} label={SND.fields[key]} value={cue[key]} min={min} max={max} step={step} digits={digits} onChange={(v) => setCue({ [key]: v })} onCommit={() => { onCommit(); onPreview(cue); }} />
-            ))}
-            <div className="flex items-center gap-2 text-sm">
-              <span className="flex-1">{SND.fields.timbre}</span>
-              {(["bright", "soft"] as const).map((t) => (
-                <Button
-                  key={t}
-                  variant={cue.timbre === t ? "primary" : "default"}
-                  onClick={() => {
-                    const next = { cues: sound.cues.map((c) => (c.id === selected ? { ...c, timbre: t } : c)) };
-                    onChange(next);
-                    onCommit(next);
-                    onPreview({ ...cue, timbre: t });
-                  }}
-                >
-                  {SND.timbre[t]}
-                </Button>
-              ))}
+    <div className="flex flex-col gap-[56px]">
+      <PanelSection title={SND.cues} meta={sound.cues.length || undefined}>
+        <div className="flex flex-col gap-[var(--space-8)] rounded-[var(--radius-lg)] bg-[var(--bg-canvas)] p-[var(--space-12)]">
+          {sound.cues.length === 0 && <span className={`px-[var(--space-8)] py-[var(--space-4)] ${empty}`}>{STRINGS.editor.noCues}</span>}
+          {[...sound.cues].sort((a, b) => a.t - b.t).map((c) => (
+            <div
+              key={c.id}
+              data-testid="cue"
+              className={`flex items-center gap-[var(--space-8)] rounded-[var(--radius-sm)] px-[var(--space-8)] py-[var(--space-8)] text-[16px] leading-[20px] text-[var(--text-primary)] ${c.id === selected ? "bg-[var(--bg-surface)] shadow-[var(--pure-shadow-card)]" : ""}`}
+            >
+              <button type="button" aria-label={`Preview ${label(c)}`} onClick={() => onPreview(c)} className="flex size-[24px] shrink-0 items-center justify-center rounded-[var(--radius-full)] bg-[var(--primary)] text-[10px] text-[var(--bg-canvas)]">▶</button>
+              <button type="button" className="min-w-0 flex-1 truncate text-left" onClick={() => onSelect(c.id)}>{label(c)}</button>
+              <span className="text-[12px] leading-[15px] tabular-nums text-[var(--text-tertiary)]">{c.t.toFixed(2)}s</span>
+              <button type="button" aria-label={SND.remove} className="px-[var(--space-4)] text-[var(--text-tertiary)] hover:text-[var(--text-primary)]" onClick={() => onRemove(c.id)}>×</button>
             </div>
-          </>
-        )}
-      </section>
+          ))}
+        </div>
+        <div className="relative">
+          <select value="" onChange={(e) => e.target.value && onAdd(e.target.value)} className="w-full appearance-none rounded-[var(--radius-full)] bg-[var(--bg-surface-muted)] px-[var(--space-16)] py-[var(--space-8)] text-[14px] leading-[18px] text-[var(--text-primary)] outline-none" aria-label={SND.add}>
+            <option value="">+ {SND.add}</option>
+            {SOUND_CUES.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}
+          </select>
+        </div>
+      </PanelSection>
 
-      <section className="flex flex-col gap-2">
-        <h3 className="text-xs text-neutral-500">{SND.output}</h3>
-        {cue && <Slider label={SND.fields.volumeDb} value={cue.volumeDb} min={-30} max={0} step={1} digits={0} onChange={(v) => setCue({ volumeDb: v })} onCommit={() => { onCommit(); onPreview(cue); }} />}
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={quietHours} onChange={(e) => onQuietHours(e.target.checked)} />
-          {SND.quietHours}
-        </label>
-      </section>
+      <PanelSection title={SND.tokens}>
+        {!cue ? (
+          <span className={empty}>{SND.select}</span>
+        ) : (
+          <div className={PANEL_BOX}>
+            {CUE_SLIDERS.map(({ key, min, max, step, digits }) => (
+              <BarSlider key={key} label={SND.fields[key]} value={cue[key]} min={min} max={max} step={step} digits={digits} onChange={(v) => setCue({ [key]: v })} onCommit={() => { onCommit(); onPreview(cue); }} />
+            ))}
+            <div className="flex items-center justify-between">
+              <span className="flex items-start gap-[var(--space-4)]">
+                <span className="mt-[2px] size-[5px] shrink-0 rounded-[var(--radius-full)] bg-[var(--neutral-300)]" aria-hidden />
+                <span className="text-[16px] leading-[20px] text-[var(--text-primary)]">{SND.fields.timbre}</span>
+              </span>
+              <span className="flex gap-[var(--space-8)]">
+                {(["bright", "soft"] as const).map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    aria-pressed={cue.timbre === t}
+                    className={pill(cue.timbre === t)}
+                    onClick={() => {
+                      const next = { cues: sound.cues.map((c) => (c.id === selected ? { ...c, timbre: t } : c)) };
+                      onChange(next);
+                      onCommit(next);
+                      onPreview({ ...cue, timbre: t });
+                    }}
+                  >
+                    {SND.timbre[t]}
+                  </button>
+                ))}
+              </span>
+            </div>
+          </div>
+        )}
+      </PanelSection>
+
+      <PanelSection title={SND.output}>
+        <div className={PANEL_BOX}>
+          {cue && <BarSlider label={SND.fields.volumeDb} value={cue.volumeDb} min={-30} max={0} step={1} digits={0} onChange={(v) => setCue({ volumeDb: v })} onCommit={() => { onCommit(); onPreview(cue); }} />}
+          <label className="flex items-center gap-[var(--space-8)] text-[16px] leading-[20px] text-[var(--text-primary)]">
+            <input type="checkbox" checked={quietHours} onChange={(e) => onQuietHours(e.target.checked)} className="size-[16px] accent-[var(--sage-400)]" />
+            {SND.quietHours}
+          </label>
+        </div>
+      </PanelSection>
     </div>
   );
 }
