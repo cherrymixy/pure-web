@@ -26,6 +26,7 @@ import { ConfirmModal, Modal, PromptModal } from "@/components/ui/modal";
 import { useToast } from "@/components/ui/toast";
 import { CHANNEL_LABEL } from "@/components/ui/channel-badges";
 import { FACE_FIELDS, FacePanel, SoundPanel } from "./channel-panels";
+import { logInput, withRef, type InputEntry } from "@/lib/ui/input-log";
 import { ContextPanel, type EditorContext, type PendingReference } from "./context-panel";
 import { LibraryPanel } from "./library-panel";
 import { JointTable, MotionPanel, PROP_LABELS } from "./panels";
@@ -83,17 +84,20 @@ const isVideo = (f: File) => f.type.startsWith("video/") || /\.(mp4|mov|webm)$/i
 
 /** Context is generation input: kept per project in this browser until the next Generate writes it into the expression. */
 const contextKey = (projectId: string) => `pure.context.${projectId}`;
+
+
 function loadContext(projectId: string, e: Expression | null): EditorContext {
   const fallback: EditorContext = {
-    currentStatus: e?.currentStatus ?? "",
     components: e?.components ?? [],
     pattern: e?.pattern ?? "",
-    references: e?.references ?? [],
+    references: [],
+    inputs: [],
     lastPrompt: "",
   };
   try {
     const raw = localStorage.getItem(contextKey(projectId));
-    return raw ? { ...fallback, ...JSON.parse(raw) } : fallback;
+    const stored = raw ? (JSON.parse(raw) as Partial<EditorContext>) : {};
+    return { ...fallback, ...stored, inputs: Array.isArray(stored.inputs) ? stored.inputs : [] };
   } catch {
     return fallback;
   }
@@ -161,10 +165,10 @@ export function Editor({
   /** Bumped when the motion itself changes (generate, auto-adjust); prop edits don't re-cue playback. */
   const [cue, setCue] = useState(0);
   const [context, setContext] = useState<EditorContext>(() => ({
-    currentStatus: initialExpression?.currentStatus ?? "",
     components: initialExpression?.components ?? [],
     pattern: initialExpression?.pattern ?? "",
-    references: initialExpression?.references ?? [],
+    references: [],
+    inputs: [],
     lastPrompt: "",
   }));
   const [pending, setPending] = useState<PendingReference[]>([]);
@@ -450,9 +454,9 @@ export function Editor({
         // Generate described the frames itself: keep that summary on the (single) reference for next time.
         if (result.referenceSummary) {
           setContext((c) => {
-            const visual = c.references.filter((r) => r.status === "ok" && (r.kind === "image" || r.kind === "video"));
+            const visual = (c.inputs[0]?.attachments ?? []).filter((r) => r.status === "ok" && (r.kind === "image" || r.kind === "video"));
             if (visual.length !== 1 || visual[0].summary) return c;
-            return { ...c, references: c.references.map((r) => (r.id === visual[0].id ? { ...r, summary: result.referenceSummary } : r)) };
+            return withRef(c, visual[0].id, { summary: result.referenceSummary });
           });
         }
         const e = await api<Expression>(`/api/expressions/${result.expressionId}`);
@@ -490,27 +494,35 @@ export function Editor({
     return () => clearInterval(timer);
   }, [job, finish]);
 
-  async function generate(text = prompt, ctx = context) {
+  /**
+   * New input (prompt + tray attachments) goes to the input log; a component-chip regenerate
+   * reuses the latest input's attachments and isn't logged again.
+   */
+  async function generate(text = prompt, ctx = context, regenerate = false) {
     const p = text.trim();
     if (!p || running(job)) return;
-    setPrompt(p);
+    const attachments = regenerate ? (ctx.inputs[0]?.attachments ?? []) : ctx.references;
+    setPrompt(regenerate ? p : "");
     setFailure(null);
-    setContext((c) => ({ ...c, lastPrompt: p }));
     try {
       setJob(
         await api<Job>(`/api/projects/${project.id}/generate`, {
           method: "POST",
           body: JSON.stringify({
             prompt: p,
-            currentStatus: ctx.currentStatus.trim() || undefined,
             components: ctx.components,
             pattern: ctx.pattern || undefined,
-            references: ctx.references,
+            references: attachments,
             expressionId: expression?.id,
           }),
         }),
       );
+      if (!regenerate) {
+        const entry: InputEntry = { id: `in-${Date.now().toString(36)}`, at: new Date().toISOString(), text: p, attachments };
+        setContext((c) => ({ ...logInput(c, entry), lastPrompt: p }));
+      }
     } catch (err) {
+      setPrompt(p);
       setFailure(err instanceof ApiError ? err.message : String(err));
     }
   }
@@ -520,7 +532,7 @@ export function Editor({
     const next = { ...context, components };
     setContext(next);
     const again = context.lastPrompt || prompt;
-    if (again.trim()) void generate(again, next);
+    if (again.trim()) void generate(again, next, !!context.lastPrompt);
   }
 
   // ------------------------------------------------------------ references
@@ -555,7 +567,7 @@ export function Editor({
     setReading((r) => [...r, ref.id]);
     api<{ summary: string | null }>(`/api/projects/${project.id}/references/describe`, { method: "POST", body: JSON.stringify({ reference: ref }) })
       .then(({ summary }) => {
-        if (summary) setContext((c) => ({ ...c, references: c.references.map((r) => (r.id === ref.id ? { ...r, summary } : r)) }));
+        if (summary) setContext((c) => withRef(c, ref.id, { summary }));
       }, () => {})
       .finally(() => setReading((r) => r.filter((id) => id !== ref.id)));
   }
@@ -727,15 +739,10 @@ export function Editor({
         {leftTab === "context" ? (
           <ContextPanel
             context={context}
-            pending={pending}
+            behaviors={expression?.motion.recipe.steps.map((st) => st.behavior) ?? []}
             busy={busy}
             onChange={(patch) => setContext((c) => ({ ...c, ...patch }))}
             onToggleComponent={toggleComponent}
-            onAddFiles={addFiles}
-            onRemoveReference={(id) => {
-              setContext((c) => ({ ...c, references: c.references.filter((r) => r.id !== id) }));
-              if (activeRef?.id === id) setActiveRef(null);
-            }}
             onOpenReference={(r) => r.kind !== "userData" && setActiveRef(activeRef?.id === r.id ? null : r)}
             activeReference={activeRef?.id ?? null}
             reading={reading}
@@ -798,10 +805,13 @@ export function Editor({
 
         <form className="flex flex-col gap-2" onSubmit={(e) => { e.preventDefault(); void generate(); }}>
           <div className="flex gap-2">
-            <select className="rounded border border-neutral-300 px-2 text-sm" aria-label="Prompt type" defaultValue="text" onChange={(e) => { if (e.target.value === "image") { setLeftTab("context"); imageInput.current?.click(); e.target.value = "text"; } }}>
+            <select className="rounded border border-neutral-300 px-2 text-sm" aria-label="Prompt type" defaultValue="text" onChange={(e) => { if (e.target.value === "image") { imageInput.current?.click(); e.target.value = "text"; } }}>
               <option value="text">{E.text}</option>
               <option value="image">{E.image}</option>
             </select>
+            <Button type="button" disabled={busy || context.references.length + pending.length >= MAX_REFERENCES} title={E.referenceRules} onClick={() => imageInput.current?.click()}>
+              + {E.attach}
+            </Button>
             <input
               type="text"
               value={prompt}
@@ -828,7 +838,7 @@ export function Editor({
               {pending.map((p) => <span key={p.id} className="rounded-full border border-dashed border-neutral-300 px-2 py-0.5 text-neutral-500">{p.name} · {E.referenceUploading}</span>)}
             </div>
           )}
-          <input ref={imageInput} type="file" accept="image/*,video/mp4,video/quicktime,video/webm" className="hidden" onChange={(e) => { if (e.target.files?.length) addFiles(e.target.files); e.target.value = ""; }} />
+          <input ref={imageInput} type="file" multiple accept="image/*,video/mp4,video/quicktime,video/webm" className="hidden" onChange={(e) => { if (e.target.files?.length) addFiles(e.target.files); e.target.value = ""; }} />
           <div className="flex flex-wrap items-center gap-2 text-xs">
             <span className="text-neutral-500">{E.suggested}</span>
             {SUGGESTED_PROMPTS.map((s) => (
