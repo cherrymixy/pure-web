@@ -87,7 +87,10 @@ export const STRINGS = {
     retry: "Try again",
   },
   structure: {
-    title: "Check structure",
+    title: "Structure",
+    body: "Check what PURE found. Limits keep every motion safe for this body.",
+    preview: "PREVIEW",
+    jointRange: "{min}° ~ {max}°",
     joints: "Joints",
     channels: "Channels",
     editLimits: "Edit limits",
