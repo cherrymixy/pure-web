@@ -64,23 +64,29 @@ export function ReferencedSets({ behaviors, variant = "list" }: { behaviors: str
     );
   }
 
+  // Default list (user data detail, share viewer): DS type scale — label Body/S secondary, set chips S, item cards on bg/canvas.
   return (
-    <section className="flex flex-col gap-2" data-testid="referenced">
-      <span className="text-xs text-neutral-500">{E.referencedTitle}</span>
+    <section className="flex flex-col gap-[var(--space-12)]" data-testid="referenced">
+      <span className="text-[13px] leading-[18px] text-[var(--text-secondary)]">{E.referencedTitle}</span>
       {!set ? (
-        <p className="text-xs text-neutral-400">{E.referencedEmpty}</p>
+        <p className="text-[14px] leading-[20px] text-[var(--text-tertiary)]">{E.referencedEmpty}</p>
       ) : (
         <>
           {sets.length > 1 && (
-            <div className="flex flex-wrap gap-1">
+            <div className="flex flex-wrap gap-[var(--space-8)]">
               {sets.map((s, i) => (
-                <button key={s.behavior} aria-pressed={s === set} onClick={() => setPick(i)} className={`rounded-full border px-2 py-0.5 text-xs ${s === set ? "border-neutral-900 bg-neutral-900 text-white" : "border-neutral-300"}`}>
+                <button
+                  key={s.behavior}
+                  aria-pressed={s === set}
+                  onClick={() => setPick(i)}
+                  className={`flex h-[32px] items-center rounded-[var(--radius-full)] px-[var(--space-12)] text-[13px] font-medium leading-[18px] ${s === set ? "bg-[var(--bg-inverse)] text-[var(--text-on-inverse)]" : "bg-[var(--bg-canvas)] text-[var(--text-primary)]"}`}
+                >
                   {label(s.behavior)}
                 </button>
               ))}
             </div>
           )}
-          {sets.length === 1 && <span className="text-xs text-neutral-500">{fmt(E.referencedFor, { behavior: label(set.behavior) })}</span>}
+          {sets.length === 1 && <span className="text-[14px] leading-[20px] text-[var(--text-link)]">{fmt(E.referencedFor, { behavior: label(set.behavior) })}</span>}
           {set.items.map((it) => <ReferencedItem key={it.channel} item={it} />)}
         </>
       )}
@@ -143,21 +149,21 @@ function ReferencedItem({ item }: { item: ReferenceItem }) {
   const video = item.file.endsWith(".webm");
   const audio = item.file.endsWith(".ogg");
   return (
-    <figure className="flex flex-col gap-1 rounded border border-neutral-200 p-1.5" data-testid={`referenced-${item.channel}`}>
-      <div className="flex items-center gap-2">
-        <span className="w-12 shrink-0 text-[10px] uppercase tracking-wide text-neutral-500">{E.tabs[item.channel]}</span>
-        <b className="truncate text-xs">{item.title}</b>
+    <figure className="flex flex-col gap-[var(--space-8)] rounded-[var(--radius-md)] bg-[var(--bg-canvas)] p-[var(--space-12)]" data-testid={`referenced-${item.channel}`}>
+      <div className="flex items-center gap-[var(--space-8)]">
+        <span className={`shrink-0 rounded-[var(--radius-sm)] border bg-[var(--bg-surface)] px-[var(--space-8)] py-[2px] text-[12px] leading-[16px] ${CHIP[item.channel]}`}>{E.tabs[item.channel]}</span>
+        <b className="truncate text-[14px] font-medium leading-[20px] text-[var(--text-primary)]">{item.title}</b>
       </div>
       {audio ? (
-        <audio src={item.file} controls className="h-7 w-full" />
+        <audio src={item.file} controls className="h-[32px] w-full" />
       ) : video ? (
-        <video src={item.file} poster={item.poster ?? undefined} muted loop autoPlay playsInline className="aspect-video w-full rounded object-cover" />
+        <video src={item.file} poster={item.poster ?? undefined} muted loop autoPlay playsInline className="aspect-video w-full rounded-[var(--radius-xs)] object-cover" />
       ) : (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={item.file} alt={item.title} className="aspect-video w-full rounded object-cover" />
+        <img src={item.file} alt={item.title} className="aspect-video w-full rounded-[var(--radius-xs)] object-cover" />
       )}
-      <span className="text-xs text-neutral-600">{item.note}</span>
-      <figcaption className="truncate text-[10px] text-neutral-400">
+      <span className="text-[13px] leading-[18px] text-[var(--text-link)]">{item.note}</span>
+      <figcaption className="truncate text-[11px] leading-[14px] text-[var(--text-tertiary)]">
         <a href={item.source.page} target="_blank" rel="noreferrer" className="underline">{fmt(E.referenceSource, { license: item.source.license, author: item.source.author })}</a>
       </figcaption>
     </figure>
