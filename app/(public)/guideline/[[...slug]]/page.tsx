@@ -1,6 +1,7 @@
+// @implemented
 // @screen W03
-import { Placeholder } from "@/components/ui/placeholder";
+import { GuidelineView } from "@/components/ui/guideline/guideline-view";
 
-export default function Page() {
-  return <Placeholder screen="W03" route="/guideline/[[...slug]]" />;
+export default async function Page({ params }: { params: Promise<{ slug?: string[] }> }) {
+  return <GuidelineView base="/guideline" slug={(await params).slug} />;
 }
