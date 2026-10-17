@@ -100,6 +100,8 @@
      that undoes it (CSS zoom scales vh too). Use var(--app-vh) instead of 100vh / h-screen. */
   --app-zoom: 0.67;
   --app-vh: calc(100vh / var(--app-zoom));
+  /* Landing elements on the full-width backgrounds: halfway between full size and the app scale (user review). */
+  --landing-scale: 0.835;
 
   /* Motion (STEP 24). Figma has no motion data (get_motion_context: none) — these are our own, one place to tune.
      Curves: standard = settle in, emphasized = quick start / soft landing, pop = slight overshoot. */

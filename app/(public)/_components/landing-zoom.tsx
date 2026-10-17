@@ -15,7 +15,11 @@ export function LandingZoom({ children }: { children: React.ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const apply = () => ref.current?.style.setProperty("--landing-zoom", String(fit()));
+    const apply = () => {
+      const z = fit();
+      ref.current?.style.setProperty("--landing-zoom", String(z));
+      ref.current?.style.setProperty("--landing-unzoom", String(1 / z)); // CSS zoom can't take calc(1 / var())
+    };
     apply();
     window.addEventListener("resize", apply);
     return () => window.removeEventListener("resize", apply);

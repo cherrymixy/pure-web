@@ -3,18 +3,19 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import { LANDING } from "@/data/landing";
+import { HeroRobot } from "./_components/hero-robot";
 import { LandingZoom } from "./_components/landing-zoom";
 import { Axes, ChannelCards, TypeCards } from "./_components/landing-cards";
 
 // W00-1 Landing = Figma 901:6909, built in its 960-unit coordinates; LandingZoom scales it to the viewport.
 // The prototype frame resolves its space/radius variables at half value → calc(var(--token)/2).
-// App scale (STEP 23, --app-zoom 0.67): the background images (hero, For Expert photo) keep filling the width; everything on
+// Landing scale (--landing-scale, between full size and the app's 0.67): the background images (hero, For Expert photo) keep filling the width; everything on
 // them shrinks in place (CSS scale around a Figma anchor, layout untouched), and the plain sections in between
 // shrink as centred 960 columns (`column` = zoom, so their height shrinks too).
 // Line height 1.26 = Figma "auto" for Google Sans Flex (text boxes in 901:6909 are 1.26× their size); CSS "normal" adds the font line gap.
 
 const L = LANDING;
-const column = "mx-auto w-[960px] [zoom:var(--app-zoom)]";
+const column = "mx-auto w-[960px] [zoom:var(--landing-scale)]";
 const label = "text-[8px] font-medium leading-[1.26] text-[var(--sage-500)]";
 const darkButton = "flex h-[30px] items-center justify-center gap-[calc(var(--space-8)/2)] rounded-[calc(var(--radius-md)/2)] bg-[var(--sage-800)] px-[calc(var(--space-28)/2)] text-[10px] font-medium leading-[1.26] text-[var(--text-on-inverse)]";
 const lightButton = "flex h-[30px] items-center justify-center gap-[calc(var(--space-8)/2)] rounded-[calc(var(--radius-md)/2)] bg-[var(--neutral-300)] px-[calc(var(--space-28)/2)] text-[10px] font-medium leading-[1.26] text-[var(--sage-800)]";
@@ -34,45 +35,43 @@ function Lines({ lines }: { lines: readonly string[] }) {
 export default function Page() {
   return (
     <LandingZoom>
+      {/* Top bar (901:6918 header): full width at any scale, stays on screen while scrolling. Contents use the landing scale. */}
+      <div className="sticky top-[8px] z-50 h-0">
+        <div className="absolute left-[7px] right-[7.5px] top-0">
+          <header className="flex h-[44px] w-full items-center [zoom:var(--landing-scale)] justify-between rounded-full border-[0.5px] border-[var(--neutral-0)] bg-[var(--bg-surface)] px-[calc(var(--space-40)/2)]">
+            <div className="flex w-[130px] items-center">
+              <Link href="/" aria-label={L.nav.logoAlt}>
+                <img src="/figma/landing/logo-mark.svg" alt={L.nav.logoAlt} width={14.9999} height={14.9997} className="block" />
+              </Link>
+            </div>
+            <nav className="flex items-center gap-[26px] whitespace-nowrap text-[10px] leading-[1.26] text-[var(--text-link)]">
+              {L.nav.items.map((n) => (
+                <a key={n.href} href={n.href}>{n.label}</a>
+              ))}
+            </nav>
+            <div className="flex items-center gap-[calc(var(--space-48)/2)]">
+              <Link href="/lab" className="text-[10px] leading-[1.26] text-[var(--text-link)]">{L.nav.signIn}</Link>
+              <Link href="/lab" className="flex h-[28px] w-[75px] items-center justify-center rounded-[calc(var(--radius-md)/2)] bg-[var(--neutral-300)] text-[10px] font-medium leading-[1.26] text-[var(--sage-900)]">
+                {L.nav.tryPure}
+              </Link>
+            </div>
+          </header>
+        </div>
+      </div>
+
       {/* Hero 901:6918 */}
       <section className="relative h-[610px] overflow-clip bg-[var(--bg-canvas)]">
         <img src="/figma/landing/hero-bg.png" alt="" className="absolute left-[-61.5px] top-0 h-[610px] w-[1083px] max-w-none object-cover" />
 
-        <header className="absolute left-[7px] top-[8px] z-10 flex origin-top [scale:var(--app-zoom)] h-[44px] w-[945.5px] items-center justify-between rounded-full border-[0.5px] border-[var(--neutral-0)] bg-[var(--bg-surface)] px-[calc(var(--space-40)/2)]">
-          <div className="flex w-[130px] items-center">
-            <Link href="/" aria-label={L.nav.logoAlt}>
-              <img src="/figma/landing/logo-mark.svg" alt={L.nav.logoAlt} width={14.9999} height={14.9997} className="block" />
-            </Link>
-          </div>
-          <nav className="flex items-center gap-[26px] whitespace-nowrap text-[10px] leading-[1.26] text-[var(--text-link)]">
-            {L.nav.items.map((n) => (
-              <a key={n.href} href={n.href}>{n.label}</a>
-            ))}
-          </nav>
-          <div className="flex items-center gap-[calc(var(--space-48)/2)]">
-            <Link href="/lab" className="text-[10px] leading-[1.26] text-[var(--text-link)]">{L.nav.signIn}</Link>
-            <Link href="/lab" className="flex h-[28px] w-[75px] items-center justify-center rounded-[calc(var(--radius-md)/2)] bg-[var(--neutral-300)] text-[10px] font-medium leading-[1.26] text-[var(--sage-900)]">
-              {L.nav.tryPure}
-            </Link>
-          </div>
-        </header>
-
-        <div className="absolute left-[284px] top-[106px] flex w-[392px] origin-top [scale:var(--app-zoom)] flex-col items-center gap-[calc(var(--space-32)/2)]">
+        <div className="absolute left-[284px] top-[106px] flex w-[392px] origin-top [scale:var(--landing-scale)] flex-col items-center gap-[calc(var(--space-32)/2)]">
           <p className="rounded-full bg-[var(--neutral-300)] px-[calc(var(--space-20)/2)] py-[calc(var(--space-12)/2)] text-[8px] font-medium leading-[1.26] text-[var(--sage-600)]">{L.hero.badge}</p>
           <h1 className="whitespace-nowrap text-center text-[46px] font-semibold leading-[1.26] text-[var(--sage-800)]">
             <Lines lines={L.hero.headline} />
           </h1>
         </div>
 
-        <div className="absolute left-[439.85px] top-[501.99px] flex h-[59.176px] w-[199.074px] origin-[38.65px_52px] items-center justify-center [scale:var(--app-zoom)]">
-          <div className="relative h-[36.954px] w-[196.132px] rotate-[173.42deg]">
-            <img src="/figma/landing/hero-ellipse.svg" alt="" width={201.206} height={42.0278} className="absolute left-[-1.29%] top-[-6.86%] block max-w-none" />
-          </div>
-        </div>
-
-        <div className="absolute left-[416px] top-[274px] h-[280px] w-[125px] origin-bottom overflow-hidden [scale:var(--app-zoom)]">
-          <img src="/figma/landing/hero-robot.png" alt={L.hero.robotAlt} className="absolute left-[-382.23%] top-[-58.09%] h-[218.87%] w-[866.33%] max-w-none" />
-        </div>
+        {/* Robot (901:6918 render → live sim, head follows the pointer). Box centred on the Figma robot (x 478.5), floor at y 554. */}
+        <HeroRobot label={L.hero.robotAlt} className="absolute left-[238.5px] top-[234px] h-[400px] w-[480px] origin-[240px_320px] [scale:var(--landing-scale)]" />
       </section>
 
       <div className={column}>
@@ -125,10 +124,10 @@ export default function Page() {
       </div>
 
       {/* For Expert: Component 6 901:6910 + fade 901:6917 + copy 901:7119–7138 */}
-      <section id="expert" className="relative mt-[calc(74px*var(--app-zoom))] h-[463px]">
+      <section id="expert" className="relative mt-[calc(74px*var(--landing-scale))] h-[463px]">
         <img src="/figma/landing/expert-composite@4x.png" alt={L.expert.imageAlt} className="absolute left-0 top-0 h-[463px] w-[960px] max-w-none" />
         <img src="/figma/landing/expert-top-fade.png" alt="" className="absolute left-[-140px] top-0 h-[89px] w-[1101px] max-w-none object-cover" />
-        <div className="absolute left-[618px] top-[39px] flex w-[235px] origin-top-left flex-col [scale:var(--app-zoom)]">
+        <div className="absolute left-[618px] top-[39px] flex w-[235px] origin-top-left flex-col [scale:var(--landing-scale)]">
           <p className={label}>{L.expert.label}</p>
           <h2 className="mt-[12px] w-[230px] text-[26px] font-semibold leading-[1.26] text-[var(--sage-800)]">{L.expert.headline}</h2>
           <ol className="mt-[30px] flex flex-col gap-[calc(var(--space-12)/2)]">
