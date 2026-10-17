@@ -187,7 +187,7 @@ export function LabHome() {
           <Button onClick={clear}>{S.clearFilter}</Button>
         </EmptyState>
       ) : (
-        <div className="grid grid-cols-3 gap-[30px]">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(498px,1fr))] gap-[30px]">
           {shown.map((p) => (
             <ProjectCard
               key={p.id}

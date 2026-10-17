@@ -2,6 +2,9 @@
 @import "../styles/tokens.css";
 
 /* Tokens: styles/tokens.css (STEP 20). Screens move onto them in STEP 22. */
+html {
+  zoom: var(--app-zoom);
+}
 body {
   background: white;
 }

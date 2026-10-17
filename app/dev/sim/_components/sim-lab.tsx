@@ -131,7 +131,7 @@ export function SimLab() {
   const finite = Number.isFinite(time.duration);
 
   return (
-    <main className="grid min-h-screen grid-cols-[1fr_400px] gap-6 p-6">
+    <main className="grid min-h-[var(--app-vh)] grid-cols-[1fr_400px] gap-6 p-6">
       <section className="flex flex-col gap-3">
         <div className="flex items-center gap-4 text-sm">
           <h1 className="font-semibold">/dev/sim</h1>

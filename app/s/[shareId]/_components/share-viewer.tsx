@@ -96,7 +96,7 @@ export function ShareViewer({ id }: { id: string }) {
     </div>
   );
   const shell = (icon: IconName, children: React.ReactNode, tone: "default" | "error" = "default") => (
-    <div className="flex min-h-screen flex-col bg-[var(--bg-canvas)]">
+    <div className="flex min-h-[var(--app-vh)] flex-col bg-[var(--bg-canvas)]">
       {header()}
       <main className="flex flex-1 items-center justify-center p-[var(--space-40)]">
         <div className="flex w-[640px] items-start gap-[var(--space-32)] rounded-[var(--radius-2xl)] border-2 border-[var(--border-default)] bg-[var(--bg-surface)] px-[var(--space-48)] py-[var(--space-40)] shadow-[0_12px_24px_0_var(--effect-shadow)]">
@@ -144,11 +144,11 @@ export function ShareViewer({ id }: { id: string }) {
   const meta = `${chipClass({ size: "S" })} pointer-events-none !bg-[var(--bg-canvas)]`;
 
   return (
-    <div className="flex min-h-screen flex-col bg-[var(--bg-canvas)]">
+    <div className="flex min-h-[var(--app-vh)] flex-col bg-[var(--bg-canvas)]">
       {header(<span className="text-[20px] leading-[1.26] text-[var(--text-link)]">{fmt(SH.viewer.by, { team: view.team })}</span>)}
       <main className="grid w-full grid-cols-[minmax(0,1fr)_440px] gap-[var(--space-24)] px-[var(--space-32)] py-[var(--space-24)]">
         <div className="flex flex-col gap-[var(--space-12)]">
-          <div className="relative h-[calc(100vh-180px)] min-h-[640px] overflow-hidden rounded-[var(--radius-2xl)] bg-[var(--bg-surface)]">
+          <div className="relative h-[calc(var(--app-vh)-180px)] min-h-[640px] overflow-hidden rounded-[var(--radius-2xl)] bg-[var(--bg-surface)]">
             <Viewport mode="share" orbit structure={view.robot?.structure} signatureParams={params} expression={playable} autoPlay sound={sound} className="block size-full" />
           </div>
           <span className="flex items-center gap-[var(--space-8)] px-[var(--space-8)] text-[13px] leading-[18px] text-[var(--text-tertiary)]">

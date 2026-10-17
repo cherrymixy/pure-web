@@ -45,7 +45,7 @@ export function MotionDetail({ motion, projects }: { motion: UserDataMotion; pro
         {U.back}
       </Link>
       <div className="grid grid-cols-[1fr_440px] gap-[var(--space-24)]">
-        <div className="relative h-[calc(100vh-168px)] min-h-[640px] overflow-hidden rounded-[var(--radius-2xl)] bg-[var(--bg-canvas)]">
+        <div className="relative h-[calc(var(--app-vh)-168px)] min-h-[640px] overflow-hidden rounded-[var(--radius-2xl)] bg-[var(--bg-canvas)]">
           <Viewport mode="preview" structure={PURE_DESK_STRUCTURE} expression={playable} autoPlay className="block size-full" />
         </div>
         <aside className="flex flex-col gap-[var(--space-32)] self-start rounded-[var(--radius-xl)] bg-[var(--bg-surface)] p-[var(--space-32)]">

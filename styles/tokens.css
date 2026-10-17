@@ -88,6 +88,19 @@
   --status-error: #e5484d;
   --effect-shadow: #0000000f;
 
+  /* 3D stage (W02B-4 901:8569 floor grid): bg/canvas ground, faint grey lines, #E9EEF0 haze ≈ fog into the canvas. */
+  --sim-stage: var(--bg-canvas);
+  --sim-floor: var(--bg-canvas);
+  --sim-grid-major: var(--neutral-300);
+  --sim-grid-minor: var(--neutral-200);
+  --sim-rim: var(--neutral-0); /* the dark stage's pink rim / violet fill tint the robot and its shadow on a light floor */
+  --sim-fill: var(--sage-200);
+
+  /* App scale: the 1920 build reads right at 67% (user review, STEP 23). Root zoom + a viewport-height unit
+     that undoes it (CSS zoom scales vh too). Use var(--app-vh) instead of 100vh / h-screen. */
+  --app-zoom: 0.67;
+  --app-vh: calc(100vh / var(--app-zoom));
+
   /* Typography (F / Typography 458:4812) — Google Sans Flex via next/font/local (app/layout.tsx) */
   --font-family-pure: var(--font-google-sans-flex), "Google Sans Flex", ui-sans-serif, system-ui, sans-serif;
   --pure-title-l-size: 30px; --pure-title-l-line-height: 38px; --pure-title-l-weight: 500; /* PURE/Title/L */

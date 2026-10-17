@@ -70,7 +70,7 @@ export function UserDataBrowser() {
       ) : items.length === 0 ? (
         <EmptyState icon="search" title={U.noResults} />
       ) : (
-        <div className="grid grid-cols-3 gap-[30px]">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(498px,1fr))] gap-[30px]">
           {items.map((m) => (
             <MotionCard key={m.id} motion={m} />
           ))}

@@ -56,7 +56,7 @@ export function Modal({ open, onClose, title, description, children }: { open: b
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center bg-[var(--bg-overlay)]" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <ModalCard role="dialog" aria-modal="true" aria-label={title} title={title} description={description} className="max-h-[calc(100vh-48px)] w-[600px] overflow-y-auto">
+      <ModalCard role="dialog" aria-modal="true" aria-label={title} title={title} description={description} className="max-h-[calc(var(--app-vh)-48px)] w-[600px] overflow-y-auto">
         {children}
       </ModalCard>
     </div>

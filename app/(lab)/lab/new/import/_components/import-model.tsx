@@ -115,7 +115,7 @@ export function ImportModel() {
   // No Figma frame: same language as W02B-1 type select (back pill at 48/40, 1714 column at x 103, title 52 semibold)
   // and the W02B-3 analysis card (white radius 2xl card, border 2, 6px bar on neutral-150 with bg/inverse fill).
   return (
-    <div className="flex min-h-screen flex-col pl-[48px] pt-[var(--space-40)]">
+    <div className="flex min-h-[var(--app-vh)] flex-col pl-[48px] pt-[var(--space-40)]">
       <Link
         href="/lab"
         className="flex h-[48px] w-fit items-center gap-[var(--space-12)] rounded-[var(--radius-full)] border-2 border-[var(--border-default)] bg-[var(--bg-surface)] px-[var(--space-16)] text-[16px] font-medium leading-[20px] text-[var(--text-link)] hover:bg-[var(--neutral-50)]"

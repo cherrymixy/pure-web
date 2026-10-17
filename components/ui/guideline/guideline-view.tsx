@@ -27,7 +27,7 @@ export function GuidelineView({ base, slug = [] }: { base: string; slug?: string
   return (
     <div className={`grid grid-cols-[300px_minmax(0,1fr)] items-start gap-[var(--space-24)] pb-[var(--space-32)] pr-[var(--space-32)] ${isPublic ? "pl-[var(--space-32)] pt-[var(--space-32)]" : "pl-[33px] pt-[var(--space-32)]"}`}>
       <nav
-        className={`sticky flex flex-col gap-[var(--space-16)] overflow-y-auto rounded-[var(--radius-xl)] bg-[var(--bg-surface)] p-[var(--space-20)] ${isPublic ? "top-[136px] max-h-[calc(100vh-168px)]" : "top-[var(--space-32)] max-h-[calc(100vh-64px)]"}`}
+        className={`sticky flex flex-col gap-[var(--space-16)] overflow-y-auto rounded-[var(--radius-xl)] bg-[var(--bg-surface)] p-[var(--space-20)] ${isPublic ? "top-[136px] max-h-[calc(var(--app-vh)-168px)]" : "top-[var(--space-32)] max-h-[calc(var(--app-vh)-64px)]"}`}
         aria-label={G.contents}
       >
         <span className="px-[var(--space-12)] text-[13px] leading-[18px] text-[var(--text-secondary)]">{G.contents}</span>

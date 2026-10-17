@@ -162,7 +162,7 @@ export function TypePicker({ initialSelected = false }: { initialSelected?: bool
   }
 
   return (
-    <div className="flex min-h-screen flex-col pl-[48px] pt-[var(--space-40)]">
+    <div className="flex min-h-[var(--app-vh)] flex-col pl-[48px] pt-[var(--space-40)]">
       <Link
         href="/lab"
         className="flex w-fit items-center gap-[var(--space-12)] h-[48px] rounded-[var(--radius-full)] border-2 border-[var(--border-default)] bg-[var(--bg-surface)] px-[var(--space-16)] text-[16px] leading-[20px] font-medium text-[var(--text-link)] hover:bg-[var(--neutral-50)]"

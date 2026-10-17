@@ -10,10 +10,10 @@ export function isFullBleed(pathname: string): boolean {
 export function LabShell({ sidebar, children }: { sidebar: React.ReactNode; children: React.ReactNode }) {
   const pathname = usePathname() ?? "";
   if (isFullBleed(pathname)) {
-    return <main className="flex min-h-screen min-w-0 flex-col bg-[var(--bg-canvas)]">{children}</main>;
+    return <main className="flex min-h-[var(--app-vh)] min-w-0 flex-col bg-[var(--bg-canvas)]">{children}</main>;
   }
   return (
-    <div className="flex min-h-screen bg-[var(--neutral-50)]">
+    <div className="flex min-h-[var(--app-vh)] bg-[var(--neutral-50)]">
       {sidebar}
       <main className="flex min-w-0 flex-1 flex-col">{children}</main>
     </div>

@@ -5,7 +5,7 @@ import { STRINGS } from "@/data/strings";
 // mono eyebrow, Web/Title/L 36 semibold, Body 16 secondary, Secondary pill (same as the type-select back pill).
 export default function NotFound() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-[var(--space-40)] bg-[var(--bg-canvas)] p-[var(--space-48)] text-center">
+    <div className="flex min-h-[var(--app-vh)] flex-col items-center justify-center gap-[var(--space-40)] bg-[var(--bg-canvas)] p-[var(--space-48)] text-center">
       <div className="flex flex-col items-center gap-[var(--space-20)]">
         <p className="font-mono text-[14px] leading-[18px] text-[var(--text-tertiary)]">404</p>
         <h1 className="text-[36px] font-semibold leading-[45px] text-[var(--sage-800)]">{STRINGS.common.notFound.title}</h1>

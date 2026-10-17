@@ -7,6 +7,7 @@
 
 import { useEffect, useRef, type RefObject } from "react";
 import type { Clip, FaceSpec, Recipe, SoundSpec, Structure } from "@/lib/models";
+import type { ViewerOptions } from "./viewer3d";
 import { SimController, type JointState, type PlaybackParams, type SimEventMap, type SoundEngine } from "./sim-controller";
 
 export type ViewportMode = "editor" | "structure" | "preview" | "share";
@@ -35,6 +36,25 @@ const MODES: Record<ViewportMode, { pan: boolean; zoom: boolean; idle: boolean }
 };
 
 let mounted = 0;
+
+/** Stage colours from the design tokens (styles/tokens.css --sim-*); unset → the viewer's defaults. */
+function stageFromTokens(el: Element): ViewerOptions {
+  const css = getComputedStyle(el);
+  const v = (name: string) => css.getPropertyValue(name).trim() || undefined;
+  const stage = v("--sim-stage");
+  const floor = v("--sim-floor");
+  const major = v("--sim-grid-major");
+  const minor = v("--sim-grid-minor");
+  const rim = v("--sim-rim");
+  const fill = v("--sim-fill");
+  return {
+    ...(rim && { rim }),
+    ...(fill && { fill }),
+    ...(stage && { stage }),
+    ...(floor && { floor }),
+    ...(major && minor && { grid: [major, minor] as [string, string] }),
+  };
+}
 
 export interface ViewportProps {
   controllerRef?: RefObject<SimController | null>;
@@ -75,7 +95,7 @@ export function Viewport({
     if (mounted > 1 && process.env.NODE_ENV !== "production") {
       console.error(`[Viewport] ${mounted} instances mounted — one per page (CLAUDE.md rule 14).`);
     }
-    const ctrl = new SimController(canvas, { sound: soundRef.current, idle: MODES[mode].idle });
+    const ctrl = new SimController(canvas, { sound: soundRef.current, idle: MODES[mode].idle, viewer: stageFromTokens(canvas) });
     ctrlRef.current = ctrl;
     if (controllerRef) controllerRef.current = ctrl;
 

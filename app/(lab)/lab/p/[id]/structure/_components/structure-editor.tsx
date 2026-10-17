@@ -83,7 +83,7 @@ export function StructureEditor({ projectId, name, initial }: { projectId: strin
   const index = new Map(structure.joints.map((j, i) => [j.id, i + 1]));
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative min-h-[var(--app-vh)] overflow-hidden">
       {/* Stage (Figma 901:8569 ×2: full width, 265 → bottom). The sim draws its own floor; never zoom/transform it. */}
       <div className="absolute inset-x-0 bottom-0 top-[265px]">
         <Viewport controllerRef={ctrl} structure={structure} mode="structure" className="block size-full" />
@@ -118,7 +118,7 @@ export function StructureEditor({ projectId, name, initial }: { projectId: strin
       {/* Structure panel (Figma 901:8646 ×2): 428×927 at 50,92, padding 32, radius xl. */}
       <section
         aria-label={name}
-        className="absolute left-[50px] top-[92px] flex h-[927px] w-[428px] flex-col justify-between gap-[var(--space-32)] overflow-hidden rounded-[var(--radius-xl)] bg-[var(--bg-surface)] p-[var(--space-32)]"
+        className="absolute bottom-[61px] left-[50px] top-[92px] flex w-[428px] flex-col justify-between gap-[var(--space-32)] overflow-hidden rounded-[var(--radius-xl)] bg-[var(--bg-surface)] p-[var(--space-32)]"
       >
         <div className="flex min-h-0 flex-col gap-[var(--space-40)]">
           <header className="flex flex-col gap-[var(--space-16)]">
@@ -217,7 +217,7 @@ export function StructureEditor({ projectId, name, initial }: { projectId: strin
         </button>
       </section>
 
-      <StageSteps current={0} className="absolute left-[619px] top-[967px]" />
+      <StageSteps current={0} className="absolute bottom-[67px] left-[calc(50%-341px)]" />
     </div>
   );
 }

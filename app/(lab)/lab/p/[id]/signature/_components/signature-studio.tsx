@@ -246,7 +246,7 @@ export function SignatureStudio({
   const sub = "text-[14px] font-medium leading-[18px] text-[var(--sage-900)]";
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative min-h-[var(--app-vh)] overflow-hidden">
       {/* Stage (Figma 901:8765 ×2: full width, 265 → bottom), same slot as the structure page. Never zoom/transform the Viewport. */}
       <div className="absolute inset-x-0 bottom-0 top-[265px]">
         <Viewport controllerRef={ctrl} mode="preview" orbit={false} signatureParams={playback} className="block size-full" />
@@ -265,7 +265,7 @@ export function SignatureStudio({
       {/* Left Panel (Figma 901:8849 ×2): 424×920 at 50,100, padding 32/24, radius xl. Scrolls where Figma clips. */}
       <section
         aria-label={name}
-        className="absolute left-[50px] top-[100px] flex h-[920px] w-[424px] flex-col overflow-hidden rounded-[var(--radius-xl)] border border-[var(--neutral-0)] bg-[var(--bg-surface)] px-[var(--space-32)] py-[var(--space-24)]"
+        className="absolute bottom-[60px] left-[50px] top-[100px] flex w-[424px] flex-col overflow-hidden rounded-[var(--radius-xl)] border border-[var(--neutral-0)] bg-[var(--bg-surface)] px-[var(--space-32)] py-[var(--space-24)]"
       >
         <div className="-mr-[var(--space-16)] flex min-h-0 flex-col gap-[var(--space-20)] overflow-y-auto pr-[var(--space-16)]">
           <header className="flex w-[345px] flex-col gap-[var(--space-8)]">
@@ -478,7 +478,7 @@ export function SignatureStudio({
         /* Right Panel (Figma 901:9452 ×2): 352×920 at 1520,100 — draft name + versions, radar, tone, channels, actions. */
         <section
           aria-label={S.draft}
-          className="absolute left-[1520px] top-[100px] flex h-[920px] w-[352px] flex-col rounded-[var(--radius-xl)] border border-[var(--neutral-0)] bg-[var(--bg-surface)] px-[26px] pb-[20px] pt-[30px]"
+          className="absolute bottom-[60px] right-[48px] top-[100px] flex w-[352px] flex-col rounded-[var(--radius-xl)] border border-[var(--neutral-0)] bg-[var(--bg-surface)] px-[26px] pb-[20px] pt-[30px]"
         >
           <h2 className={`pl-[var(--space-20)] ${label}`}>{S.draft}</h2>
           <div className="relative mt-[15px] flex h-[48px] items-center justify-between rounded-[var(--radius-sm)] bg-[var(--bg-inverse)] pl-[21px] pr-[var(--space-20)]">
@@ -576,13 +576,13 @@ export function SignatureStudio({
         </section>
       ) : (
         /* Collapsed signature rail (Figma 901:8882 ×2) — decorative until a draft exists. */
-        <div aria-hidden className="absolute left-[1800px] top-[100px] h-[927px] w-[71px] rounded-[var(--radius-lg)] border border-[var(--neutral-0)] bg-[var(--bg-surface)]">
+        <div aria-hidden className="absolute bottom-[53px] right-[49px] top-[100px] w-[71px] rounded-[var(--radius-lg)] border border-[var(--neutral-0)] bg-[var(--bg-surface)]">
           <p className={`absolute left-[19px] top-[30px] w-[36px] overflow-hidden text-ellipsis whitespace-nowrap ${label}`}>{S.steps[4]}</p>
           <span className="absolute left-[19px] top-[60px] flex size-[33px] items-center justify-center rounded-[var(--radius-sm)] bg-[var(--bg-inverse)] text-[16px] font-semibold leading-[20px] text-[var(--text-on-inverse)]">{S.steps[4][0]}</span>
         </div>
       )}
 
-      <StageSteps labels={S.steps} current={running && job ? job.step : current ? S.steps.length - 1 : -1} className="absolute left-[619px] top-[967px]" />
+      <StageSteps labels={S.steps} current={running && job ? job.step : current ? S.steps.length - 1 : -1} className="absolute bottom-[67px] left-[calc(50%-341px)]" />
 
       <ConfirmModal open={skipOpen} title={S.skipConfirm.title} body={S.skipConfirm.body} confirmLabel={S.skip} onConfirm={skip} onCancel={() => setSkipOpen(false)} />
       <Modal open={quote !== null} onClose={() => setQuote(null)} title={quote ? `“${quote.keyword}” · ${fmt(S.pageQuote, { page: quote.page })}` : ""}>

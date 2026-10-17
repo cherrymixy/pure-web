@@ -131,7 +131,7 @@ export function Analyzing({ id }: { id: string }) {
     "flex h-[48px] items-center rounded-[var(--radius-full)] bg-[var(--neutral-800)] px-[var(--space-24)] text-[16px] font-medium leading-[20px] text-[var(--neutral-100)] hover:bg-[var(--neutral-700)]";
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center overflow-hidden">
+    <div className="relative flex min-h-[var(--app-vh)] flex-col items-center overflow-hidden">
       {/* Figma 배경 901:8474: full-frame art at 70% */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/figma/analyzing/bg@2x.png" alt="" aria-hidden className="pointer-events-none absolute inset-0 size-full object-cover opacity-70" />

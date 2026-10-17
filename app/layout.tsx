@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${googleSansFlex.variable} ${robotoMono.variable}`}>
-      <body className="min-h-screen bg-white text-neutral-900 antialiased">
+      <body className="min-h-[var(--app-vh)] bg-white text-neutral-900 antialiased">
         <ToastProvider>{children}</ToastProvider>
         <MobileNotice />
       </body>

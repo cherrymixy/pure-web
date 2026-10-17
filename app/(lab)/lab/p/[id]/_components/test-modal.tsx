@@ -121,7 +121,7 @@ export function TestModal({
         aria-label={fmt(TS.playingOn, { robot: phase.robot.name })}
         data-testid="playing-card"
         title={fmt(TS.playingOn, { robot: phase.robot.name })}
-        className="fixed left-[650px] top-[48px] z-40 w-[480px]"
+        className="fixed left-[calc(50%-310px)] top-[48px] z-40 w-[480px]"
       >
         <div className="flex flex-col gap-[var(--space-12)]">
           <Row label={TS.rows.time} value={duration > 0 ? `${clock(t)} / ${clock(duration)}` : clock(t)} />
