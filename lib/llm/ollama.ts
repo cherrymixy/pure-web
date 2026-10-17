@@ -1,4 +1,4 @@
-import { OLLAMA_MODEL, OLLAMA_URL } from "../env";
+import { OLLAMA_KEEP_ALIVE, OLLAMA_MODEL, OLLAMA_URL } from "../env";
 import { LlmError, type ChatJsonRequest, type ChatJsonResponse, type LlmClient } from "./client";
 
 export const TIMEOUT_MS = 60_000;
@@ -18,12 +18,12 @@ export class OllamaClient implements LlmClient {
     private readonly defaultModel = OLLAMA_MODEL,
   ) {}
 
-  /** Ollama loads a model on an empty /api/generate; keeps it for the same 10 minutes as chat calls. */
+  /** Ollama loads a model on an empty /api/generate; keeps it as long as chat calls do (OLLAMA_KEEP_ALIVE). */
   async preload(model: string): Promise<void> {
     await fetch(`${this.url}/api/generate`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ model, keep_alive: "10m" }),
+      body: JSON.stringify({ model, keep_alive: OLLAMA_KEEP_ALIVE }),
       signal: AbortSignal.timeout(60_000),
     }).catch(() => {});
   }
@@ -67,7 +67,7 @@ export class OllamaClient implements LlmClient {
             model,
             stream: false,
             think: false,
-            keep_alive: "10m",
+            keep_alive: OLLAMA_KEEP_ALIVE,
             format: req.schema,
             options: { temperature: req.temperature ?? 0.7 },
             messages: [

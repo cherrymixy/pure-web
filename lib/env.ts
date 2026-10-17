@@ -2,6 +2,9 @@
 export const OLLAMA_URL = process.env.OLLAMA_URL ?? "http://localhost:11434";
 export const OLLAMA_MODEL = process.env.OLLAMA_MODEL ?? "qwen3:8b";
 export const OLLAMA_VISION_MODEL = process.env.OLLAMA_VISION_MODEL ?? "gemma3:4b";
+/** How long Ollama keeps a model loaded after a call ("10m"; scripts/demo.sh sets -1 = until Ollama stops). */
+const keepAlive = process.env.OLLAMA_KEEP_ALIVE ?? "10m";
+export const OLLAMA_KEEP_ALIVE: string | number = /^-?\d+$/.test(keepAlive) ? Number(keepAlive) : keepAlive;
 
 // Experimental flags — all default off (CLAUDE.md rule 13).
 export const FLAGS = {

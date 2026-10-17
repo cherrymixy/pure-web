@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { DemoReset } from "@/components/ui/demo-reset";
 import { MobileNotice } from "@/components/ui/mobile-notice";
 import { ToastProvider } from "@/components/ui/toast";
 import "./globals.css";
@@ -29,8 +30,15 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${googleSansFlex.variable} ${robotoMono.variable}`}>
+      <head>
+        {/* STEP 25: fetch the 10 MB MuJoCo wasm while the landing shows, so the first 3D screen opens fast. */}
+        <link rel="prefetch" href="/mujoco/mujoco.wasm" as="fetch" crossOrigin="anonymous" />
+      </head>
       <body className="min-h-[var(--app-vh)] bg-white text-neutral-900 antialiased">
-        <ToastProvider>{children}</ToastProvider>
+        <ToastProvider>
+          {children}
+          <DemoReset />
+        </ToastProvider>
         <MobileNotice />
       </body>
     </html>

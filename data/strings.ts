@@ -423,6 +423,7 @@ export const STRINGS = {
     backHome: "Back to Lab",
     close: "Close",
     userMenu: "Account menu",
+    resetDemo: { title: "Reset demo data?", body: "All projects, expressions and uploads go back to the exhibition seed. This can't be undone.", confirm: "Reset", done: "Demo data reset" },
     demoFallback: "Demo result",
   },
 } as const;
