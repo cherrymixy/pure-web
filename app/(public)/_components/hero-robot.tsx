@@ -4,15 +4,18 @@ import { useEffect, useRef } from "react";
 import type { SimController } from "@/components/sim/sim-controller";
 import { Viewport } from "@/components/sim/Viewport";
 
-// W00-1 hero robot: the live PURE Desk sim in place of the Figma render; the head turns toward the pointer.
-// Gaze = joint commands through the controller contract (debugCommand): left/right is shared between base yaw and
-// head pan, up/down goes to head tilt; the joints' position servos do the easing. Pointer gone → back to rest.
+// W00-1 hero robot: the live PURE Desk sim in place of the Figma render; it turns toward the pointer.
+// Gaze = joint commands through the controller contract (debugCommand); the joints' position servos do the easing.
+// Left/right: the angle to the pointer as if the viewer sat DEPTH in front of the screen (edge ≈ 70°). The head leads
+// (head_pan up to HEAD_LEAD), anything past that turns the body (base_yaw) — far side = the whole robot turns.
+// Up/down goes to head tilt. Pointer gone → back to eye contact.
 // Commands go out at most every COMMAND_MS: each one restarts the sim clock, so per-frame calls would freeze the physics.
-const YAW_MAX = 40; // degrees at the viewport edge
+const DEPTH = 0.35; // × window width
+const HEAD_LEAD = 25; // degrees the head turns before the body follows
 const TILT_MAX = 22;
-const YAW_SPLIT = 0.55; // base_yaw share; the rest is head_pan
 const COMMAND_MS = 120;
-const FACE_VIEWER = -36; // yaw (degrees) at which the screen faces the hero camera — pointer in the middle = eye contact
+// Eye contact with the hero camera (pointer in the middle): base_yaw −19.8 + head_pan −16.2 = −36°.
+const REST = { base_yaw: -19.8, head_pan: -16.2 };
 
 export function HeroRobot({ className, label }: { className?: string; label: string }) {
   const ctrl = useRef<SimController | null>(null);
@@ -29,9 +32,9 @@ export function HeroRobot({ className, label }: { className?: string; label: str
       const r = box.current?.getBoundingClientRect();
       if (!r) return;
       // From the robot's head (upper third of the box) to the pointer, normalised by the window.
-      const dx = (e.clientX - (r.left + r.width / 2)) / (window.innerWidth / 2);
+      const dx = e.clientX - (r.left + r.width / 2);
       const dy = (e.clientY - (r.top + r.height * 0.3)) / (window.innerHeight / 2);
-      target.yaw = Math.max(-1, Math.min(1, dx)) * YAW_MAX;
+      target.yaw = (Math.atan2(dx, window.innerWidth * DEPTH) * 180) / Math.PI;
       target.tilt = Math.max(-1, Math.min(1, dy)) * TILT_MAX;
     };
     const onLeave = () => {
@@ -44,9 +47,10 @@ export function HeroRobot({ className, label }: { className?: string; label: str
       if (Math.abs(target.yaw - sent.yaw) < 0.5 && Math.abs(target.tilt - sent.tilt) < 0.5) return;
       sent.yaw = target.yaw;
       sent.tilt = target.tilt;
+      const head = Math.max(-HEAD_LEAD, Math.min(HEAD_LEAD, sent.yaw));
       ctrl.current.debugCommand({
-        base_yaw: (FACE_VIEWER + sent.yaw) * YAW_SPLIT,
-        head_pan: (FACE_VIEWER + sent.yaw) * (1 - YAW_SPLIT),
+        base_yaw: REST.base_yaw + (sent.yaw - head),
+        head_pan: REST.head_pan + head,
         head_tilt: -sent.tilt,
       });
     };
