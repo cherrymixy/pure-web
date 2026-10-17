@@ -23,3 +23,21 @@ body {
   opacity: 0.6;
   animation: scan 2s linear infinite alternate;
 }
+
+/* STEP 24 motion (tokens: --motion-* / --ease-* in styles/tokens.css). Entry animations only; exits stay instant. */
+@keyframes fade-in { from { opacity: 0; } }
+@keyframes rise-in { from { opacity: 0; transform: translateY(8px); } }
+@keyframes pop-in { from { opacity: 0; transform: scale(0.96); } }
+@keyframes check-pop { 0% { transform: scale(0); } 60% { transform: scale(1.15); } 100% { transform: scale(1); } }
+@keyframes pulse-soft { 0%, 100% { opacity: 0.35; transform: scaleX(0.6); } 50% { opacity: 1; transform: scaleX(1); } }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+.anim-fade-in { animation: fade-in var(--motion-base) var(--ease-standard) both; }
+.anim-rise-in { animation: rise-in var(--motion-base) var(--ease-emphasized) both; }
+.anim-pop-in { animation: pop-in var(--motion-base) var(--ease-emphasized) both; }
+.anim-check-pop { animation: check-pop var(--motion-slow) var(--ease-pop) both; }
+.anim-pulse { animation: pulse-soft 1.4s var(--ease-standard) infinite; }
+.anim-float { animation: float 3s var(--ease-standard) infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-fade-in, .anim-rise-in, .anim-pop-in, .anim-check-pop, .anim-pulse, .anim-float, .scan-line { animation: none; }
+}

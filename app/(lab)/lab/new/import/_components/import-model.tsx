@@ -151,7 +151,7 @@ export function ImportModel() {
         >
           {phase.kind === "idle" && (
             <div className="flex flex-col items-center gap-[var(--space-24)]">
-              <span className={`flex size-[96px] items-center justify-center rounded-[var(--radius-full)] ${dragging ? "bg-[var(--bg-surface)]" : "bg-[var(--bg-canvas)]"} text-[var(--icon-primary)]`}>
+              <span className={`flex size-[96px] items-center justify-center rounded-[var(--radius-full)] ${dragging ? "anim-float bg-[var(--bg-surface)]" : "bg-[var(--bg-canvas)]"} text-[var(--icon-primary)]`}>
                 <Icon name="folder_open" size={40} />
               </span>
               <p className="text-[22px] font-medium leading-[28px] text-[var(--text-primary)]">{dragging ? S.dropHere : S.drop}</p>

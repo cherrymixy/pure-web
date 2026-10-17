@@ -733,7 +733,7 @@ export function Editor({
           {history.changes.slice(-3).map((c, i, list) => (
             <span
               key={c.id}
-              className="flex items-center gap-[var(--space-12)] whitespace-pre rounded-[var(--radius-full)] bg-[var(--bg-surface)] px-[var(--space-16)] py-[var(--space-8)] text-[14px] font-medium leading-[18px] text-[var(--text-primary)] shadow-[var(--pure-shadow-chip)]"
+              className="anim-rise-in flex items-center gap-[var(--space-12)] whitespace-pre rounded-[var(--radius-full)] bg-[var(--bg-surface)] px-[var(--space-16)] py-[var(--space-8)] text-[14px] font-medium leading-[18px] text-[var(--text-primary)] shadow-[var(--pure-shadow-chip)]"
             >
               {c.label}
               {i === list.length - 1 && (
@@ -820,8 +820,11 @@ export function Editor({
 
       {/* Generating (901:11082 ×2): pill at 665,784 with Stop */}
       {busy && job && (
+        <div aria-hidden className="anim-pulse pointer-events-none absolute bottom-[222px] left-[calc(50%-139px)] z-10 h-[4px] w-[240px] rounded-[var(--radius-full)] bg-[var(--primary)]" />
+      )}
+      {busy && job && (
         <div
-          className="absolute bottom-[244px] left-[calc(50%-295px)] z-10 flex items-center gap-[var(--space-16)] rounded-[var(--radius-full)] bg-[var(--bg-surface)] px-[var(--space-24)] py-[var(--space-16)] shadow-[var(--pure-shadow-modal)]"
+          className="anim-rise-in absolute bottom-[244px] left-[calc(50%-295px)] z-10 flex items-center gap-[var(--space-16)] rounded-[var(--radius-full)] bg-[var(--bg-surface)] px-[var(--space-24)] py-[var(--space-16)] shadow-[var(--pure-shadow-modal)]"
           data-testid="generating"
           title={`${job.stepLabel} · ${job.progress}%`}
         >

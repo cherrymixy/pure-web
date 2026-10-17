@@ -23,7 +23,7 @@ export function StageSteps({ current, className, labels }: { current: number; cl
             style={{ width: STEP }}
           >
             {i <= current ? (
-              <Icon name="step-done" size={20} className="text-[var(--bg-inverse)]" />
+              <Icon name="step-done" size={20} className="anim-check-pop text-[var(--bg-inverse)]" />
             ) : (
               <span className="size-[20px] rounded-[var(--radius-full)] border-[3px] border-[var(--border-default)] bg-[var(--bg-canvas)]" />
             )}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AXIS_INFO, AXIS_ORDER } from "@/data/signature";
 import type { Axis } from "@/lib/models";
 
@@ -9,6 +9,39 @@ type Axes = Record<Axis, number>;
 const RINGS = [100 / 3, 200 / 3, 100]; // Figma 901:9458–9460: three octagon rings
 const RADIUS = 120 / 152; // ring radius / half size (Figma 120 px ring in the 304 px radar, ×2)
 
+const TWEEN_MS = 240; // = --motion-base, ease-out cubic (≈ --ease-standard)
+
+/** Eases the drawn shape toward new values (regenerate, version switch). Skipped while dragging and for reduced motion. */
+function useTweened(target: Axes, live: boolean): Axes {
+  const [shown, setShown] = useState(target);
+  const from = useRef(target);
+  const latest = useRef(target);
+  latest.current = shown;
+  const key = AXIS_ORDER.map((ax) => target[ax]).join(",");
+  useEffect(() => {
+    if (live || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setShown(target);
+      return;
+    }
+    from.current = latest.current;
+    const start = performance.now();
+    let raf = 0;
+    const step = (now: number) => {
+      const k = Math.min(1, (now - start) / TWEEN_MS);
+      const e = 1 - (1 - k) ** 3;
+      const next = { ...target };
+      for (const ax of AXIS_ORDER) next[ax] = from.current[ax] + (target[ax] - from.current[ax]) * e;
+      setShown(next);
+      if (k < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+    // Re-run on value changes only, not on a new object with the same values.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key, live]);
+  return shown;
+}
+
 /**
  * 8-axis radar (Figma 901:9457 ×2). With `onChange`, vertices drag along their axis (0–100). `compare` draws a dashed overlay.
  * Labels are the axis keys (tempo, amp, …) as in Figma; the dragged axis also shows its value.
@@ -16,6 +49,7 @@ const RADIUS = 120 / 152; // ring radius / half size (Figma 120 px ring in the 3
 export function Radar({ axes, compare, onChange, size = 320 }: { axes: Axes; compare?: Axes; onChange?: (axis: Axis, value: number) => void; size?: number }) {
   const svg = useRef<SVGSVGElement>(null);
   const [drag, setDrag] = useState<Axis | null>(null);
+  const shape = useTweened(axes, drag !== null);
   const c = size / 2;
   const r = c * RADIUS;
   const angle = (i: number) => (Math.PI * 2 * i) / AXIS_ORDER.length - Math.PI / 2;
@@ -71,9 +105,9 @@ export function Radar({ axes, compare, onChange, size = 320 }: { axes: Axes; com
         );
       })}
       {compare && <polygon data-testid="radar-compare" points={poly(compare)} fill="none" stroke="var(--text-secondary)" strokeWidth={1.5} strokeDasharray="5 4" />}
-      <polygon points={poly(axes)} fill="var(--sage-300)" fillOpacity={0.28} stroke="var(--sage-300)" strokeWidth={2} strokeLinejoin="round" />
+      <polygon points={poly(shape)} fill="var(--sage-300)" fillOpacity={0.28} stroke="var(--sage-300)" strokeWidth={2} strokeLinejoin="round" />
       {AXIS_ORDER.map((ax, i) => {
-        const [x, y] = point(i, axes[ax]);
+        const [x, y] = point(i, shape[ax]);
         return (
           <g key={ax}>
             <circle cx={x} cy={y} r={drag === ax ? 5 : 3.5} fill="var(--sage-300)" />

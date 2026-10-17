@@ -46,7 +46,7 @@ function PreviewArt({ type }: { type: Project["type"] }) {
 }
 
 function StepIcon({ state }: { state: StepState }) {
-  if (state === "done") return <Icon name="step-done" size={20} className="shrink-0 text-[var(--bg-inverse)]" />;
+  if (state === "done") return <Icon name="step-done" size={20} className="anim-check-pop shrink-0 text-[var(--bg-inverse)]" />;
   if (state === "active") return <Icon name="step-active" size={20} className="shrink-0 text-[var(--bg-inverse)]" />;
   return (
     <span
@@ -147,7 +147,7 @@ export function Analyzing({ id }: { id: string }) {
       )}
 
       <header className="relative mt-[122px] flex w-[796px] flex-col items-center gap-[var(--space-28)] text-center">
-        <h1 className="text-[52px] font-semibold leading-[66px] text-[var(--sage-800)]">{done ? S.complete : S.title}</h1>
+        <h1 key={done ? "complete" : "analyzing"} className={`text-[52px] font-semibold leading-[66px] text-[var(--sage-800)] ${done ? "anim-pop-in" : ""}`}>{done ? S.complete : S.title}</h1>
         <p className="whitespace-nowrap text-[22px] leading-[28px] text-[var(--sage-500)]">{done ? S.completeBody : S.body}</p>
       </header>
 

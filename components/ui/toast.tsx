@@ -7,7 +7,8 @@ type Toast = { id: number; text: string; action?: { label: string; onClick: () =
 type ShowToast = (text: string, action?: Toast["action"]) => void;
 
 const ToastContext = createContext<ShowToast>(() => {});
-const DURATION = 3500;
+const DURATION = 4000;
+const DURATION_ACTION = 6000; // time to reach the action button
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -16,7 +17,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const show = useCallback<ShowToast>((text, action) => {
     const id = next.current++;
     setToasts((list) => [...list, { id, text, action }]);
-    setTimeout(() => setToasts((list) => list.filter((t) => t.id !== id)), DURATION);
+    setTimeout(() => setToasts((list) => list.filter((t) => t.id !== id)), action ? DURATION_ACTION : DURATION);
   }, []);
 
   return (
@@ -29,7 +30,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           <div
             key={t.id}
             data-testid="toast"
-            className="pointer-events-auto flex max-w-[720px] items-center gap-[var(--space-16)] rounded-[var(--radius-md)] bg-[var(--bg-inverse)] px-[var(--space-24)] py-[var(--space-16)] text-[16px] leading-[20px] text-[var(--text-on-inverse)] shadow-[var(--pure-shadow-float)]"
+            className="anim-rise-in pointer-events-auto flex max-w-[720px] items-center gap-[var(--space-16)] rounded-[var(--radius-md)] bg-[var(--bg-inverse)] px-[var(--space-24)] py-[var(--space-16)] text-[16px] leading-[20px] text-[var(--text-on-inverse)] shadow-[var(--pure-shadow-float)]"
           >
             <span>{t.text}</span>
             {t.action && (
