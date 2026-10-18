@@ -50,7 +50,7 @@ export const LANDING = {
   daily: {
     label: "For Daily User",
     headline: ["Say what’s happening.", "Your robot answers in motion."],
-    body: "Tell it “someone came home” or show it a video. Purebot replies with a motion in its own character, and you can save it to play on its own.",
+    body: "Tell it “someone came home” or show it a video.\nPurebot replies with a motion in its own character,\nand you can save it to play on its own.",
     points: ["Pick a robot, shape its character", "Say it, or show a video", "Send it to your robot"],
     cta: "Get the app",
     phoneHomeAlt: "PURE app home: Hi SeungA, what’s happening?",

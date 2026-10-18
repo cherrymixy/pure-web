@@ -80,7 +80,7 @@ export default function Page() {
 
       <div className={column}>
       {/* Why PURE 901:6971 / 7297 / 7298 */}
-      <section id="why" className="h-[340px] px-[120px] pt-[50px]">
+      <section id="why" className="h-[390px] px-[120px] pt-[100px]">
         <p className={label}>{L.why.label}</p>
         <div className="mt-[12px] flex gap-[20px]">
           <h2 className="w-[450px] text-[32px] font-semibold leading-[1.26] text-[var(--sage-800)]">
@@ -107,7 +107,7 @@ export default function Page() {
         <h2 className="mt-[12px] w-[390px] text-[24px] font-semibold leading-[1.26] text-[var(--sage-800)]">
           <Lines lines={L.daily.headline} />
         </h2>
-        <p className="mt-[23px] w-[300px] text-[11px] leading-[1.26] text-[var(--neutral-600)]">{L.daily.body}</p>
+        <p className="mt-[23px] w-[300px] whitespace-pre-line text-[11px] leading-[1.26] text-[var(--neutral-600)]">{L.daily.body}</p>
         <ul className="mt-[43px] flex flex-col gap-[5px]">
           {L.daily.points.map((p) => (
             <li key={p} className="flex h-[13px] items-center gap-[calc(var(--space-12)/2)] text-[10px] leading-[1.26] text-[var(--sage-800)]">
@@ -142,7 +142,7 @@ export default function Page() {
               </li>
             ))}
           </ol>
-          <Link href="/lab" className={`${darkButton} mt-[10px] w-[235px]`}>
+          <Link href="/lab" className={`${darkButton} mt-[30px] w-[235px]`}>
             {L.expert.cta}
             <Arrow />
           </Link>
@@ -199,7 +199,7 @@ export default function Page() {
       </section>
 
       {/* Footer 901:7175 */}
-      <footer className="relative mt-[20px] flex h-[140px] whitespace-nowrap pl-[120px] pt-[20px] leading-[1.26]">
+      <footer className="relative mt-[60px] flex h-[140px] whitespace-nowrap pl-[120px] pt-[20px] leading-[1.26]">
         <div className="w-[380px]">
           <p className="text-[14px] font-semibold text-[var(--sage-800)]">{L.footer.brand}</p>
           <p className="mt-[4px] text-[8px] text-[var(--sage-500)]">{L.footer.tagline}</p>
