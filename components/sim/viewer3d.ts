@@ -276,12 +276,15 @@ export class LampViewer {
           : this.primitiveGeometry(g);
       if (!geometry) continue;
 
+      // 거의 검은 재질(화면 베젤)은 광택을 빼서 조명을 받아도 화면처럼 검게 남게 한다.
+      const color = this.geomColor(g);
+      const matte = color.getHSL({ h: 0, s: 0, l: 0 }).l < 0.1;
       const mesh = new THREE.Mesh(
         geometry,
         new THREE.MeshStandardMaterial({
-          color: this.geomColor(g),
-          roughness: 0.5,
-          metalness: 0.18,
+          color,
+          roughness: matte ? 0.85 : 0.5,
+          metalness: matte ? 0 : 0.18,
         }),
       );
       mesh.castShadow = true;
