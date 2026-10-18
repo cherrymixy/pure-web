@@ -3,9 +3,9 @@
 
 import { COMPONENTS } from "@/data/components";
 import { BEHAVIORS as BEHAVIOR_LIST } from "../sim/behaviors";
-import { FACE_PRESETS } from "@/data/face-presets";
 import { SOUND_CUES, cueAt } from "@/data/sound-cues";
-import { FACE_RANGES, type FaceParams } from "@/components/sim/face-canvas";
+import { FACE_AUTO } from "@/data/face-videos";
+import { faceName } from "./face";
 import type { Clip, FaceSpec, Key, Recipe, RecipeStep, SoundCue, Structure } from "../models";
 import type { PlaybackParams } from "../sim/params";
 import { reduceTrack, MAX_KEYS } from "./clip";
@@ -18,7 +18,6 @@ export interface Issue {
 
 const clampTo = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), hi);
 const BEHAVIORS = new Set<string>(COMPONENTS.map((c) => c.id));
-const PRESETS = new Set(Object.keys(FACE_PRESETS));
 
 export const RECIPE_LIMITS = { steps: 6, speed: [0.5, 1.5], amplitude: [0.3, 1.3], repeat: [1, 3], minVelocitySpeed: 0.2, maxSeconds: 15 } as const;
 
@@ -84,8 +83,9 @@ export function validateRecipe(input: { steps: Partial<RecipeStep>[]; loop?: boo
       repeat: clampTo(Math.round(Number.isFinite(s.repeat) ? s.repeat! : 1), ...RECIPE_LIMITS.repeat),
     };
     if (s.face) {
-      if (PRESETS.has(s.face)) step.face = s.face;
-      else issues.push({ field: `steps[${i}].face`, message: `Dropped unknown face preset "${s.face}"` });
+      const face = faceName(s.face);
+      if (face) step.face = face;
+      else issues.push({ field: `steps[${i}].face`, message: `Dropped unknown face video "${s.face}"` });
     }
     for (const k of ["speed", "amplitude", "repeat"] as const) {
       if (s[k] !== undefined && step[k] !== s[k]) issues.push({ field: `steps[${i}].${k}`, message: `${k} ${s[k]} → ${step[k]}` });
@@ -263,23 +263,11 @@ export function validateClip(clip: Clip, structure: Structure): { clip: Clip; is
 
 // ---------------------------------------------------------------- face & sound
 
-export function validateFace(spec: { preset: string; tokens: Partial<FaceSpec["tokens"]> }, defaults?: Partial<FaceParams>): { face: FaceSpec; issues: Issue[] } {
-  const issues: Issue[] = [];
-  let preset = spec.preset;
-  if (preset !== "video" && !PRESETS.has(preset)) {
-    issues.push({ field: "face.preset", message: `Unknown preset "${preset}" → neutral` });
-    preset = "neutral";
-  }
-  const base: FaceParams = { ...(FACE_PRESETS as Record<string, FaceParams>)[preset === "video" ? "neutral" : preset], ...defaults };
-  const tokens = { ...base } as FaceParams;
-  for (const k of Object.keys(FACE_RANGES) as (keyof FaceParams)[]) {
-    const v = spec.tokens[k];
-    if (typeof v !== "number" || !Number.isFinite(v)) continue;
-    const [lo, hi] = FACE_RANGES[k];
-    tokens[k] = clampTo(v, lo, hi);
-    if (tokens[k] !== v) issues.push({ field: `face.tokens.${k}`, message: `${k} ${v} → ${tokens[k]}` });
-  }
-  return { face: { preset, tokens }, issues };
+/** The face must be one of the face videos (or "auto"); anything else falls back to auto. */
+export function validateFace(spec: { preset: string }): { face: FaceSpec; issues: Issue[] } {
+  const preset = faceName(spec.preset);
+  if (preset) return { face: { preset }, issues: [] };
+  return { face: { preset: FACE_AUTO }, issues: [{ field: "face.preset", message: `Unknown face video "${spec.preset}" → ${FACE_AUTO}` }] };
 }
 
 const CUES = new Map(SOUND_CUES.map((c) => [c.id, c]));

@@ -47,9 +47,8 @@ export const DEV_SOUND: SoundSpec = {
 
 export const DEV_FACE_KEYS: FaceSpec = {
   preset: "neutral",
-  tokens: { eyeSize: 1, eyeOpen: 1, eyeAngle: 0, browAngle: 0, brightness: 1, blinkRate: 12 },
   keys: [
-    { t: 1, tokens: { eyeOpen: 1, browAngle: 0 } },
-    { t: 3, tokens: { eyeOpen: 0.2, browAngle: -12, eyeAngle: -8, brightness: 0.45 } },
+    { t: 1, preset: "smile" },
+    { t: 3, preset: "sleepy" },
   ],
 };

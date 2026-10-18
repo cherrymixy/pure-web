@@ -11,3 +11,4 @@ export * from "./retarget";
 export * from "./keys";
 export * from "./direct";
 export * from "./references";
+export * from "./face";

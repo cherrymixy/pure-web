@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FACE_PRESETS } from "@/data/face-presets";
 import { AXIS_INFO, AXIS_ORDER, PURE_DEFAULT_SIGNATURE, TONE_DICTIONARY } from "@/data/signature";
 import { STRINGS, fmt } from "@/data/strings";
 import type { Axis, Job, Signature } from "@/lib/models";
@@ -227,10 +226,10 @@ export function SignatureStudio({
 
   const params = useMemo(() => (shown ? signatureToParams(shown.axes) : null), [shown]);
   const playback = params?.playback;
-  const eyeSize = params?.face.eyeSize;
+  const faceVideo = params?.face.video;
   useEffect(() => {
-    if (eyeSize !== undefined) ctrl.current?.setFace({ preset: "neutral", tokens: { ...FACE_PRESETS.neutral, eyeSize } });
-  }, [eyeSize]);
+    if (faceVideo) ctrl.current?.setFace({ preset: faceVideo });
+  }, [faceVideo]);
 
   // ------------------------------------------------------------ render
 

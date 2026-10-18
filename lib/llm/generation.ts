@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { COMPONENTS } from "@/data/components";
 import { COMPONENT_DEMOS, PROMPT_DEMOS, type DemoExpression } from "@/data/demo-recipes";
-import { FACE_PRESETS } from "@/data/face-presets";
+import { FACE_NAMES } from "@/data/face-videos";
 import { SUGGESTED_PROMPTS, type SuggestedPromptId } from "@/data/prompts";
 import { SOUND_CUES } from "@/data/sound-cues";
 import { OLLAMA_MODEL, OLLAMA_VISION_MODEL } from "../env";
@@ -13,7 +13,7 @@ import type { Structure } from "../models";
 
 const ids = <T extends { id: string }>(xs: readonly T[]) => xs.map((x) => x.id) as [string, ...string[]];
 const BehaviorEnum = z.enum(ids(COMPONENTS));
-const FaceEnum = z.enum(Object.keys(FACE_PRESETS) as [string, ...string[]]);
+const FaceEnum = z.enum(FACE_NAMES as unknown as [string, ...string[]]);
 const CueEnum = z.enum(ids(SOUND_CUES));
 
 /**
@@ -30,10 +30,7 @@ export const GenerationOutputSchema = z.object({
       .min(1)
       .max(6),
   }),
-  face: z.object({
-    preset: FaceEnum,
-    tokens: z.object({ eyeSize: z.number(), eyeOpen: z.number(), eyeAngle: z.number(), browAngle: z.number(), brightness: z.number(), blinkRate: z.number() }),
-  }),
+  face: z.object({ preset: FaceEnum }),
   sound: z.object({ cues: z.array(z.object({ preset: CueEnum, t: z.number() })).max(4) }),
 });
 export type GenerationOutput = z.infer<typeof GenerationOutputSchema>;
@@ -80,7 +77,7 @@ export function demoToOutput(demo: DemoExpression): GenerationOutput {
     motion: {
       steps: demo.motion.recipe.steps.map(({ behavior, speed, amplitude, repeat, face }) => ({ behavior, speed, amplitude, repeat, ...(face ? { face } : {}) })),
     },
-    face: { preset: demo.face.preset, tokens: { eyeOpen: 1, ...demo.face.tokens } },
+    face: { preset: demo.face.preset },
     sound: { cues: demo.sound.cues.map((c) => ({ preset: c.id.split("@")[0], t: c.t })) },
   };
 }

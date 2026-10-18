@@ -45,7 +45,7 @@ export function buildExpression(output: GenerationOutput, ctx: BuildContext): { 
   };
 }
 
-/** "Make it softer": slower, smaller, softer landing, dimmer, quieter. */
+/** "Make it softer": slower, smaller, softer landing, quieter. */
 export function applySoftener<T extends Pick<Expression, "motion" | "face" | "sound">>(expr: T): T {
   const p = expr.motion.props;
   return {
@@ -54,7 +54,6 @@ export function applySoftener<T extends Pick<Expression, "motion" | "face" | "so
       ...expr.motion,
       props: { ...p, speed: Math.round(p.speed * 0.8), amplitude: Math.round(p.amplitude * 0.75), smoothness: Math.min(100, p.smoothness + 15) },
     },
-    face: { ...expr.face, tokens: { ...expr.face.tokens, brightness: Math.max(0.1, Math.round(expr.face.tokens.brightness * 85) / 100) } },
     sound: { cues: expr.sound.cues.map((c) => ({ ...c, volumeDb: c.volumeDb - 4 })) },
   };
 }

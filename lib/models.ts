@@ -107,7 +107,7 @@ export const RecipeStepSchema = z.object({
   speed: z.number().positive(),
   amplitude: z.number().min(0),
   repeat: z.number().int().min(1),
-  /** Face preset name applied when this step starts */
+  /** Face video name shown while this step plays */
   face: z.string().optional(),
 });
 export type RecipeStep = z.infer<typeof RecipeStepSchema>;
@@ -129,22 +129,14 @@ export const ClipSchema = z.object({
 });
 export type Clip = z.infer<typeof ClipSchema>;
 
-export const FaceTokensSchema = z.object({
-  eyeSize: z.number(),
-  eyeAngle: z.number(),
-  browAngle: z.number(),
-  brightness: z.number(),
-  blinkRate: z.number(),
-  /** Lid openness 0…1, default 1 (added in STEP 3, see docs/decisions.md) */
-  eyeOpen: z.number().optional(),
-});
-export type FaceTokens = z.infer<typeof FaceTokensSchema>;
+export const FaceKeySchema = z.object({ t: z.number().min(0), preset: z.string() });
+export type FaceKey = z.infer<typeof FaceKeySchema>;
 
 export const FaceSpecSchema = z.object({
-  /** Canvas preset name, or "video" for the per-behavior mp4 faces */
+  /** Face video name (data/face-videos.ts) or "auto" for the per-behavior video; "" = no face channel */
   preset: z.string(),
-  tokens: FaceTokensSchema,
-  keys: z.array(z.object({ t: z.number(), tokens: FaceTokensSchema.partial() })).optional(),
+  /** Timeline keys: from t on, this video plays (held until the next key) */
+  keys: z.array(FaceKeySchema).optional(),
 });
 export type FaceSpec = z.infer<typeof FaceSpecSchema>;
 

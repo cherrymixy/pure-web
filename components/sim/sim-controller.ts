@@ -13,9 +13,9 @@ import { DEFAULT_PARAMS, applyParams, resolveParams, scaleTime, type PlaybackPar
 import { retargetMotion, type CameraView } from '@/lib/sim/robots';
 import { SequencePlayer, clipPlayable, motionPlayable } from '@/lib/sim/sequence';
 import type { Clip, FaceSpec, Recipe, SoundCue, SoundSpec, Structure } from '@/lib/models';
-import { FACE_PRESETS } from '@/data/face-presets';
-import { FACE_DEFAULTS, faceAt, type FaceParams } from './face-canvas';
-import { LEAD_IN, SimRuntime, type JointState as RuntimeJointState, type PlaybackSource, type SimRuntimeOptions } from './runtime';
+import { FACE_DIR, FACE_VIDEOS } from '@/data/face-videos';
+import { faceAtTime, faceName } from '@/lib/expression/face';
+import { LEAD_IN, SimRuntime, type FaceSource, type JointState as RuntimeJointState, type PlaybackSource, type SimRuntimeOptions } from './runtime';
 import type { LimitEvent } from './limits';
 
 export type { PlaybackParams };
@@ -76,10 +76,10 @@ export interface SimControllerOptions extends SimRuntimeOptions {
   sound?: SoundEngine;
 }
 
-/** FaceSpec → canvas params: preset bundle, then tokens on top. */
-export function faceSpecToParams(spec: FaceSpec): FaceParams {
-  const preset = (FACE_PRESETS as Record<string, FaceParams>)[spec.preset] ?? FACE_DEFAULTS;
-  return { ...preset, ...spec.tokens, eyeOpen: spec.tokens.eyeOpen ?? preset.eyeOpen };
+/** Face name → screen source: a face video, or "auto" (anything else) = the per-behavior video. */
+function faceSource(name: string | null): FaceSource {
+  const video = name ? (FACE_VIDEOS as Record<string, { file: string }>)[name] : undefined;
+  return video ? { kind: 'video', url: FACE_DIR + video.file } : { kind: 'video' };
 }
 
 export class SimController {
@@ -89,8 +89,12 @@ export class SimController {
   private params: Required<PlaybackParams> = { ...DEFAULT_PARAMS };
   private source: PlaybackSource | null = null;
   private recipe: Recipe | null = null;
-  /** Face with timeline keys, re-evaluated on every tick while an expression plays. */
+  /** The expression's face; timeline keys are re-evaluated on every tick while it plays. */
   private faceSpec: FaceSpec | null = null;
+  /** Face of the recipe step playing now (used when the face has no timeline keys). */
+  private stepFace: string | null = null;
+  /** Face name on the screen, so a tick only swaps the video when it changes. */
+  private shownFace: string | null | undefined = undefined;
   private expressionActive = false;
   private view: ViewParams = {};
   private orbit: { on: boolean; pan?: boolean; zoom?: boolean } = { on: true };
@@ -125,7 +129,7 @@ export class SimController {
           break;
         case 'tick':
           this.sound.sync?.(e.t, this.params.speed);
-          if (this.expressionActive) this.applyFaceKeys(e.t);
+          if (this.expressionActive && this.faceSpec?.keys?.length) this.applyFace(e.t);
           this.emit('tick', { t: e.t, duration: e.duration });
           break;
         case 'limitExceeded': {
@@ -224,6 +228,8 @@ export class SimController {
   private start(source: PlaybackSource, opts: { autoplay?: boolean } = {}): void {
     this.source = source;
     this.expressionActive = true;
+    this.stepFace = null;
+    this.applyFace(0);
     this.runtime.setSpeed(this.params.speed);
     this.runtime.play(source, opts);
     this.sound.sync?.(0, this.params.speed);
@@ -232,11 +238,9 @@ export class SimController {
   }
 
   private applyStepFace(name: string, index: number): void {
-    if (name !== 'recipe' || !this.recipe || this.faceSpec?.keys?.length) return;
-    const preset = this.recipe.steps[index]?.face;
-    if (!preset) return;
-    if (preset === 'video') this.runtime.setFace({ kind: 'video' });
-    else if (preset in FACE_PRESETS) this.runtime.setFace({ kind: 'canvas', params: FACE_PRESETS[preset as keyof typeof FACE_PRESETS] });
+    if (name !== 'recipe' || !this.recipe) return;
+    this.stepFace = faceName(this.recipe.steps[index]?.face);
+    this.applyFace(this.runtime.getTime().t);
   }
 
   /** Signature-driven idle (applies immediately). */
@@ -285,6 +289,7 @@ export class SimController {
     this.expressionActive = false;
     this.sound.stop();
     this.runtime.stop();
+    this.applyFace(0);
   }
 
   setLoop(on: boolean): void {
@@ -307,16 +312,18 @@ export class SimController {
   // ---------------------------------------------------------------- face & sound
 
   setFace(spec: FaceSpec): void {
-    this.faceSpec = spec.preset !== 'video' && spec.keys?.length ? spec : null;
-    if (spec.preset === 'video') this.runtime.setFace({ kind: 'video' });
-    else if (this.faceSpec && this.expressionActive) this.applyFaceKeys(this.runtime.getTime().t);
-    else this.runtime.setFace({ kind: 'canvas', params: faceSpecToParams(spec) });
+    this.faceSpec = spec;
+    this.applyFace(this.runtime.getTime().t);
   }
 
-  private applyFaceKeys(t: number): void {
+  /** Timeline keys win, then the recipe step's face, then the expression's face. */
+  private applyFace(t: number): void {
     const spec = this.faceSpec;
-    if (!spec?.keys) return;
-    this.runtime.setFace({ kind: 'canvas', params: faceAt(faceSpecToParams(spec), spec.keys, t) });
+    const keyed = this.expressionActive && spec?.keys?.length ? faceAtTime(spec, t) : null;
+    const name = faceName(keyed ?? (this.expressionActive ? this.stepFace : null) ?? spec?.preset);
+    if (name === this.shownFace) return;
+    this.shownFace = name;
+    this.runtime.setFace(faceSource(name));
   }
 
   setSound(spec: SoundSpec | null): void {

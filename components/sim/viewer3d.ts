@@ -5,7 +5,7 @@
  * STL 을 따로 파싱하지 않으므로 물리와 렌더가 항상 같은 형상을 쓴다.
  * 매 프레임 data.geom_xpos / geom_xmat(월드 변환)을 그대로 옮긴다.
  *
- * 얼굴 화면은 영상(VideoTexture) 또는 캔버스(CanvasTexture, face-canvas.ts) 중 하나를 띄운다.
+ * 얼굴 화면은 표정 영상(VideoTexture)만 띄운다. 얼굴을 직접 그리지 않는다.
  * 스테이지·조명 색은 ViewerOptions 로 바꿀 수 있다 (디자인 패스에서 sim 내부를 건드리지 않도록).
  */
 
@@ -101,7 +101,6 @@ export class LampViewer {
   private video: HTMLVideoElement | null = null;
   private videoTexture: THREE.VideoTexture | null = null;
   private faceUrl: string | null = null;
-  private canvasTexture: THREE.CanvasTexture | null = null;
   private readonly tmpMat = new THREE.Matrix4();
   private readonly options: Required<ViewerOptions>;
   private readonly jointIds: Record<JointName, number>;
@@ -322,31 +321,6 @@ export class LampViewer {
     this.screen = { material, spec };
   }
 
-  /**
-   * 캔버스 얼굴을 띄운다 (face-canvas.ts). 영상은 멈춘다. null 이면 화면을 끈다.
-   * 캔버스 내용은 render() 마다 텍스처로 올라간다.
-   */
-  setFaceCanvas(canvas: HTMLCanvasElement | null): void {
-    if (!this.screen) return;
-    const { material } = this.screen;
-    this.faceUrl = null;
-    this.video?.pause();
-    if (!canvas) {
-      material.map = null;
-      material.color.set(SCREEN_OFF);
-      material.needsUpdate = true;
-      return;
-    }
-    if (this.canvasTexture?.image !== canvas) {
-      this.canvasTexture?.dispose();
-      this.canvasTexture = new THREE.CanvasTexture(canvas);
-      this.canvasTexture.colorSpace = THREE.SRGBColorSpace;
-    }
-    material.map = this.canvasTexture;
-    material.color.set('#ffffff');
-    material.needsUpdate = true;
-  }
-
   /** 표정 영상을 바꾼다. null 이면 화면을 끈다. 같은 URL 이면 그대로 이어서 재생한다. */
   setFace(url: string | null): void {
     if (!this.screen || url === this.faceUrl) return;
@@ -412,7 +386,6 @@ export class LampViewer {
       this.video.load();
     }
     this.videoTexture?.dispose();
-    this.canvasTexture?.dispose();
     this.renderer.dispose();
   }
 
@@ -523,9 +496,6 @@ export class LampViewer {
 
   render(): void {
     this.controls.update();
-    if (this.canvasTexture && this.screen?.material.map === this.canvasTexture) {
-      this.canvasTexture.needsUpdate = true;
-    }
     this.renderer.render(this.scene, this.camera);
   }
 

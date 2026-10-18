@@ -11,7 +11,7 @@ import {
 import { COMPONENTS, guidelineSlugFor } from "./components";
 import { GUIDELINE, countEntries, findEntry } from "./guideline";
 import { COMPONENT_DEMOS, PROMPT_DEMOS, applySofterDemo } from "./demo-recipes";
-import { FACE_PRESETS } from "./face-presets";
+import { FACE_NAMES } from "./face-videos";
 import { SUGGESTED_PROMPTS } from "./prompts";
 import { PURE_DESK_STRUCTURE } from "./pure-desk";
 import { ROBOT_TYPES } from "./robot-types";
@@ -64,9 +64,9 @@ describe("demo recipes", () => {
     d.sound.cues.forEach((c) => ok(SoundCueSchema, c));
     for (const s of d.motion.recipe.steps) {
       expect(behaviorNames.has(s.behavior)).toBe(true);
-      if (s.face) expect(s.face in FACE_PRESETS).toBe(true);
+      if (s.face) expect(FACE_NAMES).toContain(s.face);
     }
-    expect(d.face.preset in FACE_PRESETS).toBe(true);
+    expect(FACE_NAMES).toContain(d.face.preset);
   });
   it("softer variant is slower, smaller and quieter", () => {
     const soft = applySofterDemo(PROMPT_DEMOS.here);

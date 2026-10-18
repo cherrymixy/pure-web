@@ -1,4 +1,5 @@
-import { AXIS_INFO, AXIS_ORDER, DEFAULT_AXES, HOW_IT_MAPS_NO_PAGE, HOW_IT_MAPS_TEMPLATE, MAP_DIRECTION, PARAM_MAPPING, TONE_DICTIONARY } from "@/data/signature";
+import { AXIS_INFO, AXIS_ORDER, DEFAULT_AXES, EYES_FACE, HOW_IT_MAPS_NO_PAGE, HOW_IT_MAPS_TEMPLATE, MAP_DIRECTION, PARAM_MAPPING, TONE_DICTIONARY } from "@/data/signature";
+import type { FaceVideoName } from "@/data/face-videos";
 import type { Axis, Signature } from "../models";
 import type { PlaybackParams } from "../sim/params";
 
@@ -63,7 +64,7 @@ export function paramEffect(axis: Axis, value: number): string | null {
     case "settle": return value > 66 ? "soft landing" : value < 34 ? "springy overshoot" : null;
     case "antic": return value > 0 ? `anticipation ${value}%` : null;
     case "rhythm": return `rhythm ×${lerp(PARAM_MAPPING.rhythm, value).toFixed(2)}`;
-    case "eyes": return `eye size ×${lerp(PARAM_MAPPING.eyeSize, value).toFixed(2)}`;
+    case "eyes": return `face ${eyesFace(value)}`;
     case "pitch": return `${lerp(PARAM_MAPPING.pitchSt, value) >= 0 ? "+" : ""}${lerp(PARAM_MAPPING.pitchSt, value).toFixed(1)} st`;
     case "density": return `up to ${Math.round(lerp(PARAM_MAPPING.maxCues, value))} cues`;
   }
@@ -71,11 +72,16 @@ export function paramEffect(axis: Axis, value: number): string | null {
 
 export interface SignatureParams {
   playback: Required<PlaybackParams>;
-  face: { eyeSize: number };
+  face: { video: FaceVideoName };
   sound: { pitchSt: number; maxCues: number };
 }
 
-/** PRD §6 rule 7: signature axes → playback parameters, default eye size, sound base. */
+/** Eyes axis → the default face video. */
+export function eyesFace(value: number): FaceVideoName {
+  return (EYES_FACE.find(([below]) => value < below) ?? EYES_FACE[EYES_FACE.length - 1])[1];
+}
+
+/** PRD §6 rule 7: signature axes → playback parameters, default face video, sound base. */
 export function signatureToParams(axes: Record<Axis, number>): SignatureParams {
   return {
     playback: {
@@ -85,7 +91,7 @@ export function signatureToParams(axes: Record<Axis, number>): SignatureParams {
       antic: axes.antic / 100,
       rhythm: lerp(PARAM_MAPPING.rhythm, axes.rhythm),
     },
-    face: { eyeSize: lerp(PARAM_MAPPING.eyeSize, axes.eyes) },
+    face: { video: eyesFace(axes.eyes) },
     sound: { pitchSt: lerp(PARAM_MAPPING.pitchSt, axes.pitch), maxCues: Math.round(lerp(PARAM_MAPPING.maxCues, axes.density)) },
   };
 }

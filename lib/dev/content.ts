@@ -1,6 +1,6 @@
 import { COMPONENTS } from "@/data/components";
 import { COMPONENT_DEMOS, PROMPT_DEMOS } from "@/data/demo-recipes";
-import { FACE_PRESETS } from "@/data/face-presets";
+import { FACE_VIDEOS } from "@/data/face-videos";
 import { countEntries } from "@/data/guideline";
 import { SITUATION_PATTERNS } from "@/data/patterns";
 import { SUGGESTED_PROMPTS } from "@/data/prompts";
@@ -32,7 +32,7 @@ export function contentSummary(): ContentRow[] {
     { file: "data/components.ts", item: "Components (behaviors)", count: COMPONENTS.length },
     { file: "data/patterns.ts", item: "Situation patterns", count: SITUATION_PATTERNS.length },
     { file: "data/prompts.ts", item: "Suggested prompts", count: SUGGESTED_PROMPTS.length },
-    { file: "data/face-presets.ts", item: "Face presets", count: Object.keys(FACE_PRESETS).length },
+    { file: "data/face-videos.ts", item: "Face videos", count: Object.keys(FACE_VIDEOS).length },
     { file: "data/sound-cues.ts", item: "Sound cues", count: SOUND_CUES.length },
     { file: "data/signature.ts", item: "Signature axes", count: AXIS_ORDER.length },
     { file: "data/signature.ts", item: "Tone keywords", count: Object.keys(TONE_DICTIONARY).length },

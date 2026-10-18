@@ -253,12 +253,8 @@ export const STRINGS = {
     demoBadge: "Demo result",
     face: {
       expression: "Expression",
-      preset: "Preset",
-      tokens: "Tokens",
-      display: "Display",
-      fields: { eyeSize: "Eye size", eyeOpen: "Eye open", eyeAngle: "Eye angle", browAngle: "Brow angle", brightness: "Brightness", blinkRate: "Blink rate" },
-      video: "Video",
-      videoNote: "Plays the per-behavior face videos instead of the canvas face.",
+      preset: "Face video",
+      autoNote: "Auto plays the video that goes with each behavior.",
       label: "Face",
     },
     sound: {

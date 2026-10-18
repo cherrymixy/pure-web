@@ -10,7 +10,7 @@ const good: GenerationOutput = {
   currentStatus: "I can barely keep my eyes open.",
   reasoning: "It slowly droops and catches itself.",
   motion: { steps: [{ behavior: "doze", speed: 0.8, amplitude: 0.9, repeat: 1, face: "sleepy" }] },
-  face: { preset: "sleepy", tokens: { eyeSize: 1, eyeOpen: 0.3, eyeAngle: -5, browAngle: -10, brightness: 0.5, blinkRate: 4 } },
+  face: { preset: "sleepy" },
   sound: { cues: [{ preset: "soft-breath", t: 0.5 }] },
 };
 const json = (v: unknown) => JSON.stringify(v);

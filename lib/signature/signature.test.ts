@@ -5,6 +5,7 @@ import { seedDb } from "@/data/seed";
 import { DEMO_EXTRACTION } from "../llm/extraction";
 import type { Db } from "../models";
 import { LowRepo } from "../repo-lowdb";
+import { DEFAULT_AXES } from "@/data/signature";
 import { axesFromTone, compareSignatures, signatureToParams } from "./axes";
 import { SignatureError } from "./errors";
 import { assertReadable, classifyUrl, extractFromHtml, extractFromPdf, fontsFromText, topColors } from "./extract";
@@ -54,7 +55,9 @@ describe("tone → axes", () => {
     expect(p.playback.settle).toBeCloseTo(0.5);
     expect(p.playback.antic).toBeCloseTo(0.2);
     expect(p.playback.rhythm).toBeCloseTo(1.1);
-    expect(p.face.eyeSize).toBeCloseTo(1.25);
+    expect(p.face.video).toBe("smile");
+    expect(signatureToParams({ ...DEFAULT_AXES, eyes: 10 }).face.video).toBe("sleepy");
+    expect(signatureToParams({ ...DEFAULT_AXES, eyes: 50 }).face.video).toBe("neutral");
     expect(p.sound).toEqual({ pitchSt: -4, maxCues: 4 });
   });
 });

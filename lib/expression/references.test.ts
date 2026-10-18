@@ -21,7 +21,7 @@ describe("reference credits", () => {
       name: "Sleepy nod",
       currentStatus: "",
       motion: { mode: "recipe" as const, recipe: { steps: [{ behavior: "doze", speed: 1, amplitude: 1, repeat: 1 }] }, props: { amplitude: 50, duration: 50, smoothness: 50, speed: 50, frequency: 50 } },
-      face: { preset: "sleepy", tokens: { eyeSize: 1, eyeOpen: 0.3, eyeAngle: 0, browAngle: 0, brightness: 0.5, blinkRate: 4 } },
+      face: { preset: "sleepy" },
       sound: { cues: [] },
     };
     const clip = { format: "lelamp.clip/1" as const, duration: 2, tracks: {} };

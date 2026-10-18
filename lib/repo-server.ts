@@ -8,6 +8,7 @@ import { UPLOADS_DIR, DB_FILE } from "./paths";
 import type { Repo } from "./repo";
 import { LowRepo } from "./repo-lowdb";
 import { fitDbToRig } from "./robot/rig";
+import { migrateDbFaces } from "./expression/face";
 
 // One repo per server process. Route bundles can load this module more than once in dev,
 // so the instance lives on globalThis.
@@ -18,6 +19,7 @@ export function getRepo(): Repo {
     seed: seedDb,
     migrate: (db) => {
       fitDbToRig(db);
+      migrateDbFaces(db);
       addMissingSeedMotions(db);
     },
     removeUploads: (projectId) => fs.rm(path.join(UPLOADS_DIR, projectId), { recursive: true, force: true }),

@@ -1,4 +1,5 @@
 import type { Axis, Signature } from "@/lib/models";
+import type { FaceVideoName } from "./face-videos";
 
 // 8-axis brand signature (W02C). Values 0–100; PURE Default = 50 on every axis.
 export const AXIS_INFO: Record<Axis, { label: string; description: string; low: string; high: string }> = {
@@ -7,7 +8,7 @@ export const AXIS_INFO: Record<Axis, { label: string; description: string; low: 
   settle: { label: "Settle", description: "How a move lands: overshoot or soft stop.", low: "Springy", high: "Soft landing" },
   antic: { label: "Anticipation", description: "Small counter-move before the main move.", low: "Direct", high: "Wound up" },
   rhythm: { label: "Rhythm", description: "Repetition and oscillation frequency.", low: "Sparse", high: "Lively" },
-  eyes: { label: "Eyes", description: "Default eye size and openness on the face display.", low: "Narrow", high: "Wide" },
+  eyes: { label: "Eyes", description: "Default face video on the screen: sleepy, neutral or smile.", low: "Calm", high: "Bright" },
   pitch: { label: "Pitch", description: "Base pitch of sound cues.", low: "Low", high: "High" },
   density: { label: "Density", description: "How many sound cues accompany a motion.", low: "Quiet", high: "Chatty" },
 };
@@ -58,12 +59,18 @@ export const HOW_IT_MAPS_TEMPLATE = "“{keyword}” on p.{page} {direction} {ax
 export const HOW_IT_MAPS_NO_PAGE = "“{keyword}” {direction} {axis} to {value}.";
 export const MAP_DIRECTION = { up: "raises", down: "lowers" } as const;
 
-/** Signature axis → playback / face / sound ranges (PRD §6 rule 7). lerp(lo, hi, axis/100). */
+/** Eyes axis → default face video: the first entry whose upper bound is above the axis value. */
+export const EYES_FACE: readonly (readonly [number, FaceVideoName])[] = [
+  [34, "sleepy"],
+  [67, "neutral"],
+  [101, "smile"],
+];
+
+/** Signature axis → playback / sound ranges (PRD §6 rule 7). lerp(lo, hi, axis/100). */
 export const PARAM_MAPPING = {
   speed: [0.7, 1.4],
   amplitude: [0.6, 1.3],
   rhythm: [0.6, 1.6],
-  eyeSize: [0.8, 1.25],
   pitchSt: [-4, 4],
   maxCues: [1, 4],
 } as const;

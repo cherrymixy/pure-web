@@ -65,12 +65,13 @@ export function deleteKey(clip: Clip, joint: string, index: number): Clip {
 
 // ---------------------------------------------------------------- face keys
 
-export function addFaceKey(face: FaceSpec, t: number, duration: number, tokens: FaceSpec["tokens"]): { face: FaceSpec; index: number } {
+/** +Keyframe on the face track: from t on, `preset` (a face video) plays. */
+export function addFaceKey(face: FaceSpec, t: number, duration: number, preset: string): { face: FaceSpec; index: number } {
   const time = snapTime(t, duration);
   const keys = face.keys ?? [];
   const existing = keys.findIndex((k) => Math.abs(k.t - time) < 1 / (2 * CLIP_FPS));
   if (existing >= 0) return { face, index: existing };
-  const next = [...keys, { t: time, tokens: { ...tokens } }].sort((a, b) => a.t - b.t);
+  const next = [...keys, { t: time, preset }].sort((a, b) => a.t - b.t);
   return { face: { ...face, keys: next }, index: next.findIndex((k) => k.t === time) };
 }
 

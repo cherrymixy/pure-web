@@ -15,7 +15,6 @@ import { engineJoint } from '@/lib/sim/clip-map';
 import { JOINT_NAMES, type JointName, type Motion, type PartialPose, type Pose } from '@/lib/sim/motion';
 import { PURE_DESK_ROBOT, retargetMotion, type CameraView, type FaceManifest, type RobotSpec } from '@/lib/sim/robots';
 import { motionPlayable, type Playable } from '@/lib/sim/sequence';
-import { FaceCanvas, type FaceParams } from './face-canvas';
 import { createLamp, type LampSim, type LoadProgress } from './lamp';
 import { LimitMonitor, type JointLimits, type LimitEvent } from './limits';
 import { LampViewer, type JointScreenPoint, type ViewerOptions } from './viewer3d';
@@ -37,7 +36,6 @@ export interface JointState {
 }
 
 export type FaceSource =
-  | { kind: 'canvas'; params?: Partial<FaceParams> }
   /** Per-behaviour mp4 from faces.json (or a fixed url) */
   | { kind: 'video'; url?: string }
   | { kind: 'off' };
@@ -81,8 +79,7 @@ export class SimRuntime {
   readonly ready: Promise<void>;
   private lamp: LampSim | null = null;
   private viewer: LampViewer | null = null;
-  private readonly face: FaceCanvas;
-  private faceSource: FaceSource = { kind: 'canvas' };
+  private faceSource: FaceSource = { kind: 'video' };
   private faces: FaceManifest | null = null;
   private limits: LimitMonitor | null = null;
   private pendingLimits: JointLimits | null = null;
@@ -115,7 +112,6 @@ export class SimRuntime {
     this.idle = options.idle ?? true;
     this.idleDefault = this.idle;
     this.stopOnLimit = options.stopOnLimit ?? true;
-    this.face = new FaceCanvas();
     this.ready = this.load();
   }
 
@@ -421,7 +417,6 @@ export class SimRuntime {
 
     const viewer = this.viewer;
     if (viewer) {
-      if (this.faceSource.kind === 'canvas') this.face.draw(now / 1000);
       viewer.sync();
       viewer.render();
     }
@@ -449,7 +444,6 @@ export class SimRuntime {
   // ---------------------------------------------------------------- face
 
   setFace(source: FaceSource): void {
-    if (source.kind === 'canvas' && source.params) this.face.setParams(source.params);
     this.faceSource = source;
     this.applyFace();
   }
@@ -459,7 +453,6 @@ export class SimRuntime {
     if (!viewer) return;
     const src = this.faceSource;
     if (src.kind === 'off') viewer.setFace(null);
-    else if (src.kind === 'canvas') viewer.setFaceCanvas(this.face.canvas);
     else {
       const a = this.active;
       const behavior = a?.source.faceBehavior?.(a.step) ?? null;

@@ -185,7 +185,7 @@ export function SignatureLab() {
               </tbody>
             </table>
             <p className="font-mono text-xs text-neutral-500">
-              speed {params.playback.speed.toFixed(2)} · amplitude {params.playback.amplitude.toFixed(2)} · settle {params.playback.settle.toFixed(2)} · antic {params.playback.antic.toFixed(2)} · rhythm {params.playback.rhythm.toFixed(2)} · eyeSize {params.face.eyeSize.toFixed(2)} · pitch {params.sound.pitchSt.toFixed(1)}st · cues ≤{params.sound.maxCues}
+              speed {params.playback.speed.toFixed(2)} · amplitude {params.playback.amplitude.toFixed(2)} · settle {params.playback.settle.toFixed(2)} · antic {params.playback.antic.toFixed(2)} · rhythm {params.playback.rhythm.toFixed(2)} · face {params.face.video} · pitch {params.sound.pitchSt.toFixed(1)}st · cues ≤{params.sound.maxCues}
             </p>
           </div>
         </section>

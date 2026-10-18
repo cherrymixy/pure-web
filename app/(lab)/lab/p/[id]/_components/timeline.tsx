@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { STRINGS, fmt } from "@/data/strings";
-import { CLIP_FPS, clipToJointCommands, formatTime } from "@/lib/expression";
+import { CLIP_FPS, clipToJointCommands, faceAtTime, faceLabel, formatTime } from "@/lib/expression";
 import { EASINGS, type Clip, type FaceSpec, type Key, type SoundSpec, type Structure } from "@/lib/models";
 
 const T = STRINGS.editor.timeline;
@@ -132,7 +132,7 @@ export function Timeline(p: TimelineProps) {
   // Current commanded value per joint (Track list › Meta) — sampled from the clip at the playhead.
   const pose = clipToJointCommands(p.clip, p.t, p.structure);
   const metaOf = (track: Track) => {
-    if (track === "face") return p.face.preset;
+    if (track === "face") return faceLabel(faceAtTime(p.face, p.t));
     if (track === "sound") return String(p.sound.cues.length);
     const v = pose[track];
     return v === undefined ? "—" : `${v.toFixed(1)}°`;
@@ -367,6 +367,7 @@ function Inspector(p: TimelineProps & { jointKey: Key | undefined }) {
           <span className={`text-[12px] leading-[15px] ${outOfRange ? "text-[var(--text-error)]" : "text-[var(--text-tertiary)]"}`}>{fmt(T.range, { min: joint.min, max: joint.max })}</span>
         </>
       )}
+      {faceKey && <span className={label}>{faceLabel(faceKey.preset)}</span>}
       {faceKey && (
         <button type="button" className={`${btn} bg-[var(--bg-surface-muted)] text-[var(--text-primary)]`} onClick={() => p.onFaceKeyFromCurrent(sel.index)}>{T.fromFace}</button>
       )}

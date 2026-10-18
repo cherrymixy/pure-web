@@ -39,7 +39,7 @@ const OUTPUT: GenerationOutput = {
   currentStatus: "I'm nodding off because I'm tired.",
   reasoning: "The head droops and catches itself, like dozing at a desk.",
   motion: { steps: [{ behavior: "doze", speed: 0.9, amplitude: 1, repeat: 1, face: "sleepy" }, { behavior: "nod", speed: 0.8, amplitude: 0.8, repeat: 1 }] },
-  face: { preset: "sleepy", tokens: { eyeSize: 1, eyeOpen: 0.25, eyeAngle: -8, browAngle: -12, brightness: 0.45, blinkRate: 4 } },
+  face: { preset: "sleepy" },
   sound: { cues: [{ preset: "soft-breath", t: 0.4 }, { preset: "low-warm", t: 2 }] },
 };
 

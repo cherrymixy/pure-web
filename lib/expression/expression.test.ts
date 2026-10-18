@@ -10,16 +10,21 @@ import type { Clip } from "../models";
 import {
   applySoftener, autoAdjust, buildExpression, buildPureJson, clipToJointCommands, compatibility, fallback, limitCheck,
   matchTiming, paramsToProps, parsePureJson, propsToParams, recipeToClip, sanitizeName, suggestName, validateClip,
-  validateFace, validateRecipe, validateSound,
+  faceAtTime, migrateFace, validateFace, validateRecipe, validateSound,
 } from ".";
 import { stepVelocities, velocityAllowance } from "./validate";
 import { sampleRecipe } from "./sample";
 
 const S = PURE_DESK_STRUCTURE;
 const purebot = SEED_SIGNATURES[1];
-const samples = ["here", "presentation", "tired", "startled"].map((id) =>
-  JSON.parse(fs.readFileSync(path.join(process.cwd(), `docs/samples/gen-${id}.json`), "utf8")),
-);
+// Recorded with the old drawn-face presets: faces go through the same migration as saved projects.
+type Sample = { output: { face: unknown; motion: { steps: { face?: string }[] } } };
+const samples = ["here", "presentation", "tired", "startled"].map((id) => {
+  const s: Sample = JSON.parse(fs.readFileSync(path.join(process.cwd(), `docs/samples/gen-${id}.json`), "utf8"));
+  s.output.face = migrateFace(s.output.face);
+  for (const step of s.output.motion.steps) if (step.face) step.face = migrateFace({ preset: step.face }).preset;
+  return s;
+});
 
 describe("validateRecipe", () => {
   it("drops unknown behaviors, clamps ranges, caps steps", () => {
@@ -99,11 +104,21 @@ describe("validateClip", () => {
 });
 
 describe("face, sound, names", () => {
-  it("face: unknown preset → neutral, tokens clamped", () => {
-    const r = validateFace({ preset: "angry", tokens: { eyeSize: 5, blinkRate: -1 } });
-    expect(r.face.preset).toBe("neutral");
-    expect(r.face.tokens.eyeSize).toBe(1.6);
-    expect(r.face.tokens.blinkRate).toBe(0);
+  it("face: a face video passes, an old drawn preset maps to its video, anything else → auto", () => {
+    expect(validateFace({ preset: "heart" })).toEqual({ face: { preset: "heart" }, issues: [] });
+    expect(validateFace({ preset: "wide" }).face.preset).toBe("surprise");
+    const r = validateFace({ preset: "angry" });
+    expect(r.face.preset).toBe("auto");
+    expect(r.issues).toHaveLength(1);
+  });
+  it("face: migration drops drawn-face tokens and keeps keys as videos", () => {
+    expect(migrateFace({ preset: "happy", tokens: { eyeSize: 1.2 }, keys: [{ t: 1, tokens: { eyeOpen: 0.2 } }] })).toEqual({ preset: "smile", keys: [{ t: 1, preset: "smile" }] });
+    expect(migrateFace({ preset: "video", tokens: {} })).toEqual({ preset: "auto" });
+    expect(migrateFace({ preset: "" })).toEqual({ preset: "" });
+  });
+  it("face at time: the last key at or before t, else the base face", () => {
+    const face = { preset: "neutral", keys: [{ t: 1, preset: "smile" }, { t: 3, preset: "sleepy" }] };
+    expect([0.5, 1, 2.9, 3, 9].map((t) => faceAtTime(face, t))).toEqual(["neutral", "smile", "smile", "sleepy", "sleepy"]);
   });
   it("sound: allow list, inside duration, density cap, signature pitch", () => {
     const r = validateSound([{ preset: "boom", t: 0 }, { preset: "rising-chirp", t: 99 }, { preset: "soft-breath", t: 0.5 }, { preset: "signature", t: 1 }], { duration: 3, maxCues: 2, pitchSt: -2 });

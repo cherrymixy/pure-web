@@ -1,5 +1,5 @@
 import { COMPONENTS } from "@/data/components";
-import { FACE_PRESETS } from "@/data/face-presets";
+import { FACE_AUTO, FACE_AUTO_HINT, FACE_VIDEOS } from "@/data/face-videos";
 import { SITUATION_PATTERNS } from "@/data/patterns";
 import { AXIS_INFO, AXIS_ORDER } from "@/data/signature";
 import { SOUND_CUES } from "@/data/sound-cues";
@@ -16,8 +16,8 @@ The robot is fixed: PURE Desk, a desk robot with five joints (base yaw, shoulder
 
 Build the expression only from these parts:
 - motion.steps: 1 to 6 steps played in order. "behavior" must be one of: ${COMPONENTS.map((c) => c.id).join(", ")}.
-  speed 0.5–1.5 (1 = normal), amplitude 0.3–1.3 (1 = normal), repeat 1–3, optional face preset per step.
-- face.preset: one of ${Object.keys(FACE_PRESETS).join(", ")}. face.tokens: eyeSize 0.4–1.6, eyeOpen 0–1, eyeAngle −30–30, browAngle −30–30, brightness 0.1–1, blinkRate 0–40 blinks per minute.
+  speed 0.5–1.5 (1 = normal), amplitude 0.3–1.3 (1 = normal), repeat 1–3, optional face video per step.
+- face.preset: the face video on the screen, one of ${Object.entries(FACE_VIDEOS).map(([id, v]) => `${id} (${v.hint})`).join(", ")}, or ${FACE_AUTO} (${FACE_AUTO_HINT}). The face is always one of these videos; never describe eye shapes or numbers.
   Looping behaviors (idle, doze, sleep, sad, sweep, focus) last 5–13 seconds per cycle: give them repeat 1. Keep the whole expression under 15 seconds.
 - sound.cues: 0 to 4 cues, "preset" one of ${SOUND_CUES.map((c) => c.id).join(", ")}, "t" = start time in seconds from the beginning.
 

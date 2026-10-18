@@ -40,10 +40,10 @@ describe("timeline keys", () => {
   });
 
   it("face keys add / move / delete", () => {
-    const face: FaceSpec = { preset: "neutral", tokens: { eyeSize: 1, eyeOpen: 1, eyeAngle: 0, browAngle: 0, brightness: 1, blinkRate: 12 } };
-    const a = addFaceKey(face, 0.5, 2, face.tokens).face;
-    const b = addFaceKey(a, 1.5, 2, { ...face.tokens, eyeOpen: 0.2 }).face;
-    expect(b.keys!.map((k) => k.t)).toEqual([0.5, 1.5]);
+    const face: FaceSpec = { preset: "neutral" };
+    const a = addFaceKey(face, 0.5, 2, "smile").face;
+    const b = addFaceKey(a, 1.5, 2, "sleepy").face;
+    expect(b.keys).toEqual([{ t: 0.5, preset: "smile" }, { t: 1.5, preset: "sleepy" }]);
     expect(moveFaceKey(b, 0, 1.6, 2).keys![0].t).toBeCloseTo(1.5 - 1 / 30, 3);
     expect(deleteFaceKey(deleteFaceKey(b, 0), 0).keys).toBeUndefined();
   });

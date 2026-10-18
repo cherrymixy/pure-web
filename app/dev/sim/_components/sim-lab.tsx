@@ -2,16 +2,14 @@
 
 import { useRef, useState } from "react";
 import { BEHAVIORS } from "@/lib/sim/behaviors";
-import { FACE_RANGES, type FaceParams } from "@/components/sim/face-canvas";
 import { DEFAULT_PARAMS, type JointState, type PlaybackParams, type SimController } from "@/components/sim/sim-controller";
 import { Viewport, type ViewportEvent } from "@/components/sim/Viewport";
-import { FACE_PRESETS, type FacePresetName } from "@/data/face-presets";
+import { FACE_NAMES } from "@/data/face-videos";
 import { DEV_FACE_KEYS, DEV_RECIPES, DEV_SOUND, DEV_STRUCTURE, DEV_STRUCTURE_NARROW } from "@/data/dev-samples";
 import { SOUND_CUES, cueAt } from "@/data/sound-cues";
 import { createSoundEngine } from "@/lib/sound";
 import type { SoundCue } from "@/lib/models";
 
-const FACE_SLIDERS: (keyof FaceParams)[] = ["eyeSize", "eyeOpen", "eyeAngle", "browAngle", "brightness", "blinkRate"];
 const PARAM_SLIDERS: { key: keyof PlaybackParams; min: number; max: number }[] = [
   { key: "speed", min: 0.25, max: 2 },
   { key: "amplitude", min: 0, max: 2 },
@@ -36,8 +34,7 @@ export function SimLab() {
   const [paused, setPaused] = useState(false);
   const [joints, setJoints] = useState<JointState[]>([]);
   const [params, setParams] = useState<Required<PlaybackParams>>(DEFAULT_PARAMS);
-  const [face, setFace] = useState<FaceParams>(FACE_PRESETS.neutral);
-  const [faceMode, setFaceMode] = useState<FacePresetName | "video">("neutral");
+  const [faceMode, setFaceMode] = useState<string>("neutral");
   const [narrow, setNarrow] = useState(false);
   const [loop, setLoop] = useState(false);
   const [seekTo, setSeekTo] = useState(1.2);
@@ -53,7 +50,7 @@ export function SimLab() {
     switch (e.type) {
       case "ready":
         setStatus("Ready");
-        ctrl.current?.setFace({ preset: "neutral", tokens: FACE_PRESETS.neutral });
+        ctrl.current?.setFace({ preset: "neutral" });
         break;
       case "error":
         setStatus(`Error: ${e.message}`);
@@ -86,19 +83,9 @@ export function SimLab() {
     ctrl.current?.setParams({ [key]: value });
   }
 
-  function applyPreset(name: FacePresetName | "video") {
+  function applyPreset(name: string) {
     setFaceMode(name);
-    if (name === "video") return ctrl.current?.setFace({ preset: "video", tokens: FACE_PRESETS.neutral });
-    setFace(FACE_PRESETS[name]);
-    ctrl.current?.setFace({ preset: name, tokens: FACE_PRESETS[name] });
-  }
-
-  function changeFace(key: keyof FaceParams, value: number) {
-    const next = { ...face, [key]: value };
-    setFace(next);
-    const preset = faceMode === "video" ? "neutral" : faceMode;
-    if (faceMode === "video") setFaceMode("neutral");
-    ctrl.current?.setFace({ preset, tokens: next });
+    ctrl.current?.setFace({ preset: name });
   }
 
   function pickCue(id: string) {
@@ -111,10 +98,9 @@ export function SimLab() {
     setCue((c) => ({ ...c, [key]: value }));
   }
 
-  /** greeting recipe + DEV_SOUND cues + DEV_FACE_KEYS (eyes close from 1s to 3s). */
+  /** greeting recipe + DEV_SOUND cues + DEV_FACE_KEYS (smile from 1s, sleepy from 3s). */
   function playWithSound() {
     setFaceMode("neutral");
-    setFace(FACE_PRESETS.neutral);
     ctrl.current?.setFace(DEV_FACE_KEYS);
     ctrl.current?.setSound(DEV_SOUND);
     ctrl.current?.playRecipe(DEV_RECIPES.greeting);
@@ -180,7 +166,7 @@ export function SimLab() {
             ))}
             <button className={btn} onClick={() => ctrl.current?.debugCommand({ shoulder_pitch: 80 })}>Overdrive pose</button>
             <button className={btn} onClick={playWithSound}>greeting + sound + face keys</button>
-            <button className={btn} onClick={() => { ctrl.current?.setSound(null); ctrl.current?.setFace({ preset: "neutral", tokens: FACE_PRESETS.neutral }); }}>Clear sound/keys</button>
+            <button className={btn} onClick={() => { ctrl.current?.setSound(null); ctrl.current?.setFace({ preset: "neutral" }); }}>Clear sound/keys</button>
           </div>
         </div>
 
@@ -222,20 +208,10 @@ export function SimLab() {
         <div className="flex flex-col gap-2">
           <h2 className="font-semibold">Face</h2>
           <div className="flex flex-wrap gap-1.5">
-            {[...(Object.keys(FACE_PRESETS) as FacePresetName[]), "video" as const].map((name) => (
+            {FACE_NAMES.map((name) => (
               <button key={name} className={`${btn} ${faceMode === name ? on : ""}`} onClick={() => applyPreset(name)}>{name}</button>
             ))}
           </div>
-          {FACE_SLIDERS.map((key) => {
-            const [min, max] = FACE_RANGES[key];
-            return (
-              <label key={key} className="flex items-center gap-2">
-                <span className="w-20">{key}</span>
-                <input type="range" min={min} max={max} step={(max - min) / 100} value={face[key]} onChange={(e) => changeFace(key, Number(e.target.value))} className="flex-1" />
-                <span className="w-12 text-right font-mono">{face[key].toFixed(2)}</span>
-              </label>
-            );
-          })}
         </div>
 
         <div className="flex flex-col gap-2">

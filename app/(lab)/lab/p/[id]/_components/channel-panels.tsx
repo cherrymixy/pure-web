@@ -1,104 +1,59 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { FACE_PRESETS } from "@/data/face-presets";
+import { FACE_AUTO, FACE_NAMES } from "@/data/face-videos";
 import { SOUND_CUES } from "@/data/sound-cues";
 import { STRINGS } from "@/data/strings";
 import type { FaceSpec, SoundCue, SoundSpec } from "@/lib/models";
-import { FACE_DEFAULTS, FACE_RANGES, FaceCanvas, type FaceParams } from "@/components/sim/face-canvas";
-import { faceSpecToParams } from "@/components/sim/sim-controller";
+import { faceLabel, faceVideoUrl } from "@/lib/expression/face";
 import { BarSlider, PANEL_BOX, PanelSection } from "./panels";
 
 const F = STRINGS.editor.face;
 const SND = STRINGS.editor.sound;
-const TOKENS: (keyof FaceParams)[] = ["eyeSize", "eyeOpen", "eyeAngle", "browAngle"];
-const DISPLAY: (keyof FaceParams)[] = ["brightness", "blinkRate"];
-export const FACE_FIELDS = Object.fromEntries(
-  (Object.keys(F.fields) as (keyof FaceParams)[]).map((k) => [k, { label: F.fields[k], digits: k === "eyeAngle" || k === "browAngle" || k === "blinkRate" ? 0 : 2 }]),
-) as Record<keyof FaceParams, { label: string; digits: number }>;
 
-/** Live thumbnail of the canvas face (same drawing code as the head display). */
-function FacePreview({ spec }: { spec: FaceSpec }) {
-  const view = useRef<HTMLCanvasElement>(null);
-  const face = useRef<FaceCanvas | null>(null);
-
-  useEffect(() => {
-    face.current ??= new FaceCanvas();
-    let raf = 0;
-    const loop = (now: number) => {
-      raf = requestAnimationFrame(loop);
-      const src = face.current!;
-      src.draw(now / 1000);
-      const ctx = view.current?.getContext("2d");
-      if (ctx && view.current) ctx.drawImage(src.canvas, 0, 0, view.current.width, view.current.height);
-    };
-    raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
-  }, []);
-
-  useEffect(() => {
-    face.current ??= new FaceCanvas();
-    face.current.setParams(spec.preset === "video" ? FACE_DEFAULTS : faceSpecToParams(spec));
-  }, [spec]);
-
-  return <canvas ref={view} width={270} height={162} data-testid="face-preview" className="w-full rounded-[var(--radius-md)] bg-[var(--neutral-1000)]" />;
+/** The face video itself (same mp4 the head display plays). */
+function FacePreview({ preset }: { preset: string }) {
+  return (
+    <video
+      key={preset}
+      src={faceVideoUrl(preset)}
+      muted
+      loop
+      autoPlay
+      playsInline
+      data-testid="face-preview"
+      className="aspect-[5/3] w-full rounded-[var(--radius-md)] bg-[var(--neutral-1000)] object-cover"
+    />
+  );
 }
 
 /** Pill used for presets / timbre (no dedicated frame; same scale as the W02E-1 tabs and chips). */
 const pill = (on: boolean) =>
   `rounded-[var(--radius-full)] px-[var(--space-16)] py-[var(--space-8)] text-[14px] leading-[18px] ${on ? "bg-[var(--neutral-800)] text-[var(--text-on-inverse)]" : "bg-[var(--bg-canvas)] text-[var(--text-primary)] hover:bg-[var(--bg-surface-muted)]"}`;
 
-// W02E Face: preview, presets, tokens, display. Edits apply live; release commits one change.
+// W02E Face: video preview + face video picker. Picking commits one change.
 export function FacePanel({ face, onChange, onCommit }: { face: FaceSpec; onChange: (next: FaceSpec) => void; onCommit: (next?: FaceSpec) => void }) {
-  const isVideo = face.preset === "video";
-  const setToken = (k: keyof FaceParams, v: number) => onChange({ ...face, tokens: { ...face.tokens, [k]: v } });
   const pick = (preset: string) => {
-    const next = preset === "video" ? { ...face, preset } : { ...face, preset, tokens: { ...FACE_PRESETS[preset as keyof typeof FACE_PRESETS] } };
+    const next = { ...face, preset };
     onChange(next);
     onCommit(next);
-  };
-  const slider = (k: keyof FaceParams) => {
-    const [min, max] = FACE_RANGES[k];
-    return (
-      <BarSlider
-        key={k}
-        label={F.fields[k]}
-        value={face.tokens[k] ?? FACE_DEFAULTS[k]}
-        min={min}
-        max={max}
-        step={(max - min) / 100}
-        digits={FACE_FIELDS[k].digits}
-        onChange={(v) => setToken(k, v)}
-        onCommit={() => onCommit()}
-      />
-    );
   };
 
   return (
     <div className="flex flex-col gap-[56px]">
       <PanelSection title={F.expression}>
-        <FacePreview spec={face} />
+        <FacePreview preset={face.preset} />
       </PanelSection>
       <PanelSection title={F.preset}>
         <div className="flex flex-wrap gap-[var(--space-8)]">
-          {[...Object.keys(FACE_PRESETS), "video"].map((p) => (
+          {FACE_NAMES.map((p) => (
             <button key={p} type="button" aria-pressed={face.preset === p} onClick={() => pick(p)} className={pill(face.preset === p)}>
-              {p === "video" ? F.video : p}
+              {faceLabel(p)}
             </button>
           ))}
         </div>
-        {isVideo && <p className="text-[14px] leading-[18px] text-[var(--text-secondary)]">{F.videoNote}</p>}
+        {face.preset === FACE_AUTO && <p className="text-[14px] leading-[18px] text-[var(--text-secondary)]">{F.autoNote}</p>}
       </PanelSection>
-      {!isVideo && (
-        <>
-          <PanelSection title={F.tokens}>
-            <div className={PANEL_BOX}>{TOKENS.map(slider)}</div>
-          </PanelSection>
-          <PanelSection title={F.display}>
-            <div className={PANEL_BOX}>{DISPLAY.map(slider)}</div>
-          </PanelSection>
-        </>
-      )}
     </div>
   );
 }

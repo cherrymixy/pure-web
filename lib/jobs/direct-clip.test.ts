@@ -17,7 +17,7 @@ const base: GenerationOutput = {
   currentStatus: "I can barely keep my eyes open.",
   reasoning: "It droops and catches itself.",
   motion: { steps: [{ behavior: "doze", speed: 0.9, amplitude: 1, repeat: 1 }] },
-  face: { preset: "sleepy", tokens: { eyeSize: 1, eyeOpen: 0.3, eyeAngle: -5, browAngle: -10, brightness: 0.5, blinkRate: 4 } },
+  face: { preset: "sleepy" },
   sound: { cues: [] },
 };
 const moving = { duration: 3, tracks: [{ joint: "head_tilt", keys: [{ t: 0, value: 0 }, { t: 1.5, value: -25 }, { t: 3, value: 0 }] }] };

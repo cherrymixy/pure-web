@@ -25,7 +25,7 @@ import { Menu } from "@/components/ui/menu";
 import { ConfirmModal, Modal, ModalActions, ModalButton, PromptModal } from "@/components/ui/modal";
 import { useToast } from "@/components/ui/toast";
 import { CHANNEL_LABEL } from "@/components/ui/channel-badges";
-import { FACE_FIELDS, FacePanel, SoundPanel } from "./channel-panels";
+import { FacePanel, SoundPanel } from "./channel-panels";
 import { logInput, withRef, type InputEntry } from "@/lib/ui/input-log";
 import { ContextPanel, type EditorContext, type PendingReference } from "./context-panel";
 import { LibraryPanel } from "./library-panel";
@@ -51,7 +51,7 @@ const MAX_REFERENCES = 4;
 
 /** One undoable edit: Motion properties, face and sound together. */
 type Snapshot = { props: MotionProps; face: FaceSpec; sound: SoundSpec; clip: Clip | null };
-const NEUTRAL_FACE: FaceSpec = { preset: "neutral", tokens: { eyeSize: 1, eyeOpen: 1, eyeAngle: 0, browAngle: 0, brightness: 1, blinkRate: 12 } };
+const NEUTRAL_FACE: FaceSpec = { preset: "neutral" };
 const CUE_FIELDS = {
   t: { label: STRINGS.editor.sound.fields.t, digits: 2 },
   pitchSt: { label: STRINGS.editor.sound.fields.pitchSt, digits: 1 },
@@ -66,11 +66,10 @@ function motionOf(e: Expression, snap: Snapshot, recipe = e.motion.recipe): Expr
   return snap.clip ? { mode: "clip", recipe, clip: snap.clip, props: snap.props } : { mode: "recipe", recipe, props: snap.props };
 }
 
-/** "Speed 85 → 60", "Face sleepy → happy, Brow angle -12 → -6", "Sound cues 2 → 3"… */
+/** "Speed 85 → 60", "Face sleepy → smile", "Sound cues 2 → 3"… */
 function describeSnapshot(a: Snapshot, b: Snapshot): string {
   const parts = [describeChange(a.props, b.props, PROP_LABELS)].filter(Boolean);
   parts.push(...describeFields({ preset: a.face.preset }, { preset: b.face.preset }, { preset: { label: STRINGS.editor.face.label } }));
-  if (a.face.preset === b.face.preset) parts.push(...describeFields(a.face.tokens, b.face.tokens, FACE_FIELDS));
   if (a.sound.cues.length !== b.sound.cues.length) parts.push(`${STRINGS.editor.sound.label} cues ${a.sound.cues.length} → ${b.sound.cues.length}`);
   else
     for (const cb of b.sound.cues) {
@@ -317,7 +316,7 @@ export function Editor({
     if (!timelineClip || !selectedTrack) return;
     const t = time.t;
     if (selectedTrack === "face") {
-      const { face: next, index } = addFaceKey(face, t, timelineClip.duration, face.tokens);
+      const { face: next, index } = addFaceKey(face, t, timelineClip.duration, face.preset);
       changeFace(next);
       setSelectedKey({ track: "face", index });
       void commit({ face: next }, fmt(E.timeline.faceKey, { time: formatTime(snapTime(t, timelineClip.duration)) }));
@@ -368,7 +367,7 @@ export function Editor({
   }
 
   function faceKeyFromCurrent(index: number) {
-    const keys = (face.keys ?? []).map((k, i) => (i === index ? { ...k, tokens: { ...face.tokens } } : k));
+    const keys = (face.keys ?? []).map((k, i) => (i === index ? { ...k, preset: face.preset } : k));
     const next = { ...face, keys };
     changeFace(next);
     void commit({ face: next });

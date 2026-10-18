@@ -1,5 +1,5 @@
 import type { FaceSpec, MotionProps, Recipe, SoundCue } from "@/lib/models";
-import { FACE_PRESETS, type FacePresetName } from "./face-presets";
+import type { FaceVideoName } from "./face-videos";
 import { cueAt } from "./sound-cues";
 import type { SuggestedPromptId } from "./prompts";
 
@@ -13,7 +13,7 @@ export interface DemoExpression {
   sound: { cues: SoundCue[] };
 }
 
-const face = (preset: FacePresetName): FaceSpec => ({ preset, tokens: { ...FACE_PRESETS[preset] } });
+const face = (preset: FaceVideoName): FaceSpec => ({ preset });
 const props = (amplitude: number, duration: number, smoothness: number, speed: number, frequency: number): MotionProps => ({
   amplitude, duration, smoothness, speed, frequency,
 });
@@ -26,12 +26,12 @@ export const PROMPT_DEMOS: Record<SuggestedPromptId, DemoExpression> = {
     reasoning: "A wake-up lift into a bow reads as noticing the person, then welcoming them.",
     motion: {
       recipe: { steps: [
-        { behavior: "wake", speed: 1.1, amplitude: 0.9, repeat: 1, face: "wide" },
-        { behavior: "greet", speed: 1, amplitude: 1, repeat: 1, face: "happy" },
+        { behavior: "wake", speed: 1.1, amplitude: 0.9, repeat: 1, face: "surprise" },
+        { behavior: "greet", speed: 1, amplitude: 1, repeat: 1, face: "smile" },
       ] },
       props: props(64, 48, 58, 62, 50),
     },
-    face: face("happy"),
+    face: face("smile"),
     sound: { cues: [cueAt("rising-chirp", 0.6), cueAt("signature", 2.4)] },
   },
   presentation: {
@@ -40,12 +40,12 @@ export const PROMPT_DEMOS: Record<SuggestedPromptId, DemoExpression> = {
     reasoning: "Happy bounces with a nod affirm the success; bright cues add celebration.",
     motion: {
       recipe: { steps: [
-        { behavior: "happy", speed: 1.1, amplitude: 1, repeat: 1, face: "happy" },
-        { behavior: "nod", speed: 1.2, amplitude: 0.8, repeat: 2, face: "happy" },
+        { behavior: "happy", speed: 1.1, amplitude: 1, repeat: 1, face: "heart" },
+        { behavior: "nod", speed: 1.2, amplitude: 0.8, repeat: 2, face: "smile" },
       ] },
       props: props(72, 55, 52, 70, 64),
     },
-    face: face("happy"),
+    face: face("smile"),
     sound: { cues: [cueAt("rising-chirp", 0.3), cueAt("rising-chirp", 1.4), cueAt("signature", 3)] },
   },
   tired: {
@@ -68,17 +68,17 @@ export const PROMPT_DEMOS: Record<SuggestedPromptId, DemoExpression> = {
     reasoning: "A sharp alert snap upward, then a look around to find the cause.",
     motion: {
       recipe: { steps: [
-        { behavior: "alert", speed: 1.2, amplitude: 1, repeat: 1, face: "wide" },
-        { behavior: "look_around", speed: 1, amplitude: 0.8, repeat: 1, face: "wide" },
+        { behavior: "alert", speed: 1.2, amplitude: 1, repeat: 1, face: "surprise" },
+        { behavior: "look_around", speed: 1, amplitude: 0.8, repeat: 1, face: "surprise" },
       ] },
       props: props(80, 40, 35, 78, 55),
     },
-    face: face("wide"),
+    face: face("surprise"),
     sound: { cues: [cueAt("rising-chirp", 0.1), cueAt("falling-tone", 1.6)] },
   },
 };
 
-const single = (behavior: string, preset: FacePresetName, cue: string, name: string, status: string): DemoExpression => ({
+const single = (behavior: string, preset: FaceVideoName, cue: string, name: string, status: string): DemoExpression => ({
   name,
   currentStatus: status,
   reasoning: `Demo fallback built from the ${behavior} component.`,
@@ -92,15 +92,15 @@ export const COMPONENT_DEMOS: Record<string, DemoExpression> = {
   idle: single("idle", "neutral", "soft-breath", "Quiet idle", "Waiting calmly."),
   doze: single("doze", "sleepy", "soft-breath", "Dozing", "Drifting off."),
   sleep: single("sleep", "sleepy", "soft-breath", "Sleeping", "Asleep."),
-  wake: single("wake", "wide", "rising-chirp", "Waking up", "Just woke up."),
-  nod: single("nod", "soft", "low-warm", "Nod", "Agreeing."),
+  wake: single("wake", "surprise", "rising-chirp", "Waking up", "Just woke up."),
+  nod: single("nod", "smile", "low-warm", "Nod", "Agreeing."),
   shake: single("shake", "neutral", "falling-tone", "Head shake", "Disagreeing."),
-  look_around: single("look_around", "wide", "rising-chirp", "Look around", "Looking for something."),
-  curious: single("curious", "wide", "rising-chirp", "Curious tilt", "Something caught its interest."),
-  happy: single("happy", "happy", "rising-chirp", "Happy bounce", "Feeling happy."),
-  sad: single("sad", "soft", "falling-tone", "Sad droop", "Feeling down."),
-  alert: single("alert", "wide", "rising-chirp", "Alert", "Something needs attention."),
-  greet: single("greet", "happy", "signature", "Greeting", "Saying hello."),
+  look_around: single("look_around", "surprise", "rising-chirp", "Look around", "Looking for something."),
+  curious: single("curious", "tilt", "rising-chirp", "Curious tilt", "Something caught its interest."),
+  happy: single("happy", "heart", "rising-chirp", "Happy bounce", "Feeling happy."),
+  sad: single("sad", "sad", "falling-tone", "Sad droop", "Feeling down."),
+  alert: single("alert", "surprise", "rising-chirp", "Alert", "Something needs attention."),
+  greet: single("greet", "smile", "signature", "Greeting", "Saying hello."),
   sweep: single("sweep", "neutral", "low-warm", "Sweep", "Scanning the desk."),
   focus: single("focus", "neutral", "low-warm", "Focus", "Concentrating on the task."),
   home: single("home", "neutral", "low-warm", "Rest", "Back to rest."),
@@ -115,7 +115,6 @@ export function applySofterDemo(demo: DemoExpression): DemoExpression {
       recipe: { ...demo.motion.recipe, steps: demo.motion.recipe.steps.map((s) => ({ ...s, speed: s.speed * 0.8, amplitude: s.amplitude * 0.75 })) },
       props: { ...demo.motion.props, amplitude: Math.round(demo.motion.props.amplitude * 0.75), smoothness: Math.min(100, demo.motion.props.smoothness + 15), speed: Math.round(demo.motion.props.speed * 0.8) },
     },
-    face: { ...demo.face, tokens: { ...demo.face.tokens, brightness: Math.max(0.1, demo.face.tokens.brightness * 0.85) } },
     sound: { cues: demo.sound.cues.map((c) => ({ ...c, volumeDb: c.volumeDb - 4 })) },
   };
 }
