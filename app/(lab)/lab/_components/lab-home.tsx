@@ -296,14 +296,14 @@ function ProjectCard({
     <Link
       href={projectHref(p)}
       data-testid="project-card"
-      className={`relative aspect-square overflow-hidden rounded-[var(--radius-2xl)] border bg-[var(--bg-surface)] hover:border-[var(--neutral-500)] ${showcase ? "border-transparent" : "border-[var(--neutral-300)]"}`}
+      className={`group relative aspect-square overflow-hidden rounded-[var(--radius-2xl)] border bg-[var(--bg-surface)] hover:border-[var(--neutral-500)] ${showcase ? "border-transparent" : "border-[var(--neutral-300)]"}`}
     >
       {scene ? (
         /* eslint-disable-next-line @next/next/no-img-element */
         <img
           src={scene}
           alt={type?.name ?? ""}
-          className={`pointer-events-none absolute inset-0 size-full object-cover ${isAnalyzing ? "opacity-40" : ""}`}
+          className={`pointer-events-none absolute inset-0 size-full object-cover transition-transform duration-[var(--motion-slow)] ease-[var(--ease-standard)] group-hover:scale-[1.06] motion-reduce:transition-none ${isAnalyzing ? "opacity-40" : ""}`}
         />
       ) : (
         <>
