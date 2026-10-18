@@ -1,18 +1,38 @@
 import Link from "next/link";
-import type { ComponentDoc, ComponentDocSection, DocChannel, GuidelineEntry } from "@/data/guideline/types";
+import { searchIndex } from "@/data/guideline";
+import type { ComponentDoc, ComponentDocSection, DocChannel, GuidelineBlock } from "@/data/guideline/types";
 import { STRINGS } from "@/data/strings";
 import { DocToc, type TocItem } from "./doc-toc";
+import { FaceChange, FaceDonts, FaceRhythm, FaceTransitions, FaceTypes } from "./face-figures";
 import { GuidelineTree } from "./guideline-tree";
 
 const G = STRINGS.guideline;
 const A = "/figma/guideline/approach";
 const I = "/figma/guideline/icons";
 
-// Component-page template — Figma W03-4L "Components · Approach" (808:1254), 960 frame ×2 (decisions: STEP 22).
+// Doc template for every guideline page — Figma W03-4L "Components · Approach" (808:1254) / W03-2L "Principle · Face" (808:1649),
+// 960 frame ×2 (decisions: STEP 22). Pages without a Figma frame get a doc derived in lib/ui/guideline-doc.ts.
 // Content card 808:1255 = main column + search / On this page (808:1580, 808:1277…). In the lab the guideline tree lives in
 // the app sidebar (LabNav); on the public route it sits in its own card on the left.
 
-export function ComponentDocPage({ entry, doc, base, current, isPublic }: { entry: GuidelineEntry; doc: ComponentDoc; base: string; current: string; isPublic: boolean }) {
+export function ComponentDocPage({
+  title,
+  proposed,
+  doc,
+  base,
+  current,
+  isPublic,
+  actions,
+}: {
+  title: string;
+  proposed?: boolean;
+  doc: ComponentDoc;
+  base: string;
+  current: string;
+  isPublic: boolean;
+  /** extra controls under the lead (Download pure tokens JSON) */
+  actions?: React.ReactNode;
+}) {
   const sections = doc.rows.flatMap((r) => (Array.isArray(r) ? r : [r]));
   const toc: TocItem[] = [...(doc.topToc ? [{ id: "top", label: doc.topToc }] : []), ...sections.map((s) => ({ id: s.id, label: s.toc ?? s.title }))];
   const stickyTop = isPublic ? "top-[136px]" : "top-[var(--space-32)]";
@@ -28,34 +48,44 @@ export function ComponentDocPage({ entry, doc, base, current, isPublic }: { entr
 
       <div className="flex min-w-0 flex-1 items-start gap-[118px] rounded-[var(--radius-xl)] bg-[var(--bg-surface)] pb-[75px] pl-[69px] pr-[61px] pt-[62px] leading-normal">
         <article className="flex min-w-0 flex-1 flex-col">
-          <span className="text-[14px] font-medium text-[var(--text-primary)]">{doc.breadcrumb}</span>
+          <span className="flex items-center gap-[var(--space-12)] text-[14px] font-medium text-[var(--text-primary)]">
+            {doc.breadcrumb}
+            {doc.ref && <code className="font-mono text-[13px] font-normal text-[var(--text-tertiary)]">{doc.ref}</code>}
+          </span>
           <header id="top" className={`mt-[var(--space-28)] flex flex-col gap-[var(--space-32)] ${scrollMt}`}>
             <div className="flex flex-col gap-[var(--space-28)]">
-              <h1 className="text-[60px] font-semibold text-[var(--text-primary)]">{entry.title}</h1>
+              <h1 className="flex items-center gap-[var(--space-16)] text-[60px] font-semibold text-[var(--text-primary)]">
+                {title}
+                {proposed && <ProposedBadge label={G.proposedNote} />}
+              </h1>
               <p className="text-[18px] text-[var(--text-secondary)]">
                 {doc.lead.map((l, i) => <span key={i} className="block">{l}</span>)}
               </p>
             </div>
-            <div className="flex flex-wrap gap-[var(--space-12)]">
-              {doc.resources.map((r) => (r.href ? <Link key={r.label} href={r.href} className={`${PILL} hover:bg-[var(--neutral-50)]`}>{r.label}</Link> : <span key={r.label} className={PILL}>{r.label}</span>))}
-            </div>
+            {doc.resources?.length || actions ? (
+              <div className="flex flex-wrap items-center gap-[var(--space-12)]">
+                {doc.resources?.map((r) => (r.href ? <Link key={r.label} href={r.href} className={`${PILL} hover:bg-[var(--neutral-50)]`}>{r.label}</Link> : <span key={r.label} className={PILL}>{r.label}</span>))}
+                {actions}
+              </div>
+            ) : null}
           </header>
 
-          <div className="mt-[50px] flex flex-col gap-[119px]">
+          {/* Without resource pills the first section sits 55 px under the lead (Face 808:1652 → 808:1667) */}
+          <div className={`${doc.resources?.length || actions ? "mt-[50px]" : "mt-[55px]"} flex max-w-[981.31px] flex-col gap-[119px]`}>
             {doc.rows.map((r, i) =>
               Array.isArray(r) ? (
                 <div key={i} className="flex items-start gap-[var(--space-48)]">
-                  <Section s={r[0]} scrollMt={scrollMt} className="min-w-0 flex-1" />
-                  <Section s={r[1]} scrollMt={scrollMt} className="w-[355px] shrink-0" />
+                  <Section s={r[0]} base={base} scrollMt={scrollMt} className="min-w-0 flex-1" />
+                  <Section s={r[1]} base={base} scrollMt={scrollMt} className="w-[355px] shrink-0" />
                 </div>
               ) : (
-                <Section key={i} s={r} scrollMt={scrollMt} />
+                <Section key={i} s={r} base={base} scrollMt={scrollMt} />
               ),
             )}
           </div>
 
           {(doc.prev || doc.next) && (
-            <footer className="mt-[118px] grid grid-cols-2 gap-[var(--space-12)]">
+            <footer className="mt-[118px] grid max-w-[981.31px] grid-cols-2 gap-[var(--space-12)]">
               {doc.prev ? <NeighborCard href={`${base}/${doc.prev.path}`} label={G.prevDoc} title={doc.prev.title} /> : <span />}
               {doc.next ? <NeighborCard href={`${base}/${doc.next.path}`} label={G.nextDoc} title={doc.next.title} end /> : <span />}
             </footer>
@@ -63,7 +93,15 @@ export function ComponentDocPage({ entry, doc, base, current, isPublic }: { entr
         </article>
 
         <aside className={`sticky -mt-[30px] w-[333px] shrink-0 ${stickyTop}`}>
-          <DocToc title={G.onThisPage} searchLabel={G.search} emptyLabel={G.noMatch} items={toc} />
+          <DocToc
+            title={G.onThisPage}
+            searchLabel={G.search}
+            emptyLabel={G.noMatch}
+            resultsLabel={G.searchResults}
+            items={toc}
+            index={searchIndex(base)}
+            pages={doc.pages?.map((p) => ({ label: p.label, href: `${base}/${p.path}`, current: p.current }))}
+          />
         </aside>
       </div>
     </div>
@@ -72,20 +110,61 @@ export function ComponentDocPage({ entry, doc, base, current, isPublic }: { entr
 
 const PILL = "rounded-[var(--radius-full)] border-[1.5px] border-[var(--border-default)] bg-[var(--bg-surface)] px-[var(--space-16)] py-[var(--space-8)] text-[14px] font-medium text-[var(--text-primary)]";
 
-function Section({ s, scrollMt, className = "" }: { s: ComponentDocSection; scrollMt: string; className?: string }) {
+/** Every page keeps the Figma column (808:1667 / Approach 808:1285) — 490.66 ×2 = 981.31 px. */
+/** Derived sections (blocks · cards · links) sit 28 px under their heading, like Face "What is changing?" (808:1734) */
+const DERIVED = new Set<ComponentDocSection["kind"]>(["blocks", "cards", "links"]);
+
+function Section({ s, base, scrollMt, className = "" }: { s: ComponentDocSection; base: string; scrollMt: string; className?: string }) {
   return (
-    <section id={s.id} aria-labelledby={`${s.id}-h`} className={`flex flex-col ${scrollMt} ${className}`} style={{ gap: s.gap ?? 40 }}>
+    <section id={s.id} aria-labelledby={`${s.id}-h`} className={`flex flex-col ${scrollMt} ${className}`} style={{ gap: s.gap ?? (DERIVED.has(s.kind) ? 28 : 40) }}>
       <div className="flex flex-col gap-[var(--space-8)]">
         <h2 id={`${s.id}-h`} className="text-[26px] font-medium text-[var(--text-primary)]">{s.title}</h2>
-        <p className="text-[14px] text-[var(--text-secondary)]">{s.text}</p>
+        {s.text && (
+          <p className="text-[14px] text-[var(--text-secondary)]">
+            {s.text.split("\n").map((l, i) => <span key={i} className="block">{l}</span>)}
+          </p>
+        )}
       </div>
-      <SectionBody s={s} />
+      <SectionBody s={s} base={base} />
     </section>
   );
 }
 
-function SectionBody({ s }: { s: ComponentDocSection }) {
+function SectionBody({ s, base }: { s: ComponentDocSection; base: string }) {
   switch (s.kind) {
+    case "blocks":
+      return (
+        <div className="flex max-w-[981.31px] flex-col gap-[var(--space-24)]">
+          {s.blocks.map((b, i) => <Block key={i} b={b} />)}
+        </div>
+      );
+    case "cards":
+      return (
+        <div className="grid max-w-[981.31px] grid-cols-2 gap-[var(--space-20)]">
+          {s.items.map((it) => (
+            <Link
+              key={it.path}
+              href={`${base}/${it.path}`}
+              className="flex flex-col gap-[var(--space-8)] rounded-[var(--radius-lg)] border-[0.85px] border-[var(--border-default)] bg-[var(--bg-surface)] p-[var(--space-20)] hover:bg-[var(--neutral-50)]"
+            >
+              <span className="flex items-center gap-[var(--space-8)] text-[16px] font-bold text-[var(--text-primary)]">
+                {it.title}
+                {it.proposed && <ProposedBadge />}
+              </span>
+              {it.ref && <code className="font-mono text-[12px] text-[var(--web-3f77a1)]">{it.ref}</code>}
+              <span className="text-[14px] text-[var(--text-secondary)]">{it.summary}</span>
+            </Link>
+          ))}
+        </div>
+      );
+    case "links":
+      return (
+        <div className="flex flex-wrap gap-[var(--space-12)]">
+          {s.items.map((it) => (
+            <Link key={it.path} href={`${base}/${it.path}`} className={`${PILL} hover:bg-[var(--neutral-50)]`}>{it.title}</Link>
+          ))}
+        </div>
+      );
     case "robot":
       return (
         <div className="flex items-start gap-[var(--space-40)]">
@@ -192,6 +271,16 @@ function SectionBody({ s }: { s: ComponentDocSection }) {
         </div>
       );
     }
+    case "face-types":
+      return <FaceTypes s={s} />;
+    case "face-change":
+      return <FaceChange s={s} />;
+    case "face-rhythm":
+      return <FaceRhythm s={s} />;
+    case "face-transitions":
+      return <FaceTransitions s={s} />;
+    case "face-donts":
+      return <FaceDonts s={s} />;
     case "states":
       return (
         <ul className="flex flex-col items-start gap-[var(--space-8)] text-[16px]">
@@ -317,6 +406,44 @@ function Fill({ src, inset }: { src: string; inset: string }) {
     <div className={`absolute ${inset}`}>
       <img alt="" src={`${A}/${src}`} className="block size-full max-w-none" />
     </div>
+  );
+}
+
+/** Body blocks in the doc style: tables like the Approach spec table, text in the Face section sizes. */
+function Block({ b }: { b: GuidelineBlock }) {
+  switch (b.kind) {
+    case "p":
+      return <p className="text-[16px] text-[var(--text-link)]">{b.text}</p>;
+    case "list":
+      return (
+        <ul className="flex list-disc flex-col gap-[var(--space-8)] pl-[var(--space-24)] text-[16px] text-[var(--text-link)] marker:text-[var(--sage-400)]">
+          {b.items.map((it, i) => <li key={i}>{it}</li>)}
+        </ul>
+      );
+    case "code":
+      return <pre className="overflow-x-auto rounded-[var(--radius-sm)] bg-[var(--bg-inverse)] px-[var(--space-24)] py-[var(--space-20)] font-mono text-[14px] leading-[1.6] text-[var(--neutral-100)]">{b.text}</pre>;
+    case "table":
+      return (
+        <div role="table" className="flex flex-col overflow-hidden rounded-[var(--radius-sm)] border-[1.5px] border-[var(--border-default)] bg-[var(--bg-surface)] text-[16px]">
+          <div role="row" className="flex gap-[var(--space-16)] bg-[var(--bg-canvas)] px-[var(--space-16)] py-[var(--space-12)] font-medium text-[var(--text-secondary)]">
+            {b.head.map((h, j) => <span role="columnheader" key={j} className={j ? "min-w-0 flex-[2]" : "min-w-0 flex-1"}>{h}</span>)}
+          </div>
+          {b.rows.map((r, i) => (
+            <div role="row" key={i} className="flex gap-[var(--space-16)] border-t-[0.5px] border-[var(--border-default)] px-[var(--space-16)] py-[var(--space-12)]">
+              {r.map((c, j) => <span role="cell" key={j} className={`min-w-0 break-words ${j ? `flex-[2] ${CELL.body}` : `flex-1 ${CELL.name}`}`}>{c}</span>)}
+            </div>
+          ))}
+        </div>
+      );
+  }
+}
+
+/** Small outlined tag for pages that are proposed or awaiting a decision. */
+function ProposedBadge({ label = G.proposed }: { label?: string }) {
+  return (
+    <span className="inline-flex shrink-0 items-center rounded-[var(--radius-full)] border border-dashed border-[var(--neutral-400)] px-[var(--space-8)] py-[2px] text-[12px] font-medium leading-[16px] text-[var(--text-secondary)]">
+      {label}
+    </span>
   );
 }
 

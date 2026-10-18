@@ -2,6 +2,8 @@ import type { ComponentDoc } from "../types";
 
 // Component page for Approach — copy from Figma W03-4L "Components · Approach" (808:1254).
 // The Robot description is Korean in Figma; translated here (UI copy is English).
+// Token names and values follow the v3 dictionary (§6, §7): Figma still shows the old ones (approach.l/n/s in cm, eye-size 0.30,
+// "no display → +20%", "→ Moving"). Siblings and prev / next come from the behavior section like every other page.
 
 export const approachDoc: ComponentDoc = {
   breadcrumb: "Components",
@@ -26,7 +28,7 @@ export const approachDoc: ComponentDoc = {
         { label: "Full-body", icon: "human" },
       ],
       selected: 2,
-      notes: ["eye-size 0.30, blink ×1", "approach.m, pause.m, tilt.s"],
+      notes: ["eye.size.l, blink ×1", "approach.m, pause.m, tilt.s"],
     },
     {
       id: "intensity",
@@ -34,9 +36,9 @@ export const approachDoc: ComponentDoc = {
       text: "It depends on how close I should get. I choose based on who the other person is and how long we've been apart.",
       kind: "intensity",
       levels: [
-        { title: "Light", chips: ["3 cm", "Interest"], token: "approach.l", reach: 1 },
-        { title: "Normal", chips: ["6 cm", "Meeting"], token: "approach.n", reach: 2 },
-        { title: "Strong", chips: ["10 cm", "Owner"], token: "approach.s", reach: 3 },
+        { title: "Light", chips: ["0.15 BH", "Interest"], token: "approach.s", reach: 1 },
+        { title: "Normal", chips: ["0.3 BH", "Meeting"], token: "approach.m", reach: 2 },
+        { title: "Strong", chips: ["0.5 BH", "Owner"], token: "approach.l", reach: 3 },
       ],
     },
     {
@@ -70,10 +72,10 @@ export const approachDoc: ComponentDoc = {
         widths: [117, 241, null],
         cols: ["key", "muted", "muted"],
         rows: [
-          ["Owner", "Approach.L + longer pause", "when the owner returns home"],
+          ["Owner", "approach.l + longer pause", "when the owner returns home"],
           ["Stranger", "Use keep distance", "unknown person"],
           ["Vehicle", "Slowly rolling + lighting", "2–4 DoF"],
-          ["No display", "Movement size +20%", "no face screen"],
+          ["No display", "Face track skipped, motion unchanged", "no face screen"],
         ],
       },
       {
@@ -84,8 +86,8 @@ export const approachDoc: ComponentDoc = {
         items: [
           { state: "Idle", effect: "play as is" },
           { state: "Quiet hours", effect: "sound −12dB" },
-          { state: "Low battery", effect: "approach.Light" },
-          { state: "Held / In-air", effect: "Omit → Moving" },
+          { state: "Low battery", effect: "approach.s" },
+          { state: "Held / In-air", effect: "Omit → Carried" },
           { state: "Error", effect: "Stop + Face" },
         ],
       },
@@ -100,18 +102,16 @@ export const approachDoc: ComponentDoc = {
       widths: [139, 119, 259, null],
       cols: ["label", "track", "code", "text"],
       rows: [
-        ["enabled", "motion", "antic", "Back 2–3° · 100 ms"],
-        ["enabled", "motion", "approach.m", "6 cm · ease-out"],
+        ["enabled", "motion", "op.antic", "7 % · 120 ms"],
+        ["enabled", "motion", "approach.m", "0.3 BH · ease-out"],
         ["enabled", "motion", "pause.m", "300 ms"],
-        ["enabled", "motion", "tilt.s", "Up 6° · eye level"],
-        ["enabled", "face", "eye-size", "0.30"],
-        ["enabled", "face", "blink-rate", "1 time when stopped"],
-        ["enabled", "sound", "timbre · length", "bright · 0.3 s · 100 ms first"],
+        ["enabled", "motion", "tilt.s", "6° · eye level"],
+        ["enabled", "face", "eye.size.l", "0.32"],
+        ["enabled", "face", "blink", "1 time when stopped · 70 %"],
+        ["enabled", "sound", "timbre · length", "bright · 0.4 s · 0.1 s first"],
         ["quiet hours", "sound", "volume", "−12 dB"],
-        ["held", "all", "override", "→ Moving"],
+        ["held", "all", "override", "→ Carried"],
       ],
     },
   ],
-  prev: { title: "Components", path: "behavior" },
-  next: { title: "Face to Face", path: "situation/face-to-face" },
 };

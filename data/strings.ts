@@ -346,6 +346,8 @@ export const STRINGS = {
     contents: "Contents",
     download: "Download pure tokens JSON",
     placeholder: "Placeholder — this entry still needs source content.",
+    proposed: "Proposed",
+    proposedNote: "Proposed — not confirmed yet.",
     do: "Do",
     dont: "Don't",
     related: "Related",
@@ -357,7 +359,8 @@ export const STRINGS = {
     prevDoc: "Previous Document",
     nextDoc: "Next Document",
     search: "Search",
-    noMatch: "No sections match.",
+    noMatch: "No guideline pages match.",
+    searchResults: "Results",
   },
   community: {
     title: "Community",
