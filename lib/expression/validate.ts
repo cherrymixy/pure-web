@@ -1,4 +1,4 @@
-// Validation every LLM output passes through before it reaches the simulator (CLAUDE.md rule 11):
+// Validation every LLM output passes through before it reaches the simulator (docs/conventions.md rule 11):
 // allow lists, range clamps, joint limits, angular velocity. Each change is reported.
 
 import { SIM_BEHAVIORS } from "@/data/sim-behaviors";

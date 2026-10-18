@@ -10,7 +10,7 @@ export interface ModelReading {
   bones: string[];
 }
 
-/** Per analysis step (4 steps). PURE Desk is staged to 8 s (BuildPlay STEP 10②); imports read faster. */
+/** Per analysis step (4 steps). PURE Desk is staged to 8 s (STEP 10②); imports read faster. */
 export const ANALYZE_STEP_MS = { "pure-desk": 2000, import: 1200 } as const;
 
 /** PRD §6 rule 2: imported rigs get ±90° until the user narrows them. */

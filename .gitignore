@@ -27,3 +27,8 @@ npm-debug.log*
 
 # STEP 22 comparison images (local review only)
 docs/review/step22/*.png
+
+# working notes kept local (not part of the public repo)
+/CLAUDE.md
+/docs/BuildPlay_Book.md
+/docs/review/

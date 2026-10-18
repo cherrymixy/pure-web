@@ -5,7 +5,7 @@ import { getRepo } from "../repo-server";
 import { RUNNERS } from "./runners";
 
 /**
- * Background jobs (CLAUDE.md rule 12): analysis, extraction and generation run as jobs
+ * Background jobs (docs/conventions.md rule 12): analysis, extraction and generation run as jobs
  * that survive leaving the page. State lives in the DB; after a server restart, jobs
  * still marked queued/running are resumed from their current step.
  */

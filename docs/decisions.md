@@ -4,7 +4,7 @@ STEP마다 한 줄. `날짜 · STEP · 결정 · 근거`
 
 | 날짜 | STEP | 결정 | 근거 |
 |---|---|---|---|
-| 2026-10-16 | 0-setup | 레포 구조 세팅(CLAUDE.md 루트, docs/, `_ref/` gitignore) | BuildPlay_Book §0 |
+| 2026-10-16 | 0-setup | 레포 구조 세팅(docs/, `_ref/` gitignore) | 초기 설정 |
 | 2026-10-16 | 0 | 스택 확정(_ref 버전 + lowdb 7 · pdf-parse 1.1.1 · cheerio 1 · zod 4 · vitest), Node 22 LTS(.nvmrc) | Node 25 전역 localStorage 리스크 |
 | 2026-10-16 | 0 | Ollama: OLLAMA_MODEL=qwen3:8b(think:false) · OLLAMA_VISION_MODEL=gemma3:4b | 18GB 메모리, pure-app 실측 7~10s |
 | 2026-10-16 | 0 | sim 이식: state-motion·exporters·LeLamp 스펙 버림, robots는 pure-desk만(리타겟 유지), viewer3d 스테이지 색 옵션화 | 새 설계는 시그니처+레시피, 디자인 패스에서 sim 수정 불가 |
@@ -21,7 +21,7 @@ STEP마다 한 줄. `날짜 · STEP · 결정 · 근거`
 | 2026-10-16 | 8 | lib/expression: 검증(허용 목록·클램프·진폭 선클램프 이진 탐색·각속도), 레시피 15초 상한(repeat→1 → 반복 동작 speed→1 → 중복 behavior 제거 → 최장 step 제거), 각속도 허용치 = max(120°/s, 동작의 원래 최고 속도)·클립은 120°/s, 클립은 30fps 샘플 + RDP(0.5°, ≤24키), pure.json/1 | LLM이 반복 동작 repeat 3~4로 40~270초, 라이브러리 자체가 의도된 스냅(doze 630°/s) 포함 |
 | 2026-10-16 | 9 | **sim 계약 변경(승인)**: SoundEngine에 선택 `sync(t, speed)` 추가(30Hz tick마다 호출, 재생 시작 전 속도 전달), FaceSpec.keys는 tick마다 `faceAt` 보간(키가 있으면 레시피 step face 무시). lib/sound: WebAudioSynth(bright=triangle/soft=sine, A4 기준 st, length/tempo, dB, 엔벨로프) + SoundScheduler(0.25s 룩어헤드를 오디오 시계로 예약, 역방향 점프=루프 재무장, pause/seek/stop 취소), Quiet hours −12dB, 마스터 볼륨 기본 0dB(전시 스피커 확인 후 조정) | tick 지터와 무관한 큐 타이밍, 재생 속도·루프 동기화 |
 | 2026-10-16 | 10① | 셸·랜딩·실험실 홈·WC 회색박스. 랜딩 문구는 data/landing.ts(PRD 기반 임시), 채널 필터는 AND·localStorage 유지, 분석 진행률은 /api/jobs?active=1 1.5s 폴링, 사용자 메뉴 Library → /lab/user-data(임시), 저장 안 된 변경 = PromptModal 취소 확인 + useUnsavedChanges(beforeunload) | 설계서 WC 문구 표 없음, 라이브러리 전용 라우트 PRD에 없음 |
-| 2026-10-16 | 10② | 로봇 등록 회색박스. 분석 잡 analyze-model(PURE Desk 2s×4 연출, import 1.2s×4), import 본 읽기는 브라우저 three.js → 결과를 잡 입력으로(본 0개 = NO_RIG E2, 리그 ±90°, 타입은 본 이름·개수로 추정). repo setStructure에 replace 옵션(새 3D 파일만 리그·타입 교체), 업로드 취소 시 생성한 프로젝트 삭제 | 잡은 서버에서 재개 가능해야 하고, 파싱은 브라우저 요구(BuildPlay) |
+| 2026-10-16 | 10② | 로봇 등록 회색박스. 분석 잡 analyze-model(PURE Desk 2s×4 연출, import 1.2s×4), import 본 읽기는 브라우저 three.js → 결과를 잡 입력으로(본 0개 = NO_RIG E2, 리그 ±90°, 타입은 본 이름·개수로 추정). repo setStructure에 replace 옵션(새 3D 파일만 리그·타입 교체), 업로드 취소 시 생성한 프로젝트 삭제 | 잡은 서버에서 재개 가능해야 하고, 파싱은 브라우저 요구(빌드 계획) |
 | 2026-10-16 | 10③ | 시그니처 회색박스. 한 페이지 상태 전환(입력→읽는 중→결과/초안, E1). 톤 칩 편집·레이더 드래그는 로컬 초안 → "Save as new version"/Review/Save and return 시 새 버전(PRD 규칙 5). p.N 원문은 최신 추출 잡 result.evidence에서(버전엔 quote 미저장). "여러 소스"는 소스마다 새 버전(병합 X). 레이더·단계 표시 components/ui 공용화 | 추출 잡 입력이 단일 소스, Signature 스키마에 quote 없음 |
 | 2026-10-16 | 10④a | 에디터 골격·생성. generate 잡(lib/jobs/generate.ts runGeneration: 구조 필수, 시그니처 없으면 PURE Default, 레퍼런스 프레임 base64, buildExpression, 재생성은 같은 표현에 update → history). 취소는 저장 직전 signal 검사 + 끝난 잡은 cancel 무시. 실패 모달은 데모 폴백(데모 모드 off)일 때만. Props 저장은 손 뗄 때 PATCH(버전), 재생 재큐는 생성·Auto-adjust 때만. Auto-adjust = recipeToClip → autoAdjust → clip 모드 저장 | 데모 폴백이 즉시 끝나 Stop 후에도 저장되던 경합 |
 | 2026-10-16 | 10④b | Context = 생성 입력(프로젝트별 localStorage, 생성 시 표현에 저장, PATCH 안 함). Component 토글 → 마지막 프롬프트로 재생성. 레퍼런스: 이미지 그대로, 영상은 브라우저 <video>+canvas로 8프레임(구간 중앙, ≤512px JPEG) → video·frame 업로드, 30s 초과는 거부, 디코딩 실패는 status failed(E3)로 남기고 텍스트만 생성. Library Apply = lib/expression applyToRobot(같은 관절은 복사, 다르면 채널 매핑·맞지 않는 클립은 레시피) → 새 표현 | Context는 표현 이전에도 존재해야 함, 버전 남발 방지 |

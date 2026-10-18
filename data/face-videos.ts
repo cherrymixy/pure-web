@@ -1,4 +1,4 @@
-// Face videos on the PURE Desk screen (CLAUDE.md rule 9: content lives in data/).
+// Face videos on the PURE Desk screen (docs/conventions.md rule 9: content lives in data/).
 // The face is never drawn: every face is one of these mp4s (public/pure-desk/faces/).
 // "auto" plays the per-behavior video from public/pure-desk/faces/faces.json.
 export const FACE_DIR = "/pure-desk/faces/";

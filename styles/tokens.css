@@ -1,6 +1,6 @@
 /*
  * PURE design tokens — Figma "Design System" page (file xp0RmyE9WwsNFAF5kE88OX, node 70:1520),
- * read with get_variable_defs / get_design_context on 2026-10-17. Light mode only (CLAUDE.md).
+ * read with get_variable_defs / get_design_context on 2026-10-17. Light mode only (docs/conventions.md rule 16).
  * Names = Figma variable names in kebab case (bg/surface → --bg-surface). Table: docs/tokens.md.
  * Screens use semantic tokens only; primitives are here for the semantics to point at (F / Color).
  */

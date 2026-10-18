@@ -1,5 +1,5 @@
 /**
- * STEP 11 — the whole logic loop end to end (BuildPlay STEP 11), with FakeClient LLMs,
+ * STEP 11 — the whole logic loop end to end (STEP 11), with FakeClient LLMs,
  * an injected clock and an in-memory repo. No UI, no sim: the same lib calls the routes and jobs make.
  */
 import path from "node:path";

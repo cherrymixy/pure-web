@@ -94,7 +94,7 @@ export function Viewport({
     if (!canvas) return;
     mounted += 1;
     if (mounted > 1 && process.env.NODE_ENV !== "production") {
-      console.error(`[Viewport] ${mounted} instances mounted — one per page (CLAUDE.md rule 14).`);
+      console.error(`[Viewport] ${mounted} instances mounted — one per page (docs/conventions.md rule 14).`);
     }
     const ctrl = new SimController(canvas, { sound: soundRef.current, idle: MODES[mode].idle, viewer: stageFromTokens(canvas) });
     ctrlRef.current = ctrl;

@@ -139,5 +139,5 @@ Not Figma variables: the Spacing frame documents `space/N` = N px. Tailwind `--s
 
 ## Not in scope
 
-- Dark mode (light only, CLAUDE.md).
+- Dark mode (light only, docs/conventions.md rule 16).
 - Icon tokens use the `icon/*` colors above; icon set (Material Symbols Round) is STEP 21.

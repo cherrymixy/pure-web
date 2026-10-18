@@ -1,8 +1,8 @@
 /**
- * SimController — the simulator contract (BuildPlay_Book appendix B).
+ * SimController — the simulator contract (docs/conventions.md rule 3).
  *
  * After STEP 3 this file is the only door into lib/sim and components/sim
- * (CLAUDE.md rule 3). Pages use it through <Viewport controllerRef>.
+ * (docs/conventions.md rule 3). Pages use it through <Viewport controllerRef>.
  * All joint ids are the robot's own (`shoulder_pitch`, …); recipes, clips, face and
  * sound use the lib/models.ts types.
  */

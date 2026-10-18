@@ -45,7 +45,7 @@
 
 ## 📑 목차
 
-[**기획**](#-기획--왜-pure인가) · [**모션 시그니처**](#-모션-시그니처) · [**Core Value**](#-core-value) · [**시나리오**](#-시나리오) · [**주요 기능**](#-주요-기능) · [**가이드라인 체계**](#-pure-motion-guideline) · [**아키텍처**](#-아키텍처) · [**기술 스택**](#-기술-스택) · [**설계 결정**](#-설계-결정) · [**시작하기**](#-시작하기) · [**팀**](#-팀)
+[**기획**](#-기획--왜-pure인가) · [**모션 시그니처**](#-모션-시그니처) · [**Core Value**](#-core-value) · [**시나리오**](#-시나리오) · [**주요 기능**](#-주요-기능) · [**가이드라인 체계**](#-pure-motion-guideline) · [**아키텍처**](#-아키텍처) · [**기술 스택**](#-기술-스택) · [**설계 결정**](#-설계-결정) · [**시작하기**](#-시작하기) · [**출처**](#-출처--오픈소스) · [**팀**](#-팀)
 
 ---
 
@@ -361,6 +361,17 @@ scripts/demo.sh      # 전시 모드: Ollama 예열 · 프로덕션 빌드 · �
 ```
 
 > 데스크톱 1920px 기준으로 만들었어요. 개발용 계기판 `/dev`에서 구현된 화면 목록, Ollama 상태, 시뮬레이터 · 토큰 · LLM 테스트 화면을 볼 수 있어요.
+
+---
+
+## 📎 출처 · 오픈소스
+
+| 항목 | 출처 | 비고 |
+|---|---|---|
+| 물리 시뮬레이터 | [MuJoCo](https://github.com/google-deepmind/mujoco) (Google DeepMind) | `public/mujoco/`의 WebAssembly 빌드를 브라우저에서 실행 |
+| 관절 · 채널 규칙 | [LeLamp](https://github.com/humancomputerlab/LeLamp) | 관절 이름(서보 id 1–5)과 채널 체계를 LeLamp 규칙에 맞춤. 3D 모델 · 메시 · 시뮬 코드는 PURE Desk용으로 따로 만듦 |
+| 레퍼런스 이미지 · 영상 | Wikimedia Commons | 항목마다 저작자 · 라이선스(CC BY / BY-SA) · 원문 링크를 앱 화면에 표시 |
+| 폰트 | Google Sans Flex · Google Sans Code · Roboto Mono | SIL Open Font License, `app/fonts/`에 라이선스 포함 |
 
 ---
 

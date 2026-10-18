@@ -1,4 +1,4 @@
-// W00-1 landing copy (CLAUDE.md rule 9). Text = Figma "W00-1.landing / Landing" (901:6909), English as drawn.
+// W00-1 landing copy (docs/conventions.md rule 9). Text = Figma "W00-1.landing / Landing" (901:6909), English as drawn.
 // The only source of landing text. Robot-type card text lives here (display copy), not in data/robot-types.ts.
 
 export const LANDING = {

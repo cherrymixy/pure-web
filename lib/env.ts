@@ -6,7 +6,7 @@ export const OLLAMA_VISION_MODEL = process.env.OLLAMA_VISION_MODEL ?? "gemma3:4b
 const keepAlive = process.env.OLLAMA_KEEP_ALIVE ?? "10m";
 export const OLLAMA_KEEP_ALIVE: string | number = /^-?\d+$/.test(keepAlive) ? Number(keepAlive) : keepAlive;
 
-// Experimental flags — all default off (CLAUDE.md rule 13).
+// Experimental flags — all default off (docs/conventions.md rule 13).
 export const FLAGS = {
   directClip: process.env.FLAG_DIRECT_CLIP === "1",
 } as const;
