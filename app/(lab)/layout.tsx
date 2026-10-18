@@ -1,3 +1,4 @@
+import { docPaths } from "@/data/guideline";
 import { getRepo } from "@/lib/repo-server";
 import { LabNav } from "./_components/lab-nav";
 import { LabShell } from "./_components/lab-shell";
@@ -15,7 +16,7 @@ export default async function LabLayout({ children }: { children: React.ReactNod
         <div className="sticky top-0 h-[var(--app-vh)] shrink-0 py-[var(--space-32)] pl-[var(--space-32)]">
           <aside className="flex h-full w-[268px] flex-col gap-[var(--space-36)] rounded-[var(--radius-xl)] bg-[var(--bg-surface)] p-[var(--space-20)]">
             <UserMenu name={profile.name} email={profile.email} />
-            <LabNav />
+            <LabNav docPaths={docPaths("/lab/guideline")} />
           </aside>
         </div>
       }

@@ -28,3 +28,8 @@ export function countEntries(): { section: string; entries: number; placeholders
     placeholders: s.entries.filter((e) => e.placeholder).length,
   }));
 }
+
+/** Routes of entries rendered with the component-page template (they get the guideline tree in the lab sidebar). */
+export function docPaths(base: string): string[] {
+  return GUIDELINE.flatMap((s) => s.entries.filter((e) => e.doc).map((e) => `${base}/${s.id}/${e.slug}`));
+}

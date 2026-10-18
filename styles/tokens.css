@@ -52,6 +52,10 @@
   --web-c35d8f: #c35d8f;
   --web-ecc377: #ecc377;
   --web-ae7d24: #ae7d24;
+  /* W03-4L guideline component page (808:1254): timeline clips, token-spec track colors, time axis */
+  --web-e0c99f: #e0c99f;
+  --web-f2a65a: #f2a65a;
+  --web-7e7f7f: #7e7f7f;
 
   /* Semantic, Light (F / Color → Semantic 458:4462). Resolved values as get_variable_defs returns them;
      which primitive each one aliases isn't exposed, so none is assumed. */

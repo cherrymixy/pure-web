@@ -26,7 +26,7 @@ export function GuidelineView({ base, slug = [] }: { base: string; slug?: string
   // eyebrow 16 medium sage/500, H1 48 semibold sage/800, summary 22 sage/500, body 18 text/link.
   const isPublic = base === "/guideline";
   if (entry?.doc)
-    return <ComponentDocPage section={section} entry={entry} doc={entry.doc} href={href} prev={flat[at - 1]} next={flat[at + 1]} isPublic={isPublic} />;
+    return <ComponentDocPage entry={entry} doc={entry.doc} base={base} current={href(section, entry)} isPublic={isPublic} />;
   return (
     <div className={`grid grid-cols-[300px_minmax(0,1fr)] items-start gap-[var(--space-24)] pb-[var(--space-32)] pr-[var(--space-32)] ${isPublic ? "pl-[var(--space-32)] pt-[var(--space-32)]" : "pl-[33px] pt-[var(--space-32)]"}`}>
       <nav

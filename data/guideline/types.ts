@@ -35,38 +35,52 @@ export interface GuidelineEntry {
   doc?: ComponentDoc;
 }
 
-/** Component-page content (Figma W03-4). Sizes are in 1920 px (Figma 960 frame ×2). */
+/** Component-page content (Figma W03-4L 808:1254). Sizes are in 1920 px (Figma 960 frame ×2). */
 export interface ComponentDoc {
-  /** e.g. ["Components", "S4 Regulatory"] */
-  breadcrumb: string[];
-  lead: string;
+  breadcrumb: string;
+  /** Lead paragraph, one string per line */
+  lead: string[];
   resources: { label: string; href?: string }[];
-  tags: string[];
-  sections: ComponentDocSection[];
+  /** Page rows top to bottom; a pair renders side by side (Variant | State). Every section is an "On this page" entry. */
+  rows: (ComponentDocSection | [ComponentDocSection, ComponentDocSection])[];
+  /** Prev / next cards; path is relative to the guideline base ("behavior", "situation/face-to-face") */
+  prev?: { title: string; path: string };
+  next?: { title: string; path: string };
 }
 
-/** Top-level page section: an "On this page" entry and an anchor (#id). */
-export interface ComponentDocSection {
+export type DocChannel = "motion" | "face" | "sound";
+
+export type ComponentDocSection = {
+  /** anchor (#id) */
   id: string;
   title: string;
-  text?: string;
-  blocks: ComponentDocBlock[];
-}
-
-export type ComponentDocBlock =
-  /** Robot anatomy figure with numbered callouts; parts are in callout order (1 body, 2 face display, 3 speaker). */
-  | { kind: "anatomy"; parts: { label: string; detail: string }[] }
-  /** Sub-heading: a nested "On this page" entry (toc overrides its label there). */
-  | { kind: "subhead"; id: string; title: string; text?: string; toc?: string }
-  /** Row of equal cards, each with a placeholder preview box. */
-  | { kind: "cards"; preview: string; previewHeight: number; cards: { title: string; chips?: string[]; caption?: string }[] }
-  /** widths: px per column, null = fill. keyCols: columns styled as keys (medium, primary); default [0]. */
-  | { kind: "table"; head: string[]; rows: string[][]; widths: (number | null)[]; keyCols?: number[] }
+  /** "On this page" label when it differs from the title */
+  toc?: string;
+  text: string;
+  /** px between the heading and the body (default 40) */
+  gap?: number;
+} & (
+  | {
+      kind: "robot";
+      classes: { label: string; icon: "wheel" | "wheel-arm" | "arm" | "quad" | "human" }[];
+      /** index into classes */
+      selected: number;
+      /** stage callouts: [face bubble, motion bubble] */
+      notes: [string, string];
+    }
+  /** reach: 1 = light … 3 = strong (how far the dot moves toward the bar) */
+  | { kind: "intensity"; levels: { title: string; chips: string[]; token: string; reach: 1 | 2 | 3 }[] }
+  | {
+      kind: "timeline";
+      /** seconds */
+      duration: number;
+      tracks: { channel: DocChannel; label: string; clips: { from: number; to: number; label?: string; align?: "start" }[] }[];
+    }
+  /** cols: per-column style — key (semibold primary), label (medium secondary), muted (regular secondary),
+   *  text (regular primary), code (mono primary), track (channel icon + colored name; other values plain). widths: px, null = fill */
+  | { kind: "table"; head: string[]; rows: string[][]; widths: (number | null)[]; cols: ("key" | "label" | "muted" | "text" | "code" | "track")[] }
   | { kind: "states"; items: { state: string; effect: string }[] }
-  | { kind: "doDont"; preview: string; previewHeight: number; do: string; dont: string }
-  | { kind: "stat"; value: string; text: string }
-  /** Pill links; slug resolves to a guideline entry when it exists. */
-  | { kind: "chips"; items: { label: string; slug?: string }[] };
+);
 
 export interface GuidelineSection {
   id: GuidelineSectionId;

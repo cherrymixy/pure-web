@@ -5,12 +5,12 @@ import { useEffect, useState } from "react";
 export interface TocItem {
   id: string;
   label: string;
-  level: 0 | 1;
 }
 
-/** "On this page" (Figma W03-4 목차 550:2884): anchors to page sections, the one in view is highlighted. */
-export function DocToc({ title, items }: { title: string; items: TocItem[] }) {
+/** Search (808:1580) + On this page (808:1277…1283): the search narrows the list, links jump to sections, the one in view is bold. */
+export function DocToc({ title, searchLabel, emptyLabel, items }: { title: string; searchLabel: string; emptyLabel: string; items: TocItem[] }) {
   const [active, setActive] = useState(items[0]?.id);
+  const [q, setQ] = useState("");
 
   useEffect(() => {
     const onScroll = () => {
@@ -30,21 +30,33 @@ export function DocToc({ title, items }: { title: string; items: TocItem[] }) {
     return () => window.removeEventListener("scroll", onScroll);
   }, [items]);
 
+  const shown = items.filter((it) => it.label.toLowerCase().includes(q.trim().toLowerCase()));
   return (
-    <nav aria-label={title} className="flex flex-col gap-[var(--space-12)] text-[14px] leading-normal">
-      <span className="font-medium text-[var(--text-tertiary)]">{title}</span>
-      {items.map((it) => (
-        <a
-          key={it.id}
-          href={`#${it.id}`}
-          aria-current={it.id === active ? "location" : undefined}
-          className={`w-fit hover:text-[var(--text-primary)] ${it.level ? "pl-[var(--space-16)]" : ""} ${
-            it.id === active ? "font-medium text-[var(--text-primary)]" : "text-[var(--text-secondary)]"
-          }`}
-        >
-          {it.label}
-        </a>
-      ))}
-    </nav>
+    <div className="flex flex-col gap-[26px] leading-normal">
+      <label className="flex items-center gap-[var(--space-12)] rounded-[var(--radius-full)] bg-[var(--neutral-200)] px-[var(--space-24)] py-[var(--space-12)]">
+        <img src="/figma/guideline/icons/search.svg" alt="" width={19.92} height={19.92} className="shrink-0" />
+        <input
+          type="search"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder={searchLabel}
+          aria-label={searchLabel}
+          className="min-w-0 flex-1 bg-transparent text-[16px] text-[var(--text-primary)] outline-none placeholder:text-[var(--sage-500)] placeholder:opacity-50"
+        />
+      </label>
+      <nav aria-label={title} className="flex flex-col gap-[14px] text-[16px]">
+        {shown.map((it) => (
+          <a
+            key={it.id}
+            href={`#${it.id}`}
+            aria-current={it.id === active ? "location" : undefined}
+            className={`w-fit hover:text-[var(--text-primary)] ${it.id === active ? "font-semibold text-[var(--text-primary)]" : "text-[var(--text-tertiary)]"}`}
+          >
+            {it.label}
+          </a>
+        ))}
+        {!shown.length && <span className="text-[var(--text-tertiary)]">{emptyLabel}</span>}
+      </nav>
+    </div>
   );
 }

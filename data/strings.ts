@@ -359,6 +359,11 @@ export const STRINGS = {
     prev: "Previous",
     next: "Next",
     onThisPage: "On this page",
+    prevDoc: "Previous Document",
+    nextDoc: "Next Document",
+    search: "Search",
+    common: "Common",
+    noMatch: "No sections match.",
   },
   community: {
     title: "Community",

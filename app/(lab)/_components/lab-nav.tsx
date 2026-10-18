@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Fragment, Suspense } from "react";
 import { STRINGS } from "@/data/strings";
 import { tabOf, type CommunityTab } from "@/data/community";
+import { GuidelineTree } from "@/components/ui/guideline/guideline-tree";
 
 const ITEMS = [
   { href: "/lab", label: STRINGS.sidebar.lab },
@@ -20,24 +21,28 @@ function activeHref(path: string) {
   return "/lab";
 }
 
-export function LabNav() {
+/** docPaths: guideline routes on the component-page template — they nest the guideline tree under Guideline (Figma 808:1583). */
+export function LabNav({ docPaths = [] }: { docPaths?: string[] }) {
   const path = usePathname() ?? "/lab";
   const active = activeHref(path);
+  const tree = docPaths.includes(path);
   return (
-    <nav className="flex flex-col gap-[11px]">
+    <nav className={`flex flex-col gap-[11px] ${tree ? "-mr-[var(--space-12)] min-h-0 overflow-y-auto pr-[var(--space-12)]" : ""}`}>
       {ITEMS.map((item) => {
         const on = item.href === active;
         return (
-          <Link
-            key={item.href}
-            href={item.href}
-            aria-current={on ? "page" : undefined}
-            className={`rounded-[var(--radius-xs)] p-[var(--space-12)] text-[20px] leading-[26px] text-[var(--text-link)] ${
-              on ? "bg-[var(--sage-50)] font-semibold" : "font-normal hover:bg-[var(--neutral-50)]"
-            }`}
-          >
-            {item.label}
-          </Link>
+          <Fragment key={item.href}>
+            <Link
+              href={item.href}
+              aria-current={on ? "page" : undefined}
+              className={`rounded-[var(--radius-xs)] p-[var(--space-12)] text-[20px] leading-[26px] text-[var(--text-link)] ${
+                on ? "bg-[var(--sage-50)] font-semibold" : "font-normal hover:bg-[var(--neutral-50)]"
+              }`}
+            >
+              {item.label}
+            </Link>
+            {tree && item.href === "/lab/guideline" && <GuidelineTree base="/lab/guideline" current={path} />}
+          </Fragment>
         );
       })}
       {path === "/lab/community" && (
