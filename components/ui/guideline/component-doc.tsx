@@ -100,7 +100,7 @@ export function ComponentDocPage({
             resultsLabel={G.searchResults}
             items={toc}
             index={searchIndex(base)}
-            pages={doc.pages?.map((p) => ({ label: p.label, href: `${base}/${p.path}`, current: p.current }))}
+            pages={doc.pages?.length ? doc.pages.map((p) => ({ label: p.label, href: `${base}/${p.path}`, current: p.current })) : undefined}
           />
         </aside>
       </div>

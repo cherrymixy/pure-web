@@ -54,7 +54,7 @@ export interface ComponentDoc {
   lead: string[];
   /** Pills under the lead; omit for none */
   resources?: { label: string; href?: string }[];
-  /** Sibling pages listed around "On this page" (Figma 808:1657…1665: Common · Motion · Face › sections · Sound); path relative to the guideline base */
+  /** Sibling pages listed around "On this page" (Figma 808:1657…1665: Common · Motion · Face › sections · Sound); path relative to the guideline base. [] = none (Approach 808:1277) */
   pages?: { label: string; path: string; current?: true }[];
   /** "On this page" entry for the page header (anchor #top); omit for none */
   topToc?: string;

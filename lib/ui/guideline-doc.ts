@@ -52,7 +52,8 @@ export function blocksToSections(blocks: GuidelineBlock[], lead: string[]): Comp
 /** Doc for an entry: its own Figma doc (pages / neighbors filled in), or one derived from the body. */
 export function entryDoc(section: GuidelineSection, entry: GuidelineEntry): ComponentDoc {
   const around = { pages: siblings(section, entry), ...neighbors(section, entry) };
-  if (entry.doc) return { ...around, ...entry.doc, ref: entry.doc.ref ?? entry.ref };
+  // Figma pages are reproduced as drawn: no ID next to the breadcrumb unless the doc sets one
+  if (entry.doc) return { ...around, ...entry.doc };
 
   const lead = [entry.summary];
   if (entry.placeholder) lead.push(G.placeholder);

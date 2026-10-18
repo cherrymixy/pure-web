@@ -26,7 +26,8 @@ describe("guideline doc template", () => {
       for (const e of s.entries) {
         const d = entryDoc(s, e);
         expect(d.rows.length, `${s.id}/${e.slug}`).toBeGreaterThan(0);
-        expect(d.pages?.some((p) => p.current)).toBe(true);
+        // Approach (808:1277) has no sibling list
+        if (d.pages?.length) expect(d.pages.some((p) => p.current)).toBe(true);
         expect(d.prev || d.next).toBeTruthy();
       }
     }
