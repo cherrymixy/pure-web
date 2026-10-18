@@ -35,10 +35,10 @@ function Lines({ lines }: { lines: readonly string[] }) {
 export default function Page() {
   return (
     <LandingZoom>
-      {/* Top bar (950:2874): full width at any scale, stays on screen while scrolling. Figma size (no landing scale), full-value space/radius. */}
+      {/* Top bar (950:2874): full width at any scale, stays on screen while scrolling. Figma size (no landing scale), full-value space/radius, frosted glass over the page. */}
       <div className="sticky top-[8px] z-50 h-0">
         <div className="absolute left-[7px] right-[7.5px] top-0">
-          <header className="flex h-[44px] w-full items-center justify-between rounded-full border-[0.5px] border-[var(--neutral-0)] bg-[var(--bg-surface)] px-[var(--space-40)]">
+          <header className="flex h-[44px] w-full items-center justify-between rounded-full border-[0.5px] border-[var(--landing-glass-border)] bg-[var(--landing-glass)] px-[var(--space-40)] backdrop-blur-[var(--landing-glass-blur)]">
             <div className="flex w-[130px] items-center">
               <Link href="/" aria-label={L.nav.logoAlt}>
                 <img src="/figma/landing/logo-mark.svg" alt={L.nav.logoAlt} width={14.9999} height={14.9997} className="block" />
@@ -59,8 +59,9 @@ export default function Page() {
         </div>
       </div>
 
-      {/* Hero 950:2872 (960 × 485 = the first screen), at Figma size like the top bar (no landing scale). */}
-      <section className="relative h-[485px] overflow-clip bg-[var(--bg-canvas)]">
+      {/* Hero 950:2872 at Figma size (no landing scale). The first screen shows its top 485; the section keeps the
+          full 610 background so scrolling reveals the robot's base and floor. */}
+      <section className="relative h-[610px] overflow-clip bg-[var(--bg-canvas)]">
         <img src="/figma/landing/hero-bg.png" alt="" className="absolute left-[-61.5px] top-0 h-[610px] w-[1083px] max-w-none object-cover" />
 
         <div className="absolute inset-0">

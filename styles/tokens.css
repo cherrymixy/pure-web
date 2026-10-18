@@ -178,6 +178,10 @@
   --community-subnav-selected: #dfe5e7; /* sidebar All / Popular / Recently */
   /* TODO(승아): PURE/Blur/Overlay = BACKGROUND_BLUR radius 50. CSS blur() 값으로 50px 그대로인지 25px(반경 절반)인지 확인 필요 */
   --pure-blur-overlay: 50px;
+  /* Landing top bar glass (user: glassmorphism; Figma exports it as plain bg/surface). Blur is in landing units (× zoom ≈ 3). */
+  --landing-glass: #ffffff8c; /* white 55% */
+  --landing-glass-border: #ffffffcc; /* white 80% */
+  --landing-glass-blur: 8px;
 }
 
 /* Tailwind v4 utilities that point at the tokens (bg-bg-surface, text-text-primary, rounded-md, text-title-l, shadow-card …) */
