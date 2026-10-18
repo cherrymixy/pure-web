@@ -5,8 +5,9 @@ const RIG = new Map<string, { rigMin: number; rigMax: number }>(PURE_DESK_JOINTS
 
 /**
  * Fit a PURE Desk structure saved for an earlier body to the current rig: rig ranges are
- * replaced and Edit-limits ranges clamped inside them (a range that no longer fits falls
- * back to the full rig range). Returns true when anything changed.
+ * replaced; a bound that sat on the old rig end (never narrowed) moves to the new rig end,
+ * a narrowed bound (Edit limits) is clamped inside the new rig (a range that no longer fits
+ * falls back to the full rig range). Returns true when anything changed.
  */
 export function fitToRig(structure: Structure): boolean {
   if (structure.source !== "pure-desk") return false;
@@ -14,8 +15,8 @@ export function fitToRig(structure: Structure): boolean {
   for (const joint of structure.joints) {
     const rig = RIG.get(joint.id);
     if (!rig || (joint.rigMin === rig.rigMin && joint.rigMax === rig.rigMax)) continue;
-    const min = Math.max(joint.min, rig.rigMin);
-    const max = Math.min(joint.max, rig.rigMax);
+    const min = joint.min === joint.rigMin ? rig.rigMin : Math.max(joint.min, rig.rigMin);
+    const max = joint.max === joint.rigMax ? rig.rigMax : Math.min(joint.max, rig.rigMax);
     Object.assign(joint, rig, min < max ? { min, max } : { min: rig.rigMin, max: rig.rigMax });
     changed = true;
   }

@@ -13,12 +13,16 @@ describe("fitToRig", () => {
       type: "joint-fixed",
       source: "pure-desk",
       channels: ["motion"],
-      joints: [joint("head_pan", -160, 160, -90, 30), joint("head_tilt", -33, 42, -30, -10)],
+      joints: [joint("head_pan", -160, 160, -90, 30), joint("head_tilt", -33, 42, -30, -10), joint("base_yaw", -150, 150), joint("elbow_pitch", -120, 33, -120, 0)],
     };
     expect(fitToRig(s)).toBe(true);
     expect(s.joints[0]).toMatchObject({ rigMin: -48, rigMax: 56, min: -48, max: 30 });
     // −30…−10 no longer fits −2…21 → full rig range
     expect(s.joints[1]).toMatchObject({ rigMin: -2, rigMax: 21, min: -2, max: 21 });
+    // never narrowed → the new rig's full range
+    expect(s.joints[2]).toMatchObject({ rigMin: -170, rigMax: 170, min: -170, max: 170 });
+    // old rig end moves, the narrowed bound stays (0 fits −135…10)
+    expect(s.joints[3]).toMatchObject({ rigMin: -135, rigMax: 10, min: -135, max: 0 });
   });
 
   it("leaves current and non-PURE structures alone", () => {
