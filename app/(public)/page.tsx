@@ -59,11 +59,12 @@ export default function Page() {
         </div>
       </div>
 
-      {/* Hero 901:6918 */}
-      <section className="relative h-[610px] overflow-clip bg-[var(--bg-canvas)]">
+      {/* Hero 901:6918 — height fits the first screen (--hero-h, Figma 610), title and robot keep their Figma
+          proportions in it: title at 106/610 of the height, robot floor 56 above the bottom, robot scaled by --hero-k. */}
+      <section className="relative h-[calc(var(--hero-h,610)*1px)] overflow-clip bg-[var(--bg-canvas)]">
         <img src="/figma/landing/hero-bg.png" alt="" className="absolute left-[-61.5px] top-0 h-[610px] w-[1083px] max-w-none object-cover" />
 
-        <div className="absolute left-[284px] top-[106px] flex w-[392px] origin-top [scale:var(--landing-scale)] flex-col items-center gap-[calc(var(--space-32)/2)]">
+        <div className="absolute left-[284px] top-[calc(var(--hero-h,610)*106px/610)] flex w-[392px] origin-top [scale:var(--landing-scale)] flex-col items-center gap-[calc(var(--space-32)/2)]">
           <p className="rounded-full bg-[var(--neutral-300)] px-[calc(var(--space-20)/2)] py-[calc(var(--space-12)/2)] text-[8px] font-medium leading-[1.26] text-[var(--sage-600)]">{L.hero.badge}</p>
           <h1 className="whitespace-nowrap text-center text-[46px] font-semibold leading-[1.26] text-[var(--sage-800)]">
             <Lines lines={L.hero.headline} />
@@ -71,7 +72,7 @@ export default function Page() {
         </div>
 
         {/* Robot (901:6918 render → live sim, head follows the pointer). Box centred on the Figma robot (x 478.5), floor at y 554. */}
-        <HeroRobot label={L.hero.robotAlt} className="absolute left-[238.5px] top-[234px] h-[400px] w-[480px] origin-[240px_320px] [scale:var(--landing-scale)]" />
+        <HeroRobot label={L.hero.robotAlt} className="absolute left-[238.5px] top-[calc((var(--hero-h,610)-376)*1px)] h-[400px] w-[480px] origin-[240px_320px] [scale:calc(var(--landing-scale)*var(--hero-k,1))]" />
       </section>
 
       <div className={column}>
