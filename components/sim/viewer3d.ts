@@ -312,6 +312,7 @@ export class LampViewer {
     geometry.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
     // ShapeGeometry 는 XY 평면에서 +Z 를 본다 → X 축으로 90° 돌려 XZ 평면에서 −Y 를 보게.
     geometry.rotateX(Math.PI / 2);
+    if (spec.pitchDeg) geometry.rotateX(THREE.MathUtils.degToRad(spec.pitchDeg));
     geometry.translate(...spec.center);
 
     // 화면은 스스로 빛나므로 조명·톤매핑을 받지 않는다.

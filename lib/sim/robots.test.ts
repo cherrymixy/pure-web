@@ -35,13 +35,7 @@ describe("PURE Desk retarget", () => {
     ]);
   });
 
-  it.each(BEHAVIORS.map((b) => b.name).filter((n) => n !== "focus"))("%s stays inside the rig range", (name) => {
+  it.each(BEHAVIORS.map((b) => b.name))("%s stays inside the rig range", (name) => {
     expect(overshoot(name)).toEqual({});
-  });
-
-  it("focus only overshoots head_tilt, by under 3°", () => {
-    const worst = overshoot("focus");
-    expect(Object.keys(worst)).toEqual(["wrist_pitch"]);
-    expect(worst.wrist_pitch!).toBeLessThan(3);
   });
 });

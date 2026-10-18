@@ -79,7 +79,7 @@ describe("validateClip", () => {
   const clip = (tracks: Clip["tracks"], duration = 2): Clip => ({ format: "lelamp.clip/1", duration, tracks });
   it("clamps to the structure and drops unknown joints", () => {
     const r = validateClip(clip({ head_tilt: [{ t: 0, value: 0, easing: "linear" }, { t: 1.5, value: 90, easing: "linear" }], tail: [] }), S);
-    expect(r.clip.tracks.head_tilt[1].value).toBe(42);
+    expect(r.clip.tracks.head_tilt[1].value).toBe(21);
     expect(r.clip.tracks.tail).toBeUndefined();
   });
   it("stretches time instead of cutting values when a segment is faster than 120°/s", () => {

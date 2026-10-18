@@ -39,6 +39,8 @@ export interface FaceDisplay {
   radius: number;
   /** Extra size hidden behind the bezel, so no gap shows at the edges */
   bleed: number;
+  /** Forward lean of the panel about the head's X axis, degrees (0 = upright) */
+  pitchDeg?: number;
 }
 
 /**
@@ -83,30 +85,27 @@ export interface RobotSpec {
 // ------------------------------------------------------------- PURE desk robot
 
 /**
- * PURE desk robot (5-DOF, rigged from the Rhino model).
+ * PURE desk robot (5-DOF, v2 body: round head on a dome turret).
  *   1 base yaw · 2 shoulder · 3 elbow · 4 head pan · 5 head tilt
  * Channel 4 is our own head-pan axis — it is *not* LeLamp's wrist roll, so the
  * `wrist_roll` channel carries head pan on this robot.
  *
- * Retarget rationale (gains are provisional, tuned to the model's joint ranges):
+ * Retarget (same gains as the PURE Desk emotion-motion preview the v2 body comes from):
  * - Gaze (LeLamp base_yaw) is split 65 / 35 between base yaw and head pan, so the head
  *   leads the body — overlapping action — while the total heading stays the same.
- * - Shoulder and elbow keep LeLamp's sign convention (+ leans forward) 1 : 1; LeLamp's
- *   behaviour range (−26…34°, −62…18°) fits inside this robot's (−35…55°, −120…33°).
- * - Head tilt takes LeLamp's head nod plus part of its wrist roll, which on LeLamp folds
- *   the head down/up (gains 0.45 / 0.25). On this robot shoulder, elbow and tilt share
- *   one axis direction, so the screen's world pitch is J5 − J2 − J3: without help, raising
- *   the arm (PERK: −14°, −20°) would also throw the screen ~34° up. Tilt therefore adds
- *   back 0.75 × (shoulder + elbow) — the head mostly holds its gaze while the arm moves,
- *   with a quarter of the arm's swing left in for follow-through. Every library keyframe
- *   then lands inside the −33…42° tilt range except `focus` (−35.2°, clamped by 2.2°).
+ * - Shoulder keeps LeLamp's sign and size (−26…34° fits −28…41°); the elbow is scaled 0.55
+ *   so LeLamp's −62…18° lands inside −135…10°.
+ * - Head tilt only spans −2…21°, so it takes a fifth of LeLamp's head nod plus a fifth of the
+ *   (scaled) arm swing — on this robot shoulder, elbow and tilt share one axis direction, and
+ *   that share keeps the screen's pitch moving with the arm instead of against it.
+ *   LeLamp's wrist roll has no counterpart and is dropped.
  */
 const PURE_DESK_RETARGET: RetargetMatrix = {
   base_yaw: { base_yaw: 0.65 },
   base_pitch: { base_pitch: 1 },
-  elbow_pitch: { elbow_pitch: 1 },
+  elbow_pitch: { elbow_pitch: 0.55 },
   wrist_roll: { base_yaw: 0.35 },
-  wrist_pitch: { wrist_pitch: 0.45, wrist_roll: 0.25, base_pitch: 0.75, elbow_pitch: 0.75 },
+  wrist_pitch: { wrist_pitch: 0.2, base_pitch: 0.2, elbow_pitch: 0.11 },
 };
 
 const PURE_DESK: RobotSpec = {
@@ -141,16 +140,16 @@ const PURE_DESK: RobotSpec = {
   heroView: { azimuth: 62, elevation: -8, distance: 0.95, lookAt: [0, -0.02, 0.2] },
   beam: null,
   /*
-   * Measured from the CAD bezel (part 4): the opening is a 108 × 64.8 mm rounded
-   * rectangle (r ≈ 6 mm, 5 : 3) whose back face sits 44.2 mm in front of the tilt axis.
-   * The panel sits just behind that face and bleeds 1 mm under the bezel.
+   * The largest 5 : 3 rounded rectangle inside the black face plate (head_bezel), centred;
+   * the plate leans 5.5° forward, so the panel does too.
    */
   display: {
-    center: [0.00132, -0.0440, 0.00909],
-    halfWidth: 0.054,
-    halfHeight: 0.0324,
-    radius: 0.006,
-    bleed: 0.001,
+    center: [-0.00096, -0.03988, 0.01912],
+    halfWidth: 0.05753,
+    halfHeight: 0.03452,
+    radius: 0.00624,
+    bleed: 0,
+    pitchDeg: 5.49,
   },
   facesManifest: '/pure-desk/faces/faces.json',
   retarget: PURE_DESK_RETARGET,

@@ -26,11 +26,11 @@ export const DEV_STRUCTURE: Structure = {
   source: "pure-desk",
   channels: ["motion", "face", "sound"],
   joints: [
-    rig("base_yaw", "Base yaw", -150, 150),
-    rig("shoulder_pitch", "Shoulder", -35, 55),
-    rig("elbow_pitch", "Elbow", -120, 33),
-    rig("head_pan", "Head pan", -160, 160),
-    rig("head_tilt", "Head tilt", -33, 42),
+    rig("base_yaw", "Base yaw", -170, 170),
+    rig("shoulder_pitch", "Shoulder", -28, 41),
+    rig("elbow_pitch", "Elbow", -135, 10),
+    rig("head_pan", "Head pan", -48, 56),
+    rig("head_tilt", "Head tilt", -2, 21),
   ],
 };
 

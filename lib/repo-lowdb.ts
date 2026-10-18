@@ -23,6 +23,8 @@ export interface LowRepoOptions {
   removeUploads?: (projectId: string) => Promise<void>;
   /** Called on dev reset (empty data/uploads). */
   clearUploads?: () => Promise<void>;
+  /** Brings data saved by an earlier version up to date, in memory, right after the file loads. */
+  migrate?: (db: Db) => void;
 }
 
 const DAY = 86_400_000;
@@ -78,8 +80,10 @@ export class LowRepo implements Repo {
     this.loaded ??= (async () => {
       // Low.read() keeps the default when the file is missing, so ask the adapter directly.
       const existing = await this.adapter.read();
-      if (existing) this.db.data = existing;
-      else await this.db.write();
+      if (existing) {
+        this.opts.migrate?.(existing);
+        this.db.data = existing;
+      } else await this.db.write();
     })();
     return this.loaded;
   }

@@ -28,7 +28,7 @@ describe("timeline keys", () => {
     const { clip: c } = addKey(clip, "head_tilt", 1, S);
     const moved = updateKey(c, "head_tilt", 1, { t: 5, value: -500, easing: "ease_out" }, S);
     expect(moved.tracks.head_tilt[1].t).toBeCloseTo(2 - 1 / 30, 3);
-    expect(moved.tracks.head_tilt[1].value).toBe(-33);
+    expect(moved.tracks.head_tilt[1].value).toBe(-2);
     expect(moved.tracks.head_tilt[1].easing).toBe("ease_out");
     expect(clip.tracks.head_tilt).toHaveLength(2); // input untouched
   });
