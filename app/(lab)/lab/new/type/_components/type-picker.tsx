@@ -162,7 +162,7 @@ export function TypePicker({ initialSelected = false }: { initialSelected?: bool
   }
 
   return (
-    <div className="flex min-h-[var(--app-vh)] flex-col pl-[48px] pt-[var(--space-40)]">
+    <div className="flex min-h-[var(--app-vh)] flex-col px-[48px] pt-[var(--space-40)]">
       <Link
         href="/lab"
         className="flex w-fit items-center gap-[var(--space-12)] h-[48px] rounded-[var(--radius-full)] border-2 border-[var(--border-default)] bg-[var(--bg-surface)] px-[var(--space-16)] text-[16px] leading-[20px] font-medium text-[var(--text-link)] hover:bg-[var(--neutral-50)]"
@@ -171,13 +171,14 @@ export function TypePicker({ initialSelected = false }: { initialSelected?: bool
         <span>{STRINGS.sidebar.lab}</span>
       </Link>
 
-      <div className="ml-[55px] flex w-[1714px] flex-1 flex-col">
+      {/* Figma 1714 = 1920 − 2 × 103: the column keeps that inset on both sides and the five cards share the width. */}
+      <div className="mx-[55px] flex flex-1 flex-col">
       <header className="mt-[21px] flex flex-col gap-[12px]">
         <h1 className="text-[52px] font-semibold leading-[66px] text-[var(--sage-800)]">{S.title}</h1>
         <p className="text-[22px] leading-[28px] text-[var(--sage-500)]">{S.body}</p>
       </header>
 
-      <div className="mt-[72px] grid grid-cols-[repeat(5,326.5px)] gap-[20.4px]">
+      <div className="mt-[72px] grid grid-cols-5 gap-[20.4px]">
         {ORDERED.map((t) => (
           <TypeCard key={t.id} type={t} selected={t.selectable && selected} onSelect={() => t.selectable && setSelected(!selected)} />
         ))}

@@ -255,6 +255,9 @@ function FilterChip({ channel, pressed, tinted, onClick }: { channel: Channel; p
 // Card robot art by project type (no per-project data): Figma W02A-1 card renders at ×2 natural size.
 // joint-fixed 901:8214, jointless-driving 901:8030, joint-driving 901:8304, joint-walking 901:7849 (bear; file named project-thumb-desk);
 // full-body has no card render in the frame → landing cut-out (W00-1 type card).
+// joint-fixed is the simulated PURE Desk: one baked render of stage, shadow and robot fills the card,
+// so nothing is layered (the cut-outs above carry an opaque white box that hides the floor grid).
+const TYPE_SCENE: Record<string, string> = { "joint-fixed": "/figma/lab/card-joint-fixed@2x.png" };
 const TYPE_IMAGE: Record<string, { src: string; w: number; h: number }> = {
   "joint-fixed": { src: "/figma/lab/robot-joint-fixed@2x.png", w: 105, h: 232 },
   "jointless-driving": { src: "/figma/lab/robot-jointless-driving@2x.png", w: 163, h: 148 },
@@ -281,6 +284,7 @@ function ProjectCard({
   const type = ROBOT_TYPES.find((t) => t.id === p.type);
   const isAnalyzing = p.status === "analyzing";
   const image = TYPE_IMAGE[p.type];
+  const scene = TYPE_SCENE[p.type];
   // Card (Figma 901:8125) ×2: 498 square, 1px neutral/300 border, radius/2xl; floor grid + type robot art.
   return (
     <Link
@@ -288,24 +292,35 @@ function ProjectCard({
       data-testid="project-card"
       className="relative aspect-square overflow-hidden rounded-[var(--radius-2xl)] border border-[var(--neutral-300)] bg-[var(--bg-surface)] hover:border-[var(--neutral-500)]"
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/figma/lab/card-floor.svg" alt="" aria-hidden className="pointer-events-none absolute bottom-[17px] left-[calc(50%-9px)] h-[278px] w-[655px] max-w-none -translate-x-1/2" />
-      <img
-        src="/figma/lab/card-shadow.svg"
-        alt=""
-        aria-hidden
-        className="pointer-events-none absolute left-[calc(50%-66px)] top-[360px] h-[35px] w-[202px] max-w-none rotate-[173.42deg]"
-      />
-      {image && (
+      {scene ? (
         /* eslint-disable-next-line @next/next/no-img-element */
         <img
-          src={image.src}
+          src={scene}
           alt={type?.name ?? ""}
-          width={image.w}
-          height={image.h}
-          style={{ width: image.w, height: image.h }}
-          className={`pointer-events-none absolute bottom-[108px] left-1/2 max-w-none -translate-x-1/2 object-contain ${isAnalyzing ? "opacity-40" : ""}`}
+          className={`pointer-events-none absolute inset-0 size-full object-cover ${isAnalyzing ? "opacity-40" : ""}`}
         />
+      ) : (
+        <>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/figma/lab/card-floor.svg" alt="" aria-hidden className="pointer-events-none absolute bottom-[17px] left-[calc(50%-9px)] h-[278px] w-[655px] max-w-none -translate-x-1/2" />
+        <img
+          src="/figma/lab/card-shadow.svg"
+          alt=""
+          aria-hidden
+          className="pointer-events-none absolute left-[calc(50%-66px)] top-[360px] h-[35px] w-[202px] max-w-none rotate-[173.42deg]"
+        />
+        {image && (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={image.src}
+            alt={type?.name ?? ""}
+            width={image.w}
+            height={image.h}
+            style={{ width: image.w, height: image.h }}
+            className={`pointer-events-none absolute bottom-[108px] left-1/2 max-w-none -translate-x-1/2 object-contain ${isAnalyzing ? "opacity-40" : ""}`}
+          />
+        )}
+        </>
       )}
 
       <div className="absolute left-[33px] right-[27px] top-[31px] flex items-start justify-between gap-[var(--space-12)]">
@@ -343,7 +358,7 @@ function ProjectCard({
           </div>
         </div>
       ) : (
-        <span className="absolute left-[31px] top-[427px] rounded-[var(--radius-lg)] bg-[var(--sage-50)] px-[var(--space-16)] py-[var(--space-12)] text-[18px] leading-[22px] text-[var(--text-primary)]">
+        <span className="absolute bottom-[25px] left-[31px] rounded-[var(--radius-lg)] bg-[var(--sage-50)] px-[var(--space-16)] py-[var(--space-12)] text-[18px] leading-[22px] text-[var(--text-primary)]">
           {type?.name ?? p.type}
         </span>
       )}
