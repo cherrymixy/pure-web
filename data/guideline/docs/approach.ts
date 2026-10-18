@@ -9,6 +9,7 @@ export const approachDoc: ComponentDoc = {
     "It's a welcoming action where you approach, stop, and match the user's eye level.",
     "It's used when the user is returning home or calling the robot.",
   ],
+  topToc: "Common",
   resources: [{ label: "Open in Lab", href: "/lab" }, { label: "pure.json" }, { label: "Figma" }, { label: "Video" }],
   rows: [
     {

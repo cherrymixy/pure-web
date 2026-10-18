@@ -362,7 +362,6 @@ export const STRINGS = {
     prevDoc: "Previous Document",
     nextDoc: "Next Document",
     search: "Search",
-    common: "Common",
     noMatch: "No sections match.",
   },
   community: {

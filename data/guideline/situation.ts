@@ -1,4 +1,5 @@
 import type { GuidelineSection } from "./types";
+import { faceToFaceDoc } from "./docs/face-to-face";
 
 // Situation patterns: recurring spatial relationships between the user and the robot.
 // Sources: _ref/pure-web/lib/guideline-content.ts (componentItems), lib/pure-system.ts (CONTEXTS),
@@ -38,6 +39,7 @@ export const situation: GuidelineSection = {
       ],
       related: ["side-by-side", "calling", "nod-yes"],
       source: "guideline-content.ts:face-to-face",
+      doc: faceToFaceDoc,
     },
     {
       slug: "touching",

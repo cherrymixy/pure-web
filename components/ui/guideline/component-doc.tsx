@@ -14,7 +14,7 @@ const I = "/figma/guideline/icons";
 
 export function ComponentDocPage({ entry, doc, base, current, isPublic }: { entry: GuidelineEntry; doc: ComponentDoc; base: string; current: string; isPublic: boolean }) {
   const sections = doc.rows.flatMap((r) => (Array.isArray(r) ? r : [r]));
-  const toc: TocItem[] = [{ id: "common", label: G.common }, ...sections.map((s) => ({ id: s.id, label: s.toc ?? s.title }))];
+  const toc: TocItem[] = [...(doc.topToc ? [{ id: "top", label: doc.topToc }] : []), ...sections.map((s) => ({ id: s.id, label: s.toc ?? s.title }))];
   const stickyTop = isPublic ? "top-[136px]" : "top-[var(--space-32)]";
   const scrollMt = isPublic ? "scroll-mt-[136px]" : "scroll-mt-[var(--space-32)]";
 
@@ -29,7 +29,7 @@ export function ComponentDocPage({ entry, doc, base, current, isPublic }: { entr
       <div className="flex min-w-0 flex-1 items-start gap-[118px] rounded-[var(--radius-xl)] bg-[var(--bg-surface)] pb-[75px] pl-[69px] pr-[61px] pt-[62px] leading-normal">
         <article className="flex min-w-0 flex-1 flex-col">
           <span className="text-[14px] font-medium text-[var(--text-primary)]">{doc.breadcrumb}</span>
-          <header id="common" className={`mt-[var(--space-28)] flex flex-col gap-[var(--space-32)] ${scrollMt}`}>
+          <header id="top" className={`mt-[var(--space-28)] flex flex-col gap-[var(--space-32)] ${scrollMt}`}>
             <div className="flex flex-col gap-[var(--space-28)]">
               <h1 className="text-[60px] font-semibold text-[var(--text-primary)]">{entry.title}</h1>
               <p className="text-[18px] text-[var(--text-secondary)]">
@@ -198,7 +198,7 @@ function SectionBody({ s }: { s: ComponentDocSection }) {
           {s.items.map((it) => (
             <li key={it.state} className="flex gap-[var(--space-8)] whitespace-nowrap rounded-[var(--radius-xs)] border-[1.5px] border-[var(--border-default)] bg-[var(--bg-surface)] px-[var(--space-16)] py-[var(--space-8)]">
               <span className="font-medium text-[var(--text-primary)]">{it.state}</span>
-              <span className="ms-[var(--space-24)] list-item list-disc text-[var(--text-secondary)]">{it.effect}</span>
+              <span className={`text-[var(--text-secondary)] ${s.plain ? "" : "ms-[var(--space-24)] list-item list-disc"}`}>{it.effect}</span>
             </li>
           ))}
         </ul>
@@ -212,6 +212,8 @@ const CELL = {
   key: "font-semibold text-[var(--text-primary)]",
   label: "font-medium text-[var(--text-secondary)]",
   muted: "text-[var(--text-secondary)]",
+  name: "font-medium text-[var(--text-primary)]",
+  body: "text-[var(--neutral-600)]",
   text: "text-[var(--text-primary)]",
   code: "font-mono font-medium text-[var(--text-primary)]",
   track: "text-[var(--text-primary)]",

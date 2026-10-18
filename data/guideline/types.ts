@@ -41,6 +41,8 @@ export interface ComponentDoc {
   /** Lead paragraph, one string per line */
   lead: string[];
   resources: { label: string; href?: string }[];
+  /** "On this page" entry for the page header (anchor #top); omit for none */
+  topToc?: string;
   /** Page rows top to bottom; a pair renders side by side (Variant | State). Every section is an "On this page" entry. */
   rows: (ComponentDocSection | [ComponentDocSection, ComponentDocSection])[];
   /** Prev / next cards; path is relative to the guideline base ("behavior", "situation/face-to-face") */
@@ -76,10 +78,12 @@ export type ComponentDocSection = {
       duration: number;
       tracks: { channel: DocChannel; label: string; clips: { from: number; to: number; label?: string; align?: "start" }[] }[];
     }
-  /** cols: per-column style — key (semibold primary), label (medium secondary), muted (regular secondary),
-   *  text (regular primary), code (mono primary), track (channel icon + colored name; other values plain). widths: px, null = fill */
-  | { kind: "table"; head: string[]; rows: string[][]; widths: (number | null)[]; cols: ("key" | "label" | "muted" | "text" | "code" | "track")[] }
-  | { kind: "states"; items: { state: string; effect: string }[] }
+  /** cols: per-column style — key (semibold primary), name (medium primary), label (medium secondary), muted (regular secondary),
+   *  body (regular neutral-600), text (regular primary), code (mono primary), track (channel icon + colored name; other values plain).
+   *  widths: px, null = fill */
+  | { kind: "table"; head: string[]; rows: string[][]; widths: (number | null)[]; cols: ("key" | "name" | "label" | "muted" | "body" | "text" | "code" | "track")[] }
+  /** plain: no bullet before the effect (pattern "Common" rules) */
+  | { kind: "states"; items: { state: string; effect: string }[]; plain?: true }
 );
 
 export interface GuidelineSection {
