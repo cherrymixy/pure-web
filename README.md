@@ -339,6 +339,8 @@ docs/             PRD · decisions · checks · deck · readme
 
 **요구 사항:** Node.js 22
 
+> 사운드 녹음 파일(`public/sounds/*.m4a`)은 저장소에 포함하지 않았어요. 파일이 없으면 소리 없이 나머지 기능은 그대로 동작해요.
+
 ```bash
 git clone https://github.com/cherrymixy/pure-web.git
 cd pure-web
