@@ -154,7 +154,7 @@ export default function Page() {
       <section id="robot-types" className="mt-[73px] flex h-[405px] flex-col">
         <h2 className="text-center text-[28px] font-semibold leading-[1.26] text-[var(--sage-800)]">{L.robotTypes.title}</h2>
         <p className="mt-[7px] text-center text-[11px] leading-[1.26] text-[var(--neutral-600)]">{L.robotTypes.body}</p>
-        <div className="mt-[39px] flex justify-center px-[48px]">
+        <div className="mt-[39px] px-[48px]">
           <TypeCards />
         </div>
       </section>

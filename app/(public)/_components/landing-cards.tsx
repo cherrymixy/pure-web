@@ -81,31 +81,26 @@ export function Axes() {
 
 // Robot type art per card (Figma 901:7217 … 901:7282): image frame box + source crop, as get_design_context gives it.
 type Crop = { src: string; frame: React.CSSProperties; img: React.CSSProperties };
-const TYPE_ART: Record<string, { box: React.CSSProperties; crop: Crop; width: number; muted?: boolean; extra?: React.ReactNode }> = {
+const TYPE_ART: Record<string, { box: React.CSSProperties; crop: Crop; muted?: boolean; extra?: React.ReactNode }> = {
   "jointless-driving": {
-    width: 134,
     box: { left: 0, width: 134.204, height: 134.204 },
     crop: { src: "/figma/landing/type-jointless-driving.png", frame: { left: 20.58, top: 24.7, width: 93.449, height: 84.804 }, img: { left: "-8.27%", top: "-28.32%", width: "118.64%", height: "156.09%" } },
     extra: <div className="absolute left-[40.91px] top-[47.47px] h-[23.241px] w-[35.584px] bg-[var(--bg-surface)]" />,
   },
   "joint-driving": {
-    width: 135,
     box: { left: 0.45, width: 134.204, height: 134.204 },
     crop: { src: "/figma/landing/type-joint-driving.png", frame: { left: 14.41, top: 8.23, width: 105.799, height: 125.971 }, img: { left: 0, top: 0, width: "100%", height: "100%", objectFit: "cover" } },
   },
   "joint-fixed": {
-    width: 134,
     muted: true,
     box: { left: -0.35, width: 134.616, height: 134.204 },
     crop: { src: "", frame: {}, img: {} },
   },
   "joint-walking": {
-    width: 135,
     box: { left: 0.27, width: 134.204, height: 134.204 },
     crop: { src: "/figma/landing/type-joint-walking.png", frame: { left: 14.82, top: 23.47, width: 105.799, height: 97.565 }, img: { left: "-0.14%", top: "-17.74%", width: "100.28%", height: "128.84%" } },
   },
   "full-body": {
-    width: 134,
     box: { left: -0.6, width: 134.616, height: 134.616 },
     crop: { src: "/figma/landing/type-full-body.png", frame: { left: 1.24, top: -0.41, width: 133.381, height: 134.616 }, img: { left: "-0.15%", top: "-0.18%", width: "100.09%", height: "148.76%" } },
   },
@@ -123,22 +118,27 @@ const R = LANDING.robotTypes;
 
 function TypeCard({ card }: { card: (typeof R.cards)[number] }) {
   const art = TYPE_ART[card.id];
+  const { left = 0, width, height } = art.box;
   return (
-    <div className="relative h-[247px] shrink-0 overflow-clip rounded-[calc(var(--radius-xl)/2)] bg-[var(--bg-surface)]" style={{ width: art.width }}>
-      <div className="absolute top-0 overflow-clip bg-[var(--sage-50)]" style={art.box}>
-        {art.extra}
-        {art.crop.src && <CropImage crop={art.crop} alt={card.name} />}
-      </div>
-      {card.id === "joint-fixed" && (
-        // Overlay frame 901:7263: arm robot crop + its two eye highlights, overhanging the image box.
-        <div className="absolute left-[34.23px] top-[-11.94px] h-[140.379px] w-[67.925px] overflow-clip">
-          <div className="absolute left-0 top-[5.35px] h-[135.027px] w-[61.339px] overflow-hidden">
-            <img src="/figma/landing/type-joint-fixed.png" alt={card.name} className="absolute left-[-101.32%] top-0 h-[223.33%] w-[395.58%] max-w-none" />
-          </div>
-          <div className="absolute left-[30.05px] top-[37.46px] h-[11.938px] w-[6.175px] rounded-[calc(var(--radius-2xs)/2)] bg-[var(--bg-surface)]" />
-          <div className="absolute left-[18.94px] top-[37.46px] h-[11.938px] w-[6.175px] rounded-[calc(var(--radius-2xs)/2)] bg-[var(--bg-surface)]" />
+    // Cards share the row width; the Figma art (box + crop, ~134 wide) stays centred in the full-width image band.
+    <div className="relative h-[247px] min-w-0 flex-1 overflow-clip rounded-[calc(var(--radius-xl)/2)] bg-[var(--bg-surface)]">
+      <div className="absolute inset-x-0 top-0 bg-[var(--sage-50)]" style={{ height }} />
+      <div className="absolute top-0" style={{ left: `calc(50% - ${Number(width) / 2}px + ${left}px)`, width, height }}>
+        <div className="absolute inset-0 overflow-clip">
+          {art.extra}
+          {art.crop.src && <CropImage crop={art.crop} alt={card.name} />}
         </div>
-      )}
+        {card.id === "joint-fixed" && (
+          // Overlay frame 901:7263: arm robot crop + its two eye highlights, overhanging the image box.
+          <div className="absolute left-[34.58px] top-[-11.94px] h-[140.379px] w-[67.925px] overflow-clip">
+            <div className="absolute left-0 top-[5.35px] h-[135.027px] w-[61.339px] overflow-hidden">
+              <img src="/figma/landing/type-joint-fixed.png" alt={card.name} className="absolute left-[-101.32%] top-0 h-[223.33%] w-[395.58%] max-w-none" />
+            </div>
+            <div className="absolute left-[30.05px] top-[37.46px] h-[11.938px] w-[6.175px] rounded-[calc(var(--radius-2xs)/2)] bg-[var(--bg-surface)]" />
+            <div className="absolute left-[18.94px] top-[37.46px] h-[11.938px] w-[6.175px] rounded-[calc(var(--radius-2xs)/2)] bg-[var(--bg-surface)]" />
+          </div>
+        )}
+      </div>
       <div className="absolute left-[11.76px] top-[143.67px] flex flex-col whitespace-nowrap leading-[1.26]">
         <p className="text-[12px] font-semibold text-[var(--sage-800)]">{card.name}</p>
         <p className={`mt-[2.3px] text-[7px] ${art.muted ? "text-[var(--text-tertiary)]" : "text-[var(--sage-500)]"}`}>{card.description}</p>
@@ -159,7 +159,7 @@ function TypeCard({ card }: { card: (typeof R.cards)[number] }) {
 
 export function TypeCards() {
   return (
-    <div className="flex gap-[12px]">
+    <div className="flex w-full gap-[12px]">
       {R.cards.map((c) => (
         <TypeCard key={c.id} card={c} />
       ))}
