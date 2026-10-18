@@ -117,6 +117,13 @@ export type ComponentDocSection = {
     }
   | { kind: "face-transitions"; items: { caption: string; title: string; text: string }[] }
   | { kind: "face-donts"; items: { title: string; text: string }[]; blinkLabels: [string, string] }
+  /** Principle pages laid out like Face (808:1649) without a frame of their own — components/ui/guideline/principle-sections.tsx */
+  | { kind: "p-cards"; label?: string; columns?: 2 | 3 | 4; items: PrincipleCard[] }
+  | { kind: "p-flow"; steps: { label: string; note?: string }[]; caption?: string }
+  | { kind: "p-bullets"; heading: string; items: string[]; figure: PrincipleFigure }
+  | { kind: "p-phases"; phases: { title: string; time: string; note: string }[]; loops?: { title: string; text: string; chips: string[] }[] }
+  | { kind: "p-compare"; items: { figure: PrincipleFigure; caption: string; title: string; text: string }[] }
+  | { kind: "p-donts"; items: { title: string; text: string; figure: PrincipleFigure }[] }
   /** Generic entry body (pages without their own Figma frame, laid out like Face) */
   | { kind: "blocks"; blocks: GuidelineBlock[] }
   /** Section landing: one card per page; path relative to the guideline base */
@@ -126,6 +133,25 @@ export type ComponentDocSection = {
 );
 
 export type FaceTypeFigure = "none" | "light" | "eyes" | "all";
+
+/** CSS-only figure for principle sections: a large mono label and/or a row of chips (arrows between them when `flow`). */
+export interface PrincipleFigure {
+  big?: string;
+  chips?: string[];
+  flow?: true;
+}
+
+export interface PrincipleCard {
+  title: string;
+  subtitle?: string;
+  /** mono ID above the title (sp.1, gr.amp_limit …) */
+  tag?: string;
+  figure?: PrincipleFigure;
+  /** info box: label (defaults to the section label) + text */
+  infoLabel?: string;
+  info?: string;
+  proposed?: true;
+}
 
 export interface GuidelineSection {
   id: GuidelineSectionId;

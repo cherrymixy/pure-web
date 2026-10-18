@@ -1,5 +1,6 @@
 import type { GuidelineEntry, GuidelineSection } from "./types";
 import { approachDoc } from "./docs/approach";
+import { COMPONENT_DOCS } from "./docs/components";
 
 // Source: PURE guideline final structure v3 (2026-10-19) §7 Component — 16 behaviors.
 // Slugs = editor component ids (data/components.ts) with "_" → "-". simBehavior = the simulator behavior that plays it.
@@ -93,7 +94,8 @@ export const behavior: GuidelineSection = {
   summary:
     "16 behaviors, each a bundle of body, face and sound tracks with trigger and forbid conditions, a style acceptance ρ and recognition features. Main-study stimuli 17 − 1 rejected (Emphasis) = 16.",
   entries: [
-    ...COMPONENTS.map((c) => (c.slug === "approach" ? { ...cmp(c), doc: approachDoc } : cmp(c))),
+    // Every behavior renders on the Approach template (Figma 808:1254); Approach itself is the Figma page as drawn
+    ...COMPONENTS.map((c) => ({ ...cmp(c), doc: c.slug === "approach" ? approachDoc : COMPONENT_DOCS[c.slug] })),
     {
       slug: "component-spec",
       title: "Component spec",

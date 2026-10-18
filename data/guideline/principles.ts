@@ -1,4 +1,11 @@
 import { faceDoc } from "./docs/face";
+import { semanticDoc } from "./docs/principles/semantic";
+import { guardrailsDoc } from "./docs/principles/guardrails";
+import { combinationDoc } from "./docs/principles/combination";
+import { animationDoc } from "./docs/principles/animation";
+import { commonDoc } from "./docs/principles/common";
+import { motionDoc } from "./docs/principles/motion";
+import { soundDoc } from "./docs/principles/sound";
 import type { GuidelineSection } from "./types";
 
 // Source: PURE guideline final structure v3 (2026-10-19) §3 Semantic, §4 Animation 6, §5 Channel & Common.
@@ -13,6 +20,7 @@ export const principles: GuidelineSection = {
   entries: [
     {
       slug: "semantic",
+      doc: semanticDoc,
       group: "semantic",
       ref: "sp.1–5",
       title: "Semantic",
@@ -36,6 +44,7 @@ export const principles: GuidelineSection = {
     },
     {
       slug: "guardrails",
+      doc: guardrailsDoc,
       group: "semantic",
       ref: "gr.*",
       title: "Guardrails",
@@ -64,6 +73,7 @@ export const principles: GuidelineSection = {
     },
     {
       slug: "combination-rules",
+      doc: combinationDoc,
       group: "semantic",
       ref: "cmb.*",
       title: "Combination rules",
@@ -100,6 +110,7 @@ export const principles: GuidelineSection = {
     },
     {
       slug: "animation",
+      doc: animationDoc,
       group: "animation",
       ref: "op.*",
       title: "Animation",
@@ -156,6 +167,7 @@ export const principles: GuidelineSection = {
     },
     {
       slug: "common",
+      doc: commonDoc,
       group: "channel",
       ref: "ch.common",
       title: "Common",
@@ -189,6 +201,7 @@ export const principles: GuidelineSection = {
     },
     {
       slug: "body",
+      doc: motionDoc,
       group: "channel",
       ref: "ch.body",
       title: "Motion",
@@ -266,6 +279,7 @@ export const principles: GuidelineSection = {
     },
     {
       slug: "sound",
+      doc: soundDoc,
       group: "channel",
       ref: "ch.sound",
       title: "Sound",

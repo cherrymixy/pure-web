@@ -5,6 +5,7 @@ import { STRINGS } from "@/data/strings";
 import { DocToc, type TocItem } from "./doc-toc";
 import { FaceChange, FaceDonts, FaceRhythm, FaceTransitions, FaceTypes } from "./face-figures";
 import { GuidelineTree } from "./guideline-tree";
+import { PrincipleBullets, PrincipleCards, PrincipleCompare, PrincipleDonts, PrincipleFlow, PrinciplePhases } from "./principle-sections";
 
 const G = STRINGS.guideline;
 const A = "/figma/guideline/approach";
@@ -281,6 +282,18 @@ function SectionBody({ s, base }: { s: ComponentDocSection; base: string }) {
       return <FaceTransitions s={s} />;
     case "face-donts":
       return <FaceDonts s={s} />;
+    case "p-cards":
+      return <PrincipleCards s={s} />;
+    case "p-flow":
+      return <PrincipleFlow s={s} />;
+    case "p-bullets":
+      return <PrincipleBullets s={s} />;
+    case "p-phases":
+      return <PrinciplePhases s={s} />;
+    case "p-compare":
+      return <PrincipleCompare s={s} />;
+    case "p-donts":
+      return <PrincipleDonts s={s} />;
     case "states":
       return (
         <ul className="flex flex-col items-start gap-[var(--space-8)] text-[16px]">
@@ -330,7 +343,8 @@ function ClassIcon({ icon, on }: { icon: keyof typeof CLASS_ICON; on: boolean })
 
 /** Robot stage 808:1334 — drawn at Figma coordinates (376.67×189.82) with zoom 2, centered on a stage that fills the row. */
 function RobotStage({ notes }: { notes: [string, string] }) {
-  const bubble = "absolute flex h-[15.364px] items-center justify-center overflow-hidden rounded-[var(--radius-full)] bg-[var(--bg-inverse)] text-[6px] whitespace-nowrap text-[var(--neutral-100)]";
+  // Bubbles keep the Figma box as their minimum and grow with longer notes: the face one leftward (its right edge touches the face dot)
+  const bubble = "absolute flex h-[15.364px] items-center justify-center overflow-hidden rounded-[var(--radius-full)] bg-[var(--bg-inverse)] px-[4px] text-[6px] whitespace-nowrap text-[var(--neutral-100)]";
   const dot = "absolute flex size-[19.824px] items-center justify-center overflow-hidden rounded-[var(--radius-full)] bg-[var(--bg-inverse)]";
   return (
     <div aria-hidden className="relative flex h-[380px] min-w-[753px] flex-1 justify-center overflow-hidden rounded-[var(--radius-xl)] bg-[var(--bg-canvas)]">
@@ -374,7 +388,7 @@ function RobotStage({ notes }: { notes: [string, string] }) {
         <div className="absolute left-[95.16px] top-[39.65px] flex size-[18.833px] items-center justify-center">
           <img alt="" src={`${A}/rect81.svg`} className="block size-[18.833px] max-w-none flex-none rotate-180 -scale-y-100" />
         </div>
-        <span className={`${bubble} left-[32.21px] top-[33.7px] w-[72.359px]`}>{notes[0]}</span>
+        <span className={`${bubble} right-[272.095px] top-[33.7px] min-w-[72.359px]`}>{notes[0]}</span>
         <div className="absolute left-[218.56px] top-[81.28px] flex h-[110.026px] w-[151.162px] items-center justify-center">
           <div className="flex-none rotate-180 -scale-y-100">
             <div className="relative h-[110.026px] w-[151.162px]">
@@ -389,7 +403,7 @@ function RobotStage({ notes }: { notes: [string, string] }) {
         <span className={`${dot} left-[104.57px] top-[49.07px]`}><img alt="" src={`${A}/stage-face.svg`} className="block size-[11.895px]" /></span>
         <span className={`${dot} left-[243.84px] top-[113px]`}><img alt="" src={`${A}/stage-sound.svg`} className="block size-[11.895px]" /></span>
         <span className={`${dot} left-[83.76px] top-[123.9px]`}><img alt="" src={`${A}/stage-motion.svg`} className="block size-[11.895px]" /></span>
-        <span className={`${bubble} left-[263.67px] top-[97.64px] w-[89.21px]`}>{notes[1]}</span>
+        <span className={`${bubble} left-[263.67px] top-[97.64px] min-w-[89.21px]`}>{notes[1]}</span>
       </div>
       {/* Play 808:1349/1350 — top-right of the stage (no media yet) */}
       <span className="absolute right-[var(--space-24)] top-[var(--space-24)] flex size-[55.5px] items-center justify-center">
