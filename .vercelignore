@@ -1,0 +1,7 @@
+_ref
+data/db.json
+data/uploads
+.omc
+.next
+node_modules
+docs/review/step22

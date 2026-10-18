@@ -57,3 +57,4 @@ STEP마다 한 줄. `날짜 · STEP · 결정 · 근거`
 | 2026-10-19 | 커뮤니티 | 렌더 카드 10장(idle·doze·wake·nod·shake·curious·alert·sweep·focus·home) 재렌더: 정면 카메라(azimuth 90), 얼굴은 동작별 영상, 화면 베젤 등 거의 검은 재질은 무광(roughness 0.85·metalness 0)으로 바꿔 조명에 회갈색으로 뜨지 않게 | 이전 렌더는 캔버스 눈·사선 각도·베젤 반사로 Figma 그림과 따로 놀았음 |
 | 2026-10-19 | 랩 | 랩 홈 Joint Fixed 카드 이미지(card-joint-fixed@2x.png)를 같은 장면·크롭으로 재렌더: 영상 얼굴(neutral)·무광 베젤 | 캔버스 눈이 구워진 옛 이미지 교체 |
 | 2026-10-19 | sim | 모션 부드럽게(사용자 요청·sim 변경 승인): ① 리타깃 후 어깨 뒤로 젖힘(−) 0.5배(RobotSpec.backGain) — wake −32°→−17°, happy −20°→−10°, alert −22°→−11° ② 재생 목표와 서보 사이에 지령 스무딩(lib/sim/smooth.ts: 임계감쇠 스프링 ω16, 최대 120°/s·900°/s², 범위 검사는 원래 목표로) ③ 서보 kv 0→1.2(거의 임계감쇠, 오버슛 제거). 정지 중 seek는 스무딩 없이 즉시 | 키프레임 모서리에서 팔이 뒤로 탁 넘어가고 튕기던 문제 |
+| 2026-10-19 | 배포 | 사용자 요청으로 Vercel 배포(pure-web-omega.vercel.app)·GitHub 비공개 저장소. Vercel에선 DB·업로드를 인스턴스 임시 폴더(os.tmpdir()/pure-data)로 — 시드에서 시작, 인스턴스 재시작 시 초기화. Ollama 없음 → 데모 레시피. README + docs/readme 스크린샷 | "배포 X" 원칙의 예외: 팀 공유용 데모 링크 |
