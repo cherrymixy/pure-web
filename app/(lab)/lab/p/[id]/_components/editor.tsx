@@ -523,14 +523,6 @@ export function Editor({
     }
   }
 
-  function toggleComponent(id: string) {
-    const components = context.components.includes(id) ? context.components.filter((c) => c !== id) : [...context.components, id];
-    const next = { ...context, components };
-    setContext(next);
-    const again = context.lastPrompt || prompt;
-    if (again.trim()) void generate(again, next, !!context.lastPrompt);
-  }
-
   // ------------------------------------------------------------ references
 
   async function addReference(file: File): Promise<Reference | null> {
@@ -803,7 +795,6 @@ export function Editor({
               behaviors={expression?.motion.recipe.steps.map((st) => st.behavior) ?? []}
               busy={busy}
               onChange={(patch) => setContext((c) => ({ ...c, ...patch }))}
-              onToggleComponent={toggleComponent}
               onOpenReference={(r) => r.kind !== "userData" && setActiveRef(activeRef?.id === r.id ? null : r)}
               activeReference={activeRef?.id ?? null}
               reading={reading}

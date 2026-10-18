@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
-import { COMPONENTS } from "@/data/components";
+import { COMPONENTS, guidelineSlugFor } from "@/data/components";
 import { SITUATION_PATTERNS } from "@/data/patterns";
 import { STRINGS, fmt } from "@/data/strings";
 import type { Reference } from "@/lib/models";
@@ -39,7 +40,6 @@ export function ContextPanel({
   reading = [],
   activeReference,
   onChange,
-  onToggleComponent,
   onOpenReference,
 }: {
   context: EditorContext;
@@ -49,7 +49,6 @@ export function ContextPanel({
   reading?: string[];
   activeReference: string | null;
   onChange: (patch: Partial<EditorContext>) => void;
-  onToggleComponent: (id: string) => void;
   onOpenReference: (r: Reference) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
@@ -92,24 +91,15 @@ export function ContextPanel({
           <Icon name="widget" size={24} className="shrink-0 text-[var(--neutral-800)]" />
           {E.component}
         </h3>
-        <div className={box} role="group" aria-label={E.component} title={E.componentHint}>
-          {COMPONENTS.map((c) => {
-            const on = context.components.includes(c.id);
-            return (
-              <button
-                key={c.id}
-                title={c.description}
-                disabled={busy}
-                aria-pressed={on}
-                onClick={() => onToggleComponent(c.id)}
-                className={`${row} ${on ? "font-semibold" : ""}`}
-              >
-                {c.label}
-                <Icon name={on ? "check" : "chevron-right-thin"} size={24} className={on ? "text-[var(--text-primary)]" : "text-[var(--text-tertiary)]"} />
-              </button>
-            );
-          })}
-        </div>
+        {/* Each row opens the component's guideline page (no selection here) */}
+        <nav className={box} aria-label={E.component} title={E.componentHint}>
+          {COMPONENTS.map((c) => (
+            <Link key={c.id} href={`/lab/guideline/behavior/${guidelineSlugFor(c.id)}`} title={c.description} className={row}>
+              {c.label}
+              <Icon name="chevron-right-thin" size={24} className="text-[var(--text-tertiary)]" />
+            </Link>
+          ))}
+        </nav>
       </section>
 
       <section className="flex flex-col gap-[var(--space-16)]">

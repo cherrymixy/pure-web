@@ -35,3 +35,6 @@ export const componentOf = (id: string) => COMPONENTS.find((c) => c.id === id);
 export function guidelineSlugFor(id: string): string | null {
   return componentOf(id) ? id.replace(/_/g, "-") : null;
 }
+
+/** Component a simulator behavior plays for (first match): community motions are stored as simulator steps. */
+export const componentForSim = (behavior: string) => COMPONENTS.find((c) => c.sim.behavior === behavior);

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
+import { componentForSim, guidelineSlugFor } from "@/data/components";
 import { CATEGORY_PATTERNS, COMMUNITY_REVIEWS, COMMUNITY_STAGE_VIEW } from "@/data/community";
 import { SITUATION_PATTERNS } from "@/data/patterns";
 import { PURE_DESK_STRUCTURE } from "@/data/pure-desk";
@@ -42,12 +43,20 @@ export function MotionDetail({ motion, projects }: { motion: UserDataMotion; pro
   const ctrl = useRef<SimController | null>(null);
   const playable = useMemo(() => ({ motion: { mode: "recipe" as const, recipe: { ...motion.preview, loop: true } } }), [motion.preview]);
   const behaviors = motion.preview.steps.map((s) => s.behavior);
+  // Component rows open the guideline page of the component each simulator step plays for (like the editor's Context)
+  const components = [...new Map(behaviors.map((b) => componentForSim(b)).filter((c) => c !== undefined).map((c) => [c.id, c])).values()];
   const patterns = CATEGORY_PATTERNS[motion.category].map((id) => SITUATION_PATTERNS.find((p) => p.id === id)).filter((p) => p !== undefined);
 
   async function use(projectId: string) {
     await api(`/api/user-data/${motion.id}/use`, { method: "POST" }).catch(() => {});
     toast(fmt(U.attached, { name: motion.name }));
     router.push(`/lab/p/${projectId}?ref=${encodeURIComponent(motion.id)}`);
+  }
+
+  /** Back to where the detail was opened from (list tab / scroll); straight to the list when opened directly */
+  function back() {
+    if (window.history.length > 1) router.back();
+    else router.push("/lab/community");
   }
 
   function onEvent(e: ViewportEvent) {
@@ -99,7 +108,13 @@ export function MotionDetail({ motion, projects }: { motion: UserDataMotion; pro
 
       {/* Left panel: Context (943:1770) */}
       <aside className="absolute bottom-[32px] left-[32px] top-[32px] z-10 flex w-[343px] flex-col overflow-hidden rounded-[var(--radius-xl)] bg-[var(--bg-surface)]">
-        <h2 className="ml-[23px] mt-[26px] text-[20px] font-semibold leading-[25px] text-[var(--neutral-800)] underline">{U.context}</h2>
+        {/* Back, in the editor's menu slot (24 icon before the panel title) */}
+        <div className="ml-[23px] mt-[26px] flex items-center gap-[var(--space-12)]">
+          <button type="button" onClick={back} aria-label={U.back} title={U.back} className="flex size-[24px] items-center justify-center text-[var(--neutral-800)] hover:text-[var(--text-primary)]">
+            <Icon name="chevron-right-small" size={24} className="rotate-180" />
+          </button>
+          <h2 className="text-[20px] font-semibold leading-[25px] text-[var(--neutral-800)] underline">{U.context}</h2>
+        </div>
         <div className="mt-[37px] flex min-h-0 flex-1 flex-col gap-[56px] overflow-y-auto pb-[var(--space-32)] pl-[19px] pr-[23px]">
           <ReferencedSets behaviors={behaviors} variant="strip" />
 
@@ -109,11 +124,11 @@ export function MotionDetail({ motion, projects }: { motion: UserDataMotion; pro
               {U.component}
             </h3>
             <div className={box}>
-              {[...new Set(behaviors)].map((b) => (
-                <span key={b} className={row}>
-                  {behaviorLabel(b)}
+              {components.map((c) => (
+                <Link key={c.id} href={`/lab/guideline/behavior/${guidelineSlugFor(c.id)}`} title={c.description} className={`${row} hover:text-[var(--text-primary)]`}>
+                  {c.label}
                   <Icon name="chevron-right-thin" size={24} className="text-[var(--text-tertiary)]" />
-                </span>
+                </Link>
               ))}
             </div>
           </section>
@@ -125,10 +140,10 @@ export function MotionDetail({ motion, projects }: { motion: UserDataMotion; pro
             </h3>
             <div className={box}>
               {patterns.map((p) => (
-                <span key={p.id} className={row} title={p.hint}>
+                <Link key={p.id} href={`/lab/guideline/situation/${p.id}`} className={`${row} hover:text-[var(--text-primary)]`} title={p.hint}>
                   {p.label}
                   <Icon name="chevron-right-thin" size={24} className="text-[var(--text-tertiary)]" />
-                </span>
+                </Link>
               ))}
             </div>
           </section>
