@@ -1,4 +1,5 @@
 import type { GuidelineSection } from "./types";
+import { approachDoc } from "./docs/approach";
 
 // Primitive motion tokens: the smallest reusable units of expressive robot movement.
 // Sources: _ref/pure-web/lib/motion-tokens.ts (MOTION_TOKENS, 14 tokens) and
@@ -309,6 +310,7 @@ export const primitiveTokens: GuidelineSection = {
       ],
       related: ["retreat", "lean", "follow"],
       source: "lib/motion-tokens.ts:approach; PURE_Knowledge/03_Motion_Tokens/Approach.md",
+      doc: approachDoc,
     },
     {
       slug: "nod",

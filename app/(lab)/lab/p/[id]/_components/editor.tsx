@@ -1032,7 +1032,7 @@ export function Editor({
       <Modal open={failure !== null} onClose={() => setFailure(null)} title={E.failed.title} description={E.failed.body}>
         {failure && <p className="font-mono text-[14px] leading-[18px] text-[var(--text-tertiary)]">{fmt(E.failedReason, { reason: failure })}</p>}
         <ModalActions>
-          <ModalButton onClick={() => router.push("/lab/user-data")}>{E.failedActions.browse}</ModalButton>
+          <ModalButton onClick={() => router.push("/lab/community")}>{E.failedActions.browse}</ModalButton>
           <ModalButton variant="primary" onClick={() => { setFailure(null); void generate(); }}>{E.failedActions.retry}</ModalButton>
         </ModalActions>
       </Modal>

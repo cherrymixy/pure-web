@@ -28,7 +28,7 @@ export interface EditorContext {
 export type PendingReference = { id: string; name: string };
 
 const fileName = (r: Reference) =>
-  r.kind === "userData" ? fmt(STRINGS.userData.referenceLabel, { name: r.path }) : r.path.split("/").pop()?.replace(/^[0-9a-f]{8}-/, "") ?? "";
+  r.kind === "userData" ? fmt(STRINGS.community.referenceLabel, { name: r.path }) : r.path.split("/").pop()?.replace(/^[0-9a-f]{8}-/, "") ?? "";
 
 // W02D Context tab: Current Status (latest input) + input log, Component chips, Situation Pattern,
 // Reference = what the AI referenced (face / motion / sound sets per behavior).

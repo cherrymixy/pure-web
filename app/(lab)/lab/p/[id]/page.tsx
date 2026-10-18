@@ -22,7 +22,7 @@ export default async function Page({ params, searchParams }: { params: Promise<{
     repo.expressions.listByProject(id),
     repo.signatures.current(id),
     repo.settings.get(),
-    // User Data → "Use as reference" lands here with ?ref=<motion id>.
+    // Community → "Bring to Lab" lands here with ?ref=<motion id>.
     ref ? repo.userData.get(ref).then((m) => ({ id: m.id, name: m.name }), () => null) : null,
   ]);
   return (

@@ -106,14 +106,36 @@ const CATEGORY: Record<string, UserDataMotion["category"]> = {
 };
 const USES = [312, 148, 96, 205, 487, 133, 174, 268, 391, 87, 156, 452, 64, 119, 41];
 
-export const SEED_USER_DATA: UserDataMotion[] = COMPONENTS.map((c, i) => ({
-  id: `ud-${c.id}`,
-  name: c.label,
-  category: CATEGORY[c.id],
-  uses: USES[i],
-  preview: { steps: [{ behavior: c.id, speed: 1, amplitude: 1, repeat: 1 }] },
-  source: "seed",
-}));
+export const SEED_USER_DATA: UserDataMotion[] = [
+  ...COMPONENTS.map((c, i): UserDataMotion => ({
+    id: `ud-${c.id}`,
+    name: c.label,
+    category: CATEGORY[c.id],
+    uses: USES[i],
+    preview: { steps: [{ behavior: c.id, speed: 1, amplitude: 1, repeat: 1 }] },
+    source: "seed",
+  })),
+  // Community motions drawn in Figma (943:1134) that aren't a single simulator behavior.
+  { id: "ud-stretch", name: "Stretch", category: "Expressive", uses: 226, preview: { steps: [{ behavior: "wake", speed: 0.8, amplitude: 1.2, repeat: 1 }] }, source: "seed" },
+  { id: "ud-surprise", name: "Surprise", category: "Expressive", uses: 219, preview: { steps: [{ behavior: "alert", speed: 1.2, amplitude: 1.2, repeat: 1 }] }, source: "seed" },
+  {
+    id: "ud-fear",
+    name: "Fear",
+    category: "Expressive",
+    uses: 131,
+    preview: { steps: [{ behavior: "alert", speed: 1.3, amplitude: 0.8, repeat: 1 }, { behavior: "shake", speed: 1.4, amplitude: 0.6, repeat: 1 }] },
+    source: "seed",
+  },
+];
+
+/** Databases saved before a seed motion existed get it added on load (user data is never touched). */
+export function addMissingSeedMotions(db: Db): void {
+  const have = new Set(db.userData.map((u) => u.id));
+  const firstUser = db.userData.findIndex((u) => u.source === "user");
+  const missing = SEED_USER_DATA.filter((u) => !have.has(u.id)).map((u) => structuredClone(u));
+  // Seeds go before user uploads so "Recently" (newest first) keeps uploads on top.
+  db.userData.splice(firstUser < 0 ? db.userData.length : firstUser, 0, ...missing);
+}
 
 export const SEED_ROBOTS: RobotDevice[] = [
   { id: "r-purebot-desk", name: "Purebot Desk", type: "joint-fixed", online: true },

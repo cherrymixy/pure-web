@@ -161,6 +161,15 @@
   --channel-motion: #46ceff;
   --channel-face: #9b8bd6;
   --channel-sound: #f2a65a;
+  /* Community list 943:1134 / detail 943:1619 (no Figma variable) */
+  --community-panel: #ffffffbf; /* list panel: white 75%, 1px white border */
+  --community-card-top: #edeef0; /* motion card gradient, top → bottom */
+  --community-card-bottom: #f3f4f6;
+  --community-card-selected: #8bafbb; /* selected card: solid to 39.85%, then fades to 10% */
+  --community-card-selected-end: #8bafbb1a;
+  --community-pill: #d4d4d433; /* search pill · More · play button: rgba(212,212,212,.2) */
+  --community-progress: #92adb5; /* detail play bar fill, track at 20% */
+  --community-subnav-selected: #dfe5e7; /* sidebar All / Popular / Recently */
   /* TODO(승아): PURE/Blur/Overlay = BACKGROUND_BLUR radius 50. CSS blur() 값으로 50px 그대로인지 25px(반경 절반)인지 확인 필요 */
   --pure-blur-overlay: 50px;
 }

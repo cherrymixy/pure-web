@@ -15,7 +15,8 @@ import { FACE_PRESETS } from "./face-presets";
 import { SUGGESTED_PROMPTS } from "./prompts";
 import { PURE_DESK_STRUCTURE } from "./pure-desk";
 import { ROBOT_TYPES } from "./robot-types";
-import { SEED_EXPRESSIONS, SEED_LIBRARY, SEED_PROFILE, SEED_PROJECTS, SEED_ROBOTS, SEED_SIGNATURES, SEED_USER_DATA } from "./seed";
+import { SEED_EXPRESSIONS, SEED_LIBRARY, SEED_PROFILE, SEED_PROJECTS, SEED_ROBOTS, SEED_SIGNATURES, SEED_USER_DATA, addMissingSeedMotions, seedDb } from "./seed";
+import { CATEGORY_PATTERNS, COMMUNITY_REVIEWS, WAVEFORM_SRC, communityCard } from "./community";
 import { AXIS_INFO, TONE_DICTIONARY } from "./signature";
 import { SITUATION_PATTERNS } from "./patterns";
 import { SOUND_CUES, cueAt } from "./sound-cues";
@@ -91,7 +92,27 @@ describe("seed", () => {
     expect(SEED_PROJECTS.map((p) => p.name)).toEqual(["Test-01", "Sleepy robot", "Surprising", "Test- final", "Pure bot - dog"]);
     SEED_ROBOTS.forEach((r) => ok(RobotDeviceSchema, r));
     SEED_USER_DATA.forEach((u) => ok(UserDataMotionSchema, u));
-    expect(SEED_USER_DATA).toHaveLength(15);
+    // 15 behaviors + Stretch / Surprise / Fear from the Community Figma list
+    expect(SEED_USER_DATA).toHaveLength(18);
+    SEED_USER_DATA.forEach((u) => u.preview.steps.forEach((s) => expect(behaviorNames.has(s.behavior)).toBe(true)));
+  });
+  it("older databases get the new seed motions, before user uploads", () => {
+    const db = seedDb();
+    const upload = { ...db.userData[0], id: "ud-mine", name: "Mine", source: "user" as const };
+    db.userData = [...db.userData.slice(0, 15), upload];
+    addMissingSeedMotions(db);
+    expect(db.userData.map((u) => u.id).slice(-4)).toEqual(["ud-stretch", "ud-surprise", "ud-fear", "ud-mine"]);
+    addMissingSeedMotions(db);
+    expect(db.userData).toHaveLength(19);
+  });
+  it("every community motion has card art on disk and its situation patterns exist", () => {
+    for (const m of SEED_USER_DATA) {
+      const { art, wave } = communityCard(m);
+      expect(fs.existsSync(path.join(process.cwd(), "public", art)), art).toBe(true);
+      expect(fs.existsSync(path.join(process.cwd(), "public", WAVEFORM_SRC[wave ?? "flat"]))).toBe(true);
+      CATEGORY_PATTERNS[m.category].forEach((id) => expect(SITUATION_PATTERNS.some((p) => p.id === id)).toBe(true));
+    }
+    COMMUNITY_REVIEWS.forEach((r) => expect(fs.existsSync(path.join(process.cwd(), "public", r.src))).toBe(true));
   });
   it("expressions and library validate and point at real projects", () => {
     const ids = new Set(SEED_PROJECTS.map((p) => p.id));

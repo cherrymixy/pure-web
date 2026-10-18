@@ -29,7 +29,7 @@ export function UserMenu({ name, email }: { name: string; email: string }) {
           </>
         }
         items={[
-          { label: STRINGS.sidebar.library, onSelect: () => router.push("/lab/user-data") },
+          { label: STRINGS.sidebar.library, onSelect: () => router.push("/lab/community") },
           { label: STRINGS.sidebar.profile, onSelect: () => router.push("/lab/profile") },
           { label: STRINGS.sidebar.logOut, onSelect: () => setLogOut(true) },
         ]}
