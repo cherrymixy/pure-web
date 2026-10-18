@@ -14,8 +14,9 @@ const DEPTH = 0.35; // × window width
 const HEAD_LEAD = 25; // degrees the head turns before the body follows
 const TILT_MAX = 22;
 const COMMAND_MS = 120;
-// Eye contact with the hero camera (pointer in the middle): base_yaw −19.8 + head_pan −16.2 = −36°.
-const REST = { base_yaw: -19.8, head_pan: -16.2 };
+// At rest (pointer in the middle) the robot looks just past the camera (base_yaw + head_pan = −50°; −36° = eye contact). The body stands side-on
+// and the head turns to the viewer (Figma 950:2872).
+const REST = { base_yaw: -80, head_pan: 30 };
 
 export function HeroRobot({ className, label }: { className?: string; label: string }) {
   const ctrl = useRef<SimController | null>(null);
@@ -69,7 +70,7 @@ export function HeroRobot({ className, label }: { className?: string; label: str
   return (
     // The stage blends into the hero background: floor/grid in the hero's floor tone, edges faded out with a mask.
     // The landing is CSS-zoomed (×2–3); the inner box undoes that zoom so the canvas renders at screen resolution.
-    <div ref={box} role="img" aria-label={label} className={`${className ?? ""} [--sim-floor:var(--neutral-0)] [--sim-grid-major:var(--neutral-0)] [--sim-grid-minor:var(--neutral-0)] [--sim-stage:var(--neutral-50)] [mask-image:radial-gradient(ellipse_42%_46%_at_50%_58%,black_45%,transparent_100%)]`}>
+    <div ref={box} role="img" aria-label={label} className={`${className ?? ""} [--sim-floor:var(--neutral-0)] [--sim-grid-major:none] [--sim-grid-minor:none] [--sim-stage:var(--neutral-50)] [mask-image:radial-gradient(ellipse_42%_46%_at_50%_58%,black_45%,transparent_100%)]`}>
       <div className="size-full [zoom:var(--landing-unzoom,1)]">
         <Viewport controllerRef={ctrl} mode="structure" orbit={false} className="block size-full" />
       </div>

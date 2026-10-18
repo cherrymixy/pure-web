@@ -35,10 +35,10 @@ function Lines({ lines }: { lines: readonly string[] }) {
 export default function Page() {
   return (
     <LandingZoom>
-      {/* Top bar (901:6918 header): full width at any scale, stays on screen while scrolling. Contents use the landing scale. */}
+      {/* Top bar (950:2874): full width at any scale, stays on screen while scrolling. Figma size (no landing scale), full-value space/radius. */}
       <div className="sticky top-[8px] z-50 h-0">
         <div className="absolute left-[7px] right-[7.5px] top-0">
-          <header className="flex h-[44px] w-full items-center [zoom:var(--landing-scale)] justify-between rounded-full border-[0.5px] border-[var(--neutral-0)] bg-[var(--bg-surface)] px-[calc(var(--space-40)/2)]">
+          <header className="flex h-[44px] w-full items-center justify-between rounded-full border-[0.5px] border-[var(--neutral-0)] bg-[var(--bg-surface)] px-[var(--space-40)]">
             <div className="flex w-[130px] items-center">
               <Link href="/" aria-label={L.nav.logoAlt}>
                 <img src="/figma/landing/logo-mark.svg" alt={L.nav.logoAlt} width={14.9999} height={14.9997} className="block" />
@@ -49,9 +49,9 @@ export default function Page() {
                 <a key={n.href} href={n.href}>{n.label}</a>
               ))}
             </nav>
-            <div className="flex items-center gap-[calc(var(--space-48)/2)]">
+            <div className="flex items-center gap-[var(--space-48)]">
               <Link href="/lab" className="text-[10px] leading-[1.26] text-[var(--text-link)]">{L.nav.signIn}</Link>
-              <Link href="/lab" className="flex h-[28px] w-[75px] items-center justify-center rounded-[calc(var(--radius-md)/2)] bg-[var(--neutral-300)] text-[10px] font-medium leading-[1.26] text-[var(--sage-900)]">
+              <Link href="/lab" className="flex h-[32px] w-[75px] items-center justify-center rounded-[var(--radius-md)] bg-[var(--neutral-300)] text-[10px] font-medium leading-[1.26] text-[var(--sage-900)]">
                 {L.nav.tryPure}
               </Link>
             </div>
@@ -59,20 +59,21 @@ export default function Page() {
         </div>
       </div>
 
-      {/* Hero 901:6918 — height fits the first screen (--hero-h, Figma 610), title and robot keep their Figma
-          proportions in it: title at 106/610 of the height, robot floor 56 above the bottom, robot scaled by --hero-k. */}
-      <section className="relative h-[calc(var(--hero-h,610)*1px)] overflow-clip bg-[var(--bg-canvas)]">
+      {/* Hero 950:2872 (960 × 485 = the first screen), at Figma size like the top bar (no landing scale). */}
+      <section className="relative h-[485px] overflow-clip bg-[var(--bg-canvas)]">
         <img src="/figma/landing/hero-bg.png" alt="" className="absolute left-[-61.5px] top-0 h-[610px] w-[1083px] max-w-none object-cover" />
 
-        <div className="absolute left-[284px] top-[calc(var(--hero-h,610)*106px/610)] flex w-[392px] origin-top [scale:var(--landing-scale)] flex-col items-center gap-[calc(var(--space-32)/2)]">
-          <p className="rounded-full bg-[var(--neutral-300)] px-[calc(var(--space-20)/2)] py-[calc(var(--space-12)/2)] text-[8px] font-medium leading-[1.26] text-[var(--sage-600)]">{L.hero.badge}</p>
-          <h1 className="whitespace-nowrap text-center text-[46px] font-semibold leading-[1.26] text-[var(--sage-800)]">
-            <Lines lines={L.hero.headline} />
-          </h1>
-        </div>
+        <div className="absolute inset-0">
+          <div className="absolute left-[calc(50%+0.42px)] top-[94px] z-[1] flex w-[346.848px] -translate-x-1/2 flex-col items-center gap-[17.696px]">
+            <p className="rounded-full border-[0.885px] border-[var(--neutral-0)] bg-[var(--neutral-300)] px-[13.272px] py-[7.079px] text-[10.618px] font-medium leading-[1.26] text-[var(--sage-600)]">{L.hero.badge}</p>
+            <h1 className="whitespace-nowrap text-center text-[40.702px] font-semibold leading-[1.1] text-[var(--sage-800)]">
+              <Lines lines={L.hero.headline} />
+            </h1>
+          </div>
 
-        {/* Robot (901:6918 render → live sim, head follows the pointer). Box centred on the Figma robot (x 478.5), floor at y 554. */}
-        <HeroRobot label={L.hero.robotAlt} className="absolute left-[238.5px] top-[calc((var(--hero-h,610)-376)*1px)] h-[400px] w-[480px] origin-[240px_320px] [scale:calc(var(--landing-scale)*var(--hero-k,1))]" />
+          {/* Robot (Figma render 417.56, 252, 122.65 × 273 → live sim, head follows the pointer). Box origin = robot centre on the floor. */}
+          <HeroRobot label={L.hero.robotAlt} className="absolute left-[238.9px] top-[200px] h-[400px] w-[480px] origin-[240px_320px] [scale:var(--hero-robot-scale)]" />
+        </div>
       </section>
 
       <div className={column}>

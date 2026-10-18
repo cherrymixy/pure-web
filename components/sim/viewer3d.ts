@@ -24,7 +24,8 @@ const MJ_TO_WORLD = -Math.PI / 2;
 export interface ViewerOptions {
   stage?: string;
   floor?: string;
-  grid?: [string, string];
+  /** Floor grid line colours (major, minor); null = no grid */
+  grid?: [string, string] | null;
   rim?: string;
   fill?: string;
   /** Emissive tint for highlightJoint */
@@ -200,6 +201,7 @@ export class LampViewer {
     floor.receiveShadow = true;
     this.root.add(floor);
 
+    if (!this.options.grid) return;
     const grid = new THREE.GridHelper(4, 40, this.options.grid[0], this.options.grid[1]);
     grid.rotation.x = Math.PI / 2;
     grid.position.z = 0.001;

@@ -37,7 +37,7 @@ const MODES: Record<ViewportMode, { pan: boolean; zoom: boolean; idle: boolean }
 
 let mounted = 0;
 
-/** Stage colours from the design tokens (styles/tokens.css --sim-*); unset → the viewer's defaults. */
+/** Stage colours from the design tokens (styles/tokens.css --sim-*); unset → the viewer's defaults, grid "none" → no grid. */
 function stageFromTokens(el: Element): ViewerOptions {
   const css = getComputedStyle(el);
   const v = (name: string) => css.getPropertyValue(name).trim() || undefined;
@@ -52,7 +52,8 @@ function stageFromTokens(el: Element): ViewerOptions {
     ...(fill && { fill }),
     ...(stage && { stage }),
     ...(floor && { floor }),
-    ...(major && minor && { grid: [major, minor] as [string, string] }),
+    // --sim-grid-major: none → no floor grid
+    ...(major === "none" ? { grid: null } : major && minor && { grid: [major, minor] as [string, string] }),
   };
 }
 
