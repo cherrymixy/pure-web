@@ -56,6 +56,11 @@ export const SEED_PROJECTS: Project[] = [
     updatedAt: "2026-10-09T18:15:00.000Z",
   },
   {
+    id: "p-mini-rover", name: "Mini rover", type: "joint-fixed", status: "draft", structure: PURE_DESK_STRUCTURE,
+    signatureId: PUREBOT_SIGNATURE.id, signatureHistory: [PUREBOT_SIGNATURE], channelsUsed: ["motion", "face"],
+    updatedAt: "2026-10-11T14:20:00.000Z",
+  },
+  {
     id: "p-purebot-dog", name: "Pure bot - dog", type: "joint-walking", status: "analyzing", progress: 62,
     signatureHistory: [], channelsUsed: [], updatedAt: "2026-10-16T08:50:00.000Z",
   },
@@ -135,6 +140,12 @@ export function addMissingSeedMotions(db: Db): void {
   const missing = SEED_USER_DATA.filter((u) => !have.has(u.id)).map((u) => structuredClone(u));
   // Seeds go before user uploads so "Recently" (newest first) keeps uploads on top.
   db.userData.splice(firstUser < 0 ? db.userData.length : firstUser, 0, ...missing);
+}
+
+/** Repo load migration: seed projects that are missing (deleted, or added after the DB was made) come back — the lab home shows a fixed set. */
+export function addMissingSeedProjects(db: Db): void {
+  const have = new Set(db.projects.map((p) => p.id));
+  db.projects.push(...SEED_PROJECTS.filter((p) => !have.has(p.id)).map((p) => structuredClone(p)));
 }
 
 export const SEED_ROBOTS: RobotDevice[] = [

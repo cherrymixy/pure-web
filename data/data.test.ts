@@ -89,7 +89,7 @@ describe("seed", () => {
     ok(ProfileSchema, SEED_PROFILE);
     expect(SEED_PROFILE.team).toHaveLength(4);
     SEED_PROJECTS.forEach((p) => ok(ProjectSchema, p));
-    expect(SEED_PROJECTS.map((p) => p.name)).toEqual(["Test-01", "Sleepy robot", "Surprising", "Test- final", "Pure bot - dog"]);
+    expect(SEED_PROJECTS.map((p) => p.name)).toEqual(["Test-01", "Sleepy robot", "Surprising", "Test- final", "Mini rover", "Pure bot - dog"]);
     SEED_ROBOTS.forEach((r) => ok(RobotDeviceSchema, r));
     SEED_USER_DATA.forEach((u) => ok(UserDataMotionSchema, u));
     // 15 behaviors + Stretch / Surprise / Fear from the Community Figma list

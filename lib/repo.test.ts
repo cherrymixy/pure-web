@@ -4,7 +4,7 @@ import path from "node:path";
 import { Memory } from "lowdb";
 import { JSONFile } from "lowdb/node";
 import { beforeEach, describe, expect, it } from "vitest";
-import { seedDb } from "@/data/seed";
+import { SEED_PROJECTS, seedDb } from "@/data/seed";
 import { PURE_DESK_STRUCTURE } from "@/data/pure-desk";
 import type { Db } from "./models";
 import { RepoError } from "./repo";
@@ -35,7 +35,7 @@ describe("LowRepo", () => {
   });
 
   it("seeds on first access", async () => {
-    expect(await t.repo.projects.list()).toHaveLength(5);
+    expect(await t.repo.projects.list()).toHaveLength(SEED_PROJECTS.length);
     expect(await t.repo.library.list()).toHaveLength(4);
     expect((await t.repo.profile.get()).name).toBe("SeungA Jeon");
   });
@@ -47,7 +47,7 @@ describe("LowRepo", () => {
     const created = await a.projects.create({ name: "Roundtrip", type: "joint-fixed", source: "pure-desk" });
     const b = new LowRepo(new JSONFile<Db>(file), { seed: seedDb });
     expect((await b.projects.get(created.id)).name).toBe("Roundtrip");
-    expect(await b.projects.list()).toHaveLength(6);
+    expect(await b.projects.list()).toHaveLength(SEED_PROJECTS.length + 1);
     await fs.rm(dir, { recursive: true });
   });
 
@@ -159,7 +159,7 @@ describe("LowRepo", () => {
     await t.repo.projects.delete("p-test-01");
     await t.repo.settings.update({ demoMode: true });
     await t.repo.dev.reset();
-    expect(await t.repo.projects.list()).toHaveLength(5);
+    expect(await t.repo.projects.list()).toHaveLength(SEED_PROJECTS.length);
     expect((await t.repo.settings.get()).demoMode).toBe(false);
   });
 });

@@ -1,5 +1,6 @@
 "use client";
 
+import { LAB_SHOWCASE, type ShowcaseCard } from "@/data/lab-showcase";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -94,11 +95,13 @@ export function LabHome() {
     };
   }, [analyzing, load]);
 
+  // Fixed set: the six showcase projects (data/lab-showcase.ts), in their order, each with its own render.
   const shown = useMemo(
     () =>
-      (projects ?? [])
-        .filter((p) => filter.every((c) => p.channelsUsed.includes(c)))
-        .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
+      LAB_SHOWCASE.flatMap((card) => {
+        const project = projects?.find((p) => p.id === card.projectId);
+        return project ? [{ project, card }] : [];
+      }).filter(({ project: p }) => filter.every((c) => p.channelsUsed.includes(c))),
     [projects, filter],
   );
 
@@ -188,10 +191,11 @@ export function LabHome() {
         </EmptyState>
       ) : (
         <div className="grid grid-cols-[repeat(auto-fill,minmax(498px,1fr))] gap-[30px]">
-          {shown.map((p) => (
+          {shown.map(({ project: p, card }) => (
             <ProjectCard
               key={p.id}
               project={p}
+              showcase={card}
               progress={progress[p.id] ?? p.progress ?? 0}
               onRename={() => setRenaming(p)}
               onDuplicate={() => duplicate(p)}
@@ -268,6 +272,7 @@ const TYPE_IMAGE: Record<string, { src: string; w: number; h: number }> = {
 
 function ProjectCard({
   project: p,
+  showcase,
   progress,
   onRename,
   onDuplicate,
@@ -275,22 +280,23 @@ function ProjectCard({
   onDelete,
 }: {
   project: Project;
+  showcase?: ShowcaseCard;
   progress: number;
   onRename: () => void;
   onDuplicate: () => void;
   onReplace: () => void;
   onDelete: () => void;
 }) {
-  const type = ROBOT_TYPES.find((t) => t.id === p.type);
+  const type = ROBOT_TYPES.find((t) => t.id === (showcase?.type ?? p.type));
   const isAnalyzing = p.status === "analyzing";
   const image = TYPE_IMAGE[p.type];
-  const scene = TYPE_SCENE[p.type];
+  const scene = showcase?.image ?? TYPE_SCENE[p.type];
   // Card (Figma 901:8125) ×2: 498 square, 1px neutral/300 border, radius/2xl; floor grid + type robot art.
   return (
     <Link
       href={projectHref(p)}
       data-testid="project-card"
-      className="relative aspect-square overflow-hidden rounded-[var(--radius-2xl)] border border-[var(--neutral-300)] bg-[var(--bg-surface)] hover:border-[var(--neutral-500)]"
+      className={`relative aspect-square overflow-hidden rounded-[var(--radius-2xl)] border bg-[var(--bg-surface)] hover:border-[var(--neutral-500)] ${showcase ? "border-transparent" : "border-[var(--neutral-300)]"}`}
     >
       {scene ? (
         /* eslint-disable-next-line @next/next/no-img-element */
