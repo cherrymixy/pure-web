@@ -66,8 +66,8 @@ export default function Page() {
 
         <div className="absolute inset-0">
           <div className="absolute left-[calc(50%+0.42px)] top-[94px] z-[1] flex w-[346.848px] -translate-x-1/2 flex-col items-center gap-[17.696px]">
-            {/* Badge 950:2927 as frosted glass: translucent fill, background blur, white rim, inner glow. */}
-            <p className="rounded-full border-[0.885px] border-[var(--landing-badge-glass-border)] bg-[linear-gradient(180deg,var(--landing-badge-glass-top),var(--landing-badge-glass-bottom))] px-[13.272px] py-[7.079px] text-[10.618px] font-medium leading-[1.26] text-[var(--sage-600)] shadow-[inset_0_0_3px_0.5px_var(--landing-badge-glass-glow),0_1px_3px_var(--landing-badge-glass-shade)] backdrop-blur-[var(--landing-badge-glass-blur)]">{L.hero.badge}</p>
+            {/* Badge 950:2927: neutral/300 at 20%, white 0.885 border (user spec). */}
+            <p className="rounded-[883.932px] border-[0.885px] border-[var(--neutral-0)] bg-[color-mix(in_srgb,var(--neutral-300)_20%,transparent)] px-[13.272px] py-[7.079px] text-[10.618px] font-medium leading-[1.26] text-[var(--sage-600)]">{L.hero.badge}</p>
             <h1 className="whitespace-nowrap text-center text-[40.702px] font-semibold leading-[1.1] text-[var(--sage-800)]">
               <Lines lines={L.hero.headline} />
             </h1>

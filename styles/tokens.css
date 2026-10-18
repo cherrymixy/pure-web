@@ -178,13 +178,6 @@
   --community-subnav-selected: #dfe5e7; /* sidebar All / Popular / Recently */
   /* TODO(승아): PURE/Blur/Overlay = BACKGROUND_BLUR radius 50. CSS blur() 값으로 50px 그대로인지 25px(반경 절반)인지 확인 필요 */
   --pure-blur-overlay: 50px;
-  /* Landing hero badge glass (user reference; Figma 950:2927 exports only a flat fill). Blur in landing units (× zoom ≈ 3). */
-  --landing-badge-glass-top: #ffffff4d; /* white 30% */
-  --landing-badge-glass-bottom: #d5dadda6; /* neutral tint 65% */
-  --landing-badge-glass-border: #ffffffe6; /* white 90% rim */
-  --landing-badge-glass-glow: #ffffffcc; /* inner glow */
-  --landing-badge-glass-shade: #7e8c9114; /* faint drop shade */
-  --landing-badge-glass-blur: 6px;
 }
 
 /* Tailwind v4 utilities that point at the tokens (bg-bg-surface, text-text-primary, rounded-md, text-title-l, shadow-card …) */
