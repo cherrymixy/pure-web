@@ -92,7 +92,7 @@ describe("v0.1-logic: full loop", () => {
     const gen = await runGeneration({
       repo,
       client: new OllamaGeneration(new FakeClient([JSON.stringify(OUTPUT)])),
-      input: { projectId: project.id, prompt: "I'm so tired, I keep nodding off", components: ["doze"], pattern: "alone" },
+      input: { projectId: project.id, prompt: "I'm so tired, I keep nodding off", components: ["doze"], pattern: "by-your-side" },
     });
     expect(gen.source).toBe("ollama");
     let expr = await repo.expressions.get(gen.expressionId);

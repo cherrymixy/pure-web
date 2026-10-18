@@ -1,4 +1,5 @@
-import { COMPONENTS } from "@/data/components";
+import { componentOf } from "@/data/components";
+import { SIM_BEHAVIORS } from "@/data/sim-behaviors";
 import { FACE_AUTO, FACE_AUTO_HINT, FACE_VIDEOS } from "@/data/face-videos";
 import { SITUATION_PATTERNS } from "@/data/patterns";
 import { AXIS_INFO, AXIS_ORDER } from "@/data/signature";
@@ -15,7 +16,7 @@ Flow: situation → the robot's current state → movement, face and sound.
 The robot is fixed: PURE Desk, a desk robot with five joints (base yaw, shoulder, elbow, head pan, head tilt), a small screen face and a speaker. Never change the robot or invent new hardware or abilities.
 
 Build the expression only from these parts:
-- motion.steps: 1 to 6 steps played in order. "behavior" must be one of: ${COMPONENTS.map((c) => c.id).join(", ")}.
+- motion.steps: 1 to 6 steps played in order. "behavior" must be one of: ${SIM_BEHAVIORS.map((c) => c.id).join(", ")}.
   speed 0.5–1.5 (1 = normal), amplitude 0.3–1.3 (1 = normal), repeat 1–3, optional face video per step.
 - face.preset: the face video on the screen, one of ${Object.entries(FACE_VIDEOS).map(([id, v]) => `${id} (${v.hint})`).join(", ")}, or ${FACE_AUTO} (${FACE_AUTO_HINT}). The face is always one of these videos; never describe eye shapes or numbers.
   Looping behaviors (idle, doze, sleep, sad, sweep, focus) last 5–13 seconds per cycle: give them repeat 1. Keep the whole expression under 15 seconds.
@@ -69,7 +70,7 @@ export interface GenerationPromptInput {
 export function generationUser(input: GenerationPromptInput): string {
   const parts = [`Moment: ${input.prompt}`];
   if (input.currentStatus) parts.push(`Current status given by the designer: ${input.currentStatus}`);
-  if (input.components?.length) parts.push(`Preferred components: ${input.components.join(", ")}`);
+  if (input.components?.length) parts.push(`Preferred components: ${input.components.map(componentText).join(", ")}`);
   const pattern = SITUATION_PATTERNS.find((p) => p.id === input.pattern);
   if (pattern) parts.push(`Situation: ${pattern.label} — ${pattern.hint}`);
   if (input.referenceSummary) parts.push(`Reference (what the designer showed): ${input.referenceSummary}`);
@@ -87,4 +88,10 @@ export function referenceLibraryText(sets: ReferenceSet[]): string {
   return sets
     .map((set) => `${set.behavior} — ${set.items.map((it) => `${it.channel}: ${it.title}`).join("; ")}`)
     .join("\n");
+}
+
+/** "Joy (play as: happy)" — chips are guideline behaviors; steps use simulator behaviors. */
+export function componentText(id: string): string {
+  const c = componentOf(id);
+  return c ? `${c.label} (play as: ${c.sim.behavior})` : id;
 }

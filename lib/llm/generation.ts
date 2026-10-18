@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { COMPONENTS } from "@/data/components";
+import { componentOf, type ComponentSim } from "@/data/components";
+import { SIM_BEHAVIORS } from "@/data/sim-behaviors";
 import { COMPONENT_DEMOS, PROMPT_DEMOS, type DemoExpression } from "@/data/demo-recipes";
 import { FACE_NAMES } from "@/data/face-videos";
 import { SUGGESTED_PROMPTS, type SuggestedPromptId } from "@/data/prompts";
@@ -12,7 +13,7 @@ import { generateDirectClip, type DirectClipOutput } from "./direct-clip";
 import type { Structure } from "../models";
 
 const ids = <T extends { id: string }>(xs: readonly T[]) => xs.map((x) => x.id) as [string, ...string[]];
-const BehaviorEnum = z.enum(ids(COMPONENTS));
+const BehaviorEnum = z.enum(ids(SIM_BEHAVIORS));
 const FaceEnum = z.enum(FACE_NAMES as unknown as [string, ...string[]]);
 const CueEnum = z.enum(ids(SOUND_CUES));
 
@@ -91,13 +92,21 @@ const KEYWORDS: [RegExp, SuggestedPromptId][] = [
 
 const normalize = (s: string) => s.toLowerCase().replace(/[…!.?,]/g, "").replace(/\s+/g, " ").trim();
 
+/** A chip's demo: the demo of the simulator behavior it plays as, with the chip's speed / amplitude. */
+function componentDemo(sim: ComponentSim): DemoExpression {
+  const demo = COMPONENT_DEMOS[sim.behavior];
+  if (sim.speed === undefined && sim.amplitude === undefined) return demo;
+  const steps = demo.motion.recipe.steps.map((s) => ({ ...s, speed: sim.speed ?? s.speed, amplitude: sim.amplitude ?? s.amplitude }));
+  return { ...demo, motion: { ...demo.motion, recipe: { ...demo.motion.recipe, steps } } };
+}
+
 /** Pick the demo for a request: suggested prompt → component chip → keyword → greeting. */
 export function pickDemo(req: Pick<GenerationRequest, "prompt" | "components">): DemoExpression {
   const text = normalize(req.prompt);
   const exact = SUGGESTED_PROMPTS.find((p) => normalize(p.text) === text || text.startsWith(normalize(p.text)));
   if (exact) return PROMPT_DEMOS[exact.id];
-  const component = req.components?.find((c) => c in COMPONENT_DEMOS);
-  if (component) return COMPONENT_DEMOS[component];
+  const sim = req.components?.map((c) => componentOf(c)?.sim).find((s) => s && s.behavior in COMPONENT_DEMOS);
+  if (sim) return componentDemo(sim);
   const hit = KEYWORDS.find(([re]) => re.test(req.prompt));
   return PROMPT_DEMOS[hit?.[1] ?? "here"];
 }

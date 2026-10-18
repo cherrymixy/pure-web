@@ -73,6 +73,9 @@ describe("demo fallback", () => {
   it("picks suggested prompts, then components, then keywords", () => {
     expect(pickDemo({ prompt: "Wow, that startled me!" }).name).toBe(PROMPT_DEMOS.startled.name);
     expect(pickDemo({ prompt: "whatever", components: ["curious"] }).name).toBe(COMPONENT_DEMOS.curious.name);
+    // Chips play as their simulator behavior, with the chip's own speed / amplitude.
+    expect(pickDemo({ prompt: "whatever", components: ["joy"] }).name).toBe(COMPONENT_DEMOS.happy.name);
+    expect(pickDemo({ prompt: "whatever", components: ["laugh"] }).motion.recipe.steps[0]).toMatchObject({ behavior: "happy", amplitude: 1.2 });
     expect(pickDemo({ prompt: "so sleepy today" }).name).toBe("Sleepy nod");
     expect(pickDemo({ prompt: "qwerty" }).name).toBe(PROMPT_DEMOS.here.name);
   });

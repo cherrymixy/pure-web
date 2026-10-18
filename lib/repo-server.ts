@@ -11,6 +11,7 @@ import { LowRepo } from "./repo-lowdb";
 import { fitDbToRig } from "./robot/rig";
 import { migrateDbFaces } from "./expression/face";
 import { migrateDbSounds } from "./expression/sound";
+import { migrateDbContext } from "./expression/context";
 
 // One repo per server process. Route bundles can load this module more than once in dev,
 // so the instance lives on globalThis.
@@ -24,6 +25,7 @@ export function getRepo(): Repo {
       fitDbToRig(db);
       migrateDbFaces(db);
       migrateDbSounds(db);
+      migrateDbContext(db);
       addMissingSeedMotions(db);
       addMissingSeedProjects(db);
     },

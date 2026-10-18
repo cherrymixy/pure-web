@@ -87,7 +87,7 @@ const single = (behavior: string, preset: FaceVideoName, cue: string, name: stri
   sound: { cues: [cueAt(cue, 0.3)] },
 });
 
-// One per component chip (data/components.ts ids).
+// One per simulator behavior (data/sim-behaviors.ts ids); component chips use their `sim` behavior.
 export const COMPONENT_DEMOS: Record<string, DemoExpression> = {
   idle: single("idle", "neutral", "cute-fond", "Quiet idle", "Waiting calmly."),
   doze: single("doze", "sleepy", "sad", "Dozing", "Drifting off."),

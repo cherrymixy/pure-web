@@ -1,4 +1,5 @@
 import { COMPONENTS } from "@/data/components";
+import { SIM_BEHAVIORS } from "@/data/sim-behaviors";
 import { COMPONENT_DEMOS, PROMPT_DEMOS } from "@/data/demo-recipes";
 import { FACE_VIDEOS } from "@/data/face-videos";
 import { countEntries } from "@/data/guideline";
@@ -29,7 +30,8 @@ export function contentSummary(): ContentRow[] {
   return [
     { file: "data/robot-types.ts", item: "Robot types", count: ROBOT_TYPES.length },
     { file: "data/pure-desk.ts", item: "PURE Desk joints", count: PURE_DESK_STRUCTURE.joints.length },
-    { file: "data/components.ts", item: "Components (behaviors)", count: COMPONENTS.length },
+    { file: "data/components.ts", item: "Components (guideline behaviors)", count: COMPONENTS.length },
+    { file: "data/sim-behaviors.ts", item: "Simulator behaviors", count: SIM_BEHAVIORS.length },
     { file: "data/patterns.ts", item: "Situation patterns", count: SITUATION_PATTERNS.length },
     { file: "data/prompts.ts", item: "Suggested prompts", count: SUGGESTED_PROMPTS.length },
     { file: "data/face-videos.ts", item: "Face videos", count: Object.keys(FACE_VIDEOS).length },

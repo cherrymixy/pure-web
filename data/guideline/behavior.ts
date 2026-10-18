@@ -1,359 +1,192 @@
-import type { GuidelineSection } from "./types";
+import type { GuidelineEntry, GuidelineSection } from "./types";
+import { approachDoc } from "./docs/approach";
 
-// Expressive behaviors built from primitive tokens.
-// Sources: _ref/pure-web/lib/guideline-content.ts (semanticItems), lib/pure-system.ts
-// (STATE_TOKENS, BEHAVIOR_COMPONENTS, CONTEXTS), PURE_Knowledge/04_State_Tokens,
-// 07_State_Tokens, 08_Behavior_Components, 09_Context_Mapping.
+// Source: PURE guideline final structure v3 (2026-10-19) §7 Component — 16 behaviors.
+// Slugs = editor component ids (data/components.ts) with "_" → "-". simBehavior = the simulator behavior that plays it.
+
+const SRC = "PURE guideline final structure v3 (2026-10-19) §7";
+
+const RHO = { high: "High (0.8–0.95)", mid: "Medium (0.5–0.6)", low: "Low (0.2–0.3)" } as const;
+
+interface Cmp {
+  slug: string;
+  title: string;
+  type: string;
+  summary: string;
+  /** confirmed ρ, or a proposed one (shown as TBD) */
+  rho: keyof typeof RHO | { proposed: keyof typeof RHO };
+  evidence: string;
+  confusable?: string;
+  simBehavior: string;
+  related?: string[];
+}
+
+const PAIRS: Record<string, string> = {
+  nod: "Bow — axis (head pitch vs whole body) · start pose · timing (after a question vs arriving and leaving). Curious — axis (roll vs pitch) · count (1 vs 2).",
+  bow: "Nod — axis (head pitch vs whole body) · start pose · timing.",
+  curious: "Nod — axis (roll vs pitch) · count (1 vs 2).",
+  approach: "Keep distance — direction.",
+  "keep-distance": "Approach — direction. Fear — height change · face · target.",
+  fear: "Keep distance — height change · face · target.",
+  close: "Doze — timing (end of a conversation vs no input) · gaze (at the person vs none).",
+  doze: "Close — timing (end of a conversation vs no input) · gaze (at the person vs none).",
+};
+
+const cmp = (c: Cmp): GuidelineEntry => {
+  const proposed = typeof c.rho === "object";
+  const rho = typeof c.rho === "object" ? `TBD (proposed: ${RHO[c.rho.proposed].toLowerCase()})` : RHO[c.rho];
+  const pair = PAIRS[c.slug];
+  return {
+    slug: c.slug,
+    ref: `cmp.${c.slug.replace(/-/g, "_")}`,
+    title: c.title,
+    summary: c.summary,
+    body: [
+      {
+        kind: "table",
+        title: "Spec",
+        head: ["Field", "Value"],
+        rows: [
+          ["type", c.type],
+          ["rho", rho],
+          ["evidence", c.evidence],
+          ...(pair ? [["confusable_with", pair]] : []),
+        ],
+      },
+      {
+        kind: "p",
+        title: "Structure",
+        text: "A behavior is one bundle of body, face and sound tracks. Its recipe uses roles and token names only, and it follows the MUST guardrails (trigger and forbid conditions, end hold, two repeats at most).",
+      },
+    ],
+    related: c.related,
+    simBehavior: c.simBehavior,
+    source: SRC,
+    ...(proposed ? { proposed: true as const } : {}),
+  };
+};
+
+const COMPONENTS: Cmp[] = [
+  { slug: "nod", title: "Nod", type: "S1 Symbolic", summary: "Two small nods right after a question, then back to rest.", rho: "low", evidence: "Nod → greeting misread 49%", simBehavior: "nod", related: ["bow", "conversation"] },
+  { slug: "shake", title: "Shake", type: "S1 Symbolic", summary: "The agreed signal for \"no\", kept as it is.", rho: "low", evidence: "Recognition 91% (highest of 17)", simBehavior: "shake", related: ["behavior/nod", "conversation"] },
+  { slug: "bow", title: "Bow", type: "S1 Symbolic", summary: "Only when arriving or leaving. Starts from a slight bow; never bows deeply.", rho: "high", evidence: "Perceived malfunction 44.7 pt (2nd of 17)", simBehavior: "greet", related: ["nod", "leave"] },
+  { slug: "doze", title: "Doze", type: "S1 Symbolic (state behavior)", summary: "After a long time without input, slowly loses strength.", rho: "high", evidence: "—", simBehavior: "doze", related: ["close", "by-your-side"] },
+  { slug: "point", title: "Point", type: "S2 Illustrator", summary: "Gaze first, body later, and a clear stop at the target.", rho: { proposed: "low" }, evidence: "Recognition 45%, 34% misread as \"looking around\"", simBehavior: "sweep", related: ["guiding"] },
+  { slug: "joy", title: "Joy", type: "S3 Expressive", summary: "An even rhythm twice + a smiling face + a bright sound.", rho: "high", evidence: "Recognition 77% (the only emotion at 75% or above)", simBehavior: "happy", related: ["laugh", "feedback"] },
+  { slug: "laugh", title: "Laugh", type: "S3 Expressive", summary: "The same rhythm as Joy, larger. Never used without a face.", rho: { proposed: "high" }, evidence: "Gesture-only recognition 55% · perceived malfunction 37.6 pt", simBehavior: "happy", related: ["joy", "feedback"] },
+  { slug: "sad", title: "Sad", type: "S3 Expressive", summary: "Loses strength, sinks and stays there. No repeats.", rho: "high", evidence: "Sad → laughing misread 32%", simBehavior: "sad", related: ["feedback"] },
+  { slug: "surprise", title: "Surprise", type: "S3 Expressive", summary: "Once, short, then straight back to rest.", rho: { proposed: "mid" }, evidence: "A large startled retreat: perceived malfunction 38.7 pt", simBehavior: "alert", related: ["sudden"] },
+  { slug: "fear", title: "Fear", type: "S3 Expressive", summary: "Back off, lower and hold. A change of posture, not trembling.", rho: { proposed: "mid" }, evidence: "Trembling fear perceived malfunction 52.8 pt (highest of 17)", simBehavior: "alert", related: ["keep-distance", "sudden"] },
+  { slug: "curious", title: "Curious", type: "S3 Expressive", summary: "When the input is unclear, tilt + hold.", rho: "high", evidence: "Perceived malfunction 24.1 pt (lowest of the 6 emotions)", simBehavior: "curious", related: ["primitive-tokens/tilt", "conversation"] },
+  { slug: "approach", title: "Approach", type: "S4 Regulator", summary: "Approach, stop, and match eye height.", rho: "mid", evidence: "Without a stop, 36% read it as \"just noticed\"", simBehavior: "focus", related: ["keep-distance", "calling"] },
+  { slug: "keep-distance", title: "Keep distance", type: "S4 Regulator", summary: "Back off and hold. Reads as personality, like a shy cat.", rho: "mid", evidence: "Recognition 79% · liking 67.7 pt (1st of 7)", simBehavior: "home", related: ["behavior/approach", "primitive-tokens/retreat"] },
+  { slug: "close", title: "Close", type: "S4 Regulator", summary: "Watch like seeing someone off, hold, lower the sound and settle into rest.", rho: { proposed: "mid" }, evidence: "Recognition 36%, 30% misread as \"waiting · resting\"", simBehavior: "home", related: ["doze", "leave"] },
+  { slug: "stretch", title: "Stretch", type: "S5 Adaptor", summary: "Now and then after a long wait. No meaning — a sign of being alive.", rho: { proposed: "high" }, evidence: "—", simBehavior: "wake", related: ["by-your-side"] },
+  { slug: "rub", title: "Rub", type: "S5 Adaptor", summary: "Rub the body against a hand or object. Shows affection.", rho: { proposed: "high" }, evidence: "Recognition 85% · liveliness 86.2 pt · perceived malfunction 10.6 pt (lowest)", simBehavior: "happy", related: ["touching"] },
+];
+
+export const BEHAVIOR_SLUGS = COMPONENTS.map((c) => c.slug);
 
 export const behavior: GuidelineSection = {
   id: "behavior",
-  title: "Behavior",
+  title: "Components",
   summary:
-    "Expressive behaviors that pair a concrete movement with the meaning it reads as, composed from primitive tokens and demonstrated in the simulator.",
+    "16 behaviors, each a bundle of body, face and sound tracks with trigger and forbid conditions, a style acceptance ρ and recognition features. Main-study stimuli 17 − 1 rejected (Emphasis) = 16.",
   entries: [
+    ...COMPONENTS.map((c) => (c.slug === "approach" ? { ...cmp(c), doc: approachDoc } : cmp(c))),
     {
-      slug: "side-sway",
-      title: "Side Sway",
-      summary: "A light side-to-side rocking of the body that shows the robot is waiting and available.",
-      body: [
-        { kind: "p", text: "Purpose: conveys that the robot is waiting and ready to respond. Meaning: waiting, ease." },
-        { kind: "list", items: ["Motion tokens: Sway.", "State token: Waiting — readiness without intervention; a calm state before engagement."] },
-        {
-          kind: "p",
-          text: "Waiting Idle component: maintains quiet presence without interruption. States Waiting -> Observing; typical tokens Drift, Light Pulse, Pause; principle Slow In / Slow Out. The goal is availability without demanding attention. Context Idle Presence: avoid strong repetition, fast movement, and comic-level expression.",
-        },
-        { kind: "p", text: "Example: between tasks, the robot rocks lightly side to side while it waits." },
-      ],
-      dos: ["Use in an idle state.", "Use to keep a calm presence."],
-      donts: ["Do not use when a focused stillness is needed.", "Do not use when the motion would get in the way."],
-      related: ["head-circle", "stretch", "scan", "sway"],
-      simBehavior: "idle",
-      source: "guideline-content.ts:side-sway; PURE_Knowledge/08_Behavior_Components/Waiting_Idle_Component.md; 04_State_Tokens/Waiting.md",
-    },
-    {
-      slug: "head-circle",
-      title: "Head Circle",
-      summary: "The head slowly traces a circle, conveying drowsiness and relaxation.",
-      body: [
-        { kind: "p", text: "Purpose: conveys languor and relaxation. Meaning: drowsy, relaxed." },
-        { kind: "list", items: ["Motion tokens: Rotate, Drift."] },
-        { kind: "p", text: "Example: on a quiet afternoon, the robot slowly draws circles with its head." },
-      ],
-      dos: ["Use in a drowsy atmosphere.", "Use to express relaxation."],
-      donts: ["Do not use when alertness is needed.", "Do not use when focus is needed."],
-      related: ["side-sway", "stretch", "scan"],
-      simBehavior: "doze",
-      source: "guideline-content.ts:head-circle",
-    },
-    {
-      slug: "hide",
-      title: "Hide",
-      summary: "The robot pulls its head into its body, curling up.",
-      body: [
-        { kind: "p", text: "Purpose: shows fear and withdrawal. Meaning: scared, shrinking. The same folded, buried-head posture also reads as rest when performed slowly." },
-        { kind: "list", items: ["Motion tokens: Contract, Retreat."] },
-        { kind: "p", text: "Example: startled by a loud sound, the robot hides its head inside its body." },
-        {
-          kind: "list",
-          items: [
-            "Variant — Crouch: lowers the body's center axis and curls up; shows nervousness and anxiety (Contract).",
-            "Variant — Chin Tuck: pulls the head joint tight toward the body; shows wariness and defensiveness (Contract, Hold).",
-            "Variant — Flinch: a sudden pull of the body backward; shows surprise (Retreat).",
-          ],
-        },
-      ],
-      dos: ["Use to express fear.", "Use to avoid a threat."],
-      donts: ["Do not use when the user needs reassurance.", "Do not use on forms with no structure to curl into."],
-      related: ["slump", "freeze", "contract"],
-      simBehavior: "sleep",
-      source: "guideline-content.ts:hide, crouch, chin-tuck, flinch",
-    },
-    {
-      slug: "stretch",
-      title: "Stretch",
-      summary: "The robot slowly opens its body wide, like a morning stretch.",
-      body: [
-        { kind: "p", text: "Purpose: conveys waking up and the start of activity. Meaning: waking, vitality." },
-        { kind: "list", items: ["Motion tokens: Expand."] },
-        { kind: "p", text: "Example: waking from idle, the robot slowly unfolds its body and stretches." },
-      ],
-      dos: ["Use when starting an activity.", "Use to express waking up."],
-      donts: ["Do not use when quiet is needed.", "Do not use on forms with no structure to unfold."],
-      related: ["bounce", "side-sway", "expand"],
-      simBehavior: "wake",
-      source: "guideline-content.ts:stretch",
-    },
-    {
-      slug: "nod-yes",
-      title: "Nod",
-      summary: "A short up-and-down movement of the head.",
-      body: [
-        { kind: "p", text: "Purpose: conveys agreement, acceptance, and listening. Meaning: agree, accept." },
-        { kind: "list", items: ["Motion tokens: Nod."] },
-        { kind: "p", text: "Example: the robot nods at the user's words to signal that it understood." },
-        {
-          kind: "list",
-          items: [
-            "Variant — Acknowledge Bow: a crisp bow of the head only, facing forward, then back up; conveys 'confirmed' (Nod, Hold). Use when acknowledging an instruction or when a formal confirmation is needed; avoid in light-hearted moods.",
-          ],
-        },
-      ],
-      dos: ["Use to show agreement.", "Use to signal listening."],
-      donts: ["Do not use when refusal is needed.", "Do not use on forms without a vertical joint."],
-      related: ["head-shake", "spin-bow", "nod"],
-      simBehavior: "nod",
-      source: "guideline-content.ts:nod-yes, acknowledge-bow",
-    },
-    {
-      slug: "head-shake",
-      title: "Head Shake",
-      summary: "The head shakes left and right.",
-      body: [
-        { kind: "p", text: "Purpose: conveys refusal and negation. Meaning: refuse, deny." },
-        { kind: "list", items: ["Motion tokens: Rotate."] },
-        { kind: "p", text: "Example: when it cannot carry out a request, the robot shakes its head left and right." },
-        {
-          kind: "list",
-          items: [
-            "Variant — Turn Away: turns the body aside and withdraws its gaze; shows indifference (Rotate). Avoid when engagement is needed or when it would read as rude.",
-          ],
-        },
-      ],
-      dos: ["Use to show refusal or negation.", "Use to signal that something is not possible."],
-      donts: ["Do not use when agreement is needed.", "Do not use on forms that cannot rotate left and right."],
-      related: ["nod-yes", "rotate"],
-      simBehavior: "shake",
-      source: "guideline-content.ts:head-shake, turn-away",
-    },
-    {
-      slug: "look-around",
-      title: "Look Around",
-      summary: "The head sweeps in a wide circle to look around the surroundings.",
-      body: [
-        { kind: "p", text: "Purpose: conveys searching the surroundings. Meaning: search, vigilance." },
-        { kind: "list", items: ["Motion tokens: Rotate.", "State token: Observing — passive environmental awareness; typically precedes interest or assistance."] },
-        { kind: "p", text: "Example: sensing someone nearby, the robot turns its head widely and looks around." },
-      ],
-      dos: ["Use to search the surroundings.", "Use when looking for something."],
-      donts: ["Do not use when focus is needed.", "Do not use on forms that cannot rotate."],
-      related: ["scan", "head-tilt", "head-circle"],
-      simBehavior: "look_around",
-      source: "guideline-content.ts:look-around; PURE_Knowledge/04_State_Tokens/Observing.md",
-    },
-    {
-      slug: "head-tilt",
-      title: "Head Tilt",
-      summary: "The head or upper body tilts to one side.",
-      body: [
-        { kind: "p", text: "Purpose: shows curiosity and gentle attention. Meaning: wondering, curiosity." },
-        { kind: "list", items: ["Motion tokens: Tilt.", "State token: Interested — curiosity and engaged attention, built from small orientation and approach cues."] },
-        { kind: "p", text: "Example: when a new sound occurs, the robot tilts its head to show interest." },
-        {
-          kind: "list",
-          items: [
-            "Variant — Peek: leans slightly to one side to peek; conveys cautious curiosity (Lean).",
-            "Variant — Zigzag: moves the head in a zigzag; conveys hesitant searching (Rotate, Tilt).",
-          ],
-        },
-      ],
-      dos: ["Use when discovering something new.", "Use to express light curiosity."],
-      donts: ["Do not use when firmness is needed.", "Do not use on forms without a directional part."],
-      related: ["neck-extend", "look-around", "tilt"],
-      simBehavior: "curious",
-      source: "guideline-content.ts:head-tilt, peek, zigzag; PURE_Knowledge/04_State_Tokens/Interested.md",
-    },
-    {
-      slug: "bounce",
-      title: "Bounce",
-      summary: "A springy up-and-down rebound.",
-      body: [
-        { kind: "p", text: "Purpose: conveys excitement and buoyant energy. Meaning: excited, lively." },
-        { kind: "list", items: ["Motion tokens: Pulse.", "State tokens: Delighted (positive, joyful, energetic) and Playful (witty, lightly exaggerated). Intensity must adapt to context."] },
-        {
-          kind: "p",
-          text: "Delight Reaction component: responds to positive or playful moments. States Delighted, Playful; typical tokens Bounce, Light Pulse, Wiggle; principles Exaggeration, Follow-Through & Reaction. Reduce or disable in serious, public, or work contexts. Context Positive Result: use delight only when tone and context support it.",
-        },
-        { kind: "p", text: "Example: when a favorite person arrives, the robot bounces up and down to welcome them." },
-        {
-          kind: "list",
-          items: [
-            "Variant — Spin: turns 360 degrees in place; conveys pride (Rotate). Avoid when in-place rotation is unsafe.",
-            "Variant — Nudge: lightly bumps the user with its body; conveys playful interest (Lean). Avoid in serious situations.",
-          ],
-        },
-      ],
-      dos: ["Use to express joy or excitement.", "Use in play situations."],
-      donts: ["Do not use when calm is needed.", "Do not use when precision matters."],
-      related: ["stretch", "spin-bow", "pulse"],
-      simBehavior: "happy",
-      source: "guideline-content.ts:bounce, spin, nudge; PURE_Knowledge/08_Behavior_Components/Delight_Reaction_Component.md; 07_State_Tokens/Delighted.md, Playful.md",
-    },
-    {
-      slug: "slump",
-      title: "Slump",
-      summary: "The upper body drops and sags.",
-      body: [
-        { kind: "p", text: "Purpose: shows disappointment and discouragement. Meaning: disappointed, dejected." },
-        { kind: "list", items: ["Motion tokens: Contract."] },
-        { kind: "p", text: "Example: when things do not go as planned, the robot lets its upper body sag." },
-        {
-          kind: "list",
-          items: [
-            "Variant — Sigh: the body rises high and comes back down; conveys being moved or overwhelmed (Expand, Pulse).",
-          ],
-        },
-      ],
-      dos: ["Use to express disappointment.", "Use to show low energy."],
-      donts: ["Do not use when energy is needed.", "Do not use on forms with no structure to drop."],
-      related: ["hide", "contract"],
-      simBehavior: "sad",
-      source: "guideline-content.ts:slump, sigh",
-    },
-    {
-      slug: "freeze",
-      title: "Freeze",
-      summary: "The robot stops abruptly mid-motion.",
-      body: [
-        { kind: "p", text: "Purpose: conveys a reaction of noticing something. Meaning: reaction, attention." },
-        { kind: "list", items: ["Motion tokens: Hold, Pause."] },
-        { kind: "p", text: "Example: a rotating robot stops dead in response to a sound." },
-        {
-          kind: "list",
-          items: [
-            "Variant — Attention Halt: straightens the body into a line and stops; conveys warning and alertness (Hold, Expand). Avoid when comfort is needed.",
-          ],
-        },
-      ],
-      dos: ["Use to react to a sudden stimulus.", "Use to signal attention."],
-      donts: ["Do not use when continuity is needed.", "Do not use when the stop could read as a malfunction."],
-      related: ["hide", "hold", "pause"],
-      simBehavior: "alert",
-      source: "guideline-content.ts:freeze, stand-at-attention",
-    },
-    {
-      slug: "spin-bow",
-      title: "Spin Bow",
-      summary: "A greeting that turns the body while bowing the head.",
-      body: [
-        { kind: "p", text: "Purpose: conveys welcome and gladness. Meaning: welcome, glad." },
-        { kind: "list", items: ["Motion tokens: Rotate, Nod.", "State token: Greeting — acknowledges user presence; should stay readable without becoming human mimicry."] },
-        {
-          kind: "p",
-          text: "Greeting component: recognizes and welcomes user presence in a readable, friendly way. States Observing -> Interested -> Greeting -> Waiting; typical tokens Orient, Pause, Lean, Brighten, Bounce or Gesture, Hold, Return; principles Anticipation, Slow In / Slow Out. Context User Approach: acknowledge the user without forcing interaction.",
-        },
-        { kind: "p", text: "Example: when the user arrives, the robot turns its body and bows its head in greeting." },
-        {
-          kind: "list",
-          items: [
-            "Variant — Draw Near: closes the distance toward the person; conveys affection and interest (Approach). Avoid when the path is unsafe.",
-            "Variant — Nuzzle: rubs its head against the user; conveys affection (Lean, Approach). Avoid when contact is inappropriate.",
-          ],
-        },
-      ],
-      dos: ["Use to welcome someone.", "Use to start an interaction."],
-      donts: ["Do not use when it would interrupt work.", "Do not use on forms that cannot rotate."],
-      related: ["nod-yes", "bounce", "approach"],
-      simBehavior: "greet",
-      source: "guideline-content.ts:spin-bow, draw-near, nuzzle; PURE_Knowledge/08_Behavior_Components/Greeting_Component.md; 05_Behavior_Patterns/Greeting.md",
-    },
-    {
-      slug: "scan",
-      title: "Scan",
-      summary: "The robot slowly sweeps over a target or the space.",
-      body: [
-        { kind: "p", text: "Purpose: conveys exploration and observation. Meaning: explore, observe." },
-        { kind: "list", items: ["Motion tokens: Rotate, Follow."] },
-        {
-          kind: "p",
-          text: "Quiet Observation pattern: observing without interrupting; works well in calm reading or focus contexts. States Observing, Waiting; token Pause.",
-        },
-        { kind: "p", text: "Example: when a new object appears, the robot slowly scans it up and down." },
-      ],
-      dos: ["Use to examine a target.", "Use to explore the environment."],
-      donts: ["Do not use when scanning feels like staring.", "Do not use when an immediate reaction is needed."],
-      related: ["look-around", "neck-extend", "rotate"],
-      simBehavior: "sweep",
-      source: "guideline-content.ts:scan; PURE_Knowledge/05_Behavior_Patterns/Quiet_Observation.md",
-    },
-    {
-      slug: "neck-extend",
-      title: "Neck Extend",
-      summary: "The neck joint extends straight toward the front.",
-      body: [
-        { kind: "p", text: "Purpose: conveys curiosity and focus. Meaning: curiosity, concentration." },
-        { kind: "list", items: ["Motion tokens: Lean, Expand.", "State token: Following — maintains attention toward a target; used when the AI aligns with the user's focus."] },
-        {
-          kind: "p",
-          text: "Shared Attention component: aligns robot attention with the user or a target. States Interested, Observing; typical tokens Orient, Follow, Hold; principles Arcs, Slow In / Slow Out. Context Shared Focus: align attention without blocking the user's task.",
-        },
-        { kind: "p", text: "Example: the robot extends its neck toward an interesting object to look closely." },
-        {
-          kind: "list",
-          items: [
-            "Variant — Point: indicates a specific place with a tap of the head; conveys direction (Tilt).",
-            "Variant — Eye-Level Match: adjusts its height to the user's eye level; conveys rapport and equality (Lean, Hold).",
-            "Variant — Mirror: matches the user's speed and rhythm; conveys empathy and attunement (Follow). Avoid when it feels like mimicry.",
-          ],
-        },
-      ],
-      dos: ["Use to express focus or curiosity.", "Use to look at a target closely."],
-      donts: ["Do not use when it could feel pressuring.", "Do not use on forms without an extendable joint."],
-      related: ["head-tilt", "scan", "follow"],
-      simBehavior: "focus",
-      source: "guideline-content.ts:neck-extend, point, eye-level, mirror; PURE_Knowledge/08_Behavior_Components/Shared_Attention_Component.md; 04_State_Tokens/Following.md",
-    },
-    {
-      slug: "completion",
-      title: "Completion",
-      summary: "The robot returns to its rest posture to signal that an action is finished or a result is available.",
+      slug: "component-spec",
+      title: "Component spec",
+      summary: "The fields every behavior has, the ρ scale, and the confusable pairs.",
       body: [
         {
-          kind: "p",
-          text: "State token: Completion — a finished action or successful response. It should communicate closure without over-celebrating neutral tasks.",
-        },
-        {
-          kind: "list",
-          items: [
-            "Typical tokens: Return, Brighten, Light Pulse.",
-            "Principles: Follow-Through & Reaction, Slow In / Slow Out.",
-            "Optional webtoon layer: smile mark, sparkle (only when a visual interface exists).",
-          ],
-        },
-        { kind: "p", text: "Completion should feel clear, not theatrical." },
-      ],
-      dos: ["Close a sequence with a clear return to rest."],
-      donts: ["Do not over-celebrate neutral tasks."],
-      related: ["thinking-response", "bounce", "hold"],
-      simBehavior: "home",
-      source: "PURE_Knowledge/08_Behavior_Components/Completion_Component.md; 07_State_Tokens/Completion.md; lib/pure-system.ts:Completion_Component",
-    },
-    {
-      slug: "thinking-response",
-      title: "Thinking Response",
-      summary: "Shows that the robot is processing or interpreting input.",
-      body: [
-        {
-          kind: "p",
-          text: "State token: Thinking — processing, considering, or interpreting input. It makes waiting legible without implying failure.",
-        },
-        {
-          kind: "list",
-          items: [
-            "Typical tokens: Pause, Hold, Ellipsis.",
-            "Principles: Secondary Action, Slow In / Slow Out.",
-            "Optional webtoon layer: ellipsis, question mark.",
+          kind: "table",
+          title: "Fields",
+          head: ["Field", "Content", "Note"],
+          rows: [
+            ["id · name", "cmp.curious · {ko, en}", ""],
+            ["type", "S1 Symbolic · S2 Illustrator · S3 Expressive · S4 Regulator · S5 Adaptor (Ekman & Friesen)", ""],
+            ["meaning", "The meaning in one line", ""],
+            ["trigger · forbid_when", "Trigger and forbid conditions", "SP-1, MUST"],
+            ["valence · arousal", "Valence and arousal", "Used for SP-4"],
+            ["channels_min", "Minimum number of channels", "2 for negative emotion"],
+            ["rho", "Style acceptance", ""],
+            ["recipe", "3 tracks (motion · face · sound), roles + token names only", "No joint names"],
+            ["structure", "move > pause > return …", "SP-5"],
+            ["guardrails", "MUST IDs that apply", ""],
+            ["confusable_with", "Confusable pairs + how they differ", "SP-3"],
+            ["recognize", "Features that identify the behavior in a source video (reuses P1–P6 measures)", "For AI input analysis"],
+            ["fallback", "Substitute or skip when a role or channel is missing", ""],
+            ["variants · states", "Variants and per-state overrides", ""],
+            ["evidence", "{type, metric, value, scale, n}", ""],
+            ["used_in", "Pattern IDs that use it", "Cross-reference"],
           ],
         },
         {
-          kind: "p",
-          text: "Contexts: User Request (thinking should be reduced for simple requests and strengthened for complex ones) and Processing / Thinking (avoid making processing look like failure or confusion).",
+          kind: "table",
+          title: "ρ scale",
+          head: ["ρ", "Meaning"],
+          rows: [
+            [RHO.high, "Style makes the personality"],
+            [RHO.mid, "Relationship signal — the shape is kept"],
+            [RHO.low, "Agreed signal — too much reads as broken"],
+          ],
+        },
+        {
+          kind: "table",
+          title: "Confusable pairs",
+          head: ["Pair", "Told apart by"],
+          rows: [
+            ["Nod ↔ Bow", "Axis (head pitch vs whole body) · start pose · timing (after a question vs arriving and leaving)"],
+            ["Curious ↔ Nod", "Axis (roll vs pitch) · count (1 vs 2)"],
+            ["Approach ↔ Keep distance", "Direction"],
+            ["Fear ↔ Keep distance", "Height change · face · target"],
+            ["Close ↔ Doze", "Timing (end of a conversation vs no input) · gaze (at the person vs none)"],
+          ],
+        },
+        {
+          kind: "code",
+          title: "Schema example",
+          lang: "json",
+          text: `{
+  "id": "cmp.curious",
+  "name": { "en": "Curious" },
+  "type": "S3_expressive",
+  "meaning": "Signals that the input is unclear",
+  "trigger": ["input.ambiguous", "object.novel"],
+  "forbid_when": ["user.speaking", "same_component_within_s < 5"],
+  "valence": "neutral",
+  "channels_min": 1,
+  "rho": 0.85,
+  "recipe": [
+    { "track": "motion", "role": "ATTEND", "token": "tok.body.tilt", "size": "l", "t_ms": 0 },
+    { "track": "motion", "token": "tok.time.pause", "size": "m", "after": "prev" },
+    { "track": "face", "block": "eyes", "token": "tok.face.eye.angle", "value_deg": 12, "t_ms": 100 },
+    { "track": "sound", "token": "tok.sound.pitch", "value_st": 2, "shape": "rising", "lead_ms": 100 }
+  ],
+  "structure": "move > pause > return",
+  "guardrails": ["gr.repeat_max_2", "gr.no_irregular_tremor"],
+  "confusable_with": [{ "id": "cmp.nod", "separate_by": ["axis: roll vs pitch", "count: 1 vs 2"] }],
+  "recognize": { "attend_roll_peak_deg": [12, 30], "hold_after_peak_ms": [250, 600], "repeats": 1 },
+  "fallback": { "ATTEND.roll missing": "POSTURE.tilt", "FACE none": "skip face track" },
+  "evidence": [{ "type": "study", "metric": "malfunction", "value": 24.1, "scale": "0-100", "n": 47 }]
+}`,
         },
       ],
-      dos: ["Make the delay readable.", "Scale the thinking expression to the complexity of the request."],
-      donts: ["Do not let processing look broken or confused."],
-      related: ["completion", "pause", "hold"],
-      source:
-        "PURE_Knowledge/08_Behavior_Components/Thinking_Response_Component.md; 07_State_Tokens/Thinking.md; 09_Context_Mapping/User_Request.md, Processing_Thinking.md",
+      related: ["curious", "emphasis"],
+      source: `${SRC}-2, §7-3`,
+    },
+    {
+      slug: "emphasis",
+      ref: "cmp.emphasis",
+      title: "Emphasis (rejected)",
+      summary: "Rejected: pilot recognition 0% — everyone read it as \"urgent · annoyed\". Absorbed into \"point once more\".",
+      body: [
+        { kind: "p", text: "Kept on record as REJECTED + Migration: uses of Emphasis move to Point repeated once." },
+        { kind: "table", title: "Pilot result", head: ["Measure", "Value"], rows: [["Pilot recognition", "0%"], ["Main misread", "Urgent · annoyed"], ["Perceived malfunction", "41.5 pt"]] },
+      ],
+      related: ["point"],
+      source: SRC,
     },
   ],
 };

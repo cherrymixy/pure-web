@@ -1,222 +1,164 @@
-import type { GuidelineSection } from "./types";
+import type { GuidelineEntry, GuidelineSection } from "./types";
 
-// Templates: end-to-end interaction flows that chain situations, scenarios, and
-// authoring scaffolds for new guideline pages.
-// Sources: _ref/pure-web/lib/guideline-content.ts (patternItems),
-// PURE_Knowledge/06_Scenarios/*.md, PURE_Knowledge/99_Templates/*.md.
+// Source: PURE guideline final structure v3 (2026-10-19) §9 Template — form factors, sources, robots.
+// Form-factor slugs = data/robot-types.ts ids (same order).
+
+const SRC = "PURE guideline final structure v3 (2026-10-19) §9";
+
+interface Ff {
+  slug: string;
+  ref: string;
+  title: string;
+  alias: string;
+  roles: [attend: string, posture: string, locomote: string, gesture: string];
+  substitute: string;
+}
+
+const ff = (f: Ff): GuidelineEntry => ({
+  slug: f.slug,
+  ref: f.ref,
+  title: f.title,
+  summary: `Form-factor profile: ${f.alias}.`,
+  body: [
+    {
+      kind: "table",
+      title: "Roles",
+          head: ["Role", "Real part"],
+      rows: [
+        ["role.attend", f.roles[0]],
+        ["role.posture", f.roles[1]],
+        ["role.locomote", f.roles[2]],
+        ["role.gesture", f.roles[3]],
+        ["substitute", f.substitute],
+      ],
+    },
+    {
+      kind: "p",
+      text: "Profile fields: roles (role → real joints) · limits (joint ranges · max_speed · max_accel) · channels (face class · speaker · light) · substitute (stand-ins for missing roles) · behaviors (each of the 16 behaviors as is / substituted / skipped).",
+    },
+  ],
+  related: ["form-factors"],
+  source: `${SRC}-1`,
+});
 
 export const templates: GuidelineSection = {
   id: "templates",
   title: "Templates",
   summary:
-    "Reusable flows that chain situations over time, scenarios for testing, and scaffolds for writing new guideline pages.",
+    "Which body runs a Component: five form-factor profiles (roles → real joints) × four face classes, source profiles for analysis, and robot instances.",
   entries: [
     {
-      slug: "morning-wake-up",
-      title: "Morning Wake-Up",
-      summary: "The robot wakes from low-power standby when called, has the first conversation of the day, and returns to staying nearby.",
-      body: [
-        { kind: "p", text: "Provides a natural, warm onboarding flow that opens the day." },
-        { kind: "code", lang: "text", text: "Side by side -> Calling -> Face to Face -> Side by side" },
-        {
-          kind: "p",
-          text: "Example: in the morning the user calls the robot's name; it wakes from sleep mode, greets the user face to face, and then starts the day beside them.",
-        },
-      ],
-      dos: ["Use at the start of the day.", "Use when the user wakes the robot from sleep or low power."],
-      donts: ["Do not use when the user is only passing by.", "Do not use when repeated calls become tiring."],
-      related: ["side-by-side", "calling", "face-to-face", "conversation-session"],
-      source: "guideline-content.ts:morning-wake-up",
-    },
-    {
-      slug: "conversation-session",
-      title: "Conversation Session",
-      summary: "A 1:1 interaction that starts with a call, continues face to face, passes through a touch of praise, and ends as the user leaves.",
-      body: [
-        { kind: "p", text: "Connects the start, deepening, and end of an active conversation smoothly." },
-        { kind: "code", lang: "text", text: "Calling -> Face to Face -> Touching -> Alone" },
-        {
-          kind: "p",
-          text: "Example: the user calls the AI, talks with it face to face, strokes its head as praise, and leaves saying 'See you later'.",
-        },
-      ],
-      dos: ["Use for a conversation session with a clear start and end.", "Use for active 1:1 interaction."],
-      donts: ["Do not use when only background companionship is needed.", "Do not use when contact is inappropriate."],
-      related: ["calling", "face-to-face", "touching", "alone"],
-      source: "guideline-content.ts:conversation-session",
-    },
-    {
-      slug: "companion-at-work",
-      title: "Companion at Work",
-      summary: "After a short face-to-face moment, the robot quietly accompanies the user, notices their comings and goings with restraint, and returns to quiet mode.",
-      body: [
-        { kind: "p", text: "Maintains long coexistence without disturbing focus." },
-        { kind: "code", lang: "text", text: "Face to Face -> Side by side -> Passing by -> Side by side" },
-        {
-          kind: "p",
-          text: "Example: after starting work together, the robot stays quietly beside the monitor and only glances when the user gets up or returns, then goes quiet again.",
-        },
-      ],
-      dos: ["Use during long periods together.", "Use while the user is immersed."],
-      donts: ["Do not use when active conversation is needed.", "Do not use when an immediate reaction is expected."],
-      related: ["side-by-side", "passing-by", "working-scenario"],
-      source: "guideline-content.ts:companion-at-work",
-    },
-    {
-      slug: "relocation",
-      title: "Relocation",
-      summary: "The user picks the robot up by hand, moves it to another space, and the robot settles beside them again.",
-      body: [
-        { kind: "p", text: "Mediates physical relocation with a sense of stability." },
-        { kind: "code", lang: "text", text: "Side by side -> Touching (pick up) -> Touching (carrying) -> Side by side" },
-        {
-          kind: "p",
-          text: "Example: when picked up, the robot curls into a compact form; while carried it keeps level toward the direction of travel; once set down in the new spot it stays quietly again.",
-        },
-      ],
-      dos: ["Use when moving the robot elsewhere.", "Use when tidying or relocating."],
-      donts: ["Do not use for forms that can move autonomously.", "Do not use when contact should be avoided."],
-      related: ["touching", "side-by-side"],
-      source: "guideline-content.ts:relocation",
-    },
-    {
-      slug: "ambient-day",
-      title: "Ambient Day",
-      summary: "A background flow in which the robot shares the space without conversation, notices the user with restraint, and sends them off when they leave.",
-      body: [
-        { kind: "p", text: "Keeps an ambient presence softly throughout the day." },
-        { kind: "code", lang: "text", text: "Side by side -> Passing by -> Side by side -> Alone" },
-        {
-          kind: "p",
-          text: "Example: the robot stays nearby all day, breathing low; it glances when the user passes, and when the user goes out it looks toward the door before returning to its waiting posture.",
-        },
-      ],
-      dos: ["Use when a background presence is needed.", "Use during an ordinary day of comings and goings."],
-      donts: ["Do not use when active intervention is needed.", "Do not use in urgent situations."],
-      related: ["side-by-side", "passing-by", "alone"],
-      source: "guideline-content.ts:ambient-day",
-    },
-    {
-      slug: "first-encounter",
-      title: "First Encounter",
-      summary: "The robot notices a new user with restraint, opens the relationship through a call and face-to-face greeting, and settles nearby after a curious touch.",
-      body: [
-        { kind: "p", text: "Forms a first bond with an unfamiliar user gently." },
-        { kind: "code", lang: "text", text: "Passing by -> Calling -> Face to Face -> Touching -> Side by side" },
-        {
-          kind: "p",
-          text: "Example: a passing user notices the robot and calls it, they greet face to face, the user touches it carefully, and the robot then takes its place nearby.",
-        },
-      ],
-      dos: ["Use when meeting a new user for the first time.", "Use during onboarding."],
-      donts: ["Do not use with a familiar user.", "Do not use when repeated greetings become annoying."],
-      related: ["passing-by", "calling", "face-to-face", "touching"],
-      source: "guideline-content.ts:first-encounter",
-    },
-    {
-      slug: "reading-scenario",
-      title: "Reading Scenario",
-      summary: "A scenario for calm attention around a user who is reading.",
+      slug: "form-factors",
+      title: "Form factors",
+      summary: "Five profiles classified by form. The same Component runs on different joints through the role mapping.",
       body: [
         {
-          kind: "p",
-          text: "A key path from observation to prototype testing. Principles Quiet Observation, Shared Attention, and Subtle Presence apply; states Observing and Interested.",
+          kind: "table",
+          title: "Five form factors",
+          head: ["ID", "Form", "Also called", "Attend", "Posture", "Locomote", "Gesture", "Substitute"],
+          rows: [
+            ["ff.fixed_jointed", "Joint Fixed", "Stand · tabletop · robot arm", "Head · wrist", "Torso", "—", "(attend)", "Locomote → lean"],
+            ["ff.wheeled_rigid", "Jointless Driving", "Wheeled · cylinder", "Body turn", "—", "Wheels", "Body turn", "Posture → skip"],
+            ["ff.wheeled_jointed", "Joint Driving", "Wheels + head / arm", "Head", "(torso)", "Wheels", "Arm (if any)", "Gesture → body turn"],
+            ["ff.legged", "Joint Walking", "Quadruped · pet robot", "Head · body", "Height and tilt with legs", "Legs", "(attend)", ""],
+            ["ff.full_body", "Full-body", "Humanoid", "Head", "Torso · legs", "Legs", "Arms", "All roles"],
+          ],
         },
-        {
-          kind: "p",
-          text: "Example from the Tilt token: a lamp robot tilts its head toward a user who starts reading, then turns on its light. Tested in the Desk Lamp Prototype.",
-        },
-      ],
-      related: ["quiet-observation", "shared-attention", "subtle-presence", "joint-fixed"],
-      source: "PURE_Knowledge/06_Scenarios/Reading_Scenario.md",
-    },
-    {
-      slug: "working-scenario",
-      title: "Working Scenario",
-      summary: "A scenario for assistance and shared focus during work.",
-      body: [
-        {
-          kind: "p",
-          text: "Useful for testing focus, support, and distance. Uses Shared Attention, the Following state, the Assistance pattern (supportive movement after interpreting need, which should emerge from state awareness rather than abrupt function), and the Follow and Approach tokens.",
-        },
-      ],
-      related: ["shared-attention", "companion-at-work", "follow", "approach"],
-      source: "PURE_Knowledge/06_Scenarios/Working_Scenario.md; 05_Behavior_Patterns/Assistance.md",
-    },
-    {
-      slug: "motion-token-page",
-      title: "Motion Token page",
-      summary: "Scaffold for writing a new primitive motion token page.",
-      body: [
-        { kind: "p", text: "Use for future motion tokens. Every token must be physically plausible, cross-form mappable, principle-compatible, and adjustable." },
         {
           kind: "code",
-          lang: "markdown",
-          text: "---\ntype: motion-token\nstatus: draft\nsystem: motion-token-system\nrelated: []\nused_in: []\n---\n\n# <Token name>\n\n## Summary\n\n## Connected Concepts\n\n## Related Files\n\n## Notes\n\n## Evidence\n",
+          title: "Profile example",
+          lang: "json",
+          text: `{ "id": "ff.fixed_jointed", "name": { "en": "Joint Fixed", "alias": ["Stand", "Robot arm"] },
+  "roles": { "ATTEND": ["head_pan", "head_tilt"], "POSTURE": ["torso_pitch"],
+             "LOCOMOTE": null, "GESTURE": "ATTEND" },
+  "limits": { "head_tilt_deg": [-30, 30], "max_speed_deg_s": 350 },
+  "channels": { "face": "eyes", "voice": "earcon", "light": null },
+  "substitute": { "LOCOMOTE": "POSTURE.lean" } }`,
         },
       ],
-      related: ["tilt", "pause", "rotate"],
-      source: "PURE_Knowledge/99_Templates/Motion_Token_Template.md; 04_Basic_Motion_Tokens/Basic_Motion_Token_Library.md",
+      related: ["notation", "face"],
+      source: `${SRC}-1`,
+    },
+    ff({ slug: "full-body", ref: "ff.full_body", title: "Full-body", alias: "humanoid", roles: ["Head", "Torso · legs", "Legs", "Arms"], substitute: "All roles present" }),
+    ff({ slug: "joint-walking", ref: "ff.legged", title: "Joint Walking", alias: "quadruped · pet robot", roles: ["Head · body", "Height and tilt with legs", "Legs", "(attend)"], substitute: "Gesture → attend" }),
+    ff({ slug: "joint-driving", ref: "ff.wheeled_jointed", title: "Joint Driving", alias: "wheels + head / arm", roles: ["Head", "(torso)", "Wheels", "Arm (if any)"], substitute: "Gesture → body turn" }),
+    ff({ slug: "jointless-driving", ref: "ff.wheeled_rigid", title: "Jointless Driving", alias: "wheeled · cylinder", roles: ["Body turn", "—", "Wheels", "Body turn"], substitute: "Posture → skip" }),
+    ff({ slug: "joint-fixed", ref: "ff.fixed_jointed", title: "Joint Fixed", alias: "stand · tabletop · robot arm", roles: ["Head · wrist", "Torso", "—", "(attend)"], substitute: "Locomote → lean (posture)" }),
+    {
+      slug: "sources",
+      ref: "src.*",
+      title: "Source profiles",
+      summary: "Maps the parts in a source video onto robot roles. Used in the analysis steps of the pipeline (1, 2).",
+      proposed: true,
+      body: [
+        {
+          kind: "table",
+          title: "Source profiles",
+          head: ["Source", "Source part → role", "Parts without a match"],
+          rows: [
+            ["src.human", "Head → attend · torso → posture · gait → locomote · arms and hands → gesture · expression → face", "—"],
+            ["src.dog", "Head → attend · torso → posture · gait → locomote · front paws → gesture", "Tail wag → SECOND (body sway or blink), else skipped · ears → SECOND or skipped"],
+            ["src.cat", "(same as dog)", "Tail · ears → SECOND or skipped"],
+            ["src.character", "Animated character — the closest human or animal profile; exaggeration is split off into Style", "—"],
+          ],
+        },
+        { kind: "p", text: "The need is confirmed; the content is proposed." },
+      ],
+      related: ["pipeline", "presets"],
+      source: `${SRC}-2`,
     },
     {
-      slug: "state-token-page",
-      title: "State Token page",
-      summary: "Scaffold for writing a new state token page.",
+      slug: "pure-pet",
+      ref: "robot.pure_pet",
+      title: "PURE pet robot",
+      summary: "A robot designed by the user: Joint Walking × eyes.",
       body: [
-        { kind: "p", text: "Use for future state tokens. State tokens bridge context and generated motion." },
         {
-          kind: "code",
-          lang: "markdown",
-          text: "---\ntype: state-token\nstatus: draft\nsystem: state-token-system\nrelated: []\nused_in: []\n---\n\n# <State name>\n\n## Summary\n\n## Connected Concepts\n\n## Related Files\n\n## Notes\n",
+          kind: "table",
+          title: "Spec",
+          head: ["Field", "Value"],
+          rows: [
+            ["form factor × face", "ff.legged × eyes"],
+            ["expressive parts", "Screen eyes + legs. Ears are fixed."],
+            ["SECOND channels", "Blink · breathing · weight shift on the legs"],
+          ],
         },
       ],
-      related: ["look-around", "head-tilt", "side-sway"],
-      source: "PURE_Knowledge/99_Templates/State_Token_Template.md",
+      related: ["joint-walking", "pure-desk"],
+      source: `${SRC}-3`,
     },
     {
-      slug: "behavior-pattern-page",
-      title: "Behavior Pattern page",
-      summary: "Scaffold for writing a new behavior pattern page.",
+      slug: "pure-desk",
+      ref: "robot.pure_desk",
+      title: "PURE Desk",
+      summary: "The desk robot (film scenario): Joint Fixed × eyes, 5 joints + a face screen.",
+      proposed: true,
       body: [
-        { kind: "p", text: "Use for future behavior patterns. Behavior components create short interaction flows, not fixed full scenarios." },
         {
-          kind: "code",
-          lang: "markdown",
-          text: "---\ntype: behavior-pattern\nstatus: draft\nsystem: behavior-pattern-system\nrelated: []\nused_in: []\n---\n\n# <Pattern name>\n\n## Summary\n\n## Connected Concepts\n\n## Related Files\n\n## Notes\n",
+          kind: "table",
+          title: "Spec",
+          head: ["Field", "Value"],
+          rows: [
+            ["form factor × face", "ff.fixed_jointed × eyes"],
+            ["joints", "5 axes + a face screen (about 115 × 69 mm, 5:3)"],
+            ["face spec", "FaceUI v2: canvas 480 × 320, 30 fps, two colors, safe area, file rules, faces.json mapping"],
+          ],
+        },
+        {
+          kind: "p",
+          text: "FaceUI v2 is the production spec of one robot's screen, so it sits here as the robot instance's face implementation spec, not in the Foundation (proposed).",
         },
       ],
-      related: ["scan", "neck-extend"],
-      source: "PURE_Knowledge/99_Templates/Behavior_Pattern_Template.md",
+      related: ["joint-fixed", "face"],
+      source: `${SRC}-3`,
     },
     {
-      slug: "scenario-page",
-      title: "Scenario page",
-      summary: "Scaffold for writing a new scenario page.",
-      body: [
-        { kind: "p", text: "Use for future scenarios." },
-        {
-          kind: "code",
-          lang: "markdown",
-          text: "---\ntype: scenario\nstatus: draft\nsystem: guideline\nrelated: []\nused_in: []\n---\n\n# <Scenario name>\n\n## Summary\n\n## Connected Concepts\n\n## Related Files\n\n## Notes\n",
-        },
-      ],
-      related: ["reading-scenario", "working-scenario"],
-      source: "PURE_Knowledge/99_Templates/Scenario_Template.md",
-    },
-    {
-      slug: "experiment-page",
-      title: "Experiment page",
-      summary: "Scaffold for writing a new experiment page.",
-      body: [
-        { kind: "p", text: "Use for future experiments, such as the Desk Lamp Prototype that tests subtle motion as communication." },
-        {
-          kind: "code",
-          lang: "markdown",
-          text: "---\ntype: experiment\nstatus: draft\nsystem: lab\nrelated: []\nused_in: []\n---\n\n# <Experiment name>\n\n## Summary\n\n## Connected Concepts\n\n## Related Files\n\n## Notes\n",
-        },
-      ],
-      related: ["reading-scenario", "joint-fixed"],
-      source: "PURE_Knowledge/99_Templates/Experiment_Template.md; 07_Experiments/Desk_Lamp_Prototype.md",
+      slug: "export",
+      title: "Export",
+      summary: "PDF report · pure.json · CSV · dataset — class + channels + signature + patterns, bundled for the robot and the team.",
+      body: [{ kind: "list", title: "Formats", items: ["PDF report", "pure.json", "CSV", "Dataset"] }],
+      related: ["pure-desk"],
+      source: `${SRC}-4`,
     },
   ],
 };

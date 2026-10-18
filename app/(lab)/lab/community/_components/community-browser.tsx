@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { COMMUNITY_PAGE_SIZE, WAVEFORM_SRC, communityCard, tabOf } from "@/data/community";
-import { COMPONENTS } from "@/data/components";
+import { simBehaviorLabel } from "@/data/sim-behaviors";
 import { ROBOT_TYPES } from "@/data/robot-types";
 import { STRINGS, fmt } from "@/data/strings";
 import type { RobotType, UserDataMotion } from "@/lib/models";
@@ -15,7 +15,7 @@ import { EmptyState, Loading } from "@/components/ui/states";
 
 const U = STRINGS.community;
 
-export const behaviorLabel = (id: string) => COMPONENTS.find((c) => c.id === id)?.label ?? id;
+export const behaviorLabel = simBehaviorLabel;
 
 /** "4.8K uses" (Figma) — thousands compact, smaller numbers as they are. */
 export const usesLabel = (n: number) => fmt(U.uses, { n: n >= 1000 ? `${(n / 1000).toFixed(1)}K` : n });

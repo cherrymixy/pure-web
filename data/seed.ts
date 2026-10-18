@@ -1,5 +1,5 @@
 import type { Db, Expression, Profile, Project, RobotDevice, SavedExpression, Share, Signature, UserDataMotion } from "@/lib/models";
-import { COMPONENTS } from "./components";
+import { SIM_BEHAVIORS } from "./sim-behaviors";
 import { COMPONENT_DEMOS, PROMPT_DEMOS, type DemoExpression } from "./demo-recipes";
 import { PURE_DESK_STRUCTURE } from "./pure-desk";
 import { PURE_DEFAULT_SIGNATURE } from "./signature";
@@ -87,7 +87,7 @@ function toExpression(id: string, projectId: string, demo: DemoExpression, compo
 
 export const SEED_EXPRESSIONS: Expression[] = [
   toExpression("e-sleepy-nod", "p-sleepy-robot", PROMPT_DEMOS.tired, "doze", PUREBOT_SIGNATURE, "2026-10-14T11:00:00.000Z"),
-  toExpression("e-hello-wave", "p-test-01", PROMPT_DEMOS.here, "greet", PUREBOT_SIGNATURE, "2026-10-15T16:30:00.000Z"),
+  toExpression("e-hello-wave", "p-test-01", PROMPT_DEMOS.here, "bow", PUREBOT_SIGNATURE, "2026-10-15T16:30:00.000Z"),
 ];
 
 const saved = (e: Expression, savedAt: string): SavedExpression => ({
@@ -100,7 +100,7 @@ export const SEED_LIBRARY: SavedExpression[] = [
   saved(SEED_EXPRESSIONS[0], "2026-10-14T11:10:00.000Z"),
   saved(SEED_EXPRESSIONS[1], "2026-10-15T16:35:00.000Z"),
   saved(toExpression("e-curious-tilt", "p-test-01", { ...COMPONENT_DEMOS.curious, name: "Curious tilt" }, "curious", PUREBOT_SIGNATURE, "2026-10-13T14:00:00.000Z"), "2026-10-13T14:05:00.000Z"),
-  saved(toExpression("e-startled-hop", "p-surprising", PROMPT_DEMOS.startled, "alert", PURE_DEFAULT_SIGNATURE, "2026-10-12T09:20:00.000Z"), "2026-10-12T09:25:00.000Z"),
+  saved(toExpression("e-startled-hop", "p-surprising", PROMPT_DEMOS.startled, "surprise", PURE_DEFAULT_SIGNATURE, "2026-10-12T09:20:00.000Z"), "2026-10-12T09:25:00.000Z"),
 ];
 
 const CATEGORY: Record<string, UserDataMotion["category"]> = {
@@ -112,7 +112,7 @@ const CATEGORY: Record<string, UserDataMotion["category"]> = {
 const USES = [312, 148, 96, 205, 487, 133, 174, 268, 391, 87, 156, 452, 64, 119, 41];
 
 export const SEED_USER_DATA: UserDataMotion[] = [
-  ...COMPONENTS.map((c, i): UserDataMotion => ({
+  ...SIM_BEHAVIORS.map((c, i): UserDataMotion => ({
     id: `ud-${c.id}`,
     name: c.label,
     category: CATEGORY[c.id],

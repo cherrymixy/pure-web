@@ -9,7 +9,8 @@ import {
   SavedExpressionSchema, SignatureSchema, SoundCueSchema, StructureSchema, UserDataMotionSchema,
 } from "@/lib/models";
 import { COMPONENTS, guidelineSlugFor } from "./components";
-import { GUIDELINE, countEntries, findEntry } from "./guideline";
+import { SIM_BEHAVIORS } from "./sim-behaviors";
+import { GUIDELINE, findEntry } from "./guideline";
 import { COMPONENT_DEMOS, PROMPT_DEMOS, applySofterDemo } from "./demo-recipes";
 import { FACE_NAMES } from "./face-videos";
 import { SUGGESTED_PROMPTS } from "./prompts";
@@ -28,17 +29,19 @@ const ok = <T,>(schema: z.ZodType<T>, value: unknown) => {
 };
 
 describe("content counts (PRD §5)", () => {
-  it("has 5 types, 5 joints, 15 components, 7 patterns, 4 prompts", () => {
+  it("has 5 types, 5 joints, 16 components, 15 sim behaviors, 11 patterns, 4 prompts", () => {
     expect(ROBOT_TYPES).toHaveLength(5);
     expect(ROBOT_TYPES.filter((t) => t.selectable).map((t) => t.id)).toEqual(["joint-fixed"]);
     expect(PURE_DESK_STRUCTURE.joints).toHaveLength(5);
-    expect(COMPONENTS).toHaveLength(15);
-    expect(SITUATION_PATTERNS).toHaveLength(7);
+    expect(COMPONENTS).toHaveLength(16);
+    expect(SIM_BEHAVIORS).toHaveLength(15);
+    expect(SITUATION_PATTERNS).toHaveLength(11);
     expect(SUGGESTED_PROMPTS).toHaveLength(4);
   });
 
-  it("components are exactly the simulator behaviors", () => {
-    expect(new Set(COMPONENTS.map((c) => c.id))).toEqual(behaviorNames);
+  it("sim behaviors are exactly the simulator behaviors, and every component plays one", () => {
+    expect(new Set(SIM_BEHAVIORS.map((b) => b.id))).toEqual(behaviorNames);
+    for (const c of COMPONENTS) expect(behaviorNames.has(c.sim.behavior)).toBe(true);
   });
 });
 
@@ -127,17 +130,28 @@ describe("seed", () => {
 
 
 describe("guideline", () => {
-  it("has the PRD structure: principles 5 / tokens 18 / behavior 16 / situation 7 / classes 5", () => {
-    const counts = Object.fromEntries(countEntries().map((c) => [c.section, c.entries]));
-    expect(counts).toMatchObject({ principles: 5, "primitive-tokens": 18, behavior: 16, situation: 7, "robot-classes": 5 });
-    expect(counts.templates).toBeGreaterThan(0);
+  const section = (id: string) => GUIDELINE.find((s) => s.id === id)!;
+  const refs = (id: string, prefix: string) => section(id).entries.filter((e) => e.ref?.startsWith(prefix));
+  it("has the v3 structure: Foundation → Component → Pattern → Template → Style → Validation", () => {
+    expect(GUIDELINE.map((s) => s.id)).toEqual(["overview", "principles", "primitive-tokens", "behavior", "situation", "templates", "style", "validation"]);
+    expect(refs("principles", "sp.").length + refs("principles", "gr.").length + refs("principles", "cmb.").length).toBe(3);
+    expect(refs("principles", "op.")).toHaveLength(1);
+    expect(refs("principles", "ch.").map((e) => e.ref)).toEqual(["ch.common", "ch.body", "ch.face", "ch.sound"]); // Figma 808:1657… order: Common · Motion · Face · Sound
+    expect(refs("primitive-tokens", "tok.")).toHaveLength(18);
+    expect(refs("behavior", "cmp.").filter((e) => e.slug !== "emphasis")).toHaveLength(16);
+    expect(refs("templates", "ff.")).toHaveLength(5);
+    for (const id of ["overview", "style", "validation"]) expect(section(id).entries.length).toBeGreaterThan(0);
   });
-  it("situation and robot-class slugs match data/patterns.ts and data/robot-types.ts", () => {
-    expect(GUIDELINE.find((s) => s.id === "situation")!.entries.map((e) => e.slug)).toEqual(SITUATION_PATTERNS.map((p) => p.id));
-    expect(GUIDELINE.find((s) => s.id === "robot-classes")!.entries.map((e) => e.slug)).toEqual(ROBOT_TYPES.map((t) => t.id));
+  it("pattern and form-factor slugs match data/patterns.ts and data/robot-types.ts", () => {
+    expect(refs("situation", "pat.").map((e) => e.slug)).toEqual(SITUATION_PATTERNS.map((p) => p.id));
+    expect(refs("templates", "ff.").map((e) => e.slug)).toEqual(ROBOT_TYPES.map((t) => t.id));
   });
   it("every component links to a guideline behavior", () => {
     for (const c of COMPONENTS) expect(findEntry("behavior", guidelineSlugFor(c.id)!)).toBeTruthy();
+  });
+  it("related links resolve", () => {
+    const keys = new Set(GUIDELINE.flatMap((s) => s.entries.flatMap((e) => [e.slug, `${s.id}/${e.slug}`])));
+    for (const s of GUIDELINE) for (const e of s.entries) for (const r of e.related ?? []) expect(keys.has(r), `${s.id}/${e.slug} → ${r}`).toBe(true);
   });
   it("is English only and slugs are unique per section", () => {
     const text = JSON.stringify(GUIDELINE);
@@ -145,3 +159,4 @@ describe("guideline", () => {
     for (const s of GUIDELINE) expect(new Set(s.entries.map((e) => e.slug)).size).toBe(s.entries.length);
   });
 });
+

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { COMPONENTS } from "@/data/components";
+import { simBehaviorLabel } from "@/data/sim-behaviors";
 import { referenceSetFor, type ReferenceChannel, type ReferenceItem } from "@/data/reference-sets";
 import { STRINGS, fmt } from "@/data/strings";
 import { Icon } from "@/components/ui/icons/icon";
@@ -16,7 +16,7 @@ export function ReferencedSets({ behaviors, variant = "list" }: { behaviors: str
   const sets = [...new Set(behaviors)].map((b) => referenceSetFor(b)).filter((s) => s !== undefined);
   const [pick, setPick] = useState(0);
   const set = sets[Math.min(pick, sets.length - 1)];
-  const label = (id: string) => COMPONENTS.find((c) => c.id === id)?.label ?? id;
+  const label = simBehaviorLabel;
 
   if (variant === "strip") {
     return (

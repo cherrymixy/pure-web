@@ -1,7 +1,7 @@
 // Validation every LLM output passes through before it reaches the simulator (CLAUDE.md rule 11):
 // allow lists, range clamps, joint limits, angular velocity. Each change is reported.
 
-import { COMPONENTS } from "@/data/components";
+import { SIM_BEHAVIORS } from "@/data/sim-behaviors";
 import { BEHAVIORS as BEHAVIOR_LIST } from "../sim/behaviors";
 import { SOUND_CUES, cueAt } from "@/data/sound-cues";
 import { FACE_AUTO } from "@/data/face-videos";
@@ -17,7 +17,7 @@ export interface Issue {
 }
 
 const clampTo = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), hi);
-const BEHAVIORS = new Set<string>(COMPONENTS.map((c) => c.id));
+const BEHAVIORS = new Set<string>(SIM_BEHAVIORS.map((c) => c.id));
 
 export const RECIPE_LIMITS = { steps: 6, speed: [0.5, 1.5], amplitude: [0.3, 1.3], repeat: [1, 3], minVelocitySpeed: 0.2, maxSeconds: 15 } as const;
 
@@ -136,7 +136,7 @@ export function validateRecipe(input: { steps: Partial<RecipeStep>[]; loop?: boo
 
 const recipeSeconds = (recipe: Recipe, params: PlaybackParams) => sampleRecipe(recipe, params, 10).duration;
 
-const LOOPING = new Set<string>(COMPONENTS.map((c) => c.id).filter((id) => BEHAVIOR_LIST.find((b) => b.name === id)?.loop));
+const LOOPING = new Set<string>(SIM_BEHAVIORS.map((c) => c.id).filter((id) => BEHAVIOR_LIST.find((b) => b.name === id)?.loop));
 
 /**
  * Keep the recipe ≤ 15 s. Looping behaviors run 5–13 s per cycle, so small models'

@@ -1,6 +1,6 @@
 // @implemented
 import Link from "next/link";
-import { COMPONENTS } from "@/data/components";
+import { SIM_BEHAVIORS } from "@/data/sim-behaviors";
 import { REFERENCE_SETS, type ReferenceItem } from "@/data/reference-sets";
 
 // Review bench for the reference sets: 15 behaviors × face / motion / sound with sources.
@@ -9,10 +9,10 @@ export default function DevReferencesPage() {
     <main className="mx-auto flex max-w-7xl flex-col gap-8 p-10">
       <div className="flex items-baseline gap-4">
         <h1 className="text-2xl font-semibold">/dev/references</h1>
-        <span className="text-sm text-neutral-500">{REFERENCE_SETS.length} / {COMPONENTS.length} behaviors · Wikimedia Commons</span>
+        <span className="text-sm text-neutral-500">{REFERENCE_SETS.length} / {SIM_BEHAVIORS.length} behaviors · Wikimedia Commons</span>
         <Link href="/dev" className="ml-auto text-sm underline">/dev</Link>
       </div>
-      {COMPONENTS.map((c) => {
+      {SIM_BEHAVIORS.map((c) => {
         const set = REFERENCE_SETS.find((s) => s.behavior === c.id);
         return (
           <section key={c.id} className="flex flex-col gap-2" data-testid={`refset-${c.id}`}>

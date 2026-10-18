@@ -20,7 +20,7 @@ const good: GenerationOutput = {
   sound: { cues: [{ preset: "sad-long", t: 0.5 }] },
 };
 const repo = () => new LowRepo(new Memory<Db>(), { seed: seedDb });
-const input = { projectId: "p-test-01", prompt: "I'm so tired, I keep nodding off", components: ["doze"], pattern: "alone" };
+const input = { projectId: "p-test-01", prompt: "I'm so tired, I keep nodding off", components: ["doze"], pattern: "by-your-side" };
 
 describe("runGeneration", () => {
   it("saves a validated expression with the project's signature snapshot", async () => {
@@ -31,9 +31,9 @@ describe("runGeneration", () => {
     expect(res.source).toBe("ollama");
     expect(steps).toHaveLength(5);
     const e = await r.expressions.get(res.expressionId);
-    expect(e).toMatchObject({ name: "Sleepy drift", components: ["doze"], pattern: "alone", motion: { mode: "recipe" } });
+    expect(e).toMatchObject({ name: "Sleepy drift", components: ["doze"], pattern: "by-your-side", motion: { mode: "recipe" } });
     expect(e.signatureSnapshot.id).toBe((await r.signatures.current("p-test-01"))!.id);
-    expect(fake.calls[0].user).toContain("Preferred components: doze");
+    expect(fake.calls[0].user).toContain("Preferred components: Doze (play as: doze)");
   });
 
   it("falls back to the demo when Ollama is unreachable", async () => {

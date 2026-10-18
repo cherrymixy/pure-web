@@ -71,12 +71,12 @@ export const COMMUNITY_STAGE_VIEW = { distance: 1.3 };
 
 /** Detail › Situation Pattern, by motion category */
 export const CATEGORY_PATTERNS: Record<UserDataMotion["category"], SituationPatternId[]> = {
-  Idle: ["alone", "at-a-distance"],
+  Idle: ["by-your-side", "pass-by"],
   Approach: ["calling", "face-to-face"],
   Interaction: ["face-to-face", "touching"],
-  Task: ["side-by-side", "passing-by"],
+  Task: ["by-your-side", "guiding"],
   Expressive: ["face-to-face", "touching"],
-  Other: ["passing-by"],
+  Other: ["pass-by"],
 };
 
 /** Detail › User Review: photos people shared of the motion on their robot (Figma 943:1619 demo photos) */

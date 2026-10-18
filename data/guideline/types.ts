@@ -1,4 +1,5 @@
-// Guideline content shape (W03). Pure data — rendered by the guideline pages in STEP 10.
+// Guideline content shape (W03). Pure data — rendered by the guideline pages.
+// Structure: PURE guideline final structure v3 (2026-10-19): Foundation (principles · primitives) → Component → Pattern → Template, then Style and Validation.
 
 export type GuidelineSectionId =
   | "overview"
@@ -6,18 +7,23 @@ export type GuidelineSectionId =
   | "primitive-tokens"
   | "behavior"
   | "situation"
-  | "robot-classes"
-  | "templates";
+  | "templates"
+  | "style"
+  | "validation";
 
-export type GuidelineBlock =
+/** title: starts a new section on the page (doc template); untitled blocks join the section above. */
+export type GuidelineBlock = { title?: string } & (
   | { kind: "p"; text: string }
   | { kind: "list"; items: string[] }
   | { kind: "table"; head: string[]; rows: string[][] }
-  | { kind: "code"; lang: string; text: string };
+  | { kind: "code"; lang: string; text: string }
+);
 
 export interface GuidelineEntry {
   /** URL segment: /guideline/<section>/<slug> */
   slug: string;
+  /** Stable guideline ID with its layer prefix (sp. gr. op. ch. role. tok. cmp. pat. ff. src. robot. style.), when the entry is one item */
+  ref?: string;
   title: string;
   summary: string;
   body: GuidelineBlock[];
@@ -31,6 +37,10 @@ export interface GuidelineEntry {
   source?: string;
   /** true = no source content yet; body holds a short stub to be written (PRD appendix D 🟡) */
   placeholder?: true;
+  /** Proposed or awaiting a decision in the source structure (not confirmed yet) */
+  proposed?: true;
+  /** Pages sharing a group list only each other on the right of the doc page (Face 808:1657…: Common · Motion · Face · Sound) */
+  group?: string;
   /** Component-page template (Figma W03-4 550:2490). When set, the entry renders as a component doc instead of body/dos/donts. */
   doc?: ComponentDoc;
 }
@@ -38,9 +48,14 @@ export interface GuidelineEntry {
 /** Component-page content (Figma W03-4L 808:1254). Sizes are in 1920 px (Figma 960 frame ×2). */
 export interface ComponentDoc {
   breadcrumb: string;
+  /** Data ID shown next to the breadcrumb (ch.face, tok.body.tilt …) */
+  ref?: string;
   /** Lead paragraph, one string per line */
   lead: string[];
-  resources: { label: string; href?: string }[];
+  /** Pills under the lead; omit for none */
+  resources?: { label: string; href?: string }[];
+  /** Sibling pages listed around "On this page" (Figma 808:1657…1665: Common · Motion · Face › sections · Sound); path relative to the guideline base */
+  pages?: { label: string; path: string; current?: true }[];
   /** "On this page" entry for the page header (anchor #top); omit for none */
   topToc?: string;
   /** Page rows top to bottom; a pair renders side by side (Variant | State). Every section is an "On this page" entry. */
@@ -58,7 +73,8 @@ export type ComponentDocSection = {
   title: string;
   /** "On this page" label when it differs from the title */
   toc?: string;
-  text: string;
+  /** Line(s) under the title; omit for none */
+  text?: string;
   /** px between the heading and the body (default 40) */
   gap?: number;
 } & (
@@ -84,7 +100,32 @@ export type ComponentDocSection = {
   | { kind: "table"; head: string[]; rows: string[][]; widths: (number | null)[]; cols: ("key" | "name" | "label" | "muted" | "body" | "text" | "code" | "track")[] }
   /** plain: no bullet before the effect (pattern "Common" rules) */
   | { kind: "states"; items: { state: string; effect: string }[]; plain?: true }
+  /** Face principle (Figma W03-2L 808:1649) — illustrations live in components/ui/guideline/face-figures.tsx */
+  | { kind: "face-types"; label: string; items: { figure: FaceTypeFigure; title: string; subtitle: string; text: string }[] }
+  | {
+      kind: "face-change";
+      base: string;
+      arrow: string;
+      variants: { emotion: string; caption: string }[];
+      valence: { title: string; bullets: string[]; faces: { name: string; shape: string }[]; orderLabel: string; order: string[] };
+    }
+  | {
+      kind: "face-rhythm";
+      /** enter · stay · return */
+      phases: { title: string; time: string; note: string }[];
+      loops: { title: string; text: string; chips: string[] }[];
+    }
+  | { kind: "face-transitions"; items: { caption: string; title: string; text: string }[] }
+  | { kind: "face-donts"; items: { title: string; text: string }[]; blinkLabels: [string, string] }
+  /** Generic entry body (pages without their own Figma frame, laid out like Face) */
+  | { kind: "blocks"; blocks: GuidelineBlock[] }
+  /** Section landing: one card per page; path relative to the guideline base */
+  | { kind: "cards"; items: { title: string; summary: string; path: string; ref?: string; proposed?: boolean }[] }
+  /** Pills linking to other pages (Related) */
+  | { kind: "links"; items: { title: string; path: string }[] }
 );
+
+export type FaceTypeFigure = "none" | "light" | "eyes" | "all";
 
 export interface GuidelineSection {
   id: GuidelineSectionId;
