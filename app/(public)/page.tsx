@@ -80,9 +80,9 @@ export default function Page() {
 
       <div className={column}>
       {/* Why PURE 901:6971 / 7297 / 7298 */}
-      <section id="why" className="h-[390px] px-[120px] pt-[100px]">
+      <section id="why" className="h-[390px] px-[48px] pt-[100px]">
         <p className={label}>{L.why.label}</p>
-        <div className="mt-[12px] flex gap-[20px]">
+        <div className="mt-[12px] flex justify-between gap-[20px]">
           <h2 className="w-[450px] text-[32px] font-semibold leading-[1.26] text-[var(--sage-800)]">
             <Lines lines={L.why.headline} />
           </h2>
@@ -93,7 +93,7 @@ export default function Page() {
       {/* One signature, three channels 901:6972 · cards 901:6973/6989/7009 · axes 901:7032 */}
       <section className="flex h-[440px] flex-col">
         <h2 className="text-center text-[28px] font-semibold leading-[1.26] text-[var(--sage-800)]">{L.channels.title}</h2>
-        <div className="mt-[30px] pl-[120px]">
+        <div className="mt-[30px] px-[48px]">
           <ChannelCards />
         </div>
         <div className="mt-[20px] flex justify-center">
@@ -102,7 +102,7 @@ export default function Page() {
       </section>
 
       {/* Band/Daily 901:7050 */}
-      <section className="relative mx-[60px] h-[430px] overflow-clip rounded-[calc(var(--radius-2xl)/2)] bg-[var(--sage-50)] pl-[60px] pt-[65px]">
+      <section className="relative mx-[8px] h-[430px] overflow-clip rounded-[calc(var(--radius-2xl)/2)] bg-[var(--sage-50)] pl-[40px] pt-[65px]">
         <p className={label}>{L.daily.label}</p>
         <h2 className="mt-[12px] w-[390px] text-[24px] font-semibold leading-[1.26] text-[var(--sage-800)]">
           <Lines lines={L.daily.headline} />
@@ -121,8 +121,8 @@ export default function Page() {
           <Arrow />
         </Link>
         {/* Phone mockups 901:7071 / 901:7093, exported with their 5px outside stroke */}
-        <img src="/figma/landing/phone-home@4x.png" alt={L.daily.phoneHomeAlt} className="absolute left-[465px] top-[35px] h-[340px] w-[161.785px] max-w-none" />
-        <img src="/figma/landing/phone-playing@4x.png" alt={L.daily.phonePlayingAlt} className="absolute left-[636.785px] top-[58px] h-[340px] w-[161.785px] max-w-none" />
+        <img src="/figma/landing/phone-home@4x.png" alt={L.daily.phoneHomeAlt} className="absolute left-[569px] top-[35px] h-[340px] w-[161.785px] max-w-none" />
+        <img src="/figma/landing/phone-playing@4x.png" alt={L.daily.phonePlayingAlt} className="absolute left-[740.785px] top-[58px] h-[340px] w-[161.785px] max-w-none" />
       </section>
 
       </div>
@@ -154,14 +154,14 @@ export default function Page() {
       <section id="robot-types" className="mt-[73px] flex h-[405px] flex-col">
         <h2 className="text-center text-[28px] font-semibold leading-[1.26] text-[var(--sage-800)]">{L.robotTypes.title}</h2>
         <p className="mt-[7px] text-center text-[11px] leading-[1.26] text-[var(--neutral-600)]">{L.robotTypes.body}</p>
-        <div className="mt-[39px] pl-[120px]">
+        <div className="mt-[39px] flex justify-center px-[48px]">
           <TypeCards />
         </div>
       </section>
 
       {/* Band/Guideline 901:7145 */}
-      <section id="guideline" className="mx-[60px] h-[260px] overflow-clip rounded-[calc(var(--radius-2xl)/2)] bg-[var(--bg-surface)] px-[50px] pt-[41px]">
-        <div className="flex">
+      <section id="guideline" className="mx-[8px] h-[260px] overflow-clip rounded-[calc(var(--radius-2xl)/2)] bg-[var(--bg-surface)] px-[40px] pt-[41px]">
+        <div className="flex justify-between">
           <div className="w-[350px]">
             <p className={label}>{L.guideline.label}</p>
             <h2 className="mt-[10px] w-[300px] text-[26px] font-semibold leading-[1.26] text-[var(--sage-800)]">
@@ -181,13 +181,13 @@ export default function Page() {
             ))}
           </div>
         </div>
-        <Link href="/guideline" className={`${lightButton} mt-[31px] w-[740px]`}>
+        <Link href="/guideline" className={`${lightButton} mt-[31px] w-full`}>
           {L.guideline.cta}
         </Link>
       </section>
 
       {/* CTA band 901:7167 */}
-      <section className="mx-[60px] mt-[40px] flex h-[110px] justify-between overflow-clip rounded-[calc(var(--radius-2xl)/2)] bg-[var(--sage-800)] px-[40px] pt-[28px]">
+      <section className="mx-[8px] mt-[40px] flex h-[110px] justify-between overflow-clip rounded-[calc(var(--radius-2xl)/2)] bg-[var(--sage-800)] px-[40px] pt-[28px]">
         <div className="whitespace-nowrap leading-[1.26]">
           <h2 className="text-[24px] font-semibold text-[var(--text-on-inverse)]">{L.cta.headline}</h2>
           <p className="mt-[6px] text-[11px] text-[var(--sage-200)]">{L.cta.body}</p>
@@ -199,8 +199,8 @@ export default function Page() {
       </section>
 
       {/* Footer 901:7175 */}
-      <footer className="relative mt-[60px] flex h-[140px] whitespace-nowrap pl-[120px] pt-[20px] leading-[1.26]">
-        <div className="w-[380px]">
+      <footer className="relative mt-[60px] flex h-[140px] whitespace-nowrap px-[48px] pt-[20px] leading-[1.26]">
+        <div className="flex-1">
           <p className="text-[14px] font-semibold text-[var(--sage-800)]">{L.footer.brand}</p>
           <p className="mt-[4px] text-[8px] text-[var(--sage-500)]">{L.footer.tagline}</p>
         </div>
@@ -218,7 +218,7 @@ export default function Page() {
             </div>
           </div>
         ))}
-        <p className="absolute left-[120px] top-[110px] text-[7px] text-[var(--text-tertiary)]">{L.footer.copyright}</p>
+        <p className="absolute left-[48px] top-[110px] text-[7px] text-[var(--text-tertiary)]">{L.footer.copyright}</p>
       </footer>
       </div>
     </LandingZoom>

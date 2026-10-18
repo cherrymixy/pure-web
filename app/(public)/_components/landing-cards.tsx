@@ -9,13 +9,16 @@ const C = LANDING.channels;
 
 function ChannelCard({ icon, title, body, children }: { icon: string; title: string; body: string; children: React.ReactNode }) {
   return (
-    <div className="flex h-[210px] w-[220px] flex-col overflow-clip rounded-[calc(var(--radius-xl)/2)] bg-[var(--bg-surface)] p-[18px]">
+    <div className="flex h-[210px] min-w-0 flex-1 flex-col overflow-clip rounded-[calc(var(--radius-xl)/2)] bg-[var(--bg-surface)] p-[18px]">
       <div className="flex size-[28px] items-center justify-center rounded-full bg-[var(--sage-50)]">
         <img src={icon} alt="" width={13} height={13} className="block size-[13px]" />
       </div>
       <p className="mt-[12px] text-[16px] font-semibold leading-[1.26] text-[var(--sage-800)]">{title}</p>
       <p className="mt-[4px] h-[26px] text-[10px] leading-[1.26] text-[var(--sage-500)]">{body}</p>
-      <div className="relative mt-[12px] h-[75px] w-[184px] overflow-clip rounded-[calc(var(--radius-lg)/2)] bg-[var(--bg-canvas)]">{children}</div>
+      <div className="mt-[12px] h-[75px] overflow-clip rounded-[calc(var(--radius-lg)/2)] bg-[var(--bg-canvas)]">
+        {/* Figma's 184 × 75 visual, centred in the wider card */}
+        <div className="relative mx-auto h-full w-[184px]">{children}</div>
+      </div>
     </div>
   );
 }
