@@ -78,7 +78,7 @@ export function demoToOutput(demo: DemoExpression): GenerationOutput {
       steps: demo.motion.recipe.steps.map(({ behavior, speed, amplitude, repeat, face }) => ({ behavior, speed, amplitude, repeat, ...(face ? { face } : {}) })),
     },
     face: { preset: demo.face.preset },
-    sound: { cues: demo.sound.cues.map((c) => ({ preset: c.id.split("@")[0], t: c.t })) },
+    sound: { cues: demo.sound.cues.map((c) => ({ preset: c.sound, t: c.t })) },
   };
 }
 

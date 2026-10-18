@@ -17,11 +17,9 @@ const PARAM_SLIDERS: { key: keyof PlaybackParams; min: number; max: number }[] =
   { key: "antic", min: 0, max: 1 },
   { key: "rhythm", min: 0.25, max: 3 },
 ];
-type CueToken = "pitchSt" | "tempo" | "lengthS" | "volumeDb";
+type CueToken = "pitchSt" | "volumeDb";
 const CUE_SLIDERS: { key: CueToken; min: number; max: number; step: number }[] = [
   { key: "pitchSt", min: -12, max: 12, step: 1 },
-  { key: "tempo", min: 0.5, max: 2, step: 0.05 },
-  { key: "lengthS", min: 0.1, max: 2, step: 0.05 },
   { key: "volumeDb", min: -30, max: 0, step: 1 },
 ];
 
@@ -222,17 +220,13 @@ export function SimLab() {
             ))}
           </div>
           <div className="flex items-center gap-2">
-            <span className="w-20">timbre</span>
-            {(["bright", "soft"] as const).map((t) => (
-              <button key={t} className={`${btn} ${cue.timbre === t ? on : ""}`} onClick={() => changeCue("timbre", t)}>{t}</button>
-            ))}
             <button className={`${btn} ml-auto`} onClick={() => sound.preview(cue)}>▶ Preview</button>
           </div>
           {CUE_SLIDERS.map(({ key, min, max, step }) => (
             <label key={key} className="flex items-center gap-2">
               <span className="w-20">{key}</span>
               <input type="range" min={min} max={max} step={step} value={cue[key]} onChange={(e) => changeCue(key, Number(e.target.value))} onPointerUp={() => sound.preview(cue)} className="flex-1" />
-              <span className="w-12 text-right font-mono">{cue[key].toFixed(key === "pitchSt" || key === "volumeDb" ? 0 : 2)}</span>
+              <span className="w-12 text-right font-mono">{cue[key].toFixed(0)}</span>
             </label>
           ))}
           <label className="flex items-center gap-2">

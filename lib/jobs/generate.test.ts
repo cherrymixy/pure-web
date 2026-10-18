@@ -17,7 +17,7 @@ const good: GenerationOutput = {
   reasoning: "It droops and catches itself.",
   motion: { steps: [{ behavior: "doze", speed: 0.8, amplitude: 0.9, repeat: 1, face: "sleepy" }] },
   face: { preset: "sleepy" },
-  sound: { cues: [{ preset: "soft-breath", t: 0.5 }] },
+  sound: { cues: [{ preset: "sad-long", t: 0.5 }] },
 };
 const repo = () => new LowRepo(new Memory<Db>(), { seed: seedDb });
 const input = { projectId: "p-test-01", prompt: "I'm so tired, I keep nodding off", components: ["doze"], pattern: "alone" };

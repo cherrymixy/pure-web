@@ -5,24 +5,26 @@ import { DEV_RECIPES, DEV_STRUCTURE_NARROW } from "@/data/dev-samples";
 import { PURE_DESK_STRUCTURE } from "@/data/pure-desk";
 import { SEED_SIGNATURES } from "@/data/seed";
 import { PURE_DEFAULT_SIGNATURE } from "@/data/signature";
+import { LEGACY_SOUNDS } from "@/data/sound-cues";
 import { GenerationOutputSchema } from "../llm/generation";
 import type { Clip } from "../models";
 import {
   applySoftener, autoAdjust, buildExpression, buildPureJson, clipToJointCommands, compatibility, fallback, limitCheck,
   matchTiming, paramsToProps, parsePureJson, propsToParams, recipeToClip, sanitizeName, suggestName, validateClip,
-  faceAtTime, migrateFace, validateFace, validateRecipe, validateSound,
+  faceAtTime, migrateCue, migrateFace, validateFace, validateRecipe, validateSound,
 } from ".";
 import { stepVelocities, velocityAllowance } from "./validate";
 import { sampleRecipe } from "./sample";
 
 const S = PURE_DESK_STRUCTURE;
 const purebot = SEED_SIGNATURES[1];
-// Recorded with the old drawn-face presets: faces go through the same migration as saved projects.
-type Sample = { output: { face: unknown; motion: { steps: { face?: string }[] } } };
+// Recorded with the old drawn-face presets and synth cues: both go through the same migration as saved projects.
+type Sample = { output: { face: unknown; motion: { steps: { face?: string }[] }; sound: { cues: { preset: string }[] } } };
 const samples = ["here", "presentation", "tired", "startled"].map((id) => {
   const s: Sample = JSON.parse(fs.readFileSync(path.join(process.cwd(), `docs/samples/gen-${id}.json`), "utf8"));
   s.output.face = migrateFace(s.output.face);
   for (const step of s.output.motion.steps) if (step.face) step.face = migrateFace({ preset: step.face }).preset;
+  for (const cue of s.output.sound.cues) cue.preset = LEGACY_SOUNDS[cue.preset] ?? cue.preset;
   return s;
 });
 
@@ -121,10 +123,15 @@ describe("face, sound, names", () => {
     expect([0.5, 1, 2.9, 3, 9].map((t) => faceAtTime(face, t))).toEqual(["neutral", "smile", "smile", "sleepy", "sleepy"]);
   });
   it("sound: allow list, inside duration, density cap, signature pitch", () => {
-    const r = validateSound([{ preset: "boom", t: 0 }, { preset: "rising-chirp", t: 99 }, { preset: "soft-breath", t: 0.5 }, { preset: "signature", t: 1 }], { duration: 3, maxCues: 2, pitchSt: -2 });
+    const r = validateSound([{ preset: "boom", t: 0 }, { preset: "excited", t: 99 }, { preset: "sad-long", t: 0.5 }, { preset: "cute-excited", t: 1 }], { duration: 3, maxCues: 2, pitchSt: -2 });
     expect(r.cues).toHaveLength(2);
-    expect(r.cues[0]).toMatchObject({ t: 0.5, pitchSt: -4 });
+    expect(r.cues[0]).toMatchObject({ t: 0.5, sound: "sad-long", pitchSt: -2 });
     expect(r.issues.map((i) => i.message).join(" ")).toMatch(/boom.*99/);
+  });
+  it("sound: old synth cues migrate to the recorded sounds, keeping the signature pitch offset", () => {
+    expect(migrateCue({ id: "soft-breath@0.4", t: 0.4, timbre: "soft", pitchSt: -2.3, tempo: 0.7, lengthS: 1.2, volumeDb: -14 })).toEqual({ id: "soft-breath@0.4", t: 0.4, sound: "sad-long", pitchSt: -0.3, volumeDb: -6 });
+    expect(migrateCue({ id: "cue-1", t: 1, timbre: "bright", pitchSt: 7, tempo: 1.2, lengthS: 0.35, volumeDb: -10 }).sound).toBe("excited");
+    expect(migrateCue({ id: "x", t: 2, sound: "tilt", pitchSt: 1, volumeDb: -3 })).toEqual({ id: "x", t: 2, sound: "tilt", pitchSt: 1, volumeDb: -3 });
   });
   it("names: identifiers → plain words; empty → from status", () => {
     expect(sanitizeName("sunshine_morning")).toBe("Sunshine morning");

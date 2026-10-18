@@ -55,10 +55,7 @@ const NEUTRAL_FACE: FaceSpec = { preset: "neutral" };
 const CUE_FIELDS = {
   t: { label: STRINGS.editor.sound.fields.t, digits: 2 },
   pitchSt: { label: STRINGS.editor.sound.fields.pitchSt, digits: 1 },
-  tempo: { label: STRINGS.editor.sound.fields.tempo, digits: 2 },
-  lengthS: { label: STRINGS.editor.sound.fields.lengthS, digits: 2 },
   volumeDb: { label: STRINGS.editor.sound.fields.volumeDb },
-  timbre: { label: STRINGS.editor.sound.fields.timbre },
 };
 
 /** Snapshot → expression.motion: a clip means keyframe mode, none means the recipe plays. */
@@ -408,9 +405,9 @@ export function Editor({
     ctrl.current?.setFace(next);
   }
 
-  function addCue(presetId: string) {
+  function addCue(soundId: string) {
     const pitch = signatureToParams(axes).sound.pitchSt;
-    const base = cueAt(presetId, Math.round(time.t * 100) / 100, `${presetId}-${Date.now().toString(36)}`);
+    const base = cueAt(soundId, Math.round(time.t * 100) / 100, `${soundId}-${Date.now().toString(36)}`);
     const cue: SoundCue = { ...base, pitchSt: Math.round((base.pitchSt + pitch) * 10) / 10 };
     const next = { cues: [...soundSpec.cues, cue].sort((a, b) => a.t - b.t) };
     setSoundSpec(next);

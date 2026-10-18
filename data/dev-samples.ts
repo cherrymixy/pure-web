@@ -42,7 +42,7 @@ export const DEV_STRUCTURE_NARROW: Structure = {
 
 // STEP 9: "greeting" with cues on the motion clock and a face that dozes off along the timeline.
 export const DEV_SOUND: SoundSpec = {
-  cues: [cueAt("rising-chirp", 0.3), cueAt("signature", 1.6), cueAt("low-warm", 3.2)],
+  cues: [cueAt("surprise", 0.3), cueAt("cute-excited", 1.6), cueAt("yes", 3.2)],
 };
 
 export const DEV_FACE_KEYS: FaceSpec = {

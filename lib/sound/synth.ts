@@ -1,45 +1,36 @@
 /**
- * Web Audio cue synth (PRD §6 rule 11).
+ * Robot sound player (PRD §6 rule 11).
  *
- * A cue is one enveloped oscillator: timbre bright = triangle / soft = sine,
- * pitch in semitones from A4, tempo × shortens the tone, volume in dB.
- * The AudioContext is created on first use (a click), never during SSR.
+ * A cue plays one recorded clip (data/sound-cues.ts, public/sounds) through Web Audio:
+ * pitch in semitones = playback rate 2^(st/12), volume in dB. Clips are fetched and decoded
+ * once, on first use. The AudioContext is created on first use (a click), never during SSR.
  */
 
+import { SOUND_DIR, soundOf } from "@/data/sound-cues";
 import type { SoundCue } from "@/lib/models";
 
-export const BASE_HZ = 440;
 /** Quiet hours: master offset in dB. */
 export const QUIET_HOURS_DB = -12;
-const SILENT = 0.0001;
 const FADE_OUT = 0.03;
 
 export interface CuePlan {
-  type: OscillatorType;
-  freq: number;
-  /** Seconds, lengthS / tempo */
+  url: string;
+  /** Playback rate from the pitch */
+  rate: number;
+  /** Seconds the clip lasts at that rate */
   duration: number;
-  /** Linear peak gain */
+  /** Linear gain */
   gain: number;
-  attack: number;
-  release: number;
 }
 
 export const dbToGain = (db: number) => Math.pow(10, db / 20);
 
-/** Pure cue → oscillator settings (unit-tested; WebAudioSynth only plays them). */
-export function cuePlan(cue: Pick<SoundCue, "timbre" | "pitchSt" | "tempo" | "lengthS" | "volumeDb">): CuePlan {
-  const duration = Math.max(cue.lengthS / Math.max(cue.tempo, 0.05), 0.05);
-  const soft = cue.timbre === "soft";
-  const attack = Math.min(soft ? 0.08 : 0.015, duration * 0.3);
-  return {
-    type: soft ? "sine" : "triangle",
-    freq: BASE_HZ * Math.pow(2, cue.pitchSt / 12),
-    duration,
-    gain: dbToGain(cue.volumeDb),
-    attack,
-    release: Math.min(duration * (soft ? 0.5 : 0.35), duration - attack),
-  };
+/** Pure cue → playback settings (unit-tested; SamplePlayer only plays them). null = unknown sound. */
+export function cuePlan(cue: Pick<SoundCue, "sound" | "pitchSt" | "volumeDb">): CuePlan | null {
+  const sound = soundOf(cue.sound);
+  if (!sound) return null;
+  const rate = Math.pow(2, cue.pitchSt / 12);
+  return { url: SOUND_DIR + sound.file, rate, duration: sound.durationS / rate, gain: dbToGain(cue.volumeDb) };
 }
 
 export interface Voice {
@@ -56,11 +47,12 @@ export interface Synth {
   setQuietHours(on: boolean): void;
 }
 
-export class WebAudioSynth implements Synth {
+export class SamplePlayer implements Synth {
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
   private masterDb = 0;
   private quiet = false;
+  private readonly buffers = new Map<string, Promise<AudioBuffer | null>>();
 
   private ensure(): AudioContext {
     if (!this.ctx) {
@@ -73,6 +65,19 @@ export class WebAudioSynth implements Synth {
     return this.ctx;
   }
 
+  private buffer(url: string): Promise<AudioBuffer | null> {
+    let b = this.buffers.get(url);
+    if (!b) {
+      const ctx = this.ensure();
+      b = fetch(url)
+        .then((r) => r.arrayBuffer())
+        .then((data) => ctx.decodeAudioData(data))
+        .catch(() => null);
+      this.buffers.set(url, b);
+    }
+    return b;
+  }
+
   now(): number {
     return this.ensure().currentTime;
   }
@@ -80,34 +85,39 @@ export class WebAudioSynth implements Synth {
   play(cue: SoundCue, when: number): Voice {
     const ctx = this.ensure();
     const p = cuePlan(cue);
-    const start = Math.max(when, ctx.currentTime);
-    const end = start + p.duration;
-
-    const osc = ctx.createOscillator();
-    osc.type = p.type;
-    osc.frequency.value = p.freq;
-    const env = ctx.createGain();
-    env.gain.setValueAtTime(0, start);
-    env.gain.linearRampToValueAtTime(p.gain, start + p.attack);
-    env.gain.setValueAtTime(p.gain, end - p.release);
-    env.gain.exponentialRampToValueAtTime(SILENT, end);
-    osc.connect(env).connect(this.master!);
-    osc.start(start);
-    osc.stop(end + 0.02);
-    osc.onended = () => env.disconnect();
-
+    let cancelled = false;
+    let stop: (() => void) | null = null;
+    if (p) {
+      void this.buffer(p.url).then((buf) => {
+        if (!buf || cancelled) return;
+        // A clip that decodes late starts now instead of being skipped.
+        const start = Math.max(when, ctx.currentTime);
+        const src = ctx.createBufferSource();
+        src.buffer = buf;
+        src.playbackRate.value = p.rate;
+        const env = ctx.createGain();
+        env.gain.value = p.gain;
+        src.connect(env).connect(this.master!);
+        src.start(start);
+        src.onended = () => env.disconnect();
+        stop = () => {
+          const now = ctx.currentTime;
+          try {
+            if (now < start) return src.stop(now);
+            env.gain.cancelScheduledValues(now);
+            env.gain.setValueAtTime(env.gain.value, now);
+            env.gain.linearRampToValueAtTime(0, now + FADE_OUT);
+            src.stop(now + FADE_OUT + 0.01);
+          } catch {
+            // already stopped
+          }
+        };
+      });
+    }
     return {
       cancel: () => {
-        const now = ctx.currentTime;
-        try {
-          if (now < start) return osc.stop(now);
-          env.gain.cancelScheduledValues(now);
-          env.gain.setValueAtTime(env.gain.value, now);
-          env.gain.linearRampToValueAtTime(0, now + FADE_OUT);
-          osc.stop(now + FADE_OUT + 0.01);
-        } catch {
-          // already stopped
-        }
+        cancelled = true;
+        stop?.();
       },
     };
   }

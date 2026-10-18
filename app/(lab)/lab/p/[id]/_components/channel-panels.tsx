@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { FACE_AUTO, FACE_NAMES } from "@/data/face-videos";
-import { SOUND_CUES } from "@/data/sound-cues";
+import { SOUND_CUES, soundOf } from "@/data/sound-cues";
 import { STRINGS } from "@/data/strings";
 import type { FaceSpec, SoundCue, SoundSpec } from "@/lib/models";
 import { faceLabel, faceVideoUrl } from "@/lib/expression/face";
@@ -58,13 +58,11 @@ export function FacePanel({ face, onChange, onCommit }: { face: FaceSpec; onChan
   );
 }
 
-const CUE_SLIDERS: { key: "pitchSt" | "tempo" | "lengthS" | "volumeDb"; min: number; max: number; step: number; digits: number }[] = [
+const CUE_SLIDERS: { key: "pitchSt"; min: number; max: number; step: number; digits: number }[] = [
   { key: "pitchSt", min: -12, max: 12, step: 0.5, digits: 1 },
-  { key: "tempo", min: 0.5, max: 2, step: 0.05, digits: 2 },
-  { key: "lengthS", min: 0.1, max: 2, step: 0.05, digits: 2 },
 ];
 
-// W02E Sound: cue list (▶ preview, select), tokens, output (volume, quiet hours).
+// W02E Sound: cue list (▶ preview, select), robot sound picker, pitch, output (volume, quiet hours).
 export function SoundPanel({
   sound,
   selected,
@@ -84,13 +82,13 @@ export function SoundPanel({
   onPreview: (cue: SoundCue) => void;
   onChange: (next: SoundSpec) => void;
   onCommit: (next?: SoundSpec) => void;
-  onAdd: (presetId: string) => void;
+  onAdd: (soundId: string) => void;
   onRemove: (id: string) => void;
   onQuietHours: (on: boolean) => void;
 }) {
   const cue = sound.cues.find((c) => c.id === selected) ?? null;
   const setCue = (patch: Partial<SoundCue>) => onChange({ cues: sound.cues.map((c) => (c.id === selected ? { ...c, ...patch } : c)) });
-  const label = (c: SoundCue) => SOUND_CUES.find((p) => c.id.startsWith(p.id))?.label ?? c.id;
+  const label = (c: SoundCue) => soundOf(c.sound)?.label ?? c.sound;
 
   const empty = "text-[16px] leading-[20px] text-[var(--text-secondary)]";
   return (
@@ -127,30 +125,21 @@ export function SoundPanel({
             {CUE_SLIDERS.map(({ key, min, max, step, digits }) => (
               <BarSlider key={key} label={SND.fields[key]} value={cue[key]} min={min} max={max} step={step} digits={digits} onChange={(v) => setCue({ [key]: v })} onCommit={() => { onCommit(); onPreview(cue); }} />
             ))}
-            <div className="flex items-center justify-between">
-              <span className="flex items-start gap-[var(--space-4)]">
-                <span className="mt-[2px] size-[5px] shrink-0 rounded-[var(--radius-full)] bg-[var(--neutral-300)]" aria-hidden />
-                <span className="text-[16px] leading-[20px] text-[var(--text-primary)]">{SND.fields.timbre}</span>
-              </span>
-              <span className="flex gap-[var(--space-8)]">
-                {(["bright", "soft"] as const).map((t) => (
-                  <button
-                    key={t}
-                    type="button"
-                    aria-pressed={cue.timbre === t}
-                    className={pill(cue.timbre === t)}
-                    onClick={() => {
-                      const next = { cues: sound.cues.map((c) => (c.id === selected ? { ...c, timbre: t } : c)) };
-                      onChange(next);
-                      onCommit(next);
-                      onPreview({ ...cue, timbre: t });
-                    }}
-                  >
-                    {SND.timbre[t]}
-                  </button>
-                ))}
-              </span>
-            </div>
+            <label className="flex items-center justify-between gap-[var(--space-8)]">
+              <span className="text-[16px] leading-[20px] text-[var(--text-primary)]">{SND.fields.sound}</span>
+              <select
+                value={cue.sound}
+                onChange={(e) => {
+                  const next = { cues: sound.cues.map((c) => (c.id === selected ? { ...c, sound: e.target.value } : c)) };
+                  onChange(next);
+                  onCommit(next);
+                  onPreview({ ...cue, sound: e.target.value });
+                }}
+                className="rounded-[var(--radius-full)] bg-[var(--bg-surface)] px-[var(--space-12)] py-[var(--space-4)] text-[14px] leading-[18px] text-[var(--text-primary)] outline-none"
+              >
+                {SOUND_CUES.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}
+              </select>
+            </label>
           </div>
         )}
       </PanelSection>

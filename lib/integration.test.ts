@@ -40,7 +40,7 @@ const OUTPUT: GenerationOutput = {
   reasoning: "The head droops and catches itself, like dozing at a desk.",
   motion: { steps: [{ behavior: "doze", speed: 0.9, amplitude: 1, repeat: 1, face: "sleepy" }, { behavior: "nod", speed: 0.8, amplitude: 0.8, repeat: 1 }] },
   face: { preset: "sleepy" },
-  sound: { cues: [{ preset: "soft-breath", t: 0.4 }, { preset: "low-warm", t: 2 }] },
+  sound: { cues: [{ preset: "sad-long", t: 0.4 }, { preset: "yes", t: 2 }] },
 };
 
 function setup() {

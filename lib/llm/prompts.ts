@@ -19,7 +19,7 @@ Build the expression only from these parts:
   speed 0.5–1.5 (1 = normal), amplitude 0.3–1.3 (1 = normal), repeat 1–3, optional face video per step.
 - face.preset: the face video on the screen, one of ${Object.entries(FACE_VIDEOS).map(([id, v]) => `${id} (${v.hint})`).join(", ")}, or ${FACE_AUTO} (${FACE_AUTO_HINT}). The face is always one of these videos; never describe eye shapes or numbers.
   Looping behaviors (idle, doze, sleep, sad, sweep, focus) last 5–13 seconds per cycle: give them repeat 1. Keep the whole expression under 15 seconds.
-- sound.cues: 0 to 4 cues, "preset" one of ${SOUND_CUES.map((c) => c.id).join(", ")}, "t" = start time in seconds from the beginning.
+- sound.cues: 0 to 4 cues, each a recorded robot sound — "preset" one of ${SOUND_CUES.map((c) => `${c.id} (${c.hint}, ${c.durationS}s)`).join(", ")}; "t" = start time in seconds from the beginning.
 
 Rules:
 - Match the situation and the brand signature. Calm moments use few, slow, small steps; lively moments use more energy.

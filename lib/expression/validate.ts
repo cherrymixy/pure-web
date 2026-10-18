@@ -270,7 +270,7 @@ export function validateFace(spec: { preset: string }): { face: FaceSpec; issues
   return { face: { preset: FACE_AUTO }, issues: [{ field: "face.preset", message: `Unknown face video "${spec.preset}" → ${FACE_AUTO}` }] };
 }
 
-const CUES = new Map(SOUND_CUES.map((c) => [c.id, c]));
+const CUES = new Set(SOUND_CUES.map((c) => c.id));
 
 /** Allow-listed cues placed in [0, duration], capped by the signature's density, pitched by its pitch. */
 export function validateSound(
@@ -280,7 +280,7 @@ export function validateSound(
   const issues: Issue[] = [];
   const out: SoundCue[] = [];
   cues.forEach((c, i) => {
-    if (!CUES.has(c.preset)) return issues.push({ field: `sound.cues[${i}]`, message: `Dropped unknown cue "${c.preset}"` });
+    if (!CUES.has(c.preset)) return issues.push({ field: `sound.cues[${i}]`, message: `Dropped unknown sound "${c.preset}"` });
     const t = clampTo(Number.isFinite(c.t) ? c.t : 0, 0, Math.max(opts.duration - 0.1, 0));
     if (t !== c.t) issues.push({ field: `sound.cues[${i}].t`, message: `t ${c.t} → ${t.toFixed(2)}` });
     const cue = cueAt(c.preset, Math.round(t * 100) / 100, `cue-${i + 1}`);

@@ -11,7 +11,7 @@ const good: GenerationOutput = {
   reasoning: "It slowly droops and catches itself.",
   motion: { steps: [{ behavior: "doze", speed: 0.8, amplitude: 0.9, repeat: 1, face: "sleepy" }] },
   face: { preset: "sleepy" },
-  sound: { cues: [{ preset: "soft-breath", t: 0.5 }] },
+  sound: { cues: [{ preset: "sad-long", t: 0.5 }] },
 };
 const json = (v: unknown) => JSON.stringify(v);
 const req = { prompt: "I'm so tired, I keep nodding off" };

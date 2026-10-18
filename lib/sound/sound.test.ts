@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { cueAt } from "@/data/sound-cues";
 import type { SoundCue } from "@/lib/models";
 import { SoundScheduler } from "./scheduler";
-import { BASE_HZ, cuePlan, dbToGain, type Synth } from "./synth";
+import { cuePlan, dbToGain, type Synth } from "./synth";
 
 class FakeSynth implements Synth {
   clock = 10;
@@ -28,7 +28,7 @@ class FakeSynth implements Synth {
   }
 }
 
-const spec = { cues: [cueAt("rising-chirp", 0, "a"), cueAt("signature", 1, "b"), cueAt("low-warm", 2, "c")] };
+const spec = { cues: [cueAt("surprise", 0, "a"), cueAt("cute-excited", 1, "b"), cueAt("yes", 2, "c")] };
 
 function setup() {
   const synth = new FakeSynth();
@@ -38,19 +38,18 @@ function setup() {
 }
 
 describe("cuePlan", () => {
-  it("maps timbre, pitch, tempo and volume", () => {
-    const p = cuePlan({ timbre: "bright", pitchSt: 12, tempo: 2, lengthS: 1, volumeDb: -20 });
-    expect(p.type).toBe("triangle");
-    expect(p.freq).toBeCloseTo(BASE_HZ * 2);
-    expect(p.duration).toBeCloseTo(0.5);
+  it("plays the recorded clip: file, pitch → playback rate, volume", () => {
+    const p = cuePlan({ sound: "excited", pitchSt: 12, volumeDb: -20 })!;
+    expect(p.url).toBe("/sounds/excited.m4a");
+    expect(p.rate).toBeCloseTo(2);
+    expect(p.duration).toBeCloseTo(2.15 / 2);
     expect(p.gain).toBeCloseTo(0.1);
-    expect(p.attack + p.release).toBeLessThanOrEqual(p.duration);
-    expect(cuePlan({ timbre: "soft", pitchSt: -5, tempo: 1, lengthS: 0.6, volumeDb: 0 }).type).toBe("sine");
+    expect(cuePlan({ sound: "beep", pitchSt: 0, volumeDb: 0 })).toBeNull();
   });
 
-  it("+2 st is higher", () => {
-    const base = cueAt("low-warm", 0);
-    expect(cuePlan({ ...base, pitchSt: base.pitchSt + 2 }).freq / cuePlan(base).freq).toBeCloseTo(Math.pow(2, 2 / 12));
+  it("+2 st plays faster and higher", () => {
+    const base = cueAt("yes", 0);
+    expect(cuePlan({ ...base, pitchSt: 2 })!.rate / cuePlan(base)!.rate).toBeCloseTo(Math.pow(2, 2 / 12));
   });
 
   it("dbToGain", () => {
@@ -113,7 +112,7 @@ describe("SoundScheduler", () => {
 
   it("stop silences everything, preview plays immediately", () => {
     const { synth, s } = setup();
-    s.preview(cueAt("signature", 0, "p"));
+    s.preview(cueAt("yes", 0, "p"));
     expect(synth.played[0].when).toBe(10);
     s.play(0);
     s.stop();

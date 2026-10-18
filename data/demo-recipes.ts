@@ -32,7 +32,7 @@ export const PROMPT_DEMOS: Record<SuggestedPromptId, DemoExpression> = {
       props: props(64, 48, 58, 62, 50),
     },
     face: face("smile"),
-    sound: { cues: [cueAt("rising-chirp", 0.6), cueAt("signature", 2.4)] },
+    sound: { cues: [cueAt("surprise", 0.6), cueAt("cute-excited", 2.4)] },
   },
   presentation: {
     name: "Proud bounce",
@@ -46,7 +46,7 @@ export const PROMPT_DEMOS: Record<SuggestedPromptId, DemoExpression> = {
       props: props(72, 55, 52, 70, 64),
     },
     face: face("smile"),
-    sound: { cues: [cueAt("rising-chirp", 0.3), cueAt("rising-chirp", 1.4), cueAt("signature", 3)] },
+    sound: { cues: [cueAt("excited", 0.3), cueAt("cute-fond", 3)] },
   },
   tired: {
     name: "Sleepy nod",
@@ -60,7 +60,7 @@ export const PROMPT_DEMOS: Record<SuggestedPromptId, DemoExpression> = {
       props: props(71, 53, 64, 85, 60),
     },
     face: face("sleepy"),
-    sound: { cues: [cueAt("soft-breath", 0.4), cueAt("soft-breath", 3.2)] },
+    sound: { cues: [cueAt("sad-long", 0.4)] },
   },
   startled: {
     name: "Startled hop",
@@ -74,7 +74,7 @@ export const PROMPT_DEMOS: Record<SuggestedPromptId, DemoExpression> = {
       props: props(80, 40, 35, 78, 55),
     },
     face: face("surprise"),
-    sound: { cues: [cueAt("rising-chirp", 0.1), cueAt("falling-tone", 1.6)] },
+    sound: { cues: [cueAt("surprise", 0.1), cueAt("tilt", 1.6)] },
   },
 };
 
@@ -89,21 +89,21 @@ const single = (behavior: string, preset: FaceVideoName, cue: string, name: stri
 
 // One per component chip (data/components.ts ids).
 export const COMPONENT_DEMOS: Record<string, DemoExpression> = {
-  idle: single("idle", "neutral", "soft-breath", "Quiet idle", "Waiting calmly."),
-  doze: single("doze", "sleepy", "soft-breath", "Dozing", "Drifting off."),
-  sleep: single("sleep", "sleepy", "soft-breath", "Sleeping", "Asleep."),
-  wake: single("wake", "surprise", "rising-chirp", "Waking up", "Just woke up."),
-  nod: single("nod", "smile", "low-warm", "Nod", "Agreeing."),
-  shake: single("shake", "neutral", "falling-tone", "Head shake", "Disagreeing."),
-  look_around: single("look_around", "surprise", "rising-chirp", "Look around", "Looking for something."),
-  curious: single("curious", "tilt", "rising-chirp", "Curious tilt", "Something caught its interest."),
-  happy: single("happy", "heart", "rising-chirp", "Happy bounce", "Feeling happy."),
-  sad: single("sad", "sad", "falling-tone", "Sad droop", "Feeling down."),
-  alert: single("alert", "surprise", "rising-chirp", "Alert", "Something needs attention."),
-  greet: single("greet", "smile", "signature", "Greeting", "Saying hello."),
-  sweep: single("sweep", "neutral", "low-warm", "Sweep", "Scanning the desk."),
-  focus: single("focus", "neutral", "low-warm", "Focus", "Concentrating on the task."),
-  home: single("home", "neutral", "low-warm", "Rest", "Back to rest."),
+  idle: single("idle", "neutral", "cute-fond", "Quiet idle", "Waiting calmly."),
+  doze: single("doze", "sleepy", "sad", "Dozing", "Drifting off."),
+  sleep: single("sleep", "sleepy", "sad-long", "Sleeping", "Asleep."),
+  wake: single("wake", "surprise", "surprise", "Waking up", "Just woke up."),
+  nod: single("nod", "smile", "yes", "Nod", "Agreeing."),
+  shake: single("shake", "neutral", "refuse", "Head shake", "Disagreeing."),
+  look_around: single("look_around", "surprise", "tilt", "Look around", "Looking for something."),
+  curious: single("curious", "tilt", "tilt", "Curious tilt", "Something caught its interest."),
+  happy: single("happy", "heart", "excited", "Happy bounce", "Feeling happy."),
+  sad: single("sad", "sad", "sad", "Sad droop", "Feeling down."),
+  alert: single("alert", "surprise", "surprise", "Alert", "Something needs attention."),
+  greet: single("greet", "smile", "cute-excited", "Greeting", "Saying hello."),
+  sweep: single("sweep", "neutral", "cute-fond", "Sweep", "Scanning the desk."),
+  focus: single("focus", "neutral", "yes", "Focus", "Concentrating on the task."),
+  home: single("home", "neutral", "yes", "Rest", "Back to rest."),
 };
 
 /** "Make it softer" variant: slower, smaller, softer landing, quieter. */

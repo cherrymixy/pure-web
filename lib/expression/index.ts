@@ -12,3 +12,4 @@ export * from "./keys";
 export * from "./direct";
 export * from "./references";
 export * from "./face";
+export * from "./sound";

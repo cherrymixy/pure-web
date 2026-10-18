@@ -143,10 +143,10 @@ export type FaceSpec = z.infer<typeof FaceSpecSchema>;
 export const SoundCueSchema = z.object({
   id: z.string(),
   t: z.number().min(0),
+  /** Robot sound id (data/sound-cues.ts) */
+  sound: z.string(),
+  /** Semitones (playback rate 2^(st/12)) */
   pitchSt: z.number(),
-  tempo: z.number().positive(),
-  lengthS: z.number().positive(),
-  timbre: z.enum(["bright", "soft"]),
   volumeDb: z.number(),
 });
 export type SoundCue = z.infer<typeof SoundCueSchema>;
