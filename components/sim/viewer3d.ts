@@ -22,6 +22,7 @@ const MJ_TO_WORLD = -Math.PI / 2;
 
 /** 스테이지·조명 색. 기본값은 _ref(다크 스테이지 + 마젠타 림 + 바이올렛 필) 그대로. */
 export interface ViewerOptions {
+  /** Background colour; "transparent" = no background, the floor only shows the shadow (page shows through) */
   stage?: string;
   floor?: string;
   /** Floor grid line colours (major, minor); null = no grid */
@@ -111,15 +112,18 @@ export class LampViewer {
     this.lamp = lamp;
     this.options = { ...DEFAULT_OPTIONS, ...options };
 
-    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    const transparent = this.options.stage === 'transparent';
+    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: transparent });
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.5;
 
-    this.scene.background = new THREE.Color(this.options.stage);
-    this.scene.fog = new THREE.Fog(this.options.stage, 2.2, 6);
+    if (!transparent) {
+      this.scene.background = new THREE.Color(this.options.stage);
+      this.scene.fog = new THREE.Fog(this.options.stage, 2.2, 6);
+    }
 
     this.camera = new THREE.PerspectiveCamera(38, 1, 0.01, 50);
     this.root.rotation.x = MJ_TO_WORLD;
@@ -194,10 +198,12 @@ export class LampViewer {
   }
 
   private addFloor(): void {
-    const floor = new THREE.Mesh(
-      new THREE.CircleGeometry(3.2, 64),
-      new THREE.MeshStandardMaterial({ color: this.options.floor, roughness: 0.9, metalness: 0.04 }),
-    );
+    // Transparent stage: the floor is invisible except for the robot's shadow.
+    const material =
+      this.options.stage === 'transparent'
+        ? new THREE.ShadowMaterial({ opacity: 0.16 })
+        : new THREE.MeshStandardMaterial({ color: this.options.floor, roughness: 0.9, metalness: 0.04 });
+    const floor = new THREE.Mesh(new THREE.CircleGeometry(3.2, 64), material);
     floor.receiveShadow = true;
     this.root.add(floor);
 

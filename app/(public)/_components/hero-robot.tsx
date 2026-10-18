@@ -68,9 +68,9 @@ export function HeroRobot({ className, label }: { className?: string; label: str
   }, []);
 
   return (
-    // The stage blends into the hero background: floor/grid in the hero's floor tone, edges faded out with a mask.
+    // Transparent stage: no background, no floor — only the robot and its shadow over the hero image.
     // The landing is CSS-zoomed (×2–3); the inner box undoes that zoom so the canvas renders at screen resolution.
-    <div ref={box} role="img" aria-label={label} className={`${className ?? ""} [--sim-floor:var(--neutral-0)] [--sim-grid-major:none] [--sim-grid-minor:none] [--sim-stage:var(--neutral-50)] [mask-image:radial-gradient(ellipse_42%_46%_at_50%_58%,black_45%,transparent_100%)]`}>
+    <div ref={box} role="img" aria-label={label} className={`${className ?? ""} [--sim-grid-major:none] [--sim-grid-minor:none] [--sim-stage:transparent]`}>
       <div className="size-full [zoom:var(--landing-unzoom,1)]">
         <Viewport controllerRef={ctrl} mode="structure" orbit={false} className="block size-full" />
       </div>
