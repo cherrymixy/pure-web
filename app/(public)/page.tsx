@@ -35,10 +35,10 @@ function Lines({ lines }: { lines: readonly string[] }) {
 export default function Page() {
   return (
     <LandingZoom>
-      {/* Top bar (950:2874): full width at any scale, stays on screen while scrolling. Figma size (no landing scale), full-value space/radius, frosted glass over the page. */}
+      {/* Top bar (950:2874): full width at any scale, stays on screen while scrolling. Figma size (no landing scale), full-value space/radius. */}
       <div className="sticky top-[8px] z-50 h-0">
         <div className="absolute left-[7px] right-[7.5px] top-0">
-          <header className="flex h-[44px] w-full items-center justify-between rounded-full border-[0.5px] border-[var(--landing-glass-border)] bg-[var(--landing-glass)] px-[var(--space-40)] backdrop-blur-[var(--landing-glass-blur)]">
+          <header className="flex h-[44px] w-full items-center justify-between rounded-full border-[0.5px] border-[var(--neutral-0)] bg-[var(--bg-surface)] px-[var(--space-40)]">
             <div className="flex w-[130px] items-center">
               <Link href="/" aria-label={L.nav.logoAlt}>
                 <img src="/figma/landing/logo-mark.svg" alt={L.nav.logoAlt} width={14.9999} height={14.9997} className="block" />
@@ -66,7 +66,8 @@ export default function Page() {
 
         <div className="absolute inset-0">
           <div className="absolute left-[calc(50%+0.42px)] top-[94px] z-[1] flex w-[346.848px] -translate-x-1/2 flex-col items-center gap-[17.696px]">
-            <p className="rounded-full border-[0.885px] border-[var(--neutral-0)] bg-[var(--neutral-300)] px-[13.272px] py-[7.079px] text-[10.618px] font-medium leading-[1.26] text-[var(--sage-600)]">{L.hero.badge}</p>
+            {/* Badge 950:2927 as frosted glass: translucent fill, background blur, white rim, inner glow. */}
+            <p className="rounded-full border-[0.885px] border-[var(--landing-badge-glass-border)] bg-[linear-gradient(180deg,var(--landing-badge-glass-top),var(--landing-badge-glass-bottom))] px-[13.272px] py-[7.079px] text-[10.618px] font-medium leading-[1.26] text-[var(--sage-600)] shadow-[inset_0_0_3px_0.5px_var(--landing-badge-glass-glow),0_1px_3px_var(--landing-badge-glass-shade)] backdrop-blur-[var(--landing-badge-glass-blur)]">{L.hero.badge}</p>
             <h1 className="whitespace-nowrap text-center text-[40.702px] font-semibold leading-[1.1] text-[var(--sage-800)]">
               <Lines lines={L.hero.headline} />
             </h1>
