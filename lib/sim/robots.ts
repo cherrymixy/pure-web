@@ -80,6 +80,8 @@ export interface RobotSpec {
   facesManifest: string | null;
   /** LeLamp channel space → this robot. null = identity. */
   retarget: RetargetMatrix | null;
+  /** Extra gain on the negative side of a retargeted channel (e.g. leaning back), applied after `retarget`. */
+  backGain?: Partial<Record<JointName, number>>;
 }
 
 // ------------------------------------------------------------- PURE desk robot
@@ -153,6 +155,8 @@ const PURE_DESK: RobotSpec = {
   },
   facesManifest: '/pure-desk/faces/faces.json',
   retarget: PURE_DESK_RETARGET,
+  // Leaning back reads as falling over on this robot: the shoulder's backward swing is halved.
+  backGain: { base_pitch: 0.5 },
 };
 
 export const ROBOTS: Record<RobotId, RobotSpec> = {
@@ -201,9 +205,12 @@ export function retargetMotion(robot: RobotSpec, motion: Motion): Motion {
   if (motion.loop) {
     for (const kf of motion.keyframes) current = { ...current, ...kf.pose } as Pose;
   }
+  const back = robot.backGain ?? {};
   const keyframes = motion.keyframes.map((kf) => {
     current = { ...current, ...kf.pose } as Pose;
-    return { ...kf, pose: mapPose(matrix, current) };
+    const pose = mapPose(matrix, current);
+    for (const [joint, gain] of Object.entries(back) as [JointName, number][]) if (pose[joint] < 0) pose[joint] *= gain;
+    return { ...kf, pose };
   });
 
   const overlays: Oscillation[] = [];

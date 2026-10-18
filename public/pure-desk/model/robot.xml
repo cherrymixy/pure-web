@@ -23,7 +23,7 @@
   <default>
     <default class="sts3215">
       <joint damping="0.60" frictionloss="0.052" armature="0.028"/>
-      <position kp="17.8" kv="0.0" forcerange="-3.35 3.35"/>
+      <position kp="17.8" kv="1.2" forcerange="-3.35 3.35"/>
     </default>
     <default class="visual">
       <geom type="mesh" contype="0" conaffinity="0" group="2"/>

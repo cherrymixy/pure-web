@@ -15,6 +15,7 @@ import { engineJoint } from '@/lib/sim/clip-map';
 import { JOINT_NAMES, type JointName, type Motion, type PartialPose, type Pose } from '@/lib/sim/motion';
 import { PURE_DESK_ROBOT, retargetMotion, type CameraView, type FaceManifest, type RobotSpec } from '@/lib/sim/robots';
 import { motionPlayable, type Playable } from '@/lib/sim/sequence';
+import { CommandSmoother } from '@/lib/sim/smooth';
 import { createLamp, type LampSim, type LoadProgress } from './lamp';
 import { LimitMonitor, type JointLimits, type LimitEvent } from './limits';
 import { LampViewer, type JointScreenPoint, type ViewerOptions } from './viewer3d';
@@ -85,7 +86,11 @@ export class SimRuntime {
   private pendingLimits: JointLimits | null = null;
   private active: Active | null = null;
   private last: PlaybackSource | null = null;
+  /** What playback asks for (raw keyframe target) — limits are checked on this. */
+  private target: Pose = { ...HOME };
+  /** What the servos get: the target after smoothing (lib/sim/smooth.ts). */
   private command: Pose = { ...HOME };
+  private readonly smoother = new CommandSmoother(HOME);
   private idle: boolean;
   /** Idle setting to restore after stop() → next play */
   private idleDefault: boolean;
@@ -237,7 +242,8 @@ export class SimRuntime {
     this.trackStep(a);
     if (this.paused) {
       this.checkLimits(pose, a.t);
-      for (const j of JOINT_NAMES) this.command[j] = pose[j];
+      for (const j of JOINT_NAMES) this.command[j] = this.target[j] = pose[j];
+      this.smoother.reset(pose);
       lamp.poseKinematic(pose);
       this.kinematic = true;
     }
@@ -345,8 +351,7 @@ export class SimRuntime {
     const lamp = this.lamp;
     if (!lamp) return;
     const hit = this.checkLimits(pose, t);
-    for (const [k, v] of Object.entries(pose)) if (v !== undefined) this.command[k as JointName] = v;
-    lamp.setPose(pose);
+    for (const [k, v] of Object.entries(pose)) if (v !== undefined) this.target[k as JointName] = v;
     const a = this.active;
     if (hit && this.stopOnLimit && a && !this.exempt(a.source.name)) this.setPaused(true);
   }
@@ -405,6 +410,9 @@ export class SimRuntime {
           this.apply(a.playable.target(a.t), a.t);
         }
       }
+      // Servos follow the smoothed target every frame, also while holding after a playback ends.
+      this.command = this.smoother.step(this.target, wall);
+      lamp.setPose(this.command);
       const steps = Math.min(Math.round(wall / lamp.dt), MAX_STEPS);
       if (steps > 0) lamp.step(steps);
 
