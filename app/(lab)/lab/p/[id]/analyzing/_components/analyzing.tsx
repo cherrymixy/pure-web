@@ -159,8 +159,15 @@ export function Analyzing({ id }: { id: string }) {
           <PreviewArt type={project.structure?.type ?? project.type} />
           {!done && !failed && (
             <>
-              <div className="absolute left-0 top-[116px] h-[4px] w-full bg-gradient-to-r from-[color-mix(in_srgb,var(--analyzing-scan)_0%,transparent)] via-[color-mix(in_srgb,var(--analyzing-scan)_90%,transparent)] to-[color-mix(in_srgb,var(--analyzing-scan)_0%,transparent)]" />
-              <div className="absolute left-0 top-[56px] h-[60px] w-full bg-gradient-to-b from-[color-mix(in_srgb,var(--analyzing-scan)_0%,transparent)] to-[color-mix(in_srgb,var(--analyzing-scan)_12%,transparent)]" />
+              {/* Scan line follows the progress: top of the preview at 0 % → bottom at 100 % (Figma 901:8473 draws it at 116 px); glow trails 60 px above */}
+              <div
+                className="absolute left-0 w-full motion-reduce:transition-none"
+                // glides linearly between polls so the line moves continuously with the percent
+                style={{ top: `calc(${percent / 100} * (100% - 4px) - 60px)`, transition: `top ${POLL_MS}ms linear` }}
+              >
+                <div className="h-[60px] w-full bg-gradient-to-b from-[color-mix(in_srgb,var(--analyzing-scan)_0%,transparent)] to-[color-mix(in_srgb,var(--analyzing-scan)_12%,transparent)]" />
+                <div className="h-[4px] w-full bg-gradient-to-r from-[color-mix(in_srgb,var(--analyzing-scan)_0%,transparent)] via-[color-mix(in_srgb,var(--analyzing-scan)_90%,transparent)] to-[color-mix(in_srgb,var(--analyzing-scan)_0%,transparent)]" />
+              </div>
             </>
           )}
         </div>
