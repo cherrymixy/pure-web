@@ -35,10 +35,10 @@ function Lines({ lines }: { lines: readonly string[] }) {
 export default function Page() {
   return (
     <LandingZoom>
-      {/* Top bar (950:2874): full width at any scale, stays on screen while scrolling. Figma size (no landing scale), full-value space/radius. */}
+      {/* Top bar (950:2874): full width at any scale, stays on screen while scrolling. Figma size (no landing scale), full-value space/radius. Pill Try PURE, right padding 11 (concentric 6 + 5 by user review). */}
       <div className="sticky top-[8px] z-50 h-0">
-        <div className="absolute left-[7px] right-[7.5px] top-0">
-          <header className="flex h-[44px] w-full items-center justify-between rounded-full border-[0.5px] border-[var(--neutral-0)] bg-[var(--bg-surface)] px-[var(--space-40)]">
+        <div className="absolute left-[var(--space-24)] right-[var(--space-24)] top-0">
+          <header className="flex h-[44px] w-full items-center justify-between rounded-full border-[0.5px] border-[var(--neutral-0)] bg-[var(--bg-surface)] pl-[var(--space-20)] pr-[11px]">
             <div className="flex w-[130px] items-center">
               <Link href="/" aria-label={L.nav.logoAlt}>
                 <img src="/figma/landing/logo-mark.svg" alt={L.nav.logoAlt} width={14.9999} height={14.9997} className="block" />
@@ -49,9 +49,9 @@ export default function Page() {
                 <a key={n.href} href={n.href}>{n.label}</a>
               ))}
             </nav>
-            <div className="flex items-center gap-[var(--space-48)]">
+            <div className="flex items-center gap-[var(--space-20)]">
               <Link href="/lab" className="text-[10px] leading-[1.26] text-[var(--text-link)]">{L.nav.signIn}</Link>
-              <Link href="/lab" className="flex h-[32px] w-[75px] items-center justify-center rounded-[var(--radius-md)] bg-[var(--neutral-300)] text-[10px] font-medium leading-[1.26] text-[var(--sage-900)]">
+              <Link href="/lab" className="flex h-[32px] w-[75px] items-center justify-center rounded-[var(--radius-full)] bg-[var(--neutral-300)] text-[10px] font-medium leading-[1.26] text-[var(--sage-900)]">
                 {L.nav.tryPure}
               </Link>
             </div>
@@ -120,9 +120,9 @@ export default function Page() {
           {L.daily.cta}
           <Arrow />
         </Link>
-        {/* Phone mockups 901:7071 / 901:7093, exported with their 5px outside stroke */}
-        <img src="/figma/landing/phone-home@4x.png" alt={L.daily.phoneHomeAlt} className="absolute left-[569px] top-[35px] h-[340px] w-[161.785px] max-w-none" />
-        <img src="/figma/landing/phone-playing@4x.png" alt={L.daily.phonePlayingAlt} className="absolute left-[740.785px] top-[58px] h-[340px] w-[161.785px] max-w-none" />
+        {/* Phone mockups (user export, Band frames 2147240559 / 2147240560): both centred in the 430 band, so their ends line up */}
+        <img src="/figma/landing/phone-home-v2.png" alt={L.daily.phoneHomeAlt} className="absolute left-[569px] top-[45px] h-[340px] w-[162px] max-w-none" />
+        <img src="/figma/landing/phone-playing-v2.png" alt={L.daily.phonePlayingAlt} className="absolute left-[740.785px] top-[45px] h-[340px] w-[163px] max-w-none" />
       </section>
 
       </div>
@@ -131,7 +131,7 @@ export default function Page() {
       <section id="expert" className="relative mt-[calc(74px*var(--landing-scale))] h-[463px]">
         <img src="/figma/landing/expert-composite@4x.png" alt={L.expert.imageAlt} className="absolute left-0 top-0 h-[463px] w-[960px] max-w-none" />
         <img src="/figma/landing/expert-top-fade.png" alt="" className="absolute left-[-140px] top-0 h-[89px] w-[1101px] max-w-none object-cover" />
-        <div className="absolute left-[618px] top-[39px] flex w-[235px] origin-top-left flex-col [scale:var(--landing-scale)]">
+        <div className="absolute left-[628px] top-[39px] flex w-[235px] origin-top-left flex-col [scale:var(--landing-scale)]">
           <p className={label}>{L.expert.label}</p>
           <h2 className="mt-[12px] w-[230px] text-[26px] font-semibold leading-[1.26] text-[var(--sage-800)]">{L.expert.headline}</h2>
           <ol className="mt-[30px] flex flex-col gap-[calc(var(--space-12)/2)]">

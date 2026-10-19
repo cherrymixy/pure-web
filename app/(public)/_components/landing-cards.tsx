@@ -121,7 +121,8 @@ function TypeCard({ card }: { card: (typeof R.cards)[number] }) {
   const { left = 0, width, height } = art.box;
   return (
     // Cards share the row width; the Figma art (box + crop, ~134 wide) stays centred in the full-width image band.
-    <div className="relative h-[247px] min-w-0 flex-1 overflow-clip rounded-[calc(var(--radius-xl)/2)] bg-[var(--bg-surface)]">
+    // Hover: a slight lift (scale + float shadow) so the type being read stands out.
+    <div className="relative h-[247px] min-w-0 flex-1 overflow-clip rounded-[calc(var(--radius-xl)/2)] bg-[var(--bg-surface)] transition-[transform,box-shadow] duration-[var(--motion-base)] ease-[var(--ease-standard)] hover:z-10 hover:shadow-[var(--pure-shadow-float)] motion-safe:hover:scale-[1.04]">
       <div className="absolute inset-x-0 top-0 bg-[var(--sage-50)]" style={{ height }} />
       <div className="absolute top-0" style={{ left: `calc(50% - ${Number(width) / 2}px + ${left}px)`, width, height }}>
         <div className="absolute inset-0 overflow-clip">
