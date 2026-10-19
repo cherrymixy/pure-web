@@ -28,6 +28,10 @@
 
 <sub>Team PURE · 최성근 Seonggeun Choi · 방태림 Taerim Bang · 전승아 SeungA Jeon</sub>
 
+<br/>
+
+**🖥️ Expert Lab** (지금 보는 저장소) · **📱 [App](https://github.com/cherrymixy/pure-app)** — 사용자가 일상의 움직임을 내 로봇의 모션체로 만드는 iOS 앱
+
 </div>
 
 > **데모 안내** — Vercel 배포본에는 로컬 LLM(Ollama)이 없어서 생성은 **데모 레시피**로 동작해요. 데이터는 서버 임시 폴더에 저장돼 언제든 처음 시드 상태로 돌아갈 수 있어요. 전체 기능은 [로컬 실행](#-시작하기)으로 확인할 수 있어요.
