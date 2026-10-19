@@ -26,7 +26,7 @@
 [![Vitest](https://img.shields.io/badge/Vitest-tested-6E9F18?style=flat-square&logo=vitest&logoColor=white&labelColor=1A1E1F)](https://vitest.dev)
 ![Status](https://img.shields.io/badge/졸업전시-2026-A9C2C7?style=flat-square&labelColor=1A1E1F)
 
-<sub>Team PURE · 최성근 Seonggeun Choi · 방태림 Taerim Bang · 전승아 SeungA Jeon</sub>
+<sub>Team PURE · 전승아 SeungA Jeon · 최성근 Seonggeun Choi · 방태림 Taerim Bang</sub>
 
 <br/>
 
@@ -389,9 +389,9 @@ UX 설계와 검증은 셋이 함께 맡고, 제품 · 브랜드 · 인터페이
 
 | 이름 | 역할 |
 |---|---|
+| **전승아** SeungA Jeon | Sound Effect Design · Visual & UI Design · Vibe Coding(웹 시뮬레이터 구현) |
 | **최성근** Seonggeun Choi | Face UI Design · Promotion Video · Project Leading |
 | **방태림** Taerim Bang | GUI Design & Prototyping · Product Design · Brand Design |
-| **전승아** SeungA Jeon | Sound Effect Design · Visual & UI Design · Vibe Coding(웹 시뮬레이터 구현) |
 | 공통 | UX Design · Validation and QA |
 
 <div align="center">
