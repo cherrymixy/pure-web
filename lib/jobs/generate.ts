@@ -7,10 +7,13 @@ import { clipFromDirect } from "../expression/direct";
 import { FLAGS } from "../env";
 import { LlmError } from "../llm/client";
 import type { Issue } from "../expression/validate";
-import type { GenerationClient, GenerationOutput } from "../llm/generation";
+import { demoToOutput, type GenerationClient, type GenerationOutput } from "../llm/generation";
+import { propsToParams } from "../expression/props";
+import { sampleRecipe } from "../expression/sample";
 import type { Clip, MotionProps, Reference } from "../models";
 import { UPLOADS_DIR } from "../paths";
 import type { Repo } from "../repo";
+import { matchScripted, pause } from "./scripted";
 
 export interface GenerateInput {
   projectId: string;
@@ -77,6 +80,39 @@ export async function runGeneration(opts: {
 
   await report(1, 15);
   const refs = input.references ?? [];
+  const scripted = await matchScripted(refs, opts.root);
+  if (scripted) {
+    // Exhibition script (data/scripted-references.ts): this video always gives the same expression.
+    const started = Date.now();
+    const beat = scripted.minMs / 3;
+    await pause(beat, signal);
+    await report(2, 30);
+    await pause(beat, signal);
+    await report(3, 85);
+    const props = input.props ?? scripted.expression.motion.props;
+    const built = buildExpression(demoToOutput(scripted.expression), {
+      structure: project.structure,
+      signature,
+      components: scripted.components,
+      pattern: input.pattern,
+      references: input.references,
+      props,
+    });
+    // The script's own sound plays as recorded: no signature pitch shift or density cap.
+    const { duration } = sampleRecipe(built.expression.motion.recipe, propsToParams(props, signature.axes).params, 10);
+    const expression: BuiltExpression = { ...built.expression, sound: { cues: scripted.expression.sound.cues.filter((c) => c.t < duration) } };
+    await pause(beat, signal);
+    await report(4, 95);
+    const saved = await save(repo, input, expression);
+    return {
+      expressionId: saved.id,
+      source: "ollama",
+      reasoning: scripted.expression.reasoning,
+      referenceSummary: scripted.summary,
+      issues: built.issues.filter((i) => !i.field.startsWith("sound.")),
+      ms: Date.now() - started,
+    };
+  }
   // Summaries made at upload time stand in for the frames; only refs without one need the vision step.
   const visual = refs.filter((r) => r.status === "ok" && (r.kind === "image" || r.kind === "video"));
   const cached = visual.length > 0 && visual.every((r) => r.summary);

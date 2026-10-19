@@ -1,5 +1,6 @@
 import { body, handle, type Ctx } from "@/lib/api";
 import { referenceImages } from "@/lib/jobs/generate";
+import { matchScripted, pause } from "@/lib/jobs/scripted";
 import { getGeneration, llmClient, recordCall } from "@/lib/llm";
 import { OLLAMA_MODEL } from "@/lib/env";
 import { ReferenceSchema } from "@/lib/models";
@@ -14,6 +15,11 @@ export function POST(req: Request, { params }: Ctx<{ id: string }>) {
   return handle(async () => {
     await getRepo().projects.get((await params).id);
     const { reference } = await body(req, z.object({ reference: ReferenceSchema }));
+    const scripted = await matchScripted([reference]);
+    if (scripted) {
+      await pause(1500);
+      return { summary: scripted.summary, ms: 1500 };
+    }
     const images = await referenceImages([reference]);
     if (!images.length) return { summary: null };
     try {

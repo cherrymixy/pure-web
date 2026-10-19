@@ -36,6 +36,7 @@ const fileName = (r: Reference) =>
 export function ContextPanel({
   context,
   behaviors,
+  applied = [],
   busy,
   reading = [],
   activeReference,
@@ -45,6 +46,8 @@ export function ContextPanel({
   context: EditorContext;
   /** Behaviors of the current expression, in recipe order */
   behaviors: string[];
+  /** Components recorded on the current expression: when any, the list shows Approach + these only */
+  applied?: string[];
   busy: boolean;
   reading?: string[];
   activeReference: string | null;
@@ -54,6 +57,9 @@ export function ContextPanel({
   const [expanded, setExpanded] = useState(false);
   const { latest, shown, hidden } = splitLog(context.inputs, expanded);
   const older = context.inputs.length - 1;
+  const components = applied.length
+    ? [...COMPONENTS].filter((c) => c.id === "approach" || applied.includes(c.id)).sort((a, b) => Number(b.id === "approach") - Number(a.id === "approach"))
+    : COMPONENTS;
 
   const title = "flex items-center gap-[var(--space-8)] text-[18px] leading-[23px] text-[var(--text-primary)]";
   const box = "flex w-full flex-col gap-[var(--space-12)] rounded-[var(--radius-lg)] bg-[var(--bg-canvas)] px-[var(--space-20)] py-[var(--space-16)]";
@@ -93,7 +99,7 @@ export function ContextPanel({
         </h3>
         {/* Each row opens the component's guideline page (no selection here) */}
         <nav className={box} aria-label={E.component} title={E.componentHint}>
-          {COMPONENTS.map((c) => (
+          {components.map((c) => (
             <Link key={c.id} href={`/lab/guideline/behavior/${guidelineSlugFor(c.id)}`} title={c.description} className={row}>
               {c.label}
               <Icon name="chevron-right-thin" size={24} className="text-[var(--text-tertiary)]" />

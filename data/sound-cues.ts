@@ -14,6 +14,8 @@ export interface RobotSound {
   hint: string;
   /** Default volume, dB */
   volumeDb: number;
+  /** Only placed by scripted references (data/scripted-references.ts); never offered to the generator */
+  scriptedOnly?: boolean;
 }
 
 export const SOUND_CUES: RobotSound[] = [
@@ -27,7 +29,11 @@ export const SOUND_CUES: RobotSound[] = [
   { id: "sulk", label: "Sulk", file: "sulk.m4a", durationS: 1.7, hint: "sulky, pouting", volumeDb: -6 },
   { id: "sad", label: "Sad", file: "sad.m4a", durationS: 0.53, hint: "sad, short", volumeDb: -6 },
   { id: "sad-long", label: "Sad (long)", file: "sad-long.m4a", durationS: 2.89, hint: "sad, drawn out, tired", volumeDb: -6 },
+  { id: "robot-happy", label: "Robot happy", file: "robot-happy.wav", durationS: 0.58, hint: "cute robot chatter, happy", volumeDb: -6, scriptedOnly: true },
 ];
+
+/** Sounds the generator may pick (scripted-only clips stay out of the LLM prompt and schema). */
+export const GENERATOR_SOUND_CUES = SOUND_CUES.filter((s) => !s.scriptedOnly);
 
 /** Old synthesized cue presets → the sound that replaces them (saved projects, old pure.json). */
 export const LEGACY_SOUNDS: Record<string, string> = {

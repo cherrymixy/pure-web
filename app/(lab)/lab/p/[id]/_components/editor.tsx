@@ -793,6 +793,7 @@ export function Editor({
             <ContextPanel
               context={context}
               behaviors={expression?.motion.recipe.steps.map((st) => st.behavior) ?? []}
+              applied={expression?.components}
               busy={busy}
               onChange={(patch) => setContext((c) => ({ ...c, ...patch }))}
               onOpenReference={(r) => r.kind !== "userData" && setActiveRef(activeRef?.id === r.id ? null : r)}

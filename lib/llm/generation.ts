@@ -4,7 +4,7 @@ import { SIM_BEHAVIORS } from "@/data/sim-behaviors";
 import { COMPONENT_DEMOS, PROMPT_DEMOS, type DemoExpression } from "@/data/demo-recipes";
 import { FACE_NAMES } from "@/data/face-videos";
 import { SUGGESTED_PROMPTS, type SuggestedPromptId } from "@/data/prompts";
-import { SOUND_CUES } from "@/data/sound-cues";
+import { GENERATOR_SOUND_CUES } from "@/data/sound-cues";
 import { OLLAMA_MODEL, OLLAMA_VISION_MODEL } from "../env";
 import { LlmError, type LlmClient } from "./client";
 import { DESCRIBE_SYSTEM, GENERATION_SYSTEM, generationUser, type GenerationPromptInput } from "./prompts";
@@ -15,7 +15,7 @@ import type { Structure } from "../models";
 const ids = <T extends { id: string }>(xs: readonly T[]) => xs.map((x) => x.id) as [string, ...string[]];
 const BehaviorEnum = z.enum(ids(SIM_BEHAVIORS));
 const FaceEnum = z.enum(FACE_NAMES as unknown as [string, ...string[]]);
-const CueEnum = z.enum(ids(SOUND_CUES));
+const CueEnum = z.enum(ids(GENERATOR_SOUND_CUES));
 
 /**
  * What the model returns (PRD §6 rule 6, Tier 1 recipe). Only names are enforced here;
