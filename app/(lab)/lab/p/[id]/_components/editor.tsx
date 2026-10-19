@@ -27,7 +27,8 @@ import { useToast } from "@/components/ui/toast";
 import { CHANNEL_LABEL } from "@/components/ui/channel-badges";
 import { FacePanel, SoundPanel } from "./channel-panels";
 import { logInput, withRef, type InputEntry } from "@/lib/ui/input-log";
-import { ContextPanel, type EditorContext, type PendingReference } from "./context-panel";
+import { ContextPanel, SET_REF, type EditorContext, type PendingReference } from "./context-panel";
+import type { ReferenceItem } from "@/data/reference-sets";
 import { LibraryPanel } from "./library-panel";
 import { JointTable, MotionPanel, PROP_LABELS } from "./panels";
 import { ExportModal } from "./export-modal";
@@ -138,6 +139,10 @@ export function Editor({
   const [selectedKey, setSelectedKey] = useState<KeyRef | null>(null);
   const [loop, setLoop] = useState(false);
   const [activeRef, setActiveRef] = useState<Reference | null>(null);
+  /** Player caption for referenced-set items (uploads show their file name) */
+  const [activeLabel, setActiveLabel] = useState<string | null>(null);
+  /** Frames made for referenced-set videos, per public file, so Match timing works on them too */
+  const setFrames = useRef(new Map<string, Pick<Reference, "frames" | "durationS">>());
   const [sideBySide, setSideBySide] = useState(false);
   const [matching, setMatching] = useState(false);
   const [testOpen, setTestOpen] = useState(false);
@@ -171,6 +176,7 @@ export function Editor({
   /** Reference ids whose vision summary is being made in the background */
   const [reading, setReading] = useState<string[]>([]);
   const imageInput = useRef<HTMLInputElement>(null);
+  const videoInput = useRef<HTMLInputElement>(null);
 
   // localStorage only after mount (SSR renders the expression's context).
   // Both updates land in one render, so the first write already carries the stored context.
@@ -577,6 +583,26 @@ export function Editor({
     }
   }
 
+  /** Referenced-set face / motion → reference player; its video frames are read once in the background for Match timing. */
+  function openSetItem(item: ReferenceItem) {
+    const id = SET_REF + item.file;
+    if (activeRef?.id === id) return setActiveRef(null);
+    const isClip = item.file.endsWith(".webm");
+    const ref: Reference = { id, kind: isClip ? "video" : "image", path: item.file, thumb: item.poster ?? item.file, status: "ok", ...setFrames.current.get(item.file) };
+    setActiveRef(ref);
+    setActiveLabel(item.title);
+    if (!isClip || ref.frames) return;
+    void (async () => {
+      const blob = await (await fetch(item.file)).blob();
+      const read = await extractFrames(new File([blob], item.file.split("/").pop() ?? "motion.webm", { type: blob.type || "video/webm" }));
+      const frames: string[] = [];
+      for (const [i, f] of read.frames.entries()) frames.push((await uploadFile(f, { projectId: project.id, kind: "frame", name: `set-${i + 1}.jpg` })).path);
+      const extra = { frames, durationS: Math.round(read.duration * 10) / 10 };
+      setFrames.current.set(item.file, extra);
+      setActiveRef((cur) => (cur?.id === id ? { ...cur, ...extra } : cur));
+    })().catch(() => {});
+  }
+
   // ------------------------------------------------------------ library
 
   async function applyLibrary(saved: SavedExpression) {
@@ -679,6 +705,7 @@ export function Editor({
       onSide={setSideBySide}
       onMatch={() => void matchToReference()}
       onClose={() => setActiveRef(null)}
+      label={activeRef.id.startsWith(SET_REF) ? activeLabel : null}
     />
   );
 
@@ -695,8 +722,8 @@ export function Editor({
   return (
     <div className="relative h-[var(--app-vh)] overflow-hidden">
       {/* Stage (Frame 2147240453 ×2: full width, 265 → bottom), same slot as structure / signature. Never zoom/transform the Viewport.
-          W02E-4: with the timeline open the robot sits 100px higher (Group 2147229381 187 → 137.5) — the slot moves up, same height. */}
-      <div className={`absolute left-0 ${timelineOpen ? "bottom-[100px] top-[165px]" : "bottom-0 top-[265px]"} ${activeRef && sideBySide ? "w-[calc(50%-2px)]" : "right-0"}`}>
+          W02E-4: with the timeline open the slot ends just above the panel (10 + 367 + 10), so the robot is never under it. */}
+      <div className={`absolute left-0 ${timelineOpen ? "bottom-[387px] top-[120px]" : "bottom-0 top-[265px]"} ${activeRef && sideBySide ? "w-[calc(50%-2px)]" : "right-0"}`}>
         <Viewport
           controllerRef={ctrl}
           structure={structure}
@@ -797,6 +824,7 @@ export function Editor({
               busy={busy}
               onChange={(patch) => setContext((c) => ({ ...c, ...patch }))}
               onOpenReference={(r) => r.kind !== "userData" && setActiveRef(activeRef?.id === r.id ? null : r)}
+              onOpenSetItem={openSetItem}
               activeReference={activeRef?.id ?? null}
               reading={reading}
             />
@@ -867,10 +895,14 @@ export function Editor({
                 className="appearance-none rounded-[var(--radius-full)] bg-[var(--bg-surface)] py-[var(--space-12)] pl-[var(--space-20)] pr-[56px] text-[22px] leading-[28px] text-[var(--text-primary)] outline-none"
                 aria-label="Prompt type"
                 defaultValue="text"
-                onChange={(e) => { if (e.target.value === "image") { imageInput.current?.click(); e.target.value = "text"; } }}
+                onChange={(e) => {
+                  const picker = e.target.value === "image" ? imageInput : e.target.value === "video" ? videoInput : null;
+                  if (picker) { picker.current?.click(); e.target.value = "text"; }
+                }}
               >
                 <option value="text">{E.text}</option>
                 <option value="image">{E.image}</option>
+                <option value="video">{E.video}</option>
               </select>
               <Icon name="chevron-down" size={24} className="pointer-events-none absolute right-[var(--space-20)] top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" />
             </div>
@@ -924,6 +956,7 @@ export function Editor({
           </button>
         </div>
         <input ref={imageInput} type="file" multiple accept="image/*,video/mp4,video/quicktime,video/webm" className="hidden" onChange={(e) => { if (e.target.files?.length) addFiles(e.target.files); e.target.value = ""; }} />
+        <input ref={videoInput} type="file" multiple accept="video/mp4,video/quicktime,video/webm" className="hidden" onChange={(e) => { if (e.target.files?.length) addFiles(e.target.files); e.target.value = ""; }} />
         <div className="flex items-center gap-[var(--space-28)] text-[14px] leading-[18px]">
           <span className="sr-only">{E.suggested}</span>
           {SUGGESTED_PROMPTS.map((s) => (

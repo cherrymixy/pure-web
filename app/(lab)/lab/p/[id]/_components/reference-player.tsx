@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { STRINGS } from "@/data/strings";
 import type { Reference } from "@/lib/models";
 import { fileUrl } from "@/lib/ui/upload";
@@ -22,6 +22,7 @@ export function ReferencePlayer({
   onSide,
   onMatch,
   onClose,
+  label = null,
 }: {
   reference: Reference;
   t: number;
@@ -32,9 +33,15 @@ export function ReferencePlayer({
   onSide: (on: boolean) => void;
   onMatch: () => void;
   onClose: () => void;
+  /** Caption name; null = the uploaded file's name */
+  label?: string | null;
 }) {
   const video = useRef<HTMLVideoElement>(null);
   const isVideo = reference.kind === "video";
+  // Referenced-set items are public files ("/reference-sets/…"); uploads go through /api/files.
+  const src = reference.path.startsWith("/") ? reference.path : fileUrl(reference.path);
+  const name = label ?? reference.path.split("/").pop()?.replace(/^[0-9a-f]{8}-/, "") ?? "";
+  const [clock, setClock] = useState({ t: 0, d: 0 });
 
   useEffect(() => {
     const v = video.current;
@@ -51,22 +58,45 @@ export function ReferencePlayer({
   }, [t, duration, playing]);
 
   return (
-    <div className={`flex flex-col gap-1.5 bg-white ${side ? "h-full p-2" : "w-72 rounded border border-neutral-300 p-1.5 shadow"}`} data-testid="reference-player">
-      <div className={`overflow-hidden rounded bg-black ${side ? "min-h-0 flex-1" : "aspect-video"}`}>
+    <div
+      className={`flex flex-col gap-[var(--space-12)] bg-[var(--bg-surface)] ${side ? "h-full p-[var(--space-16)]" : "w-[420px] rounded-[var(--radius-xl)] p-[var(--space-16)] shadow-[var(--pure-shadow-modal)]"}`}
+      data-testid="reference-player"
+    >
+      <div className={`overflow-hidden rounded-[var(--radius-md)] bg-[var(--neutral-800)] ${side ? "min-h-0 flex-1" : "aspect-video"}`}>
         {isVideo ? (
-          <video ref={video} src={fileUrl(reference.path)} muted playsInline preload="auto" className="h-full w-full object-contain" />
+          <video
+            ref={video}
+            src={src}
+            muted
+            playsInline
+            preload="auto"
+            className="h-full w-full object-contain"
+            onLoadedMetadata={(e) => setClock({ t: e.currentTarget.currentTime, d: e.currentTarget.duration })}
+            onTimeUpdate={(e) => setClock({ t: e.currentTarget.currentTime, d: e.currentTarget.duration })}
+          />
         ) : (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={fileUrl(reference.path)} alt="" className="h-full w-full object-contain" />
+          <img src={src} alt="" className="h-full w-full object-contain" />
         )}
       </div>
-      <div className="flex flex-wrap items-center gap-1.5 text-xs">
-        <Button variant={side ? "primary" : "default"} onClick={() => onSide(!side)}>{side ? SY.overlay : SY.sideBySide}</Button>
-        <Button disabled={busy || !isVideo || !reference.frames?.length || reference.status !== "ok"} title={isVideo ? undefined : SY.needsVideo} onClick={onMatch}>
+      <div className="flex items-center gap-[var(--space-8)] text-[14px] leading-[18px] text-[var(--text-tertiary)]">
+        <span className="min-w-0 truncate">{name}</span>
+        {isVideo && Number.isFinite(clock.d) && clock.d > 0 && <span className="shrink-0">· {stamp(clock.t, true)} / {stamp(clock.d)}</span>}
+        <button aria-label={SY.close} className="ml-auto shrink-0 px-[var(--space-4)] text-[18px] leading-none hover:text-[var(--text-primary)]" onClick={onClose}>×</button>
+      </div>
+      <div className="flex flex-wrap items-center gap-[var(--space-8)]">
+        <Button onClick={() => onSide(!side)}>{side ? SY.overlay : SY.sideBySide}</Button>
+        <Button variant="primary" disabled={busy || !isVideo || !reference.frames?.length || reference.status !== "ok"} title={isVideo ? undefined : SY.needsVideo} onClick={onMatch}>
           {SY.matchTiming}
         </Button>
-        <button aria-label={SY.close} className="ml-auto px-1 text-neutral-500 hover:text-neutral-900" onClick={onClose}>×</button>
       </div>
     </div>
   );
+}
+
+/** 00:07 / 00:01.25 */
+function stamp(sec: number, cents = false): string {
+  const m = String(Math.floor(sec / 60)).padStart(2, "0");
+  const s = cents ? (sec % 60).toFixed(2).padStart(5, "0") : String(Math.round(sec % 60)).padStart(2, "0");
+  return `${m}:${s}`;
 }

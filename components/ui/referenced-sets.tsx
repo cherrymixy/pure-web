@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { simBehaviorLabel } from "@/data/sim-behaviors";
-import { referenceSetFor, type ReferenceChannel, type ReferenceItem } from "@/data/reference-sets";
+import { referenceSetFor, referenceSetForText, type ReferenceChannel, type ReferenceItem } from "@/data/reference-sets";
 import { STRINGS, fmt } from "@/data/strings";
 import { Icon } from "@/components/ui/icons/icon";
 
@@ -12,8 +12,24 @@ const E = STRINGS.editor;
  * What the AI referenced: one set (face / motion / sound) per behavior in the expression.
  * `strip` = editor Context tab (Figma W02D-1 901:9964 ×2): "Reference" title + 123px thumbnails with a channel chip each.
  */
-export function ReferencedSets({ behaviors, variant = "list" }: { behaviors: string[]; variant?: "list" | "strip" }) {
-  const sets = [...new Set(behaviors)].map((b) => referenceSetFor(b)).filter((s) => s !== undefined);
+export function ReferencedSets({
+  behaviors,
+  variant = "list",
+  keywords,
+  onOpen,
+  activeFile = null,
+}: {
+  behaviors: string[];
+  /** Editor: face / motion thumbnails open in the reference player instead of the source page */
+  onOpen?: (item: ReferenceItem) => void;
+  activeFile?: string | null;
+  variant?: "list" | "strip";
+  /** Editor: one set chosen from the user's input (prompt + attachment summaries), no behavior chips; no match → the first behavior's set */
+  keywords?: string;
+}) {
+  const byBehavior = [...new Set(behaviors)].map((b) => referenceSetFor(b)).filter((s) => s !== undefined);
+  const keyed = keywords === undefined ? undefined : referenceSetForText(keywords) ?? byBehavior[0];
+  const sets = keywords === undefined ? byBehavior : keyed ? [keyed] : [];
   const [pick, setPick] = useState(0);
   const set = sets[Math.min(pick, sets.length - 1)];
   const label = simBehaviorLabel;
@@ -53,7 +69,7 @@ export function ReferencedSets({ behaviors, variant = "list" }: { behaviors: str
             {sets.length === 1 && <span className="sr-only">{fmt(E.referencedFor, { behavior: label(set.behavior) })}</span>}
             <div className="relative -mr-[32px] overflow-hidden">
               <div className="flex gap-[var(--space-12)] overflow-x-auto pr-[32px] [scrollbar-width:none]">
-                {set.items.map((it) => <StripItem key={it.channel} item={it} />)}
+                {set.items.map((it) => <StripItem key={it.channel} item={it} onOpen={onOpen} active={activeFile === it.file} />)}
               </div>
               {/* Figma 901:10006: white fade on the right edge (64px) */}
               <div className="pointer-events-none absolute inset-y-0 right-0 w-[64px] bg-gradient-to-l from-[var(--bg-surface)] from-[37%] to-transparent" />
@@ -101,7 +117,7 @@ const CHIP: Record<ReferenceChannel, string> = {
   sound: "border-[var(--web-ecc377)] text-[var(--web-ecc377)]",
 };
 
-function StripItem({ item }: { item: ReferenceItem }) {
+function StripItem({ item, onOpen, active = false }: { item: ReferenceItem; onOpen?: (item: ReferenceItem) => void; active?: boolean }) {
   const video = item.file.endsWith(".webm");
   const audio = item.file.endsWith(".ogg");
   const player = useRef<HTMLAudioElement>(null);
@@ -110,7 +126,17 @@ function StripItem({ item }: { item: ReferenceItem }) {
 
   return (
     <figure className="flex w-[123px] shrink-0 flex-col items-start gap-[var(--space-8)]" data-testid={`referenced-${item.channel}`}>
-      <div className="relative size-[123px] overflow-hidden rounded-[var(--radius-md)] bg-[var(--neutral-800)]">
+      <div className={`relative size-[123px] overflow-hidden rounded-[var(--radius-md)] bg-[var(--neutral-800)] ${active ? "outline outline-2 outline-[var(--border-strong)]" : ""}`}>
+        {onOpen && !audio ? (
+          <button type="button" title={credit} aria-label={item.title} aria-pressed={active} onClick={() => onOpen(item)} className="absolute inset-0">
+            {video ? (
+              <video src={item.file} poster={item.poster ?? undefined} muted loop autoPlay playsInline className="size-full object-cover" />
+            ) : (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={item.file} alt={item.title} className="size-full object-cover" />
+            )}
+          </button>
+        ) : (
         <a href={item.source.page} target="_blank" rel="noreferrer" title={credit} aria-label={item.title} className="absolute inset-0">
           {audio ? (
             <span className="flex size-full items-center justify-center text-[var(--web-ecc377)]">
@@ -123,6 +149,7 @@ function StripItem({ item }: { item: ReferenceItem }) {
             <img src={item.file} alt={item.title} className="size-full object-cover" />
           )}
         </a>
+        )}
         {audio && (
           <>
             <audio ref={player} src={item.file} onEnded={() => setPlaying(false)} onPause={() => setPlaying(false)} onPlay={() => setPlaying(true)} />

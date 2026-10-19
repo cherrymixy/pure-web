@@ -160,3 +160,15 @@ describe("guideline", () => {
   });
 });
 
+
+describe("reference keywords", () => {
+  it("picks the set the user's words point to", async () => {
+    const { referenceSetForText, REFERENCE_KEYWORDS, referenceSetFor } = await import("./reference-sets");
+    for (const [, behavior] of REFERENCE_KEYWORDS) expect(referenceSetFor(behavior)).toBeDefined();
+    expect(referenceSetForText("Do this A man laughs and pumps his fists — pure joy.")?.behavior).toBe("happy");
+    expect(referenceSetForText("I'm so tired, I keep nodding off")?.behavior).toBe("doze");
+    expect(referenceSetForText("Wow, that startled me!")?.behavior).toBe("alert");
+    expect(referenceSetForText("a bright day")?.behavior).not.toBe("nod");
+    expect(referenceSetForText("make something")).toBeUndefined();
+  });
+});

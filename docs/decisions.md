@@ -77,3 +77,6 @@ STEP마다 한 줄. `날짜 · STEP · 결정 · 근거`
 | 2026-10-19 | 분석 화면 | 스캔 라인이 진행률을 따라 위→아래로 이동(0 % 위 끝 ~ 100 % 아래 끝, 폴링 500 ms 동안 선형 이동). Figma 901:8473의 116 px 고정 위치 대신 | 사용자 요청 |
 | 2026-10-19 | 가이드라인 | Figma 시안이 없는 페이지도 같은 구성으로: 컴포넌트 15개 = Approach 구성(Robot·Intensity·Time Line·Variant|State·Token Spec, docs/components.ts), 원칙 7개 = Face 구성(카드·흐름·불릿·단계·비교·Don't, principle-sections.tsx). 값은 v3 md의 토큰·규칙만, md에 없는 이동 구간 길이 등은 기본값(m)으로 하고 주석에 밝힘 | 사용자 요청: "내용은 md 기반" |
 | 2026-10-19 | 시연 스크립트 | 지정 영상(파일 SHA-256, data/scripted-references.ts)이 첨부되면 LLM 없이 고정 표현 "Happy dance"(Approach → 덩실 ×2 → 끄덕 → 덩실, robot-happy.wav 4회 원음)를 약 4초 단계 진행 후 저장. 검증은 그대로 거치고, 15 s·각속도 제한에 걸리지 않게 값 조정. Context Component 목록은 표현에 components가 있으면 Approach + 그것만. robot-happy 사운드는 생성기 선택지에서 제외 | 사용자 요청: 시연용 happy 고정 출력 |
+| 2026-10-19 | 시그니처 | URL 추출: 제목·문단·목록 글자가 200자 미만인 랜딩 페이지(pixar.com 등)는 title·meta description·본문 전체 글자로 대체 | 사용자 요청: Pixar URL이 NO_TEXT |
+| 2026-10-19 | 시연 스크립트 | happy 영상 움직임을 처음부터 끝까지 덩실(happy ×3 → ×2, Speed 65)로. 접근(focus) 단계는 빼고 Component 목록에만 Approach 유지. 더 빠른 값은 120°/s·15 s 검증에 걸림 | 사용자 요청: "더 방방" |
+| 2026-10-19 | 에디터 | Reference 스트립: 행동 칩 제거, 최근 입력(프롬프트 + 첨부 요약) 키워드로 세트 하나(REFERENCE_KEYWORDS, 없으면 첫 행동). Face·Motion 썸네일 클릭 → 레퍼런스 플레이어(이름 · 시간, Side by side, Match timing — 세트 영상은 프레임을 뒤에서 추출). 입력 형식에 Video 추가. Edit Detail 중 로봇 영역 바닥을 타임라인 위(387px)로 | 사용자 요청 |

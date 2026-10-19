@@ -10,9 +10,13 @@ import { LOG_VISIBLE, splitLog, type InputEntry } from "@/lib/ui/input-log";
 import { timeAgo } from "@/lib/ui/time";
 import { fileUrl } from "@/lib/ui/upload";
 import { ReferencedSets } from "@/components/ui/referenced-sets";
+import type { ReferenceItem } from "@/data/reference-sets";
 import { Icon } from "@/components/ui/icons/icon";
 
 const E = STRINGS.editor;
+
+/** Reference ids for referenced-set items opened in the player: "set:" + public file path. */
+export const SET_REF = "set:";
 
 
 export interface EditorContext {
@@ -42,6 +46,7 @@ export function ContextPanel({
   activeReference,
   onChange,
   onOpenReference,
+  onOpenSetItem,
 }: {
   context: EditorContext;
   /** Behaviors of the current expression, in recipe order */
@@ -53,6 +58,8 @@ export function ContextPanel({
   activeReference: string | null;
   onChange: (patch: Partial<EditorContext>) => void;
   onOpenReference: (r: Reference) => void;
+  /** Face / motion item of the referenced set → reference player */
+  onOpenSetItem?: (item: ReferenceItem) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const { latest, shown, hidden } = splitLog(context.inputs, expanded);
@@ -90,7 +97,13 @@ export function ContextPanel({
         )}
       </section>
 
-      <ReferencedSets behaviors={behaviors} variant="strip" />
+      <ReferencedSets
+        behaviors={behaviors}
+        variant="strip"
+        keywords={latest ? [latest.text, ...latest.attachments.map((r) => r.summary ?? "")].join(" ") : ""}
+        onOpen={onOpenSetItem}
+        activeFile={activeReference?.startsWith(SET_REF) ? activeReference.slice(SET_REF.length) : null}
+      />
 
       <section className="flex flex-col gap-[var(--space-16)]">
         <h3 className={title}>

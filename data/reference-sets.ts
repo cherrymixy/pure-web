@@ -732,3 +732,28 @@ export const REFERENCE_SETS: ReferenceSet[] = [
 export function referenceSetFor(behavior: string): ReferenceSet | undefined {
   return REFERENCE_SETS.find((s) => s.behavior === behavior);
 }
+
+// Editor Reference strip: which set the user's own words point to (first match wins, so specific moods come first).
+export const REFERENCE_KEYWORDS: [RegExp, string][] = [
+  [/happ|joy|glad|excit|celebrat|yay|great|proud|danc|fun|smil|laugh|cheer|행복|신나|기뻐|기쁨|좋아/i, "happy"],
+  [/sad|sorry|cry|upset|lonely|miss |gloomy|슬프|슬퍼|우울/i, "sad"],
+  [/startl|surpris|wow|shock|scar|alert|suddenly|놀라|놀람|깜짝/i, "alert"],
+  [/tired|sleepy|nod(ding)? off|yawn|exhaust|drows|피곤|졸려|졸음/i, "doze"],
+  [/sleep|good ?night|\bbed\b|자러|잘 ?자/i, "sleep"],
+  [/wake|morning|stretch|일어나|기상/i, "wake"],
+  [/hello|\bhi\b|hey|welcome|arriv|i'?m here|\bbye|greet|안녕|반가/i, "greet"],
+  [/curious|wonder|what is|hmm|puzzl|궁금/i, "curious"],
+  [/\byes\b|agree|okay|\bok\b|sure|\bright\b|맞아|그래/i, "nod"],
+  [/\bno\b|nope|refus|disagree|don'?t|싫어|아니/i, "shake"],
+  [/look around|where|search|find|찾/i, "look_around"],
+  [/scan|room|sweep|둘러/i, "sweep"],
+  [/focus|\bwork|concentrat|study|task|집중|공부/i, "focus"],
+  [/\brest\b|\bdone\b|finish|\bhome\b|끝/i, "home"],
+  [/wait|calm|relax|idle|quiet|기다|편안/i, "idle"],
+];
+
+/** The set the text (prompt + reference summaries) points to, or undefined when no keyword matches. */
+export function referenceSetForText(text: string): ReferenceSet | undefined {
+  const hit = REFERENCE_KEYWORDS.find(([re]) => re.test(text));
+  return hit ? referenceSetFor(hit[1]) : undefined;
+}

@@ -163,6 +163,7 @@ export const STRINGS = {
     promptPlaceholder: "What state should the robot express?",
     text: "Text",
     image: "Image",
+    video: "Video",
     generate: "Generate",
     generating: "Generating motion, face and sound…",
     genSteps: ["Reading the moment", "Reading references", "Generating", "Checking limits", "Saving"],
