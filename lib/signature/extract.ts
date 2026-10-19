@@ -167,6 +167,13 @@ export function extractFromHtml(html: string, css: string[], url: string): Extra
   if (current.trim()) sections.push(current.trim());
 
   const title = $("title").first().text().trim() || new URL(url).hostname;
+  // Thin landing pages (copy in divs/spans, e.g. pixar.com): fall back to the title, meta description and all body text.
+  if (sections.join(" ").length < MIN_TEXT_CHARS) {
+    const meta = ['meta[name="description"]', 'meta[property="og:description"]'].map((q) => $(q).attr("content")?.trim() ?? "");
+    const body = $("body").text().replace(/\s+/g, " ").trim();
+    const text = [title, ...meta, body].filter((t, i, a) => t && a.indexOf(t) === i).join(" ");
+    sections.splice(0, sections.length, text);
+  }
   return {
     kind: "url",
     name: title,

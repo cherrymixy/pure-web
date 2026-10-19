@@ -95,6 +95,15 @@ describe("sources", () => {
     expect(x.colors[0]).toBe("#FF6600");
   });
 
+  it("a landing page with copy in divs still reads (title, meta description, body text)", () => {
+    const html = `<html><head><title>Studio</title><meta name="description" content="Stories for every age."></head>
+      <body><p>Careers at Studio.</p><div><span>${"We tell heartfelt stories with characters you love. ".repeat(5)}</span></div></body></html>`;
+    const x = extractFromHtml(html, [], "https://studio.test");
+    expect(() => assertReadable(x)).not.toThrow();
+    expect(x.pages[0].text).toContain("Stories for every age.");
+    expect(x.pages[0].text).toContain("heartfelt stories");
+  });
+
   it("helpers: font lines and grey filtering", () => {
     expect(fontsFromText("Typeface: Purebot Sans. Secondary font - Inter Display")).toEqual(["Purebot Sans", "Inter Display"]);
     expect(topColors(new Map([["#808080", 9], ["#FFFFFF", 9], ["#F0126B", 2]]))).toEqual(["#F0126B"]);
