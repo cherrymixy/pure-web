@@ -84,3 +84,4 @@ STEP마다 한 줄. `날짜 · STEP · 결정 · 근거`
 | 2026-10-19 | 랜딩 | 상단바: 화면 양끝 여백 24(가이드 GNB 48), 안쪽 왼쪽 20·오른쪽 11, Sign in↔Try PURE 20, Try PURE 알약형(바 끝과 동심). Daily 폰 목업을 사용자 내보내기(1x)로 교체·세로 가운데(top 45). For Expert 문구 +10. 로봇 타입 카드 호버 확대(1.04)+float 그림자 | 사용자 리뷰(Figma 값 대신) |
 | 2026-10-19 | 가이드라인 | 로그인 전 공개 /guideline(레이아웃·GNB) 삭제, 랜딩 Read the guideline 버튼 제거(밴드 높이 고정 해제, 하단 41). 푸터 Guideline → #guideline. 가이드라인은 /lab/guideline에서만 | 사용자 요청 |
 | 2026-10-19 | 버튼 여백 | Lab 홈 Import(고정폭 → 좌 24·우 32), Try PURE's Robot(고정폭 → 우 24), 타입 선택 Continue(고정폭 → 좌우 24) | 사용자 리뷰 |
+| 2026-10-19 | Import | W02B-2 Figma(936:8422) 번역: 배경 70%, Import your robot, 드롭 카드(흰 링+점선), No file yet → 타입 선택, 형식 카드 3개(클릭=파일 선택), 안내 행 + View upload guide(/lab/guideline 새 탭, Figma에 링크 없음). 업로드 로직 유지 | 사용자 요청 |

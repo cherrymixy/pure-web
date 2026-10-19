@@ -112,95 +112,146 @@ export function ImportModel() {
   const busy = phase.kind === "reading" || phase.kind === "uploading";
   const percent = phase.kind === "uploading" ? Math.round((phase.loaded / Math.max(phase.total, 1)) * 100) : 0;
 
-  // No Figma frame: same language as W02B-1 type select (back pill at 48/40, 1714 column at x 103, title 52 semibold)
-  // and the W02B-3 analysis card (white radius 2xl card, border 2, 6px bar on neutral-150 with bg/inverse fill).
+  // Figma W02B-2 (936:8422), 960 frame ×2: bg art at 70%, back pill 48/40, title 54 sage-700 + subtitle at 122,
+  // drop card 855×296 (13.5 white ring, 1.69 dashed neutral-400) at 332, "No file yet?" at 658, format cards at 744,
+  // divider at 889 and the rigged-model hint row at 915 (1105 wide). Everything sits 4px right of center as in Figma.
   return (
-    <div className="flex min-h-[var(--app-vh)] flex-col pl-[48px] pt-[var(--space-40)]">
+    <div className="relative flex min-h-[var(--app-vh)] flex-col items-center overflow-hidden">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/figma/import/bg@2x.png" alt="" aria-hidden className="pointer-events-none absolute inset-0 size-full object-cover opacity-70" />
+
       <Link
         href="/lab"
-        className="flex h-[48px] w-fit items-center gap-[var(--space-12)] rounded-[var(--radius-full)] border-2 border-[var(--border-default)] bg-[var(--bg-surface)] px-[var(--space-16)] text-[16px] font-medium leading-[20px] text-[var(--text-link)] hover:bg-[var(--neutral-50)]"
+        className="absolute left-[48px] top-[var(--space-40)] flex h-[48px] w-fit items-center gap-[var(--space-12)] rounded-[var(--radius-full)] border-2 border-[var(--border-default)] bg-[var(--bg-surface)] px-[var(--space-16)] text-[16px] font-medium leading-[20px] text-[var(--text-link)] hover:bg-[var(--neutral-50)]"
       >
         <span aria-hidden>←</span>
         <span>{STRINGS.sidebar.lab}</span>
       </Link>
 
-      <div className="ml-[55px] flex w-[1714px] flex-col pb-[65px]">
-        <header className="mt-[21px] flex flex-col gap-[12px]">
-          <h1 className="text-[52px] font-semibold leading-[66px] text-[var(--sage-800)]">{replaceId ? S.replaceTitle : S.title}</h1>
-        </header>
+      <header className="relative left-[4px] mt-[122px] flex w-[796px] flex-col items-center gap-[var(--space-28)] text-center text-[var(--sage-700)]">
+        <h1 className="text-[54px] font-semibold leading-normal">{replaceId ? S.replaceTitle : S.title}</h1>
+        <p className="whitespace-nowrap text-[18px] font-medium leading-normal opacity-60">{S.subtitle}</p>
+      </header>
 
+      <div
+        data-testid="dropzone"
+        onDragOver={(e) => {
+          e.preventDefault();
+          if (!busy) setDragging(true);
+        }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDragging(false);
+          if (!busy) pick(e.dataTransfer.files);
+        }}
+        className={`relative left-[4.5px] mt-[69px] flex min-h-[296px] w-[855px] flex-col items-center justify-center rounded-[var(--radius-2xl)] border-[13.5px] border-[var(--neutral-0)] text-center transition-colors ${
+          dragging ? "bg-[var(--sage-50)]" : "bg-[var(--bg-surface)]"
+        }`}
+      >
         <div
-          data-testid="dropzone"
-          onDragOver={(e) => {
-            e.preventDefault();
-            if (!busy) setDragging(true);
-          }}
-          onDragLeave={() => setDragging(false)}
-          onDrop={(e) => {
-            e.preventDefault();
-            setDragging(false);
-            if (!busy) pick(e.dataTransfer.files);
-          }}
-          className={`mt-[72px] flex h-[480px] flex-col items-center justify-center rounded-[var(--radius-2xl)] border-2 border-dashed px-[var(--space-48)] text-center transition-colors ${
-            dragging
-              ? "border-[var(--border-strong)] bg-[var(--sage-50)]"
-              : phase.kind === "error"
-                ? "border-[var(--border-error)] bg-[var(--bg-surface)]"
-                : "border-[var(--border-default)] bg-[var(--bg-surface)]"
+          aria-hidden
+          className={`pointer-events-none absolute inset-0 rounded-[calc(var(--radius-2xl)-13.5px)] border-[1.69px] border-dashed ${
+            dragging ? "border-[var(--border-strong)]" : phase.kind === "error" ? "border-[var(--border-error)]" : "border-[var(--neutral-400)]"
           }`}
-        >
-          {phase.kind === "idle" && (
-            <div className="flex flex-col items-center gap-[var(--space-24)]">
-              <span className={`flex size-[96px] items-center justify-center rounded-[var(--radius-full)] ${dragging ? "anim-float bg-[var(--bg-surface)]" : "bg-[var(--bg-canvas)]"} text-[var(--icon-primary)]`}>
-                <Icon name="folder_open" size={40} />
-              </span>
-              <p className="text-[22px] font-medium leading-[28px] text-[var(--text-primary)]">{dragging ? S.dropHere : S.drop}</p>
-              <Button variant="primary" onClick={() => input.current?.click()}>{S.browse}</Button>
+        />
+        {phase.kind === "idle" && (
+          <div className="flex w-full flex-col items-center pb-[var(--space-24)] pt-[22.5px]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/figma/import/upload.svg" alt="" width={88} height={88} className={dragging ? "anim-float" : undefined} />
+            <p className="mt-[var(--space-16)] text-[28px] font-medium leading-normal text-[var(--neutral-800)]">{dragging ? S.dropHere : S.drop}</p>
+            <p className="text-[20px] leading-[1.5] text-[var(--neutral-1000)]/50">
+              {S.or}
+              <button type="button" onClick={() => input.current?.click()} className="text-[var(--sage-200)] hover:text-[var(--sage-300)]">
+                {S.browse}
+              </button>
+            </p>
+            <p className="mt-[42px] text-[14px] leading-normal text-[var(--neutral-400)]">{S.supports}</p>
+          </div>
+        )}
+        {phase.kind === "reading" && (
+          <div className="flex items-center gap-[var(--space-12)] text-[18px] leading-[22px] text-[var(--text-secondary)]">
+            <span className="flex animate-spin text-[var(--icon-secondary)]"><Icon name="spinner" size={22} /></span>
+            <span>{S.reading}</span>
+            <span className="max-w-[500px] truncate font-medium text-[var(--text-primary)]">{phase.name}</span>
+          </div>
+        )}
+        {phase.kind === "uploading" && (
+          <div className="flex w-[600px] flex-col gap-[var(--space-24)] text-left">
+            <div className="flex flex-col gap-[var(--space-8)]">
+              <p className="truncate text-[22px] font-semibold leading-[28px] text-[var(--text-primary)]">{phase.name}</p>
+              <p className="text-[16px] leading-[20px] text-[var(--text-secondary)]">{S.uploading}</p>
             </div>
-          )}
-          {phase.kind === "reading" && (
-            <div className="flex items-center gap-[var(--space-12)] text-[18px] leading-[22px] text-[var(--text-secondary)]">
-              <span className="flex animate-spin text-[var(--icon-secondary)]"><Icon name="spinner" size={22} /></span>
-              <span>{S.reading}</span>
-              <span className="max-w-[600px] truncate font-medium text-[var(--text-primary)]">{phase.name}</span>
-            </div>
-          )}
-          {phase.kind === "uploading" && (
-            <div className="flex w-[600px] flex-col gap-[var(--space-24)] text-left">
-              <div className="flex flex-col gap-[var(--space-8)]">
-                <p className="truncate text-[22px] font-semibold leading-[28px] text-[var(--text-primary)]">{phase.name}</p>
-                <p className="text-[16px] leading-[20px] text-[var(--text-secondary)]">{S.uploading}</p>
+            <div className="flex flex-col gap-[var(--space-12)]">
+              <span className="text-[18px] font-semibold leading-[22px] text-[var(--text-primary)]">{percent}%</span>
+              <div className="relative h-[6px] w-full overflow-hidden rounded-[var(--radius-full)] bg-[var(--neutral-150)]">
+                <div className="absolute inset-y-0 left-0 rounded-[var(--radius-full)] bg-[var(--bg-inverse)] transition-[width]" style={{ width: `${percent}%` }} />
               </div>
-              <div className="flex flex-col gap-[var(--space-12)]">
-                <span className="text-[18px] font-semibold leading-[22px] text-[var(--text-primary)]">{percent}%</span>
-                <div className="relative h-[6px] w-full overflow-hidden rounded-[var(--radius-full)] bg-[var(--neutral-150)]">
-                  <div className="absolute inset-y-0 left-0 rounded-[var(--radius-full)] bg-[var(--bg-inverse)] transition-[width]" style={{ width: `${percent}%` }} />
-                </div>
-              </div>
-              <Button className="self-start" onClick={() => setConfirmCancel(true)}>{S.cancel}</Button>
             </div>
-          )}
-          {phase.kind === "error" && (
-            <div role="alert" className="flex flex-col items-center gap-[var(--space-12)]">
-              <span className="mb-[var(--space-12)] flex size-[96px] items-center justify-center rounded-[var(--radius-full)] bg-[var(--bg-error-subtle)] text-[var(--status-error)]">
-                <Icon name="error_outline" size={40} />
-              </span>
-              <p className="text-[22px] font-semibold leading-[28px] text-[var(--text-error)]">{phase.title}</p>
-              <p className="text-[16px] leading-[20px] text-[var(--text-secondary)]">{phase.body}</p>
-              <Button className="mt-[var(--space-12)]" onClick={() => { setPhase({ kind: "idle" }); input.current?.click(); }}>{S.tryAnother}</Button>
-            </div>
-          )}
-          <input ref={input} type="file" className="hidden" onChange={(e) => { pick(e.target.files); e.target.value = ""; }} />
-        </div>
+            <Button className="self-start" onClick={() => setConfirmCancel(true)}>{S.cancel}</Button>
+          </div>
+        )}
+        {phase.kind === "error" && (
+          <div role="alert" className="flex flex-col items-center gap-[var(--space-8)] py-[var(--space-16)]">
+            <span className="mb-[var(--space-8)] flex size-[64px] items-center justify-center rounded-[var(--radius-full)] bg-[var(--bg-error-subtle)] text-[var(--status-error)]">
+              <Icon name="error_outline" size={32} />
+            </span>
+            <p className="text-[22px] font-semibold leading-[28px] text-[var(--text-error)]">{phase.title}</p>
+            <p className="text-[16px] leading-[20px] text-[var(--text-secondary)]">{phase.body}</p>
+            <Button className="mt-[var(--space-8)]" onClick={() => { setPhase({ kind: "idle" }); input.current?.click(); }}>{S.tryAnother}</Button>
+          </div>
+        )}
+        <input ref={input} type="file" accept={EXTS.join(",")} className="hidden" onChange={(e) => { pick(e.target.files); e.target.value = ""; }} />
+      </div>
 
-        <div className="mt-[var(--space-24)] grid grid-cols-3 gap-[20.4px]">
-          {S.formats.map((f) => (
-            <div key={f.ext} className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-xl)] bg-[var(--bg-surface)] px-[28.5px] py-[var(--space-24)]">
-              <span className="text-[28px] font-semibold leading-[36px] text-[var(--sage-800)]">{f.ext}</span>
-              <span className="text-[16px] leading-[20px] text-[var(--sage-500)]">{f.note}</span>
-            </div>
-          ))}
+      {!replaceId && (
+        <Link href="/lab/new/type" className="relative mt-[30px] whitespace-pre text-[16px] font-medium leading-normal text-[var(--text-link)] hover:text-[var(--text-primary)]">
+          {S.noFile}
+        </Link>
+      )}
+
+      <div className={`relative left-[0.5px] flex gap-[var(--space-16)] ${replaceId ? "mt-[116px]" : "mt-[66px]"}`}>
+        {S.formats.map((f) => (
+          <button
+            key={f.ext}
+            type="button"
+            disabled={busy}
+            onClick={() => input.current?.click()}
+            className="flex items-center gap-[var(--space-40)] rounded-[var(--radius-xl)] bg-[var(--bg-surface)] px-[var(--space-28)] py-[var(--space-16)] text-left hover:bg-[var(--neutral-50)] disabled:pointer-events-none"
+          >
+            <span className="flex size-[75px] items-center justify-center rounded-[var(--radius-md)] bg-[var(--sage-50)]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={`/figma/import/${f.icon}.svg`} alt="" width={38} height={38} />
+            </span>
+            <span className="flex w-[196px] items-center justify-between">
+              <span className="flex flex-col gap-[var(--space-4)] whitespace-nowrap font-medium leading-normal">
+                <span className="text-[24px] text-[var(--text-primary)]">{f.ext}</span>
+                <span className="text-[16px] text-[var(--neutral-500)]">{f.note}</span>
+              </span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/figma/import/chevron-right.svg" alt="" width={12} height={24} />
+            </span>
+          </button>
+        ))}
+      </div>
+
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/figma/import/line.svg" alt="" aria-hidden width={1105} height={1} className="relative left-[4.5px] mt-[34px]" />
+
+      <div className="relative left-[4.5px] mt-[26px] flex w-[1105px] items-center justify-between opacity-90">
+        <div className="flex items-center gap-[var(--space-20)]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/figma/import/info.svg" alt="" width={38} height={38} />
+          <div className="flex flex-col gap-[var(--space-4)] whitespace-nowrap leading-normal text-[var(--neutral-600)]">
+            <p className="text-[18px] font-semibold">{S.hint.title}</p>
+            <p className="text-[16px] opacity-50">{S.hint.body}</p>
+          </div>
         </div>
+        <Link href="/lab/guideline" target="_blank" className="flex items-center gap-[var(--space-8)] text-[18px] font-semibold leading-normal text-[var(--neutral-600)] hover:text-[var(--text-primary)]">
+          {S.guide}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/figma/import/square-top-down.svg" alt="" width={24} height={24} />
+        </Link>
       </div>
 
       <ConfirmModal

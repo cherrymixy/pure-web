@@ -17,3 +17,5 @@
 | robot-pure-desk@2x.png | 901:8705 | image 398665290 | W02B-4 … W02F |
 
 Not in the prototype: an empty-state illustration (W02A empty lab) — no node to export.
+
+`import/` — W02B-2 3D file upload (936:8422): `bg@2x.png` = 배경 936:8423 exported at scale 2; the SVGs (upload, box, layers, chevron-right, info, square-top-down, line) come from `get_design_context` on 936:8422.
