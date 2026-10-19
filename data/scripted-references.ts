@@ -28,22 +28,20 @@ export const SCRIPTED_REFERENCES: ScriptedReference[] = [
     expression: {
       name: "Happy dance",
       currentStatus: "I'm so happy I can't stop dancing!",
-      reasoning: "It leans in close to share the moment, then bounces side to side with a beaming face and cheerful chatter.",
-      // Approach (lean in, ~3 s) then the dance. Tuned so validation only trims amplitude to joint limits:
-      // faster bounces or bigger props get slowed by the 120°/s rule and push the last step past the 15 s cap.
+      reasoning: "It bounces up and down the whole time, like the person in the video, with a beaming face and cheerful chatter.",
+      // Bouncing from start to end (the video's energy). Tuned so validation only trims amplitude to joint limits:
+      // faster or bigger bounces (or Smoothness below 40) get slowed by the 120°/s rule or cut by the 15 s cap.
       motion: {
         recipe: {
           steps: [
-            { behavior: "focus", speed: 1.5, amplitude: 0.3, repeat: 1, face: "smile" },
-            { behavior: "happy", speed: 1.12, amplitude: 1, repeat: 2, face: "heart" },
-            { behavior: "nod", speed: 1.5, amplitude: 0.6, repeat: 1, face: "smile" },
-            { behavior: "happy", speed: 1.12, amplitude: 1.1, repeat: 1, face: "heart" },
+            { behavior: "happy", speed: 1, amplitude: 1, repeat: 3, face: "heart" },
+            { behavior: "happy", speed: 1, amplitude: 1.1, repeat: 2, face: "smile" },
           ],
         },
-        props: { amplitude: 50, duration: 50, smoothness: 50, speed: 50, frequency: 50 },
+        props: { amplitude: 50, duration: 50, smoothness: 50, speed: 65, frequency: 50 },
       },
       face: { preset: "heart" },
-      sound: { cues: [cueAt("robot-happy", 0.4), cueAt("robot-happy", 3.4), cueAt("robot-happy", 6.2), cueAt("robot-happy", 10)] },
+      sound: { cues: [cueAt("robot-happy", 0.3), cueAt("robot-happy", 3), cueAt("robot-happy", 6), cueAt("robot-happy", 9), cueAt("robot-happy", 12)] },
     },
   },
 ];

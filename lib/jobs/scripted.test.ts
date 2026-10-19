@@ -50,9 +50,9 @@ describe("scripted references", () => {
     expect(steps).toHaveLength(5);
     const e = await repo.expressions.get(res.expressionId);
     expect(e.components).toEqual(["approach", "joy"]);
-    expect(e.motion.recipe.steps.map((s) => s.behavior)).toEqual(["focus", "happy", "nod", "happy"]);
+    expect(e.motion.recipe.steps.map((s) => s.behavior)).toEqual(["happy", "happy"]);
     expect(res.issues.filter((i) => !i.message.includes("joint limits"))).toEqual([]);
-    expect(e.sound.cues).toHaveLength(4);
+    expect(e.sound.cues).toHaveLength(5);
     expect(e.sound.cues.every((c) => c.sound === "robot-happy" && c.pitchSt === 0)).toBe(true);
   });
 });
