@@ -4,7 +4,6 @@ import type { ComponentDoc, ComponentDocSection, DocChannel, GuidelineBlock } fr
 import { STRINGS } from "@/data/strings";
 import { DocToc, type TocItem } from "./doc-toc";
 import { FaceChange, FaceDonts, FaceRhythm, FaceTransitions, FaceTypes } from "./face-figures";
-import { GuidelineTree } from "./guideline-tree";
 import { PrincipleBullets, PrincipleCards, PrincipleCompare, PrincipleDonts, PrincipleFlow, PrinciplePhases } from "./principle-sections";
 
 const G = STRINGS.guideline;
@@ -21,31 +20,22 @@ export function ComponentDocPage({
   proposed,
   doc,
   base,
-  current,
-  isPublic,
   actions,
 }: {
   title: string;
   proposed?: boolean;
   doc: ComponentDoc;
   base: string;
-  current: string;
-  isPublic: boolean;
   /** extra controls under the lead (Download pure tokens JSON) */
   actions?: React.ReactNode;
 }) {
   const sections = doc.rows.flatMap((r) => (Array.isArray(r) ? r : [r]));
   const toc: TocItem[] = [...(doc.topToc ? [{ id: "top", label: doc.topToc }] : []), ...sections.map((s) => ({ id: s.id, label: s.toc ?? s.title }))];
-  const stickyTop = isPublic ? "top-[136px]" : "top-[var(--space-32)]";
-  const scrollMt = isPublic ? "scroll-mt-[136px]" : "scroll-mt-[var(--space-32)]";
+  const stickyTop = "top-[var(--space-32)]";
+  const scrollMt = "scroll-mt-[var(--space-32)]";
 
   return (
-    <div className={`flex items-start gap-[29px] pb-[var(--space-32)] pr-[var(--space-32)] pt-[var(--space-32)] ${isPublic ? "pl-[var(--space-32)]" : "pl-[29px]"}`}>
-      {isPublic && (
-        <nav aria-label={G.contents} className={`sticky w-[268px] shrink-0 ${stickyTop}`}>
-          <GuidelineTree base={base} current={current} />
-        </nav>
-      )}
+    <div className={`flex items-start gap-[29px] pb-[var(--space-32)] pr-[var(--space-32)] pt-[var(--space-32)] pl-[29px]`}>
 
       <div className="flex min-w-0 flex-1 items-start gap-[118px] rounded-[var(--radius-xl)] bg-[var(--bg-surface)] pb-[75px] pl-[69px] pr-[61px] pt-[62px] leading-normal">
         <article className="flex min-w-0 flex-1 flex-col">

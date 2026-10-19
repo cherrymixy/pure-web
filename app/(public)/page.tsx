@@ -160,7 +160,7 @@ export default function Page() {
       </section>
 
       {/* Band/Guideline 901:7145 */}
-      <section id="guideline" className="mx-[8px] h-[260px] overflow-clip rounded-[calc(var(--radius-2xl)/2)] bg-[var(--bg-surface)] px-[40px] pt-[41px]">
+      <section id="guideline" className="mx-[8px] overflow-clip rounded-[calc(var(--radius-2xl)/2)] bg-[var(--bg-surface)] px-[40px] py-[41px]">
         <div className="flex justify-between">
           <div className="w-[350px]">
             <p className={label}>{L.guideline.label}</p>
@@ -181,9 +181,6 @@ export default function Page() {
             ))}
           </div>
         </div>
-        <Link href="/guideline" className={`${lightButton} mt-[31px] w-full`}>
-          {L.guideline.cta}
-        </Link>
       </section>
 
       {/* CTA band 901:7167 */}

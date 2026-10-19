@@ -86,7 +86,6 @@ export const LANDING = {
     label: "GUIDELINE",
     headline: ["Built on an open", "motion design system"],
     body: "Principles, tokens, components and patterns for robot motion, documented like any design system.",
-    cta: "Read the guideline",
     tokens: [
       { token: "tilt.s", use: "listen", value: "8°" },
       { token: "tilt.m", use: "greet / default", value: "14°" },
@@ -104,7 +103,7 @@ export const LANDING = {
     tagline: "Motion design system for physical AI",
     columns: [
       { title: "Product", links: [{ label: "Try PURE", href: "/lab" }, { label: "Sign in", href: "/lab" }, { label: "Get the app", href: "/lab" }] },
-      { title: "Resources", links: [{ label: "Guideline", href: "/guideline" }, { label: "Download", href: "/lab" }, { label: "Robot types", href: "#robot-types" }] },
+      { title: "Resources", links: [{ label: "Guideline", href: "#guideline" }, { label: "Download", href: "/lab" }, { label: "Robot types", href: "#robot-types" }] },
       { title: "Company", links: [{ label: "Terms", href: null }, { label: "Privacy", href: null }, { label: "Contact", href: null }] },
     ],
     copyright: "© 2026 PURE",
