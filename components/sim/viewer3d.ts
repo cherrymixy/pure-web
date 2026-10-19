@@ -14,6 +14,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { SERVO_ID, type LampSim } from './lamp';
 import { JOINT_NAMES, type JointName } from '@/lib/sim/motion';
 import type { CameraView, FaceDisplay } from '@/lib/sim/robots';
+import { RingDrag, rayPlane, type Vec3 } from '@/lib/sim/gizmo';
 
 export type { CameraView };
 
@@ -41,6 +42,21 @@ export interface JointScreenPoint {
   /** false when behind the camera or outside the canvas */
   visible: boolean;
 }
+
+/** Editor joint gizmo callbacks (engine joint names; the runtime maps them to robot ids). */
+export interface GizmoHandlers {
+  /** A click (not a drag) on the robot: the joint that moves the clicked part, or null (base, floor, empty space). */
+  onPick(joint: JointName | null): void;
+  /** Ring drag: degrees swept since the drag started; `done` on release. */
+  onRotate(joint: JointName, deltaDeg: number, done: boolean): void;
+}
+
+/** Ring radius (m) and the wider invisible band that catches the pointer. */
+const RING_RADIUS = 0.055;
+const RING_TUBE = 0.0022;
+const RING_GRAB = 0.009;
+/** A pointer that moves less than this (px) between down and up is a click, not an orbit. */
+const CLICK_PX = 4;
 
 const DEFAULT_OPTIONS: Required<ViewerOptions> = {
   stage: '#0a0a0d',
@@ -107,6 +123,12 @@ export class LampViewer {
   private readonly options: Required<ViewerOptions>;
   private readonly jointIds: Record<JointName, number>;
   private highlighted: JointName | null = null;
+  /** Rotation ring around the selected joint (editor gizmo) */
+  private readonly ring = new THREE.Group();
+  private readonly ringGrab: THREE.Mesh;
+  private gizmoJoint: JointName | null = null;
+  private gizmoOff: (() => void) | null = null;
+  private readonly raycaster = new THREE.Raycaster();
 
   constructor(canvas: HTMLCanvasElement, lamp: LampSim, options: ViewerOptions = {}) {
     this.lamp = lamp;
@@ -140,6 +162,7 @@ export class LampViewer {
     this.addFloor();
     this.buildGeoms();
     this.buildScreen();
+    this.ringGrab = this.buildRing();
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
@@ -391,6 +414,11 @@ export class LampViewer {
 
   /** 뷰어를 버릴 때 — 영상 디코더와 GPU 자원을 놓는다. */
   dispose(): void {
+    this.gizmoOff?.();
+    for (const m of this.ring.children as THREE.Mesh[]) {
+      m.geometry.dispose();
+      (m.material as THREE.Material).dispose();
+    }
     if (this.video) {
       this.video.pause();
       this.video.removeAttribute('src');
@@ -405,6 +433,7 @@ export class LampViewer {
   /** 시뮬레이션 상태를 3D 씬에 반영한다. */
   sync(): void {
     const { data } = this.lamp;
+    this.syncRing();
     const xpos = data.geom_xpos;
     const xmat = data.geom_xmat;
 
@@ -467,6 +496,142 @@ export class LampViewer {
       const y = (-v.y * 0.5 + 0.5) * h;
       return { joint, x, y, visible: v.z < 1 && x >= 0 && x <= w && y >= 0 && y <= h };
     });
+  }
+
+  // ---------------------------------------------------------------- joint gizmo (editor)
+
+  /** Thin visible torus + a wider invisible one for grabbing; drawn over the robot. */
+  private buildRing(): THREE.Mesh {
+    const color = new THREE.Color(this.options.highlight);
+    const visible = new THREE.Mesh(
+      new THREE.TorusGeometry(RING_RADIUS, RING_TUBE, 12, 96),
+      new THREE.MeshBasicMaterial({ color, depthTest: false, transparent: true, opacity: 0.95 }),
+    );
+    const grab = new THREE.Mesh(
+      new THREE.TorusGeometry(RING_RADIUS, RING_GRAB, 8, 64),
+      new THREE.MeshBasicMaterial({ visible: false }),
+    );
+    visible.renderOrder = grab.renderOrder = 999;
+    this.ring.add(visible, grab);
+    this.ring.visible = false;
+    this.scene.add(this.ring);
+    return grab;
+  }
+
+  /** Joint anchor and axis in world coordinates. */
+  private jointFrame(joint: JointName): { anchor: THREE.Vector3; axis: THREE.Vector3 } {
+    const { data } = this.lamp;
+    const j = this.jointIds[joint];
+    return {
+      anchor: toWorld(data.xanchor[j * 3], data.xanchor[j * 3 + 1], data.xanchor[j * 3 + 2]),
+      axis: toWorld(data.xaxis[j * 3], data.xaxis[j * 3 + 1], data.xaxis[j * 3 + 2]).normalize(),
+    };
+  }
+
+  private syncRing(): void {
+    if (!this.gizmoJoint) return;
+    const { anchor, axis } = this.jointFrame(this.gizmoJoint);
+    this.ring.position.copy(anchor);
+    this.ring.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), axis);
+  }
+
+  /** Show the rotation ring on a joint (null hides it). */
+  setGizmo(joint: JointName | null): void {
+    this.gizmoJoint = joint;
+    this.ring.visible = joint !== null;
+    this.syncRing();
+  }
+
+  /** The joint that moves a body: its own hinge, else the nearest parent's; null for the fixed base. */
+  private jointOfBody(body: number): JointName | null {
+    const { model } = this.lamp;
+    for (let b = body; b > 0; b = model.body_parentid[b]) {
+      const hit = JOINT_NAMES.find((n) => model.jnt_bodyid[this.jointIds[n]] === b);
+      if (hit) return hit;
+    }
+    return null;
+  }
+
+  private rayAt(e: PointerEvent): THREE.Ray {
+    const rect = this.renderer.domElement.getBoundingClientRect();
+    const ndc = new THREE.Vector2(((e.clientX - rect.left) / rect.width) * 2 - 1, -((e.clientY - rect.top) / rect.height) * 2 + 1);
+    this.raycaster.setFromCamera(ndc, this.camera);
+    return this.raycaster.ray;
+  }
+
+  /**
+   * Editor picking: click a part → onPick; drag the ring → onRotate (orbit is held off meanwhile).
+   * Listens in the capture phase so a ring grab reaches us before OrbitControls starts rotating.
+   */
+  enableGizmo(handlers: GizmoHandlers | null): void {
+    this.gizmoOff?.();
+    this.gizmoOff = null;
+    if (!handlers) return this.setGizmo(null);
+    const el = this.renderer.domElement;
+    const v = (p: THREE.Vector3): Vec3 => [p.x, p.y, p.z];
+    let down: { x: number; y: number } | null = null;
+    let drag: { joint: JointName; ring: RingDrag; anchor: Vec3; axis: Vec3; orbit: boolean; id: number } | null = null;
+
+    const onDown = (e: PointerEvent) => {
+      down = null;
+      if (e.button !== 0) return;
+      down = { x: e.clientX, y: e.clientY };
+      const joint = this.gizmoJoint;
+      if (!joint || !this.ring.visible) return;
+      this.scene.updateMatrixWorld();
+      const ray = this.rayAt(e);
+      if (this.raycaster.intersectObject(this.ringGrab, false).length === 0) return;
+      const { anchor, axis } = this.jointFrame(joint);
+      const hit = rayPlane(v(ray.origin), v(ray.direction), v(anchor), v(axis));
+      if (!hit) return;
+      drag = { joint, ring: new RingDrag(v(anchor), v(axis), hit), anchor: v(anchor), axis: v(axis), orbit: this.controls.enabled, id: e.pointerId };
+      this.controls.enabled = false;
+      el.setPointerCapture(e.pointerId);
+      e.stopImmediatePropagation();
+      e.preventDefault();
+    };
+    const onMove = (e: PointerEvent) => {
+      if (!drag || e.pointerId !== drag.id) return;
+      const ray = this.rayAt(e);
+      const hit = rayPlane(v(ray.origin), v(ray.direction), drag.anchor, drag.axis);
+      if (hit) handlers.onRotate(drag.joint, drag.ring.move(hit), false);
+    };
+    /** Ends a ring drag (release, cancel, or the gizmo turning off) — the editor always gets `done`. */
+    const endDrag = (pointerId?: number) => {
+      if (!drag) return false;
+      const d = drag;
+      drag = null;
+      down = null;
+      this.controls.enabled = d.orbit;
+      if (pointerId !== undefined && el.hasPointerCapture(pointerId)) el.releasePointerCapture(pointerId);
+      handlers.onRotate(d.joint, d.ring.total, true);
+      return true;
+    };
+    const onCancel = (e: PointerEvent) => {
+      if (drag && e.pointerId === drag.id) endDrag(e.pointerId);
+      down = null;
+    };
+    const onUp = (e: PointerEvent) => {
+      if (drag && e.pointerId === drag.id) return void endDrag(e.pointerId);
+      if (e.button !== 0 || !down || Math.hypot(e.clientX - down.x, e.clientY - down.y) > CLICK_PX) return void (down = null);
+      down = null;
+      this.scene.updateMatrixWorld();
+      this.rayAt(e);
+      const hits = this.raycaster.intersectObjects(this.geomNodes.map((g) => g.node), false);
+      const geom = hits.length ? this.geomNodes.find((g) => g.node === hits[0].object)?.geomId : undefined;
+      handlers.onPick(geom === undefined ? null : this.jointOfBody(this.lamp.model.geom_bodyid[geom]));
+    };
+    el.addEventListener('pointerdown', onDown, { capture: true });
+    el.addEventListener('pointermove', onMove);
+    el.addEventListener('pointerup', onUp);
+    el.addEventListener('pointercancel', onCancel);
+    this.gizmoOff = () => {
+      el.removeEventListener('pointerdown', onDown, { capture: true });
+      el.removeEventListener('pointermove', onMove);
+      el.removeEventListener('pointerup', onUp);
+      el.removeEventListener('pointercancel', onCancel);
+      endDrag();
+    };
   }
 
   enableOrbit(on: boolean, opts: { pan?: boolean; zoom?: boolean } = {}): void {

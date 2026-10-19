@@ -80,3 +80,4 @@ STEP마다 한 줄. `날짜 · STEP · 결정 · 근거`
 | 2026-10-19 | 시그니처 | URL 추출: 제목·문단·목록 글자가 200자 미만인 랜딩 페이지(pixar.com 등)는 title·meta description·본문 전체 글자로 대체 | 사용자 요청: Pixar URL이 NO_TEXT |
 | 2026-10-19 | 시연 스크립트 | happy 영상 움직임을 처음부터 끝까지 덩실(happy ×3 → ×2, Speed 65)로. 접근(focus) 단계는 빼고 Component 목록에만 Approach 유지. 더 빠른 값은 120°/s·15 s 검증에 걸림 | 사용자 요청: "더 방방" |
 | 2026-10-19 | 에디터 | Reference 스트립: 행동 칩 제거, 최근 입력(프롬프트 + 첨부 요약) 키워드로 세트 하나(REFERENCE_KEYWORDS, 없으면 첫 행동). Face·Motion 썸네일 클릭 → 레퍼런스 플레이어(이름 · 시간, Side by side, Match timing — 세트 영상은 프레임을 뒤에서 추출). 입력 형식에 Video 추가. Edit Detail 중 로봇 영역 바닥을 타임라인 위(387px)로 | 사용자 요청 |
+| 2026-10-19 | 시뮬 계약 | (봉인 해제 승인) 에디터 관절 회전 링: 부품 클릭 → 그 관절 선택(jointPick), 관절축에 맞춘 링 드래그 → 각도(jointRotate) → 재생 위치에 키프레임(addKey/updateKey, Undo). SimController에 enableJointGizmo·showJointGizmo와 이벤트 2개 추가, viewer3d에 클릭·링(캡처 단계 리스너로 OrbitControls보다 먼저). 에디터에서만 켬, 다른 모드 영향 없음. 링 반지름 5.5 cm·강조색 | 사용자 요청: "시포디처럼" |

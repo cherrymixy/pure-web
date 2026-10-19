@@ -69,6 +69,10 @@ export type SimEventMap = {
   limitExceeded: LimitEvent;
   jointState: JointState[];
   error: { message: string };
+  /** Editor gizmo (enableJointGizmo): a robot part was clicked — the joint that moves it, null = base / empty */
+  jointPick: { id: string | null };
+  /** Editor gizmo: rotation ring dragged — degrees swept since the grab; `done` on release */
+  jointRotate: { id: string; deltaDeg: number; done: boolean };
 };
 export type SimEventName = keyof SimEventMap;
 
@@ -99,6 +103,7 @@ export class SimController {
   private view: ViewParams = {};
   private orbit: { on: boolean; pan?: boolean; zoom?: boolean } = { on: true };
   private highlighted: string | null = null;
+  private gizmo: { on: boolean; joint: string | null } = { on: false, joint: null };
   private readonly handlers = new Map<SimEventName, Set<(payload: never) => void>>();
   private jointTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -131,6 +136,12 @@ export class SimController {
           this.sound.sync?.(e.t, this.params.speed);
           if (this.expressionActive && this.faceSpec?.keys?.length) this.applyFace(e.t);
           this.emit('tick', { t: e.t, duration: e.duration });
+          break;
+        case 'jointPick':
+          this.emit('jointPick', { id: e.id });
+          break;
+        case 'jointRotate':
+          this.emit('jointRotate', { id: e.id, deltaDeg: e.deltaDeg, done: e.done });
           break;
         case 'limitExceeded': {
           const { type: _type, ...event } = e;
@@ -356,11 +367,25 @@ export class SimController {
     this.runtime.highlightJoint(id);
   }
 
+  /** Editor: click a part to pick its joint, drag the ring to turn it (events jointPick / jointRotate). */
+  enableJointGizmo(on: boolean): void {
+    this.gizmo.on = on;
+    this.runtime.enableGizmo(on);
+  }
+
+  /** Rotation ring on a robot joint id (null hides it). Pose edits stay with the caller (clip keys + seek). */
+  showJointGizmo(id: string | null): void {
+    this.gizmo.joint = id;
+    this.runtime.setGizmo(id);
+  }
+
   /** Viewer calls made before the model loaded are replayed here. */
   private applyViewState(): void {
     this.runtime.setView(this.view as Partial<CameraView>);
     this.runtime.enableOrbit(this.orbit.on, this.orbit);
     this.runtime.highlightJoint(this.highlighted);
+    this.runtime.enableGizmo(this.gizmo.on);
+    this.runtime.setGizmo(this.gizmo.joint);
   }
 
   /** Joint anchors in canvas pixels — structure screen joint numbers. */

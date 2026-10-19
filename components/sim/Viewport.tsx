@@ -26,7 +26,9 @@ export type ViewportEvent =
   | { type: "tick"; t: number; duration: number }
   | ({ type: "limitExceeded" } & SimEventMap["limitExceeded"])
   | { type: "jointState"; joints: JointState[] }
-  | { type: "error"; message: string };
+  | { type: "error"; message: string }
+  | ({ type: "jointPick" } & SimEventMap["jointPick"])
+  | ({ type: "jointRotate" } & SimEventMap["jointRotate"]);
 
 const MODES: Record<ViewportMode, { pan: boolean; zoom: boolean; idle: boolean }> = {
   editor: { pan: true, zoom: true, idle: true },
@@ -109,6 +111,8 @@ export function Viewport({
       ctrl.on("limitExceeded", (p) => send({ type: "limitExceeded", ...p })),
       ctrl.on("jointState", (joints) => send({ type: "jointState", joints })),
       ctrl.on("error", (p) => send({ type: "error", ...p })),
+      ctrl.on("jointPick", (p) => send({ type: "jointPick", ...p })),
+      ctrl.on("jointRotate", (p) => send({ type: "jointRotate", ...p })),
     ];
     ctrl.ready.catch(() => {});
 

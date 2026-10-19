@@ -299,9 +299,70 @@ export function Editor({
   const jointLabel = (id: string) => structure.joints.find((j) => j.id === id)?.label ?? id;
   const isJoint = (track: Track) => track !== "face" && track !== "sound";
 
+  const editable = !!timelineClip;
   useEffect(() => {
-    ctrl.current?.highlightJoint(selectedTrack && isJoint(selectedTrack) ? selectedTrack : null);
-  }, [selectedTrack]);
+    const joint = selectedTrack && isJoint(selectedTrack) ? selectedTrack : null;
+    ctrl.current?.highlightJoint(joint);
+    // No motion yet → nothing to key, so no ring to grab.
+    ctrl.current?.showJointGizmo(editable ? joint : null);
+  }, [selectedTrack, editable]);
+
+  // Click a robot part → its joint is selected (ring + timeline layer); drag the ring → key at the playhead.
+  useEffect(() => {
+    ctrl.current?.enableJointGizmo(true);
+    return () => ctrl.current?.enableJointGizmo(false);
+  }, []);
+  /** Clip and key the current ring drag edits (taken at the grab, so every move starts from the same value). */
+  const ringDrag = useRef<{ id: string; clip: Clip; index: number; base: number; previewed: boolean } | null>(null);
+
+  /** Latest preview, drawn once per frame (pointermove fires faster than a clip can be re-cued). */
+  const ringFrame = useRef<{ raf: number; clip: Clip | null }>({ raf: 0, clip: null });
+  function previewRing(next: Clip) {
+    setClip(next);
+    ringFrame.current.clip = next;
+    if (ringFrame.current.raf) return;
+    ringFrame.current.raf = requestAnimationFrame(() => {
+      ringFrame.current.raf = 0;
+      if (ringFrame.current.clip) showClip(ringFrame.current.clip);
+    });
+  }
+
+  function pickJoint(id: string | null) {
+    ringDrag.current = null;
+    if (!id) {
+      if (selectedTrack && isJoint(selectedTrack)) setSelectedTrack(null);
+      return;
+    }
+    if (!structure.joints.some((j) => j.id === id)) return;
+    ctrl.current?.pause();
+    setPaused(true);
+    setSelectedTrack(id);
+  }
+
+  function rotateJoint(id: string, deltaDeg: number, done: boolean) {
+    if (!timelineClip) return;
+    if (!ringDrag.current || ringDrag.current.id !== id) {
+      const { clip: withKey, index } = addKey(timelineClip, id, time.t, structure);
+      ringDrag.current = { id, clip: withKey, index, base: withKey.tracks[id][index].value, previewed: false };
+    }
+    const d = ringDrag.current;
+    const next = updateKey(d.clip, id, d.index, { value: d.base + deltaDeg }, structure);
+    if (!done) {
+      // Hand jitter on the grab isn't an edit.
+      if (Math.abs(deltaDeg) < 0.5 && !d.previewed) return;
+      d.previewed = true;
+      previewRing(next);
+      return;
+    }
+    ringDrag.current = null;
+    cancelAnimationFrame(ringFrame.current.raf);
+    ringFrame.current = { raf: 0, clip: null };
+    // A grab released without turning leaves the motion as it was.
+    if (!d.previewed) return;
+    setSelectedKey({ track: id, index: d.index });
+    setTimelineOpen(true);
+    editClip(() => next, fmt(E.timeline.edited, { joint: jointLabel(id), time: formatTime(next.tracks[id][d.index].t) }));
+  }
 
   /** Joint key edit: the first one turns the recipe into keyframes. */
   function editClip(fn: (c: Clip) => Clip, label: string, done = true) {
@@ -646,6 +707,12 @@ export function Editor({
       case "limitExceeded":
         setLimit(e);
         setPaused(true);
+        break;
+      case "jointPick":
+        pickJoint(e.id);
+        break;
+      case "jointRotate":
+        rotateJoint(e.id, e.deltaDeg, e.done);
         break;
     }
   }

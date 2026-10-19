@@ -49,7 +49,11 @@ export type RuntimeEvent =
   | { type: 'ended'; name: string }
   | { type: 'step'; name: string; index: number }
   | { type: 'tick'; t: number; duration: number }
-  | ({ type: 'limitExceeded' } & LimitEvent);
+  | ({ type: 'limitExceeded' } & LimitEvent)
+  /** Editor gizmo: a part was clicked (robot joint id, null = nothing that moves) */
+  | { type: 'jointPick'; id: string | null }
+  /** Editor gizmo: ring dragged — degrees swept since the grab (robot joint id) */
+  | { type: 'jointRotate'; id: string; deltaDeg: number; done: boolean };
 
 /** What the runtime plays. `build(start)` makes the playable from the current pose. */
 export interface PlaybackSource {
@@ -493,6 +497,23 @@ export class SimRuntime {
 
   highlightJoint(id: string | null): void {
     this.viewer?.highlightJoint(id ? engineJoint(this.robot, id) : null);
+  }
+
+  /** Editor picking + rotation ring (events jointPick / jointRotate). */
+  enableGizmo(on: boolean): void {
+    this.viewer?.enableGizmo(
+      on
+        ? {
+            onPick: (joint) => this.emit({ type: 'jointPick', id: joint ? this.robot.jointKeys[joint] : null }),
+            onRotate: (joint, deltaDeg, done) => this.emit({ type: 'jointRotate', id: this.robot.jointKeys[joint], deltaDeg, done }),
+          }
+        : null,
+    );
+  }
+
+  /** Rotation ring on a robot joint (null hides it). */
+  setGizmo(id: string | null): void {
+    this.viewer?.setGizmo(id ? engineJoint(this.robot, id) : null);
   }
 
   projectJoints(): (Omit<JointScreenPoint, 'joint'> & { id: string })[] {
