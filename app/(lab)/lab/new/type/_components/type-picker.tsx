@@ -197,7 +197,7 @@ export function TypePicker({ initialSelected = false }: { initialSelected?: bool
             type="button"
             disabled={!selected || busy}
             onClick={start}
-            className="flex h-[56px] w-[335px] items-center gap-[var(--space-12)] rounded-[var(--radius-full)] bg-[var(--neutral-800)] py-[var(--space-12)] pl-[var(--space-32)] pr-[var(--space-16)] text-[20px] font-medium leading-[26px] text-[var(--neutral-100)] hover:bg-[var(--neutral-700)] disabled:cursor-not-allowed disabled:bg-[var(--bg-disabled)] disabled:text-[var(--text-disabled)]"
+            className="flex h-[56px] items-center gap-[var(--space-12)] rounded-[var(--radius-full)] bg-[var(--neutral-800)] px-[var(--space-24)] py-[var(--space-12)] text-[20px] font-medium leading-[26px] text-[var(--neutral-100)] hover:bg-[var(--neutral-700)] disabled:cursor-not-allowed disabled:bg-[var(--bg-disabled)] disabled:text-[var(--text-disabled)]"
           >
             {S.continue}
           </button>

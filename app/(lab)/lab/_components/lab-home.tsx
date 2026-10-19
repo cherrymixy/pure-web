@@ -147,14 +147,14 @@ export function LabHome() {
     <>
       <button
         onClick={() => router.push("/lab/new/import")}
-        className="flex h-[56px] w-[152px] items-center justify-center gap-[var(--space-12)] rounded-[var(--radius-full)] bg-[var(--neutral-300)] text-[20px] leading-[26px] text-[var(--text-primary)] hover:bg-[var(--neutral-200)]"
+        className="flex h-[56px] items-center gap-[var(--space-12)] pl-[var(--space-24)] pr-[var(--space-32)] rounded-[var(--radius-full)] bg-[var(--neutral-300)] text-[20px] leading-[26px] text-[var(--text-primary)] hover:bg-[var(--neutral-200)]"
       >
         <Icon name="download-minimalistic" size={25} className="text-[var(--neutral-800)]" />
         {S.import}
       </button>
       <button
         onClick={() => router.push("/lab/new/type")}
-        className="flex h-[56px] w-[274px] items-center gap-[var(--space-12)] rounded-[var(--radius-full)] bg-[var(--neutral-800)] py-[var(--space-12)] pl-[var(--space-32)] pr-[var(--space-16)] text-[20px] font-medium leading-[26px] text-[var(--neutral-100)] hover:bg-[var(--neutral-700)]"
+        className="flex h-[56px] items-center gap-[var(--space-12)] rounded-[var(--radius-full)] bg-[var(--neutral-800)] py-[var(--space-12)] pl-[var(--space-32)] pr-[var(--space-24)] text-[20px] font-medium leading-[26px] text-[var(--neutral-100)] hover:bg-[var(--neutral-700)]"
       >
         {S.tryRobot}
         <Icon name="arrow-right" size={37.6} className="text-[var(--neutral-0)]" />
