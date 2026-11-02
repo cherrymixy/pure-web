@@ -85,3 +85,4 @@ STEP마다 한 줄. `날짜 · STEP · 결정 · 근거`
 | 2026-10-19 | 가이드라인 | 로그인 전 공개 /guideline(레이아웃·GNB) 삭제, 랜딩 Read the guideline 버튼 제거(밴드 높이 고정 해제, 하단 41). 푸터 Guideline → #guideline. 가이드라인은 /lab/guideline에서만 | 사용자 요청 |
 | 2026-10-19 | 버튼 여백 | Lab 홈 Import(고정폭 → 좌 24·우 32), Try PURE's Robot(고정폭 → 우 24), 타입 선택 Continue(고정폭 → 좌우 24) | 사용자 리뷰 |
 | 2026-10-19 | Import | W02B-2 Figma(936:8422) 번역: 배경 70%, Import your robot, 드롭 카드(흰 링+점선), No file yet → 타입 선택, 형식 카드 3개(클릭=파일 선택), 안내 행 + View upload guide(/lab/guideline 새 탭, Figma에 링크 없음). 업로드 로직 유지 | 사용자 요청 |
+| 2026-11-02 | 3D 에셋 L1 | NVIDIA SimReady(HF nvidia/simready-assets, CC BY 4.0) 13개를 scripts/simready/convert.py로 변환: USD → GLB(Y-up, 텍스처 ≤1K, 원점 바닥 중앙) + CoACD 볼록 충돌 STL(Z-up) + 썸네일, 질량·마찰은 SimReady 값 → data/simready-assets.ts. Shelf(창고 랙 6t·29MB) 제외. 배치는 자유 드래그 대신 이동 모드(방향키 한 칸 0.1m, R 90°). 확인 /dev/simready | 사용자 요청 |

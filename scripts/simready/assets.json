@@ -1,0 +1,15 @@
+[
+  {"id": "desk_a01", "name": "Desk", "category": "furniture", "role": "stage"},
+  {"id": "furniture_table_coffee_low_a01", "name": "Coffee table", "category": "furniture", "role": "stage"},
+  {"id": "table_bedside_b01", "name": "Bedside table", "category": "furniture", "role": "stage"},
+  {"id": "sofa_soft_b01", "name": "Armchair", "category": "furniture", "role": "stage"},
+  {"id": "chair_office_fabric_manager_a01", "name": "Office chair", "category": "furniture", "role": "stage"},
+  {"id": "lamp_table_bedside_a01", "name": "Table lamp", "category": "object", "role": "prop"},
+  {"id": "dishware_mug_a01", "name": "Mug", "category": "object", "role": "prop"},
+  {"id": "kitchenware_bowl_b01", "name": "Bowl", "category": "object", "role": "prop"},
+  {"id": "book_open_a01", "name": "Open book", "category": "object", "role": "prop"},
+  {"id": "misc_notebook_a01", "name": "Notebook", "category": "object", "role": "prop"},
+  {"id": "toys_rubiksCube_a01", "name": "Cube puzzle", "category": "object", "role": "prop"},
+  {"id": "misc_golfBall_a01", "name": "Ball", "category": "object", "role": "prop"},
+  {"id": "storage_box_a01", "name": "Storage chest", "category": "furniture", "role": "stage"}
+]
