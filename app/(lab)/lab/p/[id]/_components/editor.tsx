@@ -1158,9 +1158,9 @@ export function Editor({
       <div className="pointer-events-none absolute bottom-[32px] left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-[20px]">
       {/* Play bar (452:2414): white pill 550×68 (pad 10 · 21 right), centred, 20 above the composer (user review; Figma 156) — play 48 (pill grey 20%),
           time Medium 14.986, 331×9 track (#829398 at 20%, fill full strength) with a 21 knob ring, volume 24 (mute).
-          W02E-4: hidden under the Timeline Panel while it's open (its transport takes over). */}
+          W02E-4: hidden under the Timeline Panel while it's open (its transport takes over). Shown at 80% (zoom, user review). */}
       {!timelineOpen && (
-      <div className="pointer-events-auto flex h-[68px] w-[550px] shrink-0 items-center gap-[14px] rounded-[var(--radius-full)] bg-[var(--bg-surface)] py-[10px] pl-[10px] pr-[21px]">
+      <div className="pointer-events-auto flex h-[68px] w-[550px] shrink-0 [zoom:0.8] items-center gap-[14px] rounded-[var(--radius-full)] bg-[var(--bg-surface)] py-[10px] pl-[10px] pr-[21px]">
         <span data-testid="time" className="sr-only">{fmtT(time.t)} / {fmtT(time.duration)}</span>
         <button
           type="button"
