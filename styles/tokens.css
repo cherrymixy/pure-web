@@ -177,6 +177,12 @@
   --community-pill: #d4d4d433; /* search pill · More · play button: rgba(212,212,212,.2) */
   --community-progress: #92adb5; /* detail play bar fill, track at 20% */
   --community-subnav-selected: #dfe5e7; /* sidebar All / Popular / Recently */
+  /* Editor Library tab 451:1595 (file 8K6xueAm5tSPPKkJenfXeO, no Figma variable) */
+  --library-section: #6f6d6e; /* Community / 3D Asset label + icons */
+  --library-card-title: #2c3030; /* motion card title (Gray6) */
+  --library-pager: #f1f2f4; /* ‹ › pill */
+  --library-pager-icon: #929292;
+  --library-asset: #f0f1f3; /* 115 round asset tile */
   /* TODO(승아): PURE/Blur/Overlay = BACKGROUND_BLUR radius 50. CSS blur() 값으로 50px 그대로인지 25px(반경 절반)인지 확인 필요 */
   --pure-blur-overlay: 50px;
 }

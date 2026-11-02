@@ -3,11 +3,12 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SUGGESTED_PROMPTS } from "@/data/prompts";
+import { LIBRARY } from "@/data/library";
 import { STRINGS, fmt } from "@/data/strings";
-import { addFaceKey, addKey, applyToRobot, autoAdjust, deleteFaceKey, deleteKey, formatTime, matchTiming, moveFaceKey, paramsToProps, propsToParams, recipeToClip, snapTime, updateKey } from "@/lib/expression";
+import { addFaceKey, addKey, autoAdjust, deleteFaceKey, deleteKey, formatTime, matchTiming, moveFaceKey, paramsToProps, propsToParams, recipeToClip, snapTime, updateKey } from "@/lib/expression";
 import { diffEnergy, energySamples } from "@/lib/reference/energy";
 import { flowEnergy } from "@/lib/reference/flow";
-import type { Channel, Clip, Expression, FaceSpec, Key, Job, MotionProps, Project, Reference, SavedExpression, Settings, Signature, SoundCue, SoundSpec, Structure } from "@/lib/models";
+import type { Channel, Clip, Expression, FaceSpec, Key, Job, MotionProps, Project, Reference, Settings, UserDataMotion, Signature, SoundCue, SoundSpec, Structure } from "@/lib/models";
 import { cueAt } from "@/data/sound-cues";
 import { ReferenceError, extractFrames, readFramePixels } from "@/lib/reference/frames";
 
@@ -24,7 +25,6 @@ import { Icon } from "@/components/ui/icons/icon";
 import { Menu } from "@/components/ui/menu";
 import { ConfirmModal, Modal, ModalActions, ModalButton, PromptModal } from "@/components/ui/modal";
 import { useToast } from "@/components/ui/toast";
-import { CHANNEL_LABEL } from "@/components/ui/channel-badges";
 import { FacePanel, SoundPanel } from "./channel-panels";
 import { logInput, withRef, type InputEntry } from "@/lib/ui/input-log";
 import { ContextPanel, SET_REF, type EditorContext, type PendingReference } from "./context-panel";
@@ -666,21 +666,20 @@ export function Editor({
 
   // ------------------------------------------------------------ library
 
-  async function applyLibrary(saved: SavedExpression) {
-    const { expression: input, dropped, clipDropped } = applyToRobot(saved, structure);
-    try {
-      const created = await api<Expression>(`/api/projects/${project.id}/expressions`, { method: "POST", body: JSON.stringify(input) });
-      setExpression(created);
-      resetTo(created);
-      setLastResult(null);
-      setAutoPlay(true);
-      setCue((c) => c + 1);
-      toast(fmt(E.libraryPanel.applied, { name: saved.name }));
-      if (dropped.length) toast(fmt(E.libraryPanel.dropped, { channels: dropped.map((c) => CHANNEL_LABEL[c]).join(", ") }));
-      if (clipDropped) toast(E.libraryPanel.clipDropped);
-    } catch {
-      toast(STRINGS.lab.toast.failed);
+  /** Library › Community card: attach the motion as a userData reference (same as Community "Use"). */
+  function attachCommunity(m: UserDataMotion) {
+    if (context.references.some((r) => r.kind === "userData" && r.path === m.id)) {
+      toast(fmt(LIBRARY.already, { name: m.name }));
+      return;
     }
+    if (context.references.length + pending.length >= MAX_REFERENCES) {
+      toast(LIBRARY.full);
+      return;
+    }
+    const ref: Reference = { id: `ref-${m.id}`, kind: "userData", path: m.id, thumb: "", status: "ok" };
+    setContext((c) => ({ ...c, references: [...c.references, ref] }));
+    void api(`/api/user-data/${m.id}/use`, { method: "POST" }).catch(() => {});
+    toast(fmt(LIBRARY.attached, { name: m.name }));
   }
 
   async function stop() {
@@ -806,7 +805,7 @@ export function Editor({
       {activeRef && sideBySide && (
         <div className="absolute left-[calc(50%-2px)] top-[265px] h-[560px] w-[518px] overflow-hidden rounded-[var(--radius-xl)] bg-[var(--bg-surface)]">{referencePlayer}</div>
       )}
-      {activeRef && !sideBySide && <div className="absolute bottom-[230px] left-[407px] z-10">{referencePlayer}</div>}
+      {activeRef && !sideBySide && <div className="absolute bottom-[230px] left-[494px] z-10">{referencePlayer}</div>}
 
       {/* Change chip (W02E-1 901:12020 ×2): centered at top 300 above the robot — "Speed  85 → 60  Undo" (Caption Strong 14, shadow 0 6 20 #0000001f).
           Up to the last three changes; Undo on the newest. Moves up with the robot when the timeline is open. */}
@@ -827,7 +826,7 @@ export function Editor({
       )}
 
       {/* Top of the stage (no Figma equivalent): signature, result badges, reasoning, empty hint */}
-      <div className="pointer-events-none absolute left-[407px] right-[444px] top-[32px] z-10 flex flex-col items-center gap-[var(--space-12)]">
+      <div className="pointer-events-none absolute left-[494px] right-[444px] top-[32px] z-10 flex flex-col items-center gap-[var(--space-12)]">
         <div className="pointer-events-auto flex flex-wrap items-center justify-center gap-[var(--space-8)]">
           <span className={`${chip} text-[var(--text-secondary)]`}>{signature.name} · v0.{signature.version}</span>
           {lastResult?.directClip && expression && !busy && (
@@ -851,7 +850,7 @@ export function Editor({
       </div>
 
       {/* Left panel: Context / Library (Frame 2147240454 ×2) */}
-      <aside className={`absolute left-[32px] top-[32px] z-10 flex ${timelineOpen ? "bottom-[397px]" : "bottom-[32px]"} w-[343px] flex-col overflow-hidden rounded-[var(--radius-xl)] bg-[var(--bg-surface)]`}>
+      <aside className={`absolute left-[32px] top-[32px] z-10 flex ${timelineOpen ? "bottom-[397px]" : "bottom-[32px]"} w-[430px] flex-col overflow-hidden rounded-[var(--radius-xl)] bg-[var(--bg-surface)]`}>
         <div className="flex items-center gap-[21px] pl-[21px] pt-[20px]">
           <Menu
             label="Project menu"
@@ -896,7 +895,10 @@ export function Editor({
               reading={reading}
             />
           ) : (
-            <LibraryPanel busy={busy} onApply={(s) => void applyLibrary(s)} />
+            <LibraryPanel
+              attached={context.references.filter((r) => r.kind === "userData").map((r) => r.path)}
+              onAttach={attachCommunity}
+            />
           )}
         </div>
       </aside>
