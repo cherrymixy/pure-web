@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { SUGGESTED_PROMPTS } from "@/data/prompts";
 import { LIBRARY } from "@/data/library";
 import { componentForSim } from "@/data/components";
 import { EDITOR_PANEL } from "@/data/editor-panel";
@@ -119,6 +118,27 @@ function loadContext(projectId: string, e: Expression | null): EditorContext {
 
 // W02D editor: Context/Library · viewport + playback bar + prompt/generation · Motion properties, joints,
 // limit modal, change chips + Undo, ☰ menu. Timeline and Face/Sound panels arrive in ⑤.
+/** Play bar mute: master gain this far down is silent */
+const MUTE_DB = -120;
+
+/** The bits of the Web Speech API the composer mic uses (not in the TS DOM lib everywhere). */
+interface SpeechRecognizer {
+  lang: string;
+  interimResults: boolean;
+  continuous: boolean;
+  onresult: ((ev: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
+  onend: (() => void) | null;
+  onerror: (() => void) | null;
+  start(): void;
+  stop(): void;
+  abort(): void;
+}
+function speechRecognition(): (new () => SpeechRecognizer) | null {
+  if (typeof window === "undefined") return null;
+  const w = window as unknown as { SpeechRecognition?: new () => SpeechRecognizer; webkitSpeechRecognition?: new () => SpeechRecognizer };
+  return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
+}
+
 export function Editor({
   project,
   structure,
@@ -200,8 +220,8 @@ export function Editor({
   const [pending, setPending] = useState<PendingReference[]>([]);
   /** Reference ids whose vision summary is being made in the background */
   const [reading, setReading] = useState<string[]>([]);
-  const imageInput = useRef<HTMLInputElement>(null);
-  const videoInput = useRef<HTMLInputElement>(null);
+  /** Composer attach: images and videos both (addFiles routes by type) */
+  const mediaInput = useRef<HTMLInputElement>(null);
 
   // localStorage only after mount (SSR renders the expression's context).
   // Both updates land in one render, so the first write already carries the stored context.
@@ -869,6 +889,48 @@ export function Editor({
     setCue((c) => c + 1);
   }
 
+  // ------------------------------------------------------------ play bar · composer tools (Figma 452:2414 / 452:2426)
+
+  /** Play bar volume: mutes the sound engine's master (cues keep their own levels) */
+  const [muted, setMuted] = useState(false);
+  useEffect(() => sound.setMasterDb(muted ? MUTE_DB : 0), [sound, muted]);
+
+  const scrubbing = useRef(false);
+  function scrubAt(e: React.PointerEvent<HTMLDivElement>) {
+    if (!expression || !Number.isFinite(time.duration) || time.duration <= 0) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    const frac = Math.min(Math.max((e.clientX - r.left) / r.width, 0), 1);
+    seekTo(frac * time.duration);
+  }
+
+  /** Composer mic: Web Speech dictation (en-US) into the prompt; the button hides where the browser has none. */
+  const [speech, setSpeech] = useState(false);
+  const [listening, setListening] = useState(false);
+  const recognizer = useRef<SpeechRecognizer | null>(null);
+  useEffect(() => {
+    setSpeech(speechRecognition() !== null);
+    return () => recognizer.current?.abort();
+  }, []);
+  function toggleDictation() {
+    if (listening) return recognizer.current?.stop();
+    const Rec = speechRecognition();
+    if (!Rec) return;
+    const rec = new Rec();
+    rec.lang = "en-US";
+    rec.interimResults = true;
+    rec.continuous = false;
+    const base = prompt.trim();
+    rec.onresult = (ev) => {
+      const heard = Array.from(ev.results).map((r) => r[0]?.transcript ?? "").join("");
+      setPrompt([base, heard.trim()].filter(Boolean).join(" ").slice(0, 500));
+    };
+    rec.onend = () => setListening(false);
+    rec.onerror = () => setListening(false);
+    recognizer.current = rec;
+    setListening(true);
+    rec.start();
+  }
+
   function togglePlay() {
     const c = ctrl.current;
     if (!c || !expression) return;
@@ -918,8 +980,12 @@ export function Editor({
 
   const ended = time.duration > 0 && time.t >= time.duration - 0.01;
   const progress = Number.isFinite(time.duration) && time.duration > 0 ? Math.min(time.t / time.duration, 1) : 0;
-  const clock = (sec: number) => (Number.isFinite(sec) ? `${String(Math.floor(sec / 60)).padStart(2, "0")}:${String(Math.floor(sec % 60)).padStart(2, "0")}` : "--:--");
   const chip = "rounded-[var(--radius-full)] bg-[var(--bg-surface)] px-[var(--space-16)] py-[var(--space-8)] text-[14px] leading-[18px]";
+  /** Play bar time "0:03" (Figma), minutes unpadded */
+  const mclock = (sec: number) => (Number.isFinite(sec) ? `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, "0")}` : "-:--");
+  /** Composer tool button (452:2431): 33, r 10, #f0f0f0 + 1px #eaeaea, inner white glow */
+  const tool =
+    "flex size-[33px] shrink-0 items-center justify-center rounded-[10px] border border-[var(--composer-tool-border)] bg-[var(--composer-tool)] p-[7px] text-[var(--composer-tool-icon)] shadow-[inset_0_0_20px_0_rgb(255_255_255/0.63)] disabled:opacity-40";
 
   // W02D-1/3/4/5 (Figma 901:9691 · 10163 · 10631 · 11097, ×2): full-bleed stage behind floating panels —
   // left Context/Library 343×1016 at 32,32 · right channel panel 380×1016 at right 32 · play bar 634,868 · composer 513,918.
@@ -1098,120 +1164,154 @@ export function Editor({
         </div>
       )}
 
-      {/* Play bar (Frame 2087331925 ×2) — the Play button (901:10012) rides the progress as the playhead, kept inside the track so it never covers the time labels */}
-      {/* W02E-4: hidden under the Timeline Panel while it's open (its transport takes over) */}
+      {/* Play bar (452:2414): white pill 550×68 (pad 10 · 21 right), centred, 156 above the composer — play 48 (pill grey 20%),
+          time Medium 14.986, 331×9 track (#829398 at 20%, fill full strength) with a 21 knob ring, volume 24 (mute).
+          W02E-4: hidden under the Timeline Panel while it's open (its transport takes over). */}
       {!timelineOpen && (
-      <div className="absolute bottom-[182px] left-[calc(50%-326px)] z-10 h-[30px] w-[613px]">
+      <div className="absolute bottom-[294px] left-1/2 z-10 flex h-[68px] w-[550px] -translate-x-1/2 items-center gap-[14px] rounded-[var(--radius-full)] bg-[var(--bg-surface)] py-[10px] pl-[10px] pr-[21px]">
         <span data-testid="time" className="sr-only">{fmtT(time.t)} / {fmtT(time.duration)}</span>
-        <span className="absolute right-[559px] top-[3px] text-[14px] leading-[18px] text-[var(--text-tertiary)]">{clock(time.t)}</span>
-        <div className="absolute left-[59px] top-[12px] h-[6px] w-[495px] rounded-[var(--radius-full)] bg-[var(--neutral-150)]">
-          <div className="h-full rounded-[var(--radius-full)] bg-[var(--primary)]" style={{ width: `${progress * 100}%` }} />
-        </div>
-        <span className="absolute left-[564px] top-[3px] text-[14px] leading-[18px] text-[var(--text-tertiary)]">{clock(time.duration)}</span>
         <button
           type="button"
           disabled={!expression}
           onClick={togglePlay}
           aria-label={paused ? (ended ? E.replay : E.play) : E.pause}
           title={paused ? (ended ? E.replay : E.play) : E.pause}
-          className="absolute top-[-5px] flex size-[40px] -translate-x-1/2 items-center justify-center rounded-[var(--radius-full)] bg-[var(--primary)] text-[var(--bg-canvas)] disabled:cursor-not-allowed"
-          style={{ left: Math.min(Math.max(59 + progress * 495, 79), 534) }}
+          className="flex size-[48px] shrink-0 items-center justify-center rounded-[var(--radius-full)] bg-[var(--community-pill)] text-[var(--playbar-icon)] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {paused ? (
-            <Icon name="play-glyph" size={40} />
+            <Icon name="play-solid" size={19.407} />
           ) : (
             <span className="flex gap-[4px]" aria-hidden>
-              <span className="h-[13px] w-[4px] rounded-[var(--radius-2xs)] bg-current" />
-              <span className="h-[13px] w-[4px] rounded-[var(--radius-2xs)] bg-current" />
+              <span className="h-[15px] w-[4px] rounded-[var(--radius-2xs)] bg-current" />
+              <span className="h-[15px] w-[4px] rounded-[var(--radius-2xs)] bg-current" />
             </span>
           )}
+        </button>
+        <span className="shrink-0 whitespace-nowrap text-[14.986px] font-medium leading-[1.6] tracking-[-0.2997px] text-[var(--playbar-text)] tabular-nums">
+          {mclock(time.t)} / {mclock(time.duration)}
+        </span>
+        {/* Track: click or drag to seek (pauses, like the timeline scrubber) */}
+        <div
+          role="slider"
+          tabIndex={expression ? 0 : -1}
+          aria-label={E.seek}
+          aria-valuemin={0}
+          aria-valuemax={Number.isFinite(time.duration) ? Number(time.duration.toFixed(2)) : 0}
+          aria-valuenow={Number(time.t.toFixed(2))}
+          aria-valuetext={`${mclock(time.t)} / ${mclock(time.duration)}`}
+          className={`relative h-[21px] w-[331px] shrink-0 ${expression ? "cursor-pointer" : "pointer-events-none"}`}
+          onPointerDown={(e) => {
+            scrubbing.current = true;
+            e.currentTarget.setPointerCapture(e.pointerId);
+            scrubAt(e);
+          }}
+          onPointerMove={(e) => scrubbing.current && scrubAt(e)}
+          onPointerUp={() => (scrubbing.current = false)}
+          onKeyDown={(e) => {
+            if (!Number.isFinite(time.duration)) return;
+            const step = e.key === "ArrowRight" ? 0.5 : e.key === "ArrowLeft" ? -0.5 : 0;
+            if (!step) return;
+            e.preventDefault();
+            seekTo(Math.min(Math.max(time.t + step, 0), time.duration));
+          }}
+        >
+          <div className="absolute left-0 top-[6.5px] h-[9px] w-[331px] overflow-hidden rounded-[8px]">
+            <div className="absolute inset-0 rounded-[9px] bg-[var(--playbar-track)] opacity-20" />
+            <div className="absolute inset-y-0 left-0 bg-[var(--playbar-track)]" style={{ width: progress * 331 }} />
+          </div>
+          <span
+            className="absolute top-0 size-[21px] rounded-full border-[5px] border-[var(--playbar-track)] bg-[var(--bg-surface)]"
+            style={{ left: Math.min(Math.max(progress * 331 - 13, 0), 310) }}
+            aria-hidden
+          />
+        </div>
+        <button
+          type="button"
+          onClick={() => setMuted((m) => !m)}
+          aria-label={muted ? E.unmute : E.mute}
+          aria-pressed={muted}
+          title={muted ? E.unmute : E.mute}
+          className="flex size-[24px] shrink-0 items-center justify-center text-[var(--playbar-icon)]"
+        >
+          <Icon name={muted ? "volume-cross" : "volume-loud"} size={24} />
         </button>
       </div>
       )}
 
-      {/* Composer (Frame 56 ×2): prompt box 856×92 + suggestions. W02E-4 collapses it while the timeline is open. */}
+      {/* Composer (452:2426): 646 wide card, r 20, 1px #ededed + drop shadow, pad 16 · 12 bottom — prompt (16, #b1b1b1
+          placeholder), then attach / dictate tools (33, r 10) and a 74×33 Send. Centred, bottom 32 like the panels (Figma 24).
+          Attach chips sit above the prompt. W02E-4 collapses it while the timeline is open. */}
       <form
         hidden={timelineOpen}
-        className="absolute bottom-[28px] left-[calc(50%-447px)] z-10 flex w-[856px] flex-col items-center gap-[var(--space-24)]"
+        className="absolute bottom-[32px] left-1/2 z-10 flex w-[646px] -translate-x-1/2 flex-col items-center gap-[var(--space-12)]"
         onSubmit={(e) => { e.preventDefault(); void generate(); }}
       >
-        <div className="flex h-[92px] w-full items-center justify-between gap-[var(--space-12)] rounded-[var(--radius-xl)] bg-[var(--bg-surface)] px-[var(--space-8)]">
-          <div className="flex min-w-0 flex-1 items-center gap-[var(--space-20)]">
-            <div className="relative shrink-0">
-              <select
-                className="appearance-none rounded-[var(--radius-full)] bg-[var(--bg-surface)] py-[var(--space-12)] pl-[var(--space-20)] pr-[56px] text-[22px] leading-[28px] text-[var(--text-primary)] outline-none"
-                aria-label="Prompt type"
-                defaultValue="text"
-                onChange={(e) => {
-                  const picker = e.target.value === "image" ? imageInput : e.target.value === "video" ? videoInput : null;
-                  if (picker) { picker.current?.click(); e.target.value = "text"; }
-                }}
+        <div className="flex min-h-[106px] w-full flex-col justify-between gap-[var(--space-12)] rounded-[20px] border border-[var(--composer-border)] bg-[var(--bg-surface)] px-[16px] pb-[12px] pt-[16px] shadow-[var(--composer-shadow)]">
+          {(context.references.length > 0 || pending.length > 0) && (
+            <div className="flex flex-wrap items-center gap-[var(--space-8)] text-[14px] leading-[18px]" data-testid="attach-chips">
+              {context.references.map((r) => (
+                <span
+                  key={r.id}
+                  className={`flex max-w-[200px] items-center gap-[var(--space-4)] rounded-[var(--radius-full)] border px-[var(--space-12)] py-[var(--space-4)] ${r.status === "failed" ? "border-[var(--border-error)] text-[var(--text-error)]" : "border-[var(--border-default)] text-[var(--text-primary)]"}`}
+                >
+                  <span className="truncate">{r.kind === "video" ? "▶" : "▣"} {r.path.split("/").pop()?.replace(/^[0-9a-f]{8}-/, "")}</span>
+                  <button type="button" aria-label={E.removeReference} onClick={() => setContext((c) => ({ ...c, references: c.references.filter((x) => x.id !== r.id) }))}>×</button>
+                </span>
+              ))}
+              {pending.map((p) => (
+                <span key={p.id} className="max-w-[200px] truncate rounded-[var(--radius-full)] border border-dashed border-[var(--border-default)] px-[var(--space-12)] py-[var(--space-4)] text-[var(--text-tertiary)]">
+                  {p.name} · {E.referenceUploading}
+                </span>
+              ))}
+            </div>
+          )}
+          <input
+            type="text"
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            disabled={busy}
+            placeholder={E.promptPlaceholder}
+            aria-label={E.promptPlaceholder}
+            maxLength={500}
+            className="w-full bg-transparent text-[16px] leading-none tracking-[-0.32px] text-[var(--text-primary)] outline-none placeholder:text-[var(--composer-placeholder)] disabled:opacity-60"
+          />
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-[5px]">
+              <button
+                type="button"
+                aria-label={E.attachMedia}
+                disabled={busy || context.references.length + pending.length >= MAX_REFERENCES}
+                title={`${E.attachMedia} — ${E.referenceRules}`}
+                onClick={() => mediaInput.current?.click()}
+                className={tool}
               >
-                <option value="text">{E.text}</option>
-                <option value="image">{E.image}</option>
-                <option value="video">{E.video}</option>
-              </select>
-              <Icon name="chevron-down" size={24} className="pointer-events-none absolute right-[var(--space-20)] top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" />
+                <Icon name="clipboard-add" size={20} />
+              </button>
+              {speech && (
+                <button
+                  type="button"
+                  aria-label={listening ? E.dictateStop : E.dictate}
+                  aria-pressed={listening}
+                  title={listening ? E.dictateStop : E.dictate}
+                  disabled={busy}
+                  onClick={toggleDictation}
+                  className={`${tool} ${listening ? "border-[var(--playbar-track)] text-[var(--playbar-track)]" : ""}`}
+                >
+                  <Icon name="microphone" size={24} />
+                </button>
+              )}
             </div>
             <button
-              type="button"
-              aria-label={`+ ${E.attach}`}
-              disabled={busy || context.references.length + pending.length >= MAX_REFERENCES}
-              title={E.referenceRules}
-              onClick={() => imageInput.current?.click()}
-              className="-ml-[var(--space-12)] flex size-[36px] shrink-0 items-center justify-center rounded-[var(--radius-full)] text-[var(--text-secondary)] hover:bg-[var(--bg-canvas)] disabled:opacity-40"
+              type="submit"
+              title={E.generate}
+              disabled={busy || !prompt.trim()}
+              className="flex h-[33px] w-[74px] items-center justify-center rounded-[10px] bg-[var(--composer-send)] p-[7px] text-[16px] font-medium leading-none text-[var(--text-on-inverse)] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <Icon name="add" size={24} />
+              {E.send}
             </button>
-            {(context.references.length > 0 || pending.length > 0) && (
-              <div className="flex shrink-0 items-center gap-[var(--space-8)] text-[14px] leading-[18px]" data-testid="attach-chips">
-                {context.references.map((r) => (
-                  <span
-                    key={r.id}
-                    className={`flex max-w-[160px] items-center gap-[var(--space-4)] rounded-[var(--radius-full)] border px-[var(--space-12)] py-[var(--space-4)] ${r.status === "failed" ? "border-[var(--border-error)] text-[var(--text-error)]" : "border-[var(--border-default)] text-[var(--text-primary)]"}`}
-                  >
-                    <span className="truncate">{r.kind === "video" ? "▶" : "▣"} {r.path.split("/").pop()?.replace(/^[0-9a-f]{8}-/, "")}</span>
-                    <button type="button" aria-label={E.removeReference} onClick={() => setContext((c) => ({ ...c, references: c.references.filter((x) => x.id !== r.id) }))}>×</button>
-                  </span>
-                ))}
-                {pending.map((p) => (
-                  <span key={p.id} className="max-w-[160px] truncate rounded-[var(--radius-full)] border border-dashed border-[var(--border-default)] px-[var(--space-12)] py-[var(--space-4)] text-[var(--text-tertiary)]">
-                    {p.name} · {E.referenceUploading}
-                  </span>
-                ))}
-              </div>
-            )}
-            <input
-              type="text"
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              disabled={busy}
-              placeholder={E.promptPlaceholder}
-              aria-label={E.promptPlaceholder}
-              maxLength={500}
-              className="min-w-0 flex-1 bg-transparent text-[22px] leading-[28px] text-[var(--text-primary)] outline-none placeholder:text-[var(--text-tertiary)] disabled:opacity-60"
-            />
           </div>
-          <button
-            type="submit"
-            aria-label={E.generate}
-            title={E.generate}
-            disabled={busy || !prompt.trim()}
-            className="flex shrink-0 items-center justify-center rounded-[var(--radius-full)] bg-[var(--sage-50)] px-[var(--space-16)] py-[var(--space-12)] text-[var(--neutral-800)] disabled:cursor-not-allowed"
-          >
-            <Icon name="arrow-up" size={30} />
-          </button>
         </div>
-        <input ref={imageInput} type="file" multiple accept="image/*,video/mp4,video/quicktime,video/webm" className="hidden" onChange={(e) => { if (e.target.files?.length) addFiles(e.target.files); e.target.value = ""; }} />
-        <input ref={videoInput} type="file" multiple accept="video/mp4,video/quicktime,video/webm" className="hidden" onChange={(e) => { if (e.target.files?.length) addFiles(e.target.files); e.target.value = ""; }} />
-        <div className="flex items-center gap-[var(--space-28)] text-[14px] leading-[18px]">
-          <span className="sr-only">{E.suggested}</span>
-          {SUGGESTED_PROMPTS.map((s) => (
-            <button key={s.id} type="button" disabled={busy} onClick={() => void generate(s.text)} className="text-center text-[var(--neutral-500)] hover:text-[var(--text-primary)] disabled:opacity-40">
-              {s.text}
-            </button>
-          ))}
-        </div>
+        <input ref={mediaInput} type="file" multiple accept="image/*,video/mp4,video/quicktime,video/webm" className="hidden" onChange={(e) => { if (e.target.files?.length) addFiles(e.target.files); e.target.value = ""; }} />
       </form>
 
       {/* Right panel (Figma 452:2024): content column 330 at 24 · divider at 378 · Motion / Face / Sound rail at 397, Edit Detail at the bottom */}

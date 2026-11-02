@@ -211,6 +211,17 @@
   --context-motion: #383838; /* motion block / legend */
   --context-ref-dim: #00000057; /* reference thumbnail overlay: black 34% */
   --context-wave: #d9d9d961; /* sound reference bars: #d9d9d9 at 38% */
+  /* Editor play bar 452:2414 · composer 452:2426 (file 8K6xueAm5tSPPKkJenfXeO, no Figma variable) */
+  --playbar-text: #666d6e; /* time "0:03 / 0:12" (Gray4) */
+  --playbar-track: #829398; /* progress fill + knob ring; the track is it at 20% */
+  --playbar-icon: #4e4e50; /* play glyph · volume icon */
+  --composer-border: #ededed;
+  --composer-shadow: 0 1px 2px 0 #0000000a, 0 5px 8px 0 #0000001a;
+  --composer-placeholder: #b1b1b1;
+  --composer-tool: #f0f0f0; /* clipboard / mic button 33, 1px #eaeaea border */
+  --composer-tool-border: #eaeaea;
+  --composer-tool-icon: #424242;
+  --composer-send: #4e4e50;
   /* TODO(승아): PURE/Blur/Overlay = BACKGROUND_BLUR radius 50. CSS blur() 값으로 50px 그대로인지 25px(반경 절반)인지 확인 필요 */
   --pure-blur-overlay: 50px;
 }
