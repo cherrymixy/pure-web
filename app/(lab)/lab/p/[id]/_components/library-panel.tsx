@@ -68,7 +68,7 @@ export function LibraryPanel({
 
       <div className="mt-[27px]">
         <SectionHeader label={L.assets}>
-          <a href={L.assetsSource} target="_blank" rel="noreferrer" aria-label={L.openAssets} title={SIMREADY_CREDIT} className="text-[var(--library-section)]">
+          <a href={L.assetsSource} target="_blank" rel="noreferrer" aria-label={L.openAssets} className="text-[var(--library-section)]">
             <Icon name="square-top-down" size={16} />
           </a>
         </SectionHeader>
@@ -88,6 +88,8 @@ export function LibraryPanel({
           </button>
         ))}
       </div>
+      {/* CC BY 4.0 asks for attribution where the assets are used */}
+      <p className="ml-[12px] mt-[var(--space-16)] text-[12px] leading-[15px] text-[var(--text-tertiary)]">{SIMREADY_CREDIT}</p>
     </div>
   );
 }

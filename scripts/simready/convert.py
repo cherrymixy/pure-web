@@ -292,6 +292,20 @@ def physics(stage):
     return mass, friction or 0.5
 
 
+def fit_hulls(hulls, lo, hi):
+    """CoACD 볼록 조각은 원본보다 0.5~1 cm 부푼다 — 합친 바운딩박스를 시각 모델 박스에 축별로 맞춘다
+    (아핀 변환이라 볼록성 유지). 안 맞추면 가구가 떠 있고 위에 올린 로봇이 윗면에 묻힌다."""
+    if not hulls:
+        return hulls
+    b = trimesh.util.concatenate(hulls).bounds
+    scale = (hi - lo) / np.maximum(b[1] - b[0], 1e-9)
+    out = []
+    for h in hulls:
+        v = (h.vertices - b[0]) * scale + lo
+        out.append(trimesh.Trimesh(v, h.faces, process=True).convex_hull)
+    return out
+
+
 # ---------- main ----------
 
 def convert(entry, cache):
@@ -343,11 +357,10 @@ def convert(entry, cache):
         max_ch_vertex=48,
         preprocess_mode="auto",
     )
+    parts_h = [trimesh.Trimesh(hv, hf).convex_hull for hv, hf in hulls]
+    parts_h = fit_hulls([h for h in parts_h if h.volume > 1e-9], np.array([-dims[0] / 2, -dims[1] / 2, 0]), np.array([dims[0] / 2, dims[1] / 2, dims[2]]))
     cols = []
-    for i, (hv, hf) in enumerate(hulls):
-        h = trimesh.Trimesh(hv, hf).convex_hull
-        if h.volume <= 1e-9:
-            continue
+    for i, h in enumerate(parts_h):
         name = f"col_{i:02d}.stl"
         h.export(out / name)
         cols.append(name)
@@ -405,9 +418,20 @@ def write_catalog(items):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--cache", required=True, type=Path)
+    ap.add_argument("--cache", type=Path)
     ap.add_argument("ids", nargs="*")
+    ap.add_argument("--refit", action="store_true", help="다운로드·분해 없이 기존 col_*.stl 만 시각 박스에 다시 맞춤")
     args = ap.parse_args()
+    if args.refit:
+        txt = CATALOG.read_text()
+        for a in json.loads(txt[txt.index("= [") + 2 : txt.rindex(";")]):
+            d = np.array(a["dims"])
+            paths = [OUT / a["id"] / c for c in a["collision"]]
+            fitted = fit_hulls([trimesh.load(p) for p in paths], np.array([-d[0] / 2, -d[1] / 2, 0]), np.array([d[0] / 2, d[1] / 2, d[2]]))
+            for p, h in zip(paths, fitted):
+                h.export(p)
+            print(f"[{a['id']}] refit {len(paths)} hulls")
+        return
     entries = json.loads(LIST.read_text())
     prev = {}
     if CATALOG.exists() and args.ids:

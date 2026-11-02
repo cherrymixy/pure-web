@@ -133,7 +133,9 @@ export class LowRepo implements Repo {
     update: (id, patch) =>
       this.write((data) => {
         const project = found(data.projects.find((p) => p.id === id), "Project");
-        Object.assign(project, patch, { updatedAt: this.iso() });
+        // Scene layout (3D assets, robot spot) is a view setting — it doesn't move the project up the Lab list.
+        const touches = Object.keys(patch).some((k) => k !== "scene");
+        Object.assign(project, patch, touches ? { updatedAt: this.iso() } : {});
         return project;
       }),
     duplicate: (id) =>
