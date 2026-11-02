@@ -66,7 +66,7 @@ export function LibraryPanel({
 
       {pages > 1 && (
         <div className="mt-[16px] flex w-[376px] justify-center">
-          <div className="flex h-[36px] w-[66px] items-center justify-center gap-[24px] rounded-[18px] bg-[var(--library-pager)] text-[var(--library-pager-icon)]">
+          <div className="flex h-[36px] w-[66px] overflow-hidden rounded-[18px] bg-[var(--library-pager)] text-[var(--library-pager-icon)]">
             <PagerButton label={L.prev} disabled={page === 0} onClick={() => setPage((p) => p - 1)} flip />
             <PagerButton label={L.next} disabled={page >= pages - 1} onClick={() => setPage((p) => p + 1)} />
           </div>
@@ -97,7 +97,7 @@ export function LibraryPanel({
       </div>
       {assetPages > 1 && (
         <div className="mt-[16px] flex w-[376px] justify-center">
-          <div className="flex h-[36px] w-[66px] items-center justify-center gap-[24px] rounded-[18px] bg-[var(--library-pager)] text-[var(--library-pager-icon)]">
+          <div className="flex h-[36px] w-[66px] overflow-hidden rounded-[18px] bg-[var(--library-pager)] text-[var(--library-pager-icon)]">
             <PagerButton label={L.prev} disabled={assetPage === 0} onClick={() => setAssetPage((p) => p - 1)} flip />
             <PagerButton label={L.next} disabled={assetPage >= assetPages - 1} onClick={() => setAssetPage((p) => p + 1)} />
           </div>
@@ -124,7 +124,14 @@ function SectionHeader({ label, children }: { label: string; children: React.Rea
 
 function PagerButton({ label, disabled, onClick, flip }: { label: string; disabled: boolean; onClick: () => void; flip?: boolean }) {
   return (
-    <button type="button" aria-label={label} disabled={disabled} onClick={onClick} className="flex h-[12px] w-[9px] items-center justify-center disabled:opacity-40">
+    <button
+      type="button"
+      aria-label={label}
+      disabled={disabled}
+      onClick={onClick}
+      // Each button fills its half of the pill (icon 12 in from the edge, as in Figma), so the whole pill is clickable
+      className={`flex h-full flex-1 items-center ${flip ? "justify-end pr-[12px]" : "justify-start pl-[12px]"} hover:bg-[var(--neutral-150)] disabled:opacity-40 disabled:hover:bg-transparent`}
+    >
       <Icon name="pager-chevron" size={9} className={flip ? "rotate-180" : undefined} />
     </button>
   );
