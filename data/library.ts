@@ -19,6 +19,10 @@ export const LIBRARY = {
   robotToFloor: "Robot to floor",
   remove: "Remove",
   robotInWay: "The robot is in the way",
+  robot: "Robot",
+  moveRobot: "Move robot",
+  robotHint: "←↑↓→ Move · R Rotate · Esc Done",
+  robotBlocked: "Can't go there",
   /** Community cards per page (2 × 2) */
   pageSize: 4,
 } as const;

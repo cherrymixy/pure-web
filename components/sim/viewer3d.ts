@@ -13,7 +13,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { SERVO_ID, type LampSim, type PropSlot } from './lamp';
-import type { PropScene } from './prop-scene';
+import { ROBOT_KEY, type PropScene } from './prop-scene';
 import { SIMREADY_BASE } from '@/data/simready-assets';
 import { JOINT_NAMES, type JointName } from '@/lib/sim/motion';
 import type { CameraView, FaceDisplay } from '@/lib/sim/robots';
@@ -138,8 +138,8 @@ export class LampViewer {
   private readonly propBox = new THREE.Box3();
   private readonly propHelper = new THREE.Box3Helper(this.propBox, new THREE.Color('#789ba2'));
   private propPickOff: (() => void) | null = null;
-  /** 로봇 받침이 올라간 높이 — 카메라를 그만큼 따라 올린다 */
-  private mountZ = 0;
+  /** 카메라가 마지막으로 맞춘 로봇 받침 위치 — 옮겨진 만큼 카메라를 따라 옮긴다 */
+  private mountAt: [number, number, number] = [0, 0, 0];
 
   constructor(canvas: HTMLCanvasElement, lamp: LampSim, options: ViewerOptions = {}) {
     this.lamp = lamp;
@@ -503,23 +503,35 @@ export class LampViewer {
       node.quaternion.set(data.xquat[b * 4 + 1], data.xquat[b * 4 + 2], data.xquat[b * 4 + 3], data.xquat[b * 4]);
       if (slot.key === scene.selected) selected = node;
     }
-    this.propHelper.visible = selected !== null;
-    if (selected) {
-      selected.updateMatrixWorld(true);
-      this.propBox.setFromObject(selected);
+    if (scene.selected === ROBOT_KEY) {
+      // 로봇 전체를 감싼다
+      this.propBox.makeEmpty();
+      for (const { node } of this.geomNodes) {
+        node.updateMatrixWorld(true);
+        this.propBox.expandByObject(node);
+      }
+      this.propHelper.visible = true;
+    } else {
+      this.propHelper.visible = selected !== null;
+      if (selected) {
+        selected.updateMatrixWorld(true);
+        this.propBox.setFromObject(selected);
+      }
     }
-    const dz = scene.mountHeight - this.mountZ;
-    if (Math.abs(dz) > 1e-6) {
-      // MuJoCo z = Three 월드 y
-      this.camera.position.y += dz;
-      this.controls.target.y += dz;
-      this.mountZ = scene.mountHeight;
+    // 로봇 받침이 옮겨진 만큼 카메라도 따라간다 (MuJoCo x, y, z → Three x, z, -y)
+    const m = this.lamp.mount;
+    const d = toWorld(m[0] - this.mountAt[0], m[1] - this.mountAt[1], m[2] - this.mountAt[2]);
+    if (d.lengthSq() > 1e-12) {
+      this.camera.position.add(d);
+      this.controls.target.add(d);
+      this.mountAt = [m[0], m[1], m[2]];
     }
   }
 
   /** 소품 씬을 붙이고 에셋 GLB 를 불러온다 (에셋당 한 번, 슬롯마다 복제). */
   attachProps(scene: PropScene): void {
     this.propScene = scene;
+    this.mountAt = this.lamp.mount;
     this.scene.add(this.propHelper);
     this.propHelper.visible = false;
     const loader = new GLTFLoader();
@@ -546,7 +558,7 @@ export class LampViewer {
     }
   }
 
-  /** 뷰포트에서 소품을 클릭하면 그 슬롯 key (빈 곳 = null) */
+  /** 뷰포트에서 소품을 클릭하면 그 슬롯 key, 로봇 받침이면 ROBOT_KEY (빈 곳 = null) */
   enablePropPick(onPick: ((key: string | null) => void) | null): void {
     this.propPickOff?.();
     this.propPickOff = null;
@@ -565,7 +577,12 @@ export class LampViewer {
       // 로봇도 함께 쏜다 — 로봇에 가려진 소품은 고르지 않는다
       const robot = new Set<THREE.Object3D>(this.geomNodes.map((g) => g.node));
       const hits = this.raycaster.intersectObjects([...shown.map((p) => p.node), ...robot], true);
-      if (!hits.length || robot.has(hits[0].object)) return onPick(null);
+      if (!hits.length) return onPick(null);
+      if (robot.has(hits[0].object)) {
+        // 받침(로봇 트리 루트)을 누르면 로봇 선택, 다른 부품은 관절 기즈모 몫
+        const geom = this.geomNodes.find((g) => g.node === hits[0].object)!.geomId;
+        return onPick(this.lamp.model.geom_bodyid[geom] === this.lamp.robotRootBody ? ROBOT_KEY : null);
+      }
       let o: THREE.Object3D | null = hits[0].object;
       while (o && !shown.some((p) => p.node === o)) o = o.parent;
       onPick(shown.find((p) => p.node === o)?.slot.key ?? null);

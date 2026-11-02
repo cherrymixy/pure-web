@@ -99,6 +99,8 @@ export const SceneSchema = z.object({
   props: z.array(PropPlacementSchema),
   /** Key of the placed prop the robot stands on (null = floor) */
   mount: z.string().nullable(),
+  /** Robot base cell (0.1 m, from its home spot) and 90° turns */
+  robot: z.object({ cell: z.tuple([z.number().int(), z.number().int()]), turn: z.number().int().min(0).max(3) }).optional(),
 });
 export type Scene = z.infer<typeof SceneSchema>;
 

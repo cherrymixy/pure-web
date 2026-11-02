@@ -19,7 +19,7 @@ import { createSoundEngine } from "@/lib/sound";
 import { ApiError, api } from "@/lib/ui/api";
 import { describeChange, describeFields, emptyHistory, pushChange, undoChange, type History } from "@/lib/ui/history";
 import { fileUrl, uploadFile } from "@/lib/ui/upload";
-import type { JointState, SimController } from "@/components/sim/sim-controller";
+import { ROBOT_KEY, type JointState, type SimController } from "@/components/sim/sim-controller";
 import { Viewport, type ViewportEvent } from "@/components/sim/Viewport";
 import type { LimitEvent } from "@/components/sim/limits";
 import { Icon } from "@/components/ui/icons/icon";
@@ -697,7 +697,7 @@ export function Editor({
     const c = ctrl.current;
     if (!c) return;
     // Read now (the controller may be gone when the timer fires), send after a short pause.
-    const scene = { props: c.listProps(), mount: c.robotMount };
+    const scene = { props: c.listProps(), mount: c.robotMount, robot: c.robotPlacement };
     const send = () => {
       pendingScene.current = null;
       void api(`/api/projects/${project.id}`, { method: "PATCH", body: JSON.stringify({ scene }) }).catch(() => toast(STRINGS.lab.toast.failed));
@@ -754,12 +754,14 @@ export function Editor({
       if ((e.target as HTMLElement).closest("input, textarea, select")) return;
       const c = ctrl.current;
       if (!c) return;
+      const robot = selectedProp === ROBOT_KEY;
       if (dirs[e.code]) {
-        if (!c.moveProp(selectedProp, dirs[e.code])) toast(LIBRARY.robotInWay);
+        if (robot ? !c.moveRobot(dirs[e.code]) : !c.moveProp(selectedProp, dirs[e.code])) toast(robot ? LIBRARY.robotBlocked : LIBRARY.robotInWay);
       } else if (e.code === "KeyR" && !e.metaKey && !e.ctrlKey) {
-        if (!c.turnProp(selectedProp)) toast(LIBRARY.robotInWay);
+        if (robot) c.turnRobot();
+        else if (!c.turnProp(selectedProp)) toast(LIBRARY.robotInWay);
       }
-      else if (e.code === "Delete" || e.code === "Backspace") return void (e.preventDefault(), removeProp(selectedProp));
+      else if ((e.code === "Delete" || e.code === "Backspace") && !robot) return void (e.preventDefault(), removeProp(selectedProp));
       else if (e.code === "Escape") return void selectProp(null);
       else return;
       e.preventDefault();
@@ -803,7 +805,7 @@ export function Editor({
         rotateJoint(e.id, e.deltaDeg, e.done);
         break;
       case "ready":
-        ctrl.current?.restoreProps(project.scene?.props ?? [], project.scene?.mount ?? null);
+        ctrl.current?.restoreProps(project.scene?.props ?? [], project.scene?.mount ?? null, project.scene?.robot);
         ctrl.current?.enablePropPick(true);
         setRobotMount(ctrl.current?.robotMount ?? null);
         break;
@@ -927,6 +929,19 @@ export function Editor({
       <div className="pointer-events-none absolute left-[494px] right-[444px] top-[32px] z-10 flex flex-col items-center gap-[var(--space-12)]">
         <div className="pointer-events-auto flex flex-wrap items-center justify-center gap-[var(--space-8)]">
           <span className={`${chip} text-[var(--text-secondary)]`}>{signature.name} · v0.{signature.version}</span>
+          {/* The robot's own base is a thin ring (the white dome is the base_yaw joint), so it gets a button too */}
+          <button
+            type="button"
+            data-testid="move-robot"
+            aria-pressed={selectedProp === ROBOT_KEY}
+            onClick={(e) => {
+              e.currentTarget.blur();
+              selectProp(selectedProp === ROBOT_KEY ? null : ROBOT_KEY);
+            }}
+            className={`${chip} ${selectedProp === ROBOT_KEY ? "bg-[var(--bg-inverse)] text-[var(--text-on-inverse)]" : "text-[var(--text-primary)]"}`}
+          >
+            {LIBRARY.moveRobot}
+          </button>
           {lastResult?.directClip && expression && !busy && (
             <span className={`${chip} text-[var(--web-3f77a1)]`} title={lastResult.directClip.reason}>
               {lastResult.directClip.used ? E.directClip.used : fmt(E.directClip.fallback, { reason: lastResult.directClip.reason ?? "" })}
@@ -936,16 +951,23 @@ export function Editor({
         </div>
         {selectedProp && (
           <div data-testid="prop-bar" className={`${chip} pointer-events-auto flex items-center gap-[var(--space-12)] shadow-[var(--pure-shadow-chip)]`}>
-            <span className="font-semibold text-[var(--text-primary)]">{propAsset(selectedProp)?.name}</span>
-            <span className="text-[var(--text-secondary)]">{LIBRARY.moveHint}</span>
+            <span className="font-semibold text-[var(--text-primary)]">{selectedProp === ROBOT_KEY ? LIBRARY.robot : propAsset(selectedProp)?.name}</span>
+            <span className="text-[var(--text-secondary)]">{selectedProp === ROBOT_KEY ? LIBRARY.robotHint : LIBRARY.moveHint}</span>
+            {selectedProp === ROBOT_KEY && robotMount && (
+              <button type="button" onClick={() => mountRobot(null)} className="font-medium text-[var(--text-brand)]">
+                {LIBRARY.robotToFloor}
+              </button>
+            )}
             {propAsset(selectedProp)?.role === "stage" && (
               <button type="button" onClick={() => mountRobot(robotMount === selectedProp ? null : selectedProp)} className="font-medium text-[var(--text-brand)]">
                 {robotMount === selectedProp ? LIBRARY.robotToFloor : LIBRARY.putRobot}
               </button>
             )}
-            <button type="button" onClick={() => removeProp(selectedProp)} className="font-medium text-[var(--text-error)]">
-              {LIBRARY.remove}
-            </button>
+            {selectedProp !== ROBOT_KEY && (
+              <button type="button" onClick={() => removeProp(selectedProp)} className="font-medium text-[var(--text-error)]">
+                {LIBRARY.remove}
+              </button>
+            )}
           </div>
         )}
         {expression && lastResult?.reasoning && (

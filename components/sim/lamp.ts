@@ -155,6 +155,8 @@ export class LampSim {
   /** 로봇 트리의 루트 바디 (월드 바로 아래) — 받침 높이(mount)를 옮길 때 */
   private readonly rootBodyId: number;
   private readonly rootHomePos = new Float64Array(3);
+  private readonly rootHomeQuat = new Float64Array(4);
+  private robotYaw = 0;
   /** 소품이 아닌(로봇) qpos·qvel 주소 — 소품만 물리로 돌릴 때 로봇을 붙잡아 둔다 */
   private readonly robotQpos: number[] = [];
   private readonly robotDof: number[] = [];
@@ -234,6 +236,7 @@ export class LampSim {
     for (let i = 0; i < model.nq; i++) if (!propQpos.has(i)) this.robotQpos.push(i);
     for (let i = 0; i < model.nv; i++) if (!propDof.has(i)) this.robotDof.push(i);
     this.rootHomePos.set(model.body_pos.subarray(root * 3, root * 3 + 3));
+    this.rootHomeQuat.set(model.body_quat.subarray(root * 4, root * 4 + 4));
 
     // 홈 자세에서의 베이스 포즈를 기억해 둔다.
     mj.mj_resetData(model, data);
@@ -408,6 +411,22 @@ export class LampSim {
       this.homeBasePos[i] += target[i] - before[i];
     }
     this.mj.mj_forward(this.model, this.data);
+  }
+
+  /** 로봇 받침을 z 축으로 yaw(rad) 만큼 돌린다 (원래 방향 기준). */
+  setRobotYaw(yaw: number): void {
+    const r = this.rootBodyId;
+    // 기구학 프리뷰의 베이스 기준 방향도 같이 돌린다 (freejoint 로봇)
+    this.homeBaseQuat.set(quatMul(yawQuat(yaw - this.robotYaw), this.homeBaseQuat));
+    this.robotYaw = yaw;
+    const q = quatMul(yawQuat(yaw), this.rootHomeQuat);
+    for (let i = 0; i < 4; i++) this.model.body_quat[r * 4 + i] = q[i];
+    this.mj.mj_forward(this.model, this.data);
+  }
+
+  /** 로봇 받침 바디 (뷰포트에서 로봇을 고를 때) */
+  get robotRootBody(): number {
+    return this.rootBodyId;
   }
 
   /** 로봇 받침 위치 */

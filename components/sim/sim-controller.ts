@@ -18,8 +18,15 @@ import { faceAtTime, faceName } from '@/lib/expression/face';
 import { LEAD_IN, SimRuntime, type FaceSource, type JointState as RuntimeJointState, type PlaybackSource, type SimRuntimeOptions } from './runtime';
 import type { LimitEvent } from './limits';
 import type { PropPlacement } from './props';
+import { ROBOT_KEY } from './prop-scene';
 
 export type { PropPlacement };
+/** Selection key the viewport reports when the robot's base is clicked (propPick). */
+export { ROBOT_KEY };
+export interface RobotPlacement {
+  cell: [number, number];
+  turn: number;
+}
 export type PropDirection = 'up' | 'down' | 'left' | 'right';
 
 export type { PlaybackParams };
@@ -77,7 +84,7 @@ export type SimEventMap = {
   jointPick: { id: string | null };
   /** Editor gizmo: rotation ring dragged — degrees swept since the grab; `done` on release */
   jointRotate: { id: string; deltaDeg: number; done: boolean };
-  /** Library L3: a placed 3D asset was clicked in the viewport (slot key, null = empty space) */
+  /** Library L3: a placed 3D asset was clicked in the viewport (slot key, ROBOT_KEY = the robot's base, null = empty space) */
   propPick: { key: string | null };
 };
 export type SimEventName = keyof SimEventMap;
@@ -112,7 +119,7 @@ export class SimController {
   private gizmo: { on: boolean; joint: string | null } = { on: false, joint: null };
   private propPick = false;
   /** Props to restore once the model is loaded */
-  private pendingProps: { placements: PropPlacement[]; mount: string | null } | null = null;
+  private pendingProps: { placements: PropPlacement[]; mount: string | null; robot?: RobotPlacement } | null = null;
   private readonly handlers = new Map<SimEventName, Set<(payload: never) => void>>();
   private jointTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -400,7 +407,7 @@ export class SimController {
     this.runtime.setGizmo(this.gizmo.joint);
     this.runtime.enablePropPick(this.propPick);
     if (this.pendingProps) {
-      this.runtime.props?.restore(this.pendingProps.placements, this.pendingProps.mount);
+      this.runtime.props?.restore(this.pendingProps.placements, this.pendingProps.mount, this.pendingProps.robot);
       this.pendingProps = null;
     }
   }
@@ -423,9 +430,25 @@ export class SimController {
   // Needs `props` (the asset catalog) in the controller options; without it these are no-ops.
 
   /** Restore saved placements (queued until the model is ready). */
-  restoreProps(placements: PropPlacement[], mount: string | null): void {
-    if (this.runtime.props) this.runtime.props.restore(placements, mount);
-    else this.pendingProps = { placements, mount };
+  restoreProps(placements: PropPlacement[], mount: string | null, robot?: RobotPlacement): void {
+    if (this.runtime.props) this.runtime.props.restore(placements, mount, robot);
+    else this.pendingProps = { placements, mount, robot };
+  }
+
+  /** Robot base one cell in a screen direction. false = a prop is in the way / the edge of the furniture it stands on. */
+  moveRobot(dir: PropDirection): boolean {
+    const [dx, dy] = this.runtime.screenStep(dir);
+    return this.runtime.props?.moveRobot(dx, dy) ?? false;
+  }
+
+  /** Turn the robot 90°. */
+  turnRobot(): void {
+    this.runtime.props?.turnRobot();
+  }
+
+  /** Robot base cell + turns — what the project saves. */
+  get robotPlacement(): RobotPlacement {
+    return this.runtime.props?.robot ?? { cell: [0, 0], turn: 0 };
   }
 
   /** Drop an asset next to the robot. Returns its key, null when its slots are full (or no prop scene). */

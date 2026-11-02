@@ -171,6 +171,46 @@ describe('prop scene', () => {
     expect(scene.list()).toEqual([{ key: 'toys_rubiksCube_a01#0', assetId: 'toys_rubiksCube_a01', cell: [3, 3], turn: 2 }]);
   });
 
+  it('robot moves by cells, turns, is blocked by props and stays on furniture', () => {
+    const lamp = new LampSim(mj, model, new mj.MjData(model), PURE_DESK_ROBOT, slots);
+    const scene = new PropScene(lamp);
+    const base = bodyId('base');
+    expect(scene.moveRobot(1, 0)).toBe(true);
+    expect(lamp.mount[0]).toBeCloseTo(0.1, 6);
+    expect(lamp.data.xpos[base * 3]).toBeCloseTo(0.1, 3);
+    scene.turnRobot();
+    expect(scene.robot).toEqual({ cell: [1, 0], turn: 1 });
+
+    // 소품(stage 가 아닌 것)에는 막히고, 가구(stage)에는 올라간다
+    const mug = scene.add('dishware_mug_a01', [1, 4])!;
+    expect(scene.moveRobot(0, 1)).toBe(true); // (1,1)
+    expect(scene.moveRobot(0, 1)).toBe(true); // (1,2)
+    expect(scene.moveRobot(0, 1)).toBe(false); // 머그 앞에서 멈춤
+    scene.remove(mug);
+
+    const box = scene.add('storage_box_a01', [8, 2])!;
+    let n = 0;
+    while (scene.mount !== box && n < 20 && scene.moveRobot(1, 0)) n++;
+    expect(scene.mount).toBe(box);
+    const top = lamp.propPosition(lamp.props.find((p) => p.key === box)!)[2] + SIMREADY_ASSETS.find((a) => a.id === 'storage_box_a01')!.dims[2];
+    expect(lamp.mount[2]).toBeCloseTo(top, 3);
+
+    // 가구 위에서 계속 가면 반대편 바닥으로 내려온다
+    n = 0;
+    while (scene.mount === box && n < 20 && scene.moveRobot(1, 0)) n++;
+    expect(scene.mount).toBeNull();
+    expect(lamp.mount[2]).toBeCloseTo(0, 6);
+    const [hx] = footprint(SIMREADY_ASSETS.find((a) => a.id === 'storage_box_a01')!.dims, 0);
+    expect(lamp.mount[0]).toBeGreaterThan(0.8 + hx);
+
+    // 저장된 로봇 자리 복원
+    scene.restore([], null, { cell: [-3, 2], turn: 3 });
+    expect(lamp.mount[0]).toBeCloseTo(-0.3, 6);
+    expect(lamp.mount[1]).toBeCloseTo(0.2, 6);
+    expect(scene.robot.turn).toBe(3);
+    scene.restore([], null);
+  });
+
   it('free cell avoids the robot base', () => {
     const c = freeCell([0.05, 0.05], [], 0.12);
     expect(Math.hypot(c[0] * 0.1, c[1] * 0.1)).toBeGreaterThanOrEqual(0.12);
