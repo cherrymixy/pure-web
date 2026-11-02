@@ -140,6 +140,19 @@ function speechRecognition(): (new () => SpeechRecognizer) | null {
   return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
 }
 
+
+/** Transient stage notes (change chips, result badges, reasoning) fade after this long; `key` changing shows them again. */
+const NOTE_MS = 30_000;
+function useFresh(key: unknown, ms = NOTE_MS): boolean {
+  const [shown, setShown] = useState(true);
+  useEffect(() => {
+    setShown(true);
+    const t = setTimeout(() => setShown(false), ms);
+    return () => clearTimeout(t);
+  }, [key, ms]);
+  return shown;
+}
+
 export function Editor({
   project,
   structure,
@@ -983,6 +996,9 @@ export function Editor({
 
   const ended = time.duration > 0 && time.t >= time.duration - 0.01;
   const progress = Number.isFinite(time.duration) && time.duration > 0 ? Math.min(time.t / time.duration, 1) : 0;
+  // Notes that only matter right after something happened go away after 30 s (the prop bar and empty hint stay)
+  const changesShown = useFresh(history.changes[history.changes.length - 1]?.id);
+  const resultShown = useFresh(lastResult);
   const chip = "rounded-[var(--radius-full)] bg-[var(--bg-surface)] px-[var(--space-16)] py-[var(--space-8)] text-[14px] leading-[18px]";
   /** Play bar time "0:03" (Figma), minutes unpadded */
   const mclock = (sec: number) => (Number.isFinite(sec) ? `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, "0")}` : "-:--");
@@ -1019,7 +1035,7 @@ export function Editor({
 
       {/* Change chip (W02E-1 901:12020 ×2): centered at top 300 above the robot — "Speed  85 → 60  Undo" (Caption Strong 14, shadow 0 6 20 #0000001f).
           Up to the last three changes; Undo on the newest. Moves up with the robot when the timeline is open. */}
-      {history.changes.length > 0 && (
+      {history.changes.length > 0 && changesShown && (
         <div className={`absolute left-1/2 z-10 flex -translate-x-1/2 items-center gap-[var(--space-8)] ${timelineOpen ? "top-[200px]" : "top-[300px]"}`} data-testid="change-chips">
           {history.changes.slice(-3).map((c, i, list) => (
             <span
@@ -1038,12 +1054,12 @@ export function Editor({
       {/* Top of the stage (no Figma equivalent): signature, result badges, reasoning, empty hint */}
       <div className="pointer-events-none absolute left-[494px] right-[512px] top-[32px] z-10 flex flex-col items-center gap-[var(--space-12)]">
         <div className="pointer-events-auto flex flex-wrap items-center justify-center gap-[var(--space-8)]">
-          {lastResult?.directClip && expression && !busy && (
+          {resultShown && lastResult?.directClip && expression && !busy && (
             <span className={`${chip} text-[var(--web-3f77a1)]`} title={lastResult.directClip.reason}>
               {lastResult.directClip.used ? E.directClip.used : fmt(E.directClip.fallback, { reason: lastResult.directClip.reason ?? "" })}
             </span>
           )}
-          {lastResult?.source === "demo" && expression && !busy && <span className={`${chip} text-[var(--web-ae7d24)]`}>{E.demoBadge}</span>}
+          {resultShown && lastResult?.source === "demo" && expression && !busy && <span className={`${chip} text-[var(--web-ae7d24)]`}>{E.demoBadge}</span>}
         </div>
         {selectedProp && (
           <div data-testid="prop-bar" className={`${chip} pointer-events-auto flex items-center gap-[var(--space-12)] shadow-[var(--pure-shadow-chip)]`}>
@@ -1066,7 +1082,7 @@ export function Editor({
             )}
           </div>
         )}
-        {expression && lastResult?.reasoning && (
+        {resultShown && expression && lastResult?.reasoning && (
           <p className="max-w-[760px] text-center text-[14px] leading-[18px] text-[var(--text-secondary)]">
             <b className="font-semibold text-[var(--text-primary)]">{E.reasoning}</b> · {lastResult.reasoning}
           </p>
