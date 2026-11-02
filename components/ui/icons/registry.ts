@@ -367,6 +367,12 @@ export const ICONS = {
     "height": 24,
     "body": "<path d=\"M8 6H16C17.1 6 18 6.9 18 8V16C18 17.1 17.1 18 16 18H8C6.9 18 6 17.1 6 16V8C6 6.9 6.9 6 8 6Z\" fill=\"currentColor\"/>"
   },
+  "tile-chevron": {
+    "viewBox": "0 0 10.5001 5.20018",
+    "width": 10.5001,
+    "height": 5.20018,
+    "body": "<path id=\"Vector 26253\" d=\"M0.750034 4.45015L5.25003 0.950146L9.75003 4.45015\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke=\"currentColor\"/>"
+  },
   "visibility": {
     "viewBox": "0 0 24 24",
     "width": 24,

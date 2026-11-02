@@ -4,10 +4,11 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SUGGESTED_PROMPTS } from "@/data/prompts";
 import { LIBRARY } from "@/data/library";
+import { componentForSim } from "@/data/components";
 import { EDITOR_PANEL } from "@/data/editor-panel";
 import { SIMREADY_ASSETS } from "@/data/simready-assets";
 import { STRINGS, fmt } from "@/data/strings";
-import { addFaceKey, addKey, applyBehavior, autoAdjust, delayFace, delaySound, isNeutralBehavior, NEUTRAL_BEHAVIOR, deleteFaceKey, deleteKey, formatTime, matchTiming, moveFaceKey, paramsToProps, propsToParams, recipeToClip, snapTime, updateKey } from "@/lib/expression";
+import { addFaceKey, addKey, applyBehavior, autoAdjust, delayFace, delaySound, isNeutralBehavior, NEUTRAL_BEHAVIOR, deleteFaceKey, deleteKey, formatTime, matchTiming, moveFaceKey, paramsToProps, propsToParams, recipeToClip, snapTime, channelTiles, updateKey } from "@/lib/expression";
 import { diffEnergy, energySamples } from "@/lib/reference/energy";
 import { flowEnergy } from "@/lib/reference/flow";
 import type { Channel, Clip, Expression, FaceSpec, Key, Job, MotionBehavior, MotionProps, Project, Reference, Settings, UserDataMotion, Signature, SoundCue, SoundSpec, Structure } from "@/lib/models";
@@ -228,6 +229,11 @@ export function Editor({
   useEffect(() => sound.setQuietHours(quietHours), [sound, quietHours]);
 
   const { params, warnings } = useMemo(() => propsToParams(props, axes), [props, axes]);
+  /** Context › Component card: channels per recipe step (live face / sound edits) */
+  const steps = useMemo(
+    () => (expression ? channelTiles(expression.motion.recipe, face, soundSpec, params, (b) => componentForSim(b)?.id ?? b) : []),
+    [expression, face, soundSpec, params],
+  );
   const playable = useMemo(
     () => {
       if (!expression) return undefined;
@@ -1020,7 +1026,8 @@ export function Editor({
 
       {/* Left panel: Context / Library (Frame 2147240454 ×2) */}
       <aside className={`absolute left-[32px] top-[32px] z-10 flex ${timelineOpen ? "bottom-[397px]" : "bottom-[32px]"} w-[430px] flex-col overflow-hidden rounded-[var(--radius-xl)] bg-[var(--bg-surface)]`}>
-        <div className="flex items-center gap-[21px] pl-[21px] pt-[20px]">
+        {/* Header (452:2269 / 2270): list icon 24 at 21,21, title Regular 20 #2c3030 at 66 */}
+        <div className="flex items-center gap-[21px] pl-[21px] pt-[21px]">
           <Menu
             label="Project menu"
             align="left"
@@ -1035,27 +1042,28 @@ export function Editor({
               { label: E.menu.delete, onSelect: () => setDeleting(true), danger: true },
             ]}
           />
-          <h1 className="min-w-0 truncate pr-[var(--space-20)] text-[20px] leading-[25px] text-[var(--text-primary)]">{name}</h1>
+          <h1 className="min-w-0 truncate pr-[var(--space-20)] text-[20px] leading-[25px] text-[var(--context-title)]">{name}</h1>
         </div>
-        <div className="ml-[13px] mt-[27px] flex gap-[var(--space-16)]" role="tablist">
+        {/* Tabs (452:2272): at 13,60 · p 10 · gap 15; selected SemiBold 20 #2c3030 underlined, other Regular 20 #3d4452 */}
+        <div className="ml-[13px] mt-[14px] flex gap-[15px]" role="tablist">
           {(["context", "library"] as const).map((t) => (
             <button
               key={t}
               role="tab"
               aria-selected={leftTab === t}
               onClick={() => setLeftTab(t)}
-              className={`p-[var(--space-12)] text-[20px] leading-[25px] ${leftTab === t ? "font-semibold text-[var(--text-primary)]" : "text-[var(--text-link)]"}`}
+              className={`p-[10px] text-[20px] leading-[25px] ${leftTab === t ? "font-semibold text-[var(--context-title)] underline decoration-from-font underline-offset-auto" : "text-[var(--context-tab)]"}`}
             >
               {t === "context" ? E.context : E.library}
             </button>
           ))}
         </div>
-        <div className="mt-[20px] min-h-0 flex-1 overflow-y-auto pb-[var(--space-32)] pl-[19px] pr-[23px]">
+        <div className="mt-[28px] min-h-0 flex-1 overflow-y-auto pb-[var(--space-32)] pl-[19px] pr-[17px]">
           {leftTab === "context" ? (
             <ContextPanel
               context={context}
               behaviors={expression?.motion.recipe.steps.map((st) => st.behavior) ?? []}
-              applied={expression?.components}
+              steps={steps}
               busy={busy}
               onChange={(patch) => setContext((c) => ({ ...c, ...patch }))}
               onOpenReference={(r) => r.kind !== "userData" && setActiveRef(activeRef?.id === r.id ? null : r)}

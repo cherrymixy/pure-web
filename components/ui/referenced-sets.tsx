@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { simBehaviorLabel } from "@/data/sim-behaviors";
 import { referenceSetFor, referenceSetForText, type ReferenceChannel, type ReferenceItem } from "@/data/reference-sets";
 import { STRINGS, fmt } from "@/data/strings";
-import { Icon } from "@/components/ui/icons/icon";
+import { Icon, type IconName } from "@/components/ui/icons/icon";
 
 const E = STRINGS.editor;
 
@@ -35,18 +35,12 @@ export function ReferencedSets({
   const label = simBehaviorLabel;
 
   if (variant === "strip") {
+    // Figma 452:2284: header = notes 16 · 5 · Medium 16 #6f6d6e; 123 thumbnails gap 12 running to the panel edge.
     return (
-      <section className="flex w-[301px] flex-col gap-[var(--space-16)]" data-testid="referenced">
-        <div className="flex items-center gap-[var(--space-8)]">
-          <Icon name="notes" size={24} className="shrink-0 text-[var(--neutral-800)]" />
-          <h3 className="flex-1 text-[18px] leading-[23px] text-[var(--text-primary)]">{E.reference}</h3>
-          <span
-            title={E.referencedEmpty}
-            aria-label={E.referencedTitle}
-            className="flex size-[19px] items-center justify-center rounded-[var(--radius-full)] bg-[var(--neutral-300)] text-[12px] leading-[15px] text-[var(--text-on-inverse)]"
-          >
-            ?
-          </span>
+      <section className="flex w-[394px] flex-col gap-[15px]" data-testid="referenced">
+        <div className="flex h-[16px] items-center gap-[5px] whitespace-nowrap text-[16px] font-medium leading-none text-[var(--library-section)]" title={E.referencedEmpty}>
+          <Icon name="notes" size={16} />
+          <h3>{E.reference}</h3>
         </div>
         {!set ? (
           <p className="text-[14px] leading-[18px] text-[var(--text-tertiary)]">{E.referencedEmpty}</p>
@@ -67,12 +61,9 @@ export function ReferencedSets({
               </div>
             )}
             {sets.length === 1 && <span className="sr-only">{fmt(E.referencedFor, { behavior: label(set.behavior) })}</span>}
-            <div className="relative -mr-[32px] overflow-hidden">
-              <div className="flex gap-[var(--space-12)] overflow-x-auto pr-[32px] [scrollbar-width:none]">
-                {set.items.map((it) => <StripItem key={it.channel} item={it} onOpen={onOpen} active={activeFile === it.file} />)}
-              </div>
-              {/* Figma 901:10006: white fade on the right edge (64px) */}
-              <div className="pointer-events-none absolute inset-y-0 right-0 w-[64px] bg-gradient-to-l from-[var(--bg-surface)] from-[37%] to-transparent" />
+            {/* -mr: the strip scrolls under the panel's right edge like the Figma frame (470 wide in a 430 panel) */}
+            <div className="-mr-[17px] flex gap-[12px] overflow-x-auto pr-[17px] [scrollbar-width:none]">
+              {set.items.map((it) => <StripItem key={it.channel} item={it} onOpen={onOpen} active={activeFile === it.file} />)}
             </div>
           </>
         )}
@@ -117,57 +108,73 @@ const CHIP: Record<ReferenceChannel, string> = {
   sound: "border-[var(--web-ecc377)] text-[var(--web-ecc377)]",
 };
 
+/** Channel tab on a strip thumbnail (452:2309 / 2315 / 2323) */
+const TAB_ICON: Record<ReferenceChannel, IconName> = { motion: "running-round", face: "smile-square", sound: "volume-loud" };
+/** Sound thumbnail bars (452:2325): 20 bars, 2 wide, 4 apart */
+const WAVE = [20, 34, 14, 8, 4, 14, 24, 28, 30, 26, 20, 4, 20, 26, 30, 6, 4, 10, 24, 30];
+const clock = (s: number) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+
+/**
+ * Strip thumbnail (452:2292): 123 square r 16 under a 34% black veil; channel tab at 12,0 (#f2f2f2, bottom corners 12,
+ * icon 20); video / sound: play 13 at 12,101 and the length (Regular 12 white) at 30,100.
+ */
 function StripItem({ item, onOpen, active = false }: { item: ReferenceItem; onOpen?: (item: ReferenceItem) => void; active?: boolean }) {
   const video = item.file.endsWith(".webm");
   const audio = item.file.endsWith(".ogg");
   const player = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
+  const [length, setLength] = useState<number | null>(null);
   const credit = `${item.title} — ${item.note}\n${fmt(E.referenceSource, { license: item.source.license, author: item.source.author })}`;
+  const onMeta = (e: React.SyntheticEvent<HTMLMediaElement>) => Number.isFinite(e.currentTarget.duration) && setLength(e.currentTarget.duration);
+  const media = video ? (
+    <video src={item.file} poster={item.poster ?? undefined} muted loop autoPlay playsInline onLoadedMetadata={onMeta} className="size-full object-cover" />
+  ) : audio ? null : (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={item.file} alt={item.title} className="size-full object-cover" />
+  );
 
   return (
-    <figure className="flex w-[123px] shrink-0 flex-col items-start gap-[var(--space-8)]" data-testid={`referenced-${item.channel}`}>
-      <div className={`relative size-[123px] overflow-hidden rounded-[var(--radius-md)] bg-[var(--neutral-800)] ${active ? "outline outline-2 outline-[var(--border-strong)]" : ""}`}>
-        {onOpen && !audio ? (
-          <button type="button" title={credit} aria-label={item.title} aria-pressed={active} onClick={() => onOpen(item)} className="absolute inset-0">
-            {video ? (
-              <video src={item.file} poster={item.poster ?? undefined} muted loop autoPlay playsInline className="size-full object-cover" />
-            ) : (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={item.file} alt={item.title} className="size-full object-cover" />
-            )}
-          </button>
-        ) : (
-        <a href={item.source.page} target="_blank" rel="noreferrer" title={credit} aria-label={item.title} className="absolute inset-0">
-          {audio ? (
-            <span className="flex size-full items-center justify-center text-[var(--web-ecc377)]">
-              <Icon name="sound" size={40} />
+    <figure
+      className={`relative size-[123px] shrink-0 overflow-hidden rounded-[16px] bg-[var(--neutral-800)] ${active ? "outline outline-2 -outline-offset-2 outline-[var(--border-strong)]" : ""}`}
+      data-testid={`referenced-${item.channel}`}
+    >
+      {audio ? (
+        <>
+          <audio ref={player} src={item.file} onLoadedMetadata={onMeta} onEnded={() => setPlaying(false)} onPause={() => setPlaying(false)} onPlay={() => setPlaying(true)} />
+          <button
+            type="button"
+            title={credit}
+            aria-label={item.title}
+            aria-pressed={playing}
+            onClick={() => (playing ? player.current?.pause() : void player.current?.play().catch(() => {}))}
+            className="absolute inset-0"
+          >
+            <span className="absolute left-[4px] top-[49px] flex items-center gap-[4px]" aria-hidden>
+              {WAVE.map((h, i) => (
+                <span key={i} className="w-[2px] bg-[var(--context-wave)]" style={{ height: h }} />
+              ))}
             </span>
-          ) : video ? (
-            <video src={item.file} poster={item.poster ?? undefined} muted loop autoPlay playsInline className="size-full object-cover" />
-          ) : (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={item.file} alt={item.title} className="size-full object-cover" />
-          )}
+          </button>
+        </>
+      ) : onOpen ? (
+        <button type="button" title={credit} aria-label={item.title} aria-pressed={active} onClick={() => onOpen(item)} className="absolute inset-0">
+          {media}
+        </button>
+      ) : (
+        <a href={item.source.page} target="_blank" rel="noreferrer" title={credit} aria-label={item.title} className="absolute inset-0">
+          {media}
         </a>
-        )}
-        {audio && (
-          <>
-            <audio ref={player} src={item.file} onEnded={() => setPlaying(false)} onPause={() => setPlaying(false)} onPlay={() => setPlaying(true)} />
-            <button
-              type="button"
-              aria-label={item.title}
-              onClick={() => (playing ? player.current?.pause() : void player.current?.play().catch(() => {}))}
-              className="absolute right-[var(--space-8)] top-[var(--space-8)] flex size-[24px] items-center justify-center rounded-[var(--radius-full)] text-[var(--text-on-inverse)]"
-            >
-              <Icon name={playing ? "stop" : "play-glyph"} size={playing ? 16 : 24} />
-            </button>
-          </>
-        )}
-        {video && <Icon name="play-glyph" size={13} className="pointer-events-none absolute left-[100px] top-[10px] text-[var(--text-on-inverse)]" />}
-      </div>
-      <figcaption className={`rounded-[var(--radius-sm)] border bg-[var(--bg-surface)] px-[var(--space-12)] py-[var(--space-4)] text-[14px] leading-[18px] ${CHIP[item.channel]}`}>
-        {E.tabs[item.channel]}
+      )}
+      {!audio && <span className="pointer-events-none absolute inset-0 bg-[var(--context-ref-dim)]" aria-hidden />}
+      <figcaption className="pointer-events-none absolute left-[12px] top-0 flex rounded-b-[12px] bg-[var(--context-card)] p-[5px] text-[var(--library-section)] shadow-[inset_0_0_20px_0_var(--neutral-0)]">
+        <Icon name={TAB_ICON[item.channel]} size={20} label={E.tabs[item.channel]} />
       </figcaption>
+      {(video || audio) && (
+        <span className="pointer-events-none absolute left-[12px] top-[100px] flex items-center gap-[5px] text-[12px] leading-[15px] text-[var(--text-on-inverse)]">
+          <Icon name={audio && playing ? "stop" : "play-glyph"} size={13} />
+          {length !== null && clock(length)}
+        </span>
+      )}
     </figure>
   );
 }

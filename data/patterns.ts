@@ -1,8 +1,8 @@
 // Situation patterns (editor Context) = guideline v3 §8-1 (pat.*). Guideline detail lives in data/guideline/situation.ts (same slugs).
 // The last four are proposed in the guideline.
 export const SITUATION_PATTERNS = [
-  { id: "face-to-face", label: "Face to Face", hint: "Facing each other, focused on the interaction." },
-  { id: "touching", label: "Touching", hint: "The person touches the robot's body or joints directly." },
+  { id: "face-to-face", label: "Face to Face", hint: "Facing each other, focused on the interaction.", art: "/figma/patterns/face-to-face.svg" },
+  { id: "touching", label: "Touching", hint: "The person touches the robot's body or joints directly.", art: "/figma/patterns/touching.svg" },
   { id: "calling", label: "Calling", hint: "A voice or signal asks for attention right away." },
   { id: "carried", label: "Carried", hint: "The robot is lifted up or carried somewhere." },
   { id: "pass-by", label: "Pass By", hint: "Someone walks past without any intent." },
