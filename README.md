@@ -165,6 +165,9 @@ flowchart LR
 | 🎨 **브랜드 시그니처** | 브랜드 가이드 PDF나 URL에서 색 · 서체 · 톤을 뽑아 8축(`Tempo` `Amplitude` `Settle` `Anticipation` `Rhythm` `Eyes` `Pitch` `Density`) 시그니처를 제안. 레이더를 드래그해 조정하고 버전을 비교 · 복원 |
 | ⚙️ **표현 생성** | 상황 문장 + 이미지 · 영상 레퍼런스를 로컬 LLM이 읽고 Motion · Face · Sound를 JSON Schema로 생성. 비전 모델이 레퍼런스를 먼저 요약해요 |
 | ▶️ **물리 시뮬레이션** | 브라우저 안의 MuJoCo(WebAssembly)로 PURE Desk(5축 탁상 로봇)가 바로 재생. 30fps 타임라인 키프레임 편집, 관절별 명령값 / 실제값 |
+| 🎛️ **에디터** | 왼쪽 **Context** — 지금 상태, 채널(Sound · Face · Motion)이 켜지는 순서대로 계단처럼 쌓이는 컴포넌트 타일, 이 표현에 적용된 상황 패턴. 오른쪽 **Motion Dynamics · Behavior** — 진폭 · 길이 · 속도(0.5–2×) · 빈도와 Easing · Direction · Delay가 실제 재생에 반영돼요 |
+| 🪑 **3D 공간 구성 (Library)** | [NVIDIA SimReady](https://docs.omniverse.nvidia.com/simready/latest/overview.html) 무료 에셋 33종(책상 · 소파 · 의자 · 램프 · 머그 · 과일 · 화분 …)을 물리 바디로 놓아요. 떨어져 쌓이고 부딪히며, 방향키로 한 칸씩 이동 · R로 45° 회전. 로봇도 옮기고 돌릴 수 있고, 책상 위로 올라가거나 내려와요. 배치는 프로젝트에 저장 |
+| 📚 **커뮤니티 라이브러리** | 에디터 안에서 커뮤니티 모션 카드를 누르면 바로 재생되고 다음 생성의 레퍼런스로 붙어요 |
 | 🙂 **Face · 🔊 Sound** | 얼굴 영상 7종(neutral · smile · sleepy · sad · surprise · tilt · heart), 녹음된 로봇 사운드 10종을 시그니처 Pitch 축으로 보정 |
 | 🛡️ **검증과 폴백** | LLM 출력은 재생 전에 행동 허용 목록 · 범위 클램프 · 관절 한계 · 각속도 · 15초 길이 검사를 거쳐요. Ollama가 없거나 실패하면 데모 레시피로 대체 |
 | 📦 **테스트 · 내보내기 · 공유** | 로봇 테스트(시연용 더미 로봇 · 관절 호환성 검사), `pure.json` 내보내기, 공유 링크(만료일 · 비밀번호 해시 · 5회 실패 잠금 · 다운로드 허용) |
@@ -188,7 +191,12 @@ flowchart LR
 | 에디터 | 커뮤니티 |
 |:---:|:---:|
 | <img src="docs/readme/editor.jpg" width="420"> | <img src="docs/readme/community.jpg" width="420"> |
-| MuJoCo 재생 · Motion / Face / Sound | 공유된 모션 둘러보기 |
+| Context(컴포넌트 타일 · 상황 패턴) · Motion Dynamics / Behavior | 공유된 모션 둘러보기 |
+
+| 에디터 — Library · 3D 공간 구성 |
+|:---:|
+| <img src="docs/readme/library.jpg" width="860"> |
+| 커뮤니티 모션 카드 · SimReady 에셋을 놓고 로봇을 책상 위에 올린 모습 |
 
 | 가이드라인 — Face 원칙 | 가이드라인 — Approach 컴포넌트 |
 |:---:|:---:|
@@ -282,6 +290,7 @@ flowchart LR
 
 - **생성 경로** — 레퍼런스 이미지 · 영상 프레임은 비전 모델이 먼저 요약하고, 텍스트 모델이 시그니처 · 상황 · 레퍼런스를 받아 JSON Schema에 맞춘 레시피를 돌려줘요. 검증 계층을 통과한 것만 시뮬레이터로 가요.
 - **잡** — 분석 · 추출 · 생성은 `jobId`가 붙은 작업이라, 화면을 떠났다 돌아와도 진행 상태가 복구돼요.
+- **3D 에셋 파이프라인** — SimReady의 OpenUSD를 `scripts/simready/convert.py`(usd-core · trimesh · CoACD)로 미리 변환해요. 보이는 모델은 GLB(텍스처 1K 이하), 충돌은 볼록 분해 STL로 나눠 `public/assets/simready/`에 두고, MuJoCo에는 에셋마다 미리 만든 freejoint 슬롯을 넣어 배치 · 이동할 때 모델을 다시 컴파일하지 않아요.
 - **가이드라인 데이터** — 원칙 · 토큰 · 컴포넌트 · 패턴은 `data/guideline`의 타입이 있는 데이터 한 벌이고, 웹 페이지 · 검색 · 토큰 JSON · LLM 프롬프트가 모두 여기서 만들어져요.
 
 ---
@@ -316,7 +325,8 @@ lib/
   expression/     검증 · 클램프 · 리타깃 · pure.json
   jobs/ robot/ signature/ reference/ sound/ ui/
 data/             콘텐츠 (타입 · 컴포넌트 · 패턴 · 시드 · 가이드라인 · 문구)
-public/           mujoco/ (wasm) · pure-desk/ (모델 · 얼굴 영상) · sounds/
+scripts/simready/ SimReady USD → GLB · 충돌 STL · 썸네일 변환기
+public/           mujoco/ (wasm) · pure-desk/ (모델 · 얼굴 영상) · sounds/ · assets/simready/ (3D 에셋)
 docs/             PRD · decisions · checks · deck · readme
 ```
 
@@ -335,6 +345,7 @@ docs/             PRD · decisions · checks · deck · readme
 | **시연 경로는 죽지 않기** | Ollama가 없거나 응답이 깨지면 항상 데모 레시피로 대체해요. 배포본도 같은 방식이에요 |
 | **디자인 값은 Figma Dev Mode에서** | 색 · 타이포 · 간격은 Figma 변수를 토큰으로 옮겨 쓰고, 스크린샷은 구현 후 비교용으로만 써요 |
 | **콘텐츠와 코드 분리** | 로봇 타입 · 컴포넌트 · 패턴 · 프리셋 · 시드 · 가이드라인 본문 · UI 문구는 모두 `data/`에 있어요 |
+| **3D 에셋은 물리 기반으로** | 에셋을 그림으로만 겹치지 않고 MuJoCo 바디로 넣어 실제로 떨어지고 쌓여요. 이동은 자유 드래그 대신 10cm 칸 단위, 회전은 45° 단위라 배치가 흐트러지지 않아요. 봉인된 시뮬레이터를 사람 승인을 받고 연 예외예요 |
 | **칩과 재생 행동 분리** | 에디터의 컴포넌트는 가이드라인의 행동 16개, 시뮬레이터가 재생하는 행동은 15개 — 매핑으로 잇고, 옛 데이터는 로드할 때 마이그레이션해요 |
 
 ---
@@ -376,6 +387,7 @@ scripts/demo.sh      # 전시 모드: Ollama 예열 · 프로덕션 빌드 · �
 |---|---|---|
 | 물리 시뮬레이터 | [MuJoCo](https://github.com/google-deepmind/mujoco) (Google DeepMind) | `public/mujoco/`의 WebAssembly 빌드를 브라우저에서 실행 |
 | 관절 · 채널 규칙 | [LeLamp](https://github.com/humancomputerlab/LeLamp) | 관절 이름(서보 id 1–5)과 채널 체계를 LeLamp 규칙에 맞춤. 3D 모델 · 메시 · 시뮬 코드는 PURE Desk용으로 따로 만듦 |
+| 3D 에셋 | [NVIDIA SimReady Assets](https://huggingface.co/datasets/nvidia/simready-assets) | CC BY 4.0. GLB · 충돌 메시로 변환해 사용, 에디터 Library에 출처 표시 |
 | 레퍼런스 이미지 · 영상 | Wikimedia Commons | 항목마다 저작자 · 라이선스(CC BY / BY-SA) · 원문 링크를 앱 화면에 표시 |
 | 폰트 | Google Sans Flex · Google Sans Code · Roboto Mono | SIL Open Font License, `app/fonts/`에 라이선스 포함 |
 
