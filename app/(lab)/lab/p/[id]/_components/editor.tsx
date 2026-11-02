@@ -1248,10 +1248,10 @@ export function Editor({
 
       {/* Composer (452:2426): 646 wide card, r 20, 1px #ededed + drop shadow, pad 16 · 12 bottom — prompt (16, #b1b1b1
           placeholder), then attach / dictate tools (33, r 10) and a 74×33 Send. Centred, bottom 32 like the panels (Figma 24).
-          Attach chips sit above the prompt. W02E-4 collapses it while the timeline is open. */}
+          Shown at 120% (zoom, user review). Attach chips sit above the prompt. W02E-4 collapses it while the timeline is open. */}
       <form
         hidden={timelineOpen}
-        className="pointer-events-auto flex w-[646px] flex-col items-center gap-[var(--space-12)]"
+        className="pointer-events-auto flex w-[646px] flex-col items-center gap-[var(--space-12)] [zoom:1.2]"
         onSubmit={(e) => { e.preventDefault(); void generate(); }}
       >
         <div className="flex min-h-[106px] w-full flex-col justify-between gap-[var(--space-12)] rounded-[20px] border border-[var(--composer-border)] bg-[var(--bg-surface)] px-[16px] pb-[12px] pt-[16px] shadow-[var(--composer-shadow)]">
