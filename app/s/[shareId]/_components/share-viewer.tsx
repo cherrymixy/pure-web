@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ROBOT_TYPES } from "@/data/robot-types";
 import { STRINGS, fmt } from "@/data/strings";
-import { buildPureJson, propsToParams, recipeToClip } from "@/lib/expression";
+import { buildPureJson, playableExpression, propsToParams, recipeToClip } from "@/lib/expression";
 import type { Expression, RobotType, Structure } from "@/lib/models";
 import { createSoundEngine } from "@/lib/sound";
 import { ApiError, api } from "@/lib/ui/api";
@@ -70,13 +70,20 @@ export function ShareViewer({ id }: { id: string }) {
 
   const view = state.kind === "view" ? state.view : null;
   const expr = view?.expressions?.[selected] ?? null;
-  const playable = useMemo(() => (expr ? { motion: expr.motion, face: expr.face, sound: expr.sound } : undefined), [expr]);
   const params = useMemo(() => (expr ? propsToParams(expr.motion.props, expr.signatureSnapshot.axes).params : undefined), [expr]);
+  // Motion Behavior (delay · direction · easing) plays as a clip; speed stays live in the player.
+  const structure = view?.robot?.structure;
+  const playable = useMemo(() => {
+    if (!expr) return undefined;
+    const e = structure && params ? playableExpression(expr, structure, { ...params, speed: 1 }) : expr;
+    return { motion: e.motion, face: e.face, sound: e.sound };
+  }, [expr, structure, params]);
 
   function download() {
     if (!view?.robot || !expr || !params) return;
     const { structure, type, projectName } = view.robot;
-    const clip = expr.motion.mode === "clip" && expr.motion.clip ? expr.motion.clip : recipeToClip(expr.motion.recipe, params, structure);
+    const shown = playableExpression(expr, structure, params);
+    const clip = shown.motion.mode === "clip" && shown.motion.clip ? shown.motion.clip : recipeToClip(expr.motion.recipe, params, structure);
     const { text } = buildPureJson({ name: projectName, type, structure }, expr.signatureSnapshot, expr, clip, { team: view.team });
     downloadText(`${slug(expr.name)}.pure.json`, text);
   }

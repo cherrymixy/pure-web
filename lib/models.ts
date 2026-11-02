@@ -173,6 +173,23 @@ export type SoundCue = z.infer<typeof SoundCueSchema>;
 export const SoundSpecSchema = z.object({ cues: z.array(SoundCueSchema) });
 export type SoundSpec = z.infer<typeof SoundSpecSchema>;
 
+/** Seconds the first pose is held before the motion starts (Motion Behavior › Delay). */
+export const MAX_BEHAVIOR_DELAY = 5;
+
+/**
+ * Motion Behavior (Figma 452:2062). Neutral = { direction: "left", delay: 0 } with no easing:
+ * the motion plays exactly as generated / keyed.
+ * - easing: every key eases with this (undefined = keep each key's own easing)
+ * - direction: "right" mirrors the lateral joints (yaw / roll); "left" = as generated
+ * - delay: hold the first pose this long before moving (face keys and sound cues wait too)
+ */
+export const MotionBehaviorSchema = z.object({
+  easing: EasingSchema.optional(),
+  direction: z.enum(["left", "right"]),
+  delay: z.number().min(0).max(MAX_BEHAVIOR_DELAY),
+});
+export type MotionBehavior = z.infer<typeof MotionBehaviorSchema>;
+
 export const MotionPropsSchema = z.object({
   amplitude: z.number().min(0).max(100),
   duration: z.number().min(0).max(100),
@@ -208,6 +225,8 @@ const ExpressionBase = z.object({
     recipe: RecipeSchema,
     clip: ClipSchema.optional(),
     props: MotionPropsSchema,
+    /** Motion Behavior (editor right panel): applied on top of whatever plays — see lib/expression/behavior.ts */
+    behavior: MotionBehaviorSchema.optional(),
   }),
   face: FaceSpecSchema,
   sound: SoundSpecSchema,

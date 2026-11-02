@@ -14,3 +14,4 @@ export * from "./references";
 export * from "./face";
 export * from "./sound";
 export * from "./context";
+export * from "./behavior";

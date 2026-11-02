@@ -1,5 +1,6 @@
 import type { Channel, Expression, Structure } from "../models";
 import { limitCheck, recipeToClip } from "./clip";
+import { applyBehavior } from "./behavior";
 import { propsToParams } from "./props";
 import { MAX_DEG_PER_S, jointIds, sampleModelClip } from "./sample";
 import { velocityAllowance } from "./validate";
@@ -19,7 +20,8 @@ export interface CompatTarget {
 }
 
 function peakVelocities(expr: Pick<Expression, "motion" | "signatureSnapshot">, structure: Structure) {
-  const clip = expr.motion.mode === "clip" && expr.motion.clip ? expr.motion.clip : recipeToClip(expr.motion.recipe, propsToParams(expr.motion.props, expr.signatureSnapshot.axes).params, structure);
+  const base = expr.motion.mode === "clip" && expr.motion.clip ? expr.motion.clip : recipeToClip(expr.motion.recipe, propsToParams(expr.motion.props, expr.signatureSnapshot.axes).params, structure);
+  const clip = applyBehavior(base, expr.motion.behavior, structure);
   const ids = jointIds(structure);
   const peaks: Record<string, number> = {};
   const dt = 1 / 60;

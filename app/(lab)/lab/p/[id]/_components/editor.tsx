@@ -4,12 +4,13 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SUGGESTED_PROMPTS } from "@/data/prompts";
 import { LIBRARY } from "@/data/library";
+import { EDITOR_PANEL } from "@/data/editor-panel";
 import { SIMREADY_ASSETS } from "@/data/simready-assets";
 import { STRINGS, fmt } from "@/data/strings";
-import { addFaceKey, addKey, autoAdjust, deleteFaceKey, deleteKey, formatTime, matchTiming, moveFaceKey, paramsToProps, propsToParams, recipeToClip, snapTime, updateKey } from "@/lib/expression";
+import { addFaceKey, addKey, applyBehavior, autoAdjust, delayFace, delaySound, isNeutralBehavior, NEUTRAL_BEHAVIOR, deleteFaceKey, deleteKey, formatTime, matchTiming, moveFaceKey, paramsToProps, propsToParams, recipeToClip, snapTime, updateKey } from "@/lib/expression";
 import { diffEnergy, energySamples } from "@/lib/reference/energy";
 import { flowEnergy } from "@/lib/reference/flow";
-import type { Channel, Clip, Expression, FaceSpec, Key, Job, MotionProps, Project, Reference, Settings, UserDataMotion, Signature, SoundCue, SoundSpec, Structure } from "@/lib/models";
+import type { Channel, Clip, Expression, FaceSpec, Key, Job, MotionBehavior, MotionProps, Project, Reference, Settings, UserDataMotion, Signature, SoundCue, SoundSpec, Structure } from "@/lib/models";
 import { cueAt } from "@/data/sound-cues";
 import { ReferenceError, extractFrames, readFramePixels } from "@/lib/reference/frames";
 
@@ -31,7 +32,8 @@ import { logInput, withRef, type InputEntry } from "@/lib/ui/input-log";
 import { ContextPanel, SET_REF, type EditorContext, type PendingReference } from "./context-panel";
 import type { ReferenceItem } from "@/data/reference-sets";
 import { LibraryPanel } from "./library-panel";
-import { JointTable, MotionPanel, PROP_LABELS } from "./panels";
+import { PROP_LABELS } from "./panels";
+import { EditDetailButton, JointList, MotionBehaviorPanel, MotionDynamics, PanelRail } from "./right-panel";
 import { ExportModal } from "./export-modal";
 import { ReferencePlayer } from "./reference-player";
 import { TestModal } from "./test-modal";
@@ -52,7 +54,7 @@ const running = (j: Job | null) => j !== null && (j.status === "queued" || j.sta
 const MAX_REFERENCES = 4;
 
 /** One undoable edit: Motion properties, face and sound together. */
-type Snapshot = { props: MotionProps; face: FaceSpec; sound: SoundSpec; clip: Clip | null };
+type Snapshot = { props: MotionProps; face: FaceSpec; sound: SoundSpec; clip: Clip | null; behavior?: MotionBehavior };
 const NEUTRAL_FACE: FaceSpec = { preset: "neutral" };
 const CUE_FIELDS = {
   t: { label: STRINGS.editor.sound.fields.t, digits: 2 },
@@ -62,7 +64,8 @@ const CUE_FIELDS = {
 
 /** Snapshot → expression.motion: a clip means keyframe mode, none means the recipe plays. */
 function motionOf(e: Expression, snap: Snapshot, recipe = e.motion.recipe): Expression["motion"] {
-  return snap.clip ? { mode: "clip", recipe, clip: snap.clip, props: snap.props } : { mode: "recipe", recipe, props: snap.props };
+  const behavior = snap.behavior && !isNeutralBehavior(snap.behavior) ? { behavior: snap.behavior } : {};
+  return snap.clip ? { mode: "clip", recipe, clip: snap.clip, props: snap.props, ...behavior } : { mode: "recipe", recipe, props: snap.props, ...behavior };
 }
 
 /** "Speed 85 → 60", "Face sleepy → smile", "Sound cues 2 → 3"… */
@@ -75,8 +78,20 @@ function describeSnapshot(a: Snapshot, b: Snapshot): string {
       const ca = a.sound.cues.find((c) => c.id === cb.id);
       if (ca) parts.push(...describeFields(ca, cb, CUE_FIELDS).map((d) => `${STRINGS.editor.sound.label} ${d}`));
     }
+  if (a.behavior !== b.behavior) parts.push(describeBehavior(a.behavior, b.behavior));
   if (!parts.length && a.clip !== b.clip) parts.push(STRINGS.editor.timeline.title);
   return parts.join(", ");
+}
+/** "Delay 0.0 → 3.0", "Direction Left → Right", "Easing Auto → Ease Out" */
+function describeBehavior(a: MotionBehavior | undefined, b: MotionBehavior | undefined): string {
+  const x = { ...NEUTRAL_BEHAVIOR, ...a };
+  const y = { ...NEUTRAL_BEHAVIOR, ...b };
+  const B = EDITOR_PANEL.behavior;
+  const out: string[] = [];
+  if (x.easing !== y.easing) out.push(`${B.easing} ${B.easings[x.easing ?? "auto"]} → ${B.easings[y.easing ?? "auto"]}`);
+  if (x.direction !== y.direction) out.push(`${B.direction} ${B.directions[x.direction]} → ${B.directions[y.direction]}`);
+  if (x.delay !== y.delay) out.push(`${B.delay} ${x.delay.toFixed(1)} → ${y.delay.toFixed(1)}`);
+  return out.join(", ");
 }
 const isVideo = (f: File) => f.type.startsWith("video/") || /\.(mp4|mov|webm)$/i.test(f.name);
 
@@ -136,6 +151,8 @@ export function Editor({
   const [selectedCue, setSelectedCue] = useState<string | null>(null);
   const [quietHours, setQuietHours] = useState(settings.quietHours);
   const [clip, setClip] = useState<Clip | null>(initialExpression?.motion.mode === "clip" ? initialExpression.motion.clip ?? null : null);
+  /** Motion Behavior (easing · direction · delay) — undefined = neutral */
+  const [behavior, setBehavior] = useState<MotionBehavior | undefined>(initialExpression?.motion.behavior);
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
   const [selectedKey, setSelectedKey] = useState<KeyRef | null>(null);
   const [loop, setLoop] = useState(false);
@@ -148,7 +165,9 @@ export function Editor({
   const [matching, setMatching] = useState(false);
   const [testOpen, setTestOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState<null | "robot" | "file" | "share">(null);
-  const committed = useRef<Snapshot>({ props, face, sound: soundSpec, clip });
+  const committed = useRef<Snapshot>({ props, face, sound: soundSpec, clip, behavior });
+  /** Bumped on every commit / undo — a non-neutral behavior rebuilds its clip from the committed props then */
+  const [committedVersion, setCommittedVersion] = useState(0);
   const [history, setHistory] = useState<History<Snapshot>>(emptyHistory);
   const [prompt, setPrompt] = useState("");
   const [job, setJob] = useState<Job | null>(null);
@@ -210,10 +229,22 @@ export function Editor({
 
   const { params, warnings } = useMemo(() => propsToParams(props, axes), [props, axes]);
   const playable = useMemo(
-    () => (expression ? { motion: expression.motion, face: expression.face, sound: expression.sound } : undefined),
-    // Props go through signatureParams; saving them must not restart playback.
+    () => {
+      if (!expression) return undefined;
+      const snap = committed.current;
+      if (isNeutralBehavior(snap.behavior)) return { motion: expression.motion, face: expression.face, sound: expression.sound };
+      // Motion Behavior plays as a clip, built from the committed props (speed stays live through signatureParams).
+      const base = snap.clip ?? recipeToClip(expression.motion.recipe, { ...propsToParams(snap.props, axes).params, speed: 1 }, structure);
+      return {
+        motion: { ...expression.motion, mode: "clip" as const, clip: applyBehavior(base, snap.behavior, structure) },
+        face: delayFace(snap.face, snap.behavior),
+        sound: delaySound(snap.sound, snap.behavior),
+      };
+    },
+    // Props go through signatureParams; saving them must not restart playback (a recipe without behavior).
+    // With a behavior the clip is rebuilt when a change is committed (committedVersion).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [expression?.id, cue],
+    [expression?.id, cue, isNeutralBehavior(behavior) ? 0 : committedVersion],
   );
 
   // ------------------------------------------------------------ persistence
@@ -234,6 +265,7 @@ export function Editor({
     setFace(snap.face);
     setSoundSpec(snap.sound);
     setClip(snap.clip);
+    setBehavior(snap.behavior);
     ctrl.current?.setFace(snap.face);
     ctrl.current?.setSound(snap.sound);
   }, []);
@@ -241,15 +273,17 @@ export function Editor({
   /** Show an edited clip at the playhead (paused) without waiting for the save. */
   const showClip = useCallback((c: Clip) => {
     const t = ctrl.current?.getTime().t ?? 0;
-    ctrl.current?.playClip(c, undefined, { autoplay: false });
+    // Same as playback: the committed Motion Behavior on top of the edited keys
+    ctrl.current?.playClip(applyBehavior(c, committed.current.behavior, structure), undefined, { autoplay: false });
     ctrl.current?.seek(Math.min(t, c.duration));
     setPaused(true);
-  }, []);
+  }, [structure]);
 
   /** New baseline after generate / library apply: no undo across expressions. */
   const resetTo = useCallback((e: Expression) => {
-    const snap = { props: e.motion.props, face: e.face, sound: e.sound, clip: e.motion.mode === "clip" ? e.motion.clip ?? null : null };
+    const snap = { props: e.motion.props, face: e.face, sound: e.sound, clip: e.motion.mode === "clip" ? e.motion.clip ?? null : null, behavior: e.motion.behavior };
     setProps(snap.props);
+    setBehavior(snap.behavior);
     setFace(snap.face);
     setSoundSpec(snap.sound);
     setClip(snap.clip);
@@ -262,10 +296,11 @@ export function Editor({
   /** Release / pick: one change chip, one saved version. */
   async function commit(override: Partial<Snapshot> = {}, label = "") {
     const before = committed.current;
-    const after: Snapshot = { props, face, sound: soundSpec, clip, ...override };
+    const after: Snapshot = { props, face, sound: soundSpec, clip, behavior, ...override };
     label ||= describeSnapshot(before, after);
     if (!label) return;
     committed.current = after;
+    setCommittedVersion((v) => v + 1);
     setHistory((h) => pushChange(h, label, before, after));
     if (after.sound !== before.sound) ctrl.current?.setSound(after.sound);
     if (expression) {
@@ -282,6 +317,7 @@ export function Editor({
     setHistory(u.history);
     applySnapshot(u.restore);
     committed.current = u.restore;
+    setCommittedVersion((v) => v + 1);
     if (expression) {
       await patchExpression({ motion: motionOf(expression, u.restore), face: u.restore.face, sound: u.restore.sound }).catch(() => {});
       if (u.restore.clip !== u.change.after.clip) {
@@ -878,7 +914,6 @@ export function Editor({
   const progress = Number.isFinite(time.duration) && time.duration > 0 ? Math.min(time.t / time.duration, 1) : 0;
   const clock = (sec: number) => (Number.isFinite(sec) ? `${String(Math.floor(sec / 60)).padStart(2, "0")}:${String(Math.floor(sec % 60)).padStart(2, "0")}` : "--:--");
   const chip = "rounded-[var(--radius-full)] bg-[var(--bg-surface)] px-[var(--space-16)] py-[var(--space-8)] text-[14px] leading-[18px]";
-  const tabTint: Record<Tab, string> = { motion: "text-[var(--text-primary)]", face: "text-[var(--web-e2a1c1)]", sound: "text-[var(--web-ecc377)]" };
 
   // W02D-1/3/4/5 (Figma 901:9691 · 10163 · 10631 · 11097, ×2): full-bleed stage behind floating panels —
   // left Context/Library 343×1016 at 32,32 · right channel panel 380×1016 at right 32 · play bar 634,868 · composer 513,918.
@@ -926,7 +961,7 @@ export function Editor({
       )}
 
       {/* Top of the stage (no Figma equivalent): signature, result badges, reasoning, empty hint */}
-      <div className="pointer-events-none absolute left-[494px] right-[444px] top-[32px] z-10 flex flex-col items-center gap-[var(--space-12)]">
+      <div className="pointer-events-none absolute left-[494px] right-[512px] top-[32px] z-10 flex flex-col items-center gap-[var(--space-12)]">
         <div className="pointer-events-auto flex flex-wrap items-center justify-center gap-[var(--space-8)]">
           <span className={`${chip} text-[var(--text-secondary)]`}>{signature.name} · v0.{signature.version}</span>
           {/* The robot's own base is a thin ring (the white dome is the base_yaw joint), so it gets a button too */}
@@ -1171,32 +1206,22 @@ export function Editor({
         </div>
       </form>
 
-      {/* Right panel: channel tabs + panel + joints + Edit Detail (Frame 29 ×2) */}
-      <aside className={`absolute right-[32px] top-[32px] z-10 flex ${timelineOpen ? "bottom-[397px]" : "bottom-[32px]"} w-[380px] flex-col gap-[var(--space-32)] overflow-hidden rounded-[var(--radius-xl)] bg-[var(--bg-surface)] px-[var(--space-24)] pb-[var(--space-32)] pt-[var(--space-24)]`}>
-        <div className="grid h-[49px] w-[330px] shrink-0 grid-cols-3 gap-[var(--space-8)] rounded-[var(--radius-sm)] bg-[var(--bg-canvas)] px-[var(--space-8)] py-[7px]" role="tablist">
-          {(["motion", "face", "sound"] as const).map((c) => (
-            <button
-              key={c}
-              role="tab"
-              aria-selected={tab === c}
-              disabled={!hasChannel(c)}
-              title={hasChannel(c) ? undefined : fmt(E.noChannel, { channel: E.tabs[c] })}
-              onClick={() => setTab(c)}
-              className={`flex h-[36px] items-center justify-center rounded-[var(--radius-xs)] text-[16px] leading-[20px] disabled:cursor-not-allowed disabled:opacity-40 ${tabTint[c]} ${tab === c ? "bg-[var(--neutral-300)]" : ""}`}
-            >
-              {E.tabs[c]}
-            </button>
-          ))}
-        </div>
-
-        <div className="-mr-[var(--space-16)] flex min-h-0 flex-1 flex-col gap-[56px] overflow-y-auto pr-[var(--space-16)]">
+      {/* Right panel (Figma 452:2024): content column 330 at 24 · divider at 378 · Motion / Face / Sound rail at 397, Edit Detail at the bottom */}
+      <aside className={`absolute right-[32px] top-[32px] z-10 ${timelineOpen ? "bottom-[397px]" : "bottom-[32px]"} w-[448px] overflow-hidden rounded-[var(--radius-xl)] bg-[var(--bg-surface)] shadow-[var(--editor-panel-shadow)]`}>
+        {/* Scroll column starts 8 left of the content so field borders and the focus ring aren't clipped */}
+        <div className="absolute bottom-[96px] left-[16px] top-[24px] flex w-[354px] flex-col gap-[40px] overflow-y-auto overflow-x-hidden pb-[var(--space-8)] pl-[8px] pr-[16px] pt-[4px] -mt-[4px]">
           {tab === "motion" && (
-            <MotionPanel
-              props={props}
-              warnings={warnings}
-              onChange={(key, value) => setProps((p) => ({ ...p, [key]: value }))}
-              onCommit={() => void commit()}
-            />
+            <>
+              <MotionDynamics
+                props={props}
+                warnings={warnings}
+                durationS={timelineClip?.duration ?? null}
+                onChange={(key, value) => setProps((p) => ({ ...p, [key]: value }))}
+                onCommit={(patch) => void commit(patch ? { props: { ...props, ...patch } } : {})}
+              />
+              <MotionBehaviorPanel behavior={behavior} onChange={setBehavior} onCommit={(next) => void commit(next ? { behavior: next } : {})} />
+              <JointList joints={joints} structure={structure} flagged={limit?.joint} />
+            </>
           )}
           {tab === "face" && <FacePanel face={face} onChange={changeFace} onCommit={(next) => void commit(next ? { face: next } : {})} />}
           {tab === "sound" && (
@@ -1213,17 +1238,14 @@ export function Editor({
               onQuietHours={(on) => void toggleQuietHours(on)}
             />
           )}
-          <JointTable joints={joints} structure={structure} flagged={limit?.joint} />
         </div>
-
-        <button
-          type="button"
-          aria-pressed={timelineOpen}
-          onClick={() => setTimelineOpen(!timelineOpen)}
-          className="h-[55px] w-[332px] shrink-0 rounded-[var(--radius-lg)] bg-[var(--neutral-800)] text-[22px] leading-[28px] text-[var(--text-on-inverse)]"
-        >
-          {E.timeline.title}
-        </button>
+        <div className="absolute bottom-[22px] left-[24px]">
+          <EditDetailButton open={timelineOpen} onClick={() => setTimelineOpen(!timelineOpen)} />
+        </div>
+        <span className="absolute bottom-[16px] left-[378px] top-[16px] w-px bg-[var(--editor-divider)]" aria-hidden />
+        <div className="absolute left-[397px] top-[42px]">
+          <PanelRail tab={tab} enabled={hasChannel} onTab={setTab} />
+        </div>
       </aside>
 
       {/* Edit Detail timeline (W02E-4 Timeline Panel 901:12348 ×2): 32,703 · 1856 wide, down to 10 above the bottom */}
@@ -1301,8 +1323,8 @@ export function Editor({
           open={exportOpen !== null}
           initialDestination={exportOpen ?? "file"}
           project={{ name, type: project.type, structure }}
-          expression={expression}
-          clip={timelineClip}
+          expression={{ ...expression, face: delayFace(expression.face, behavior), sound: delaySound(expression.sound, behavior) }}
+          clip={applyBehavior(timelineClip, behavior, structure)}
           onFix={(issue) => {
             setExportOpen(null);
             setTimelineOpen(true);
