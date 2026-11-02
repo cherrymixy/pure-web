@@ -236,6 +236,8 @@ export const STRINGS = {
     statusPlaceholder: "How does the robot feel right now?",
     statusEmpty: "Your latest input shows here after you Generate.",
     inputLog: "Input log",
+    clearStatus: "Clear",
+    clearStatusConfirm: { title: "Clear input history?", body: "Current Status and the input log will be emptied. The motion stays as it is." },
     showMore: "Show {n} more",
     showLess: "Show less",
     attach: "Attach",

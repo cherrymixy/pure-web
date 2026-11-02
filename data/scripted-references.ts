@@ -24,7 +24,7 @@ export const SCRIPTED_REFERENCES: ScriptedReference[] = [
     sha256: ["a08a53c790f35a99d3032d236bee184bcdfac6e4aaffcfb65bdfbb6fcfaac8e9"],
     summary: "A man laughs and pumps his fists, bouncing side to side in celebration — pure joy.",
     components: ["approach", "joy"],
-    minMs: 4200,
+    minMs: 1500,
     expression: {
       name: "Happy dance",
       currentStatus: "I'm so happy I can't stop dancing!",

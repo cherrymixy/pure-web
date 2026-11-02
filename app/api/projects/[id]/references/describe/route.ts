@@ -17,8 +17,8 @@ export function POST(req: Request, { params }: Ctx<{ id: string }>) {
     const { reference } = await body(req, z.object({ reference: ReferenceSchema }));
     const scripted = await matchScripted([reference]);
     if (scripted) {
-      await pause(1500);
-      return { summary: scripted.summary, ms: 1500 };
+      await pause(500);
+      return { summary: scripted.summary, ms: 500 };
     }
     const images = await referenceImages([reference]);
     if (!images.length) return { summary: null };

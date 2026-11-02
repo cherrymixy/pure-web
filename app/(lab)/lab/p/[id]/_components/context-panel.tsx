@@ -12,6 +12,7 @@ import { fileUrl } from "@/lib/ui/upload";
 import { ReferencedSets } from "@/components/ui/referenced-sets";
 import type { ReferenceItem } from "@/data/reference-sets";
 import { Icon } from "@/components/ui/icons/icon";
+import { ConfirmModal } from "@/components/ui/modal";
 
 const E = STRINGS.editor;
 
@@ -62,6 +63,7 @@ export function ContextPanel({
   onOpenSetItem?: (item: ReferenceItem) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const [confirmClear, setConfirmClear] = useState(false);
   const { latest, shown, hidden } = splitLog(context.inputs, expanded);
   const older = context.inputs.length - 1;
   const components = applied.length
@@ -76,7 +78,19 @@ export function ContextPanel({
   return (
     <div className="flex w-[301px] flex-col gap-[56px]">
       <section className="flex flex-col gap-[var(--space-16)]">
-        <h3 className="text-[18px] leading-[23px] text-[var(--text-primary)]">{E.currentStatus}</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-[18px] leading-[23px] text-[var(--text-primary)]">{E.currentStatus}</h3>
+          {latest && (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => setConfirmClear(true)}
+              className="text-[14px] leading-[18px] text-[var(--text-link)] underline disabled:opacity-40"
+            >
+              {E.clearStatus}
+            </button>
+          )}
+        </div>
         {latest ? (
           <InputCard entry={latest} strong reading={reading} activeReference={activeReference} onOpen={onOpenReference} />
         ) : (
@@ -97,13 +111,16 @@ export function ContextPanel({
         )}
       </section>
 
-      <ReferencedSets
-        behaviors={behaviors}
-        variant="strip"
-        keywords={latest ? [latest.text, ...latest.attachments.map((r) => r.summary ?? "")].join(" ") : ""}
-        onOpen={onOpenSetItem}
-        activeFile={activeReference?.startsWith(SET_REF) ? activeReference.slice(SET_REF.length) : null}
-      />
+      {/* What the AI referenced only exists once a motion was generated from an input (hidden while generating) */}
+      {latest && !busy && (
+        <ReferencedSets
+          behaviors={behaviors}
+          variant="strip"
+          keywords={[latest.text, ...latest.attachments.map((r) => r.summary ?? "")].join(" ")}
+          onOpen={onOpenSetItem}
+          activeFile={activeReference?.startsWith(SET_REF) ? activeReference.slice(SET_REF.length) : null}
+        />
+      )}
 
       <section className="flex flex-col gap-[var(--space-16)]">
         <h3 className={title}>
@@ -145,6 +162,20 @@ export function ContextPanel({
           })}
         </div>
       </section>
+
+      <ConfirmModal
+        open={confirmClear}
+        title={E.clearStatusConfirm.title}
+        body={E.clearStatusConfirm.body}
+        confirmLabel={E.clearStatus}
+        danger
+        onConfirm={() => {
+          setConfirmClear(false);
+          setExpanded(false);
+          onChange({ inputs: [] });
+        }}
+        onCancel={() => setConfirmClear(false)}
+      />
     </div>
   );
 }
