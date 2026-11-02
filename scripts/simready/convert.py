@@ -292,6 +292,18 @@ def physics(stage):
     return mass, friction or 0.5
 
 
+def clear_thumb_bg(im):
+    """투명 버전이 없는 썸네일(검은·회색 배경): 네 모서리에서 이어진 배경색을 투명으로."""
+    from PIL import ImageDraw
+
+    im = im.convert("RGBA")
+    w, h = im.size
+    for xy in [(0, 0), (w - 1, 0), (0, h - 1), (w - 1, h - 1)]:
+        if im.getpixel(xy)[3] == 255:
+            ImageDraw.floodfill(im, xy, (0, 0, 0, 0), thresh=40)
+    return im
+
+
 def fit_hulls(hulls, lo, hi):
     """CoACD 볼록 조각은 원본보다 0.5~1 cm 부푼다 — 합친 바운딩박스를 시각 모델 박스에 축별로 맞춘다
     (아핀 변환이라 볼록성 유지). 안 맞추면 가구가 떠 있고 위에 올린 로봇이 윗면에 묻힌다."""
@@ -370,7 +382,7 @@ def convert(entry, cache):
 
     thumb = cache / aid / "thumb.png"
     if thumb.exists():
-        im = Image.open(thumb).convert("RGBA")
+        im = clear_thumb_bg(Image.open(thumb))
         im.thumbnail((256, 256), Image.LANCZOS)
         im.save(out / "thumb.png", optimize=True)
 
@@ -421,7 +433,14 @@ def main():
     ap.add_argument("--cache", type=Path)
     ap.add_argument("ids", nargs="*")
     ap.add_argument("--refit", action="store_true", help="다운로드·분해 없이 기존 col_*.stl 만 시각 박스에 다시 맞춤")
+    ap.add_argument("--thumbs", action="store_true", help="기존 thumb.png 의 불투명 배경만 투명으로")
     args = ap.parse_args()
+    if args.thumbs:
+        for d in sorted(OUT.iterdir()):
+            t = d / "thumb.png"
+            if t.exists():
+                clear_thumb_bg(Image.open(t)).save(t, optimize=True)
+        return
     if args.refit:
         txt = CATALOG.read_text()
         for a in json.loads(txt[txt.index("= [") + 2 : txt.rindex(";")]):

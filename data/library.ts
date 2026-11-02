@@ -3,9 +3,8 @@ export const LIBRARY = {
   community: "Community",
   assets: "3D Asset",
   openCommunity: "Open Community",
-  openAssets: "Open asset source",
-  /** SimReady catalog the 3D assets come from (opens from the 3D Asset ↗) */
-  assetsSource: "https://huggingface.co/datasets/nvidia/simready-assets",
+  resetScene: "Clear the space",
+  resetConfirm: { title: "Clear the space?", body: "Every placed object is removed and the robot goes back to its spot on the floor.", confirm: "Clear" },
   prev: "Previous",
   next: "Next",
   empty: "No community motions yet.",
@@ -23,4 +22,6 @@ export const LIBRARY = {
   robotBlocked: "Can't go there",
   /** Community cards per page (2 × 2) */
   pageSize: 4,
+  /** 3D asset tiles per page (3 × 3) once there are 10 or more */
+  assetPageSize: 9,
 } as const;

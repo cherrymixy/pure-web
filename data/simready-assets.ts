@@ -371,5 +371,474 @@ export const SIMREADY_ASSETS: SimReadyAsset[] = [
       "col_02.stl"
     ],
     "license": "CC-BY-4.0"
+  },
+  {
+    "id": "TV_a01",
+    "name": "TV",
+    "category": "furniture",
+    "role": "prop",
+    "dims": [
+      0.1062,
+      1.272,
+      0.7549
+    ],
+    "mass": 35.2989,
+    "friction": 0.4,
+    "collision": [
+      "col_00.stl",
+      "col_01.stl"
+    ],
+    "license": "CC-BY-4.0"
+  },
+  {
+    "id": "sofa_visitor_a01",
+    "name": "Visitor sofa",
+    "category": "furniture",
+    "role": "stage",
+    "dims": [
+      1.0233,
+      2.1838,
+      0.849
+    ],
+    "mass": 22.6846,
+    "friction": 0.5,
+    "collision": [
+      "col_00.stl",
+      "col_01.stl",
+      "col_02.stl",
+      "col_03.stl",
+      "col_04.stl",
+      "col_05.stl",
+      "col_06.stl",
+      "col_07.stl",
+      "col_08.stl",
+      "col_09.stl",
+      "col_10.stl",
+      "col_11.stl",
+      "col_12.stl",
+      "col_13.stl",
+      "col_14.stl",
+      "col_15.stl",
+      "col_16.stl",
+      "col_17.stl",
+      "col_18.stl",
+      "col_19.stl"
+    ],
+    "license": "CC-BY-4.0"
+  },
+  {
+    "id": "sofa_soft_b02",
+    "name": "Sofa",
+    "category": "furniture",
+    "role": "stage",
+    "dims": [
+      0.7028,
+      1.5255,
+      0.728
+    ],
+    "mass": 31.5877,
+    "friction": 0.5,
+    "collision": [
+      "col_00.stl",
+      "col_01.stl",
+      "col_02.stl",
+      "col_03.stl",
+      "col_04.stl",
+      "col_05.stl",
+      "col_06.stl",
+      "col_07.stl",
+      "col_08.stl",
+      "col_09.stl",
+      "col_10.stl",
+      "col_11.stl",
+      "col_12.stl",
+      "col_13.stl",
+      "col_14.stl",
+      "col_15.stl",
+      "col_16.stl",
+      "col_17.stl",
+      "col_18.stl",
+      "col_19.stl",
+      "col_20.stl",
+      "col_21.stl",
+      "col_22.stl"
+    ],
+    "license": "CC-BY-4.0"
+  },
+  {
+    "id": "computer_monitor_office_a01",
+    "name": "Monitor",
+    "category": "object",
+    "role": "prop",
+    "dims": [
+      0.542,
+      0.1722,
+      0.3942
+    ],
+    "mass": 1.0948,
+    "friction": 0.4,
+    "collision": [
+      "col_00.stl",
+      "col_01.stl",
+      "col_02.stl"
+    ],
+    "license": "CC-BY-4.0"
+  },
+  {
+    "id": "computer_keyboard_a01",
+    "name": "Keyboard",
+    "category": "object",
+    "role": "prop",
+    "dims": [
+      0.442,
+      0.142,
+      0.0202
+    ],
+    "mass": 0.556,
+    "friction": 0.4,
+    "collision": [
+      "col_00.stl"
+    ],
+    "license": "CC-BY-4.0"
+  },
+  {
+    "id": "dishware_utah_teapot_a01",
+    "name": "Teapot",
+    "category": "object",
+    "role": "prop",
+    "dims": [
+      0.21,
+      0.1306,
+      0.0816
+    ],
+    "mass": 2.1031,
+    "friction": 0.3,
+    "collision": [
+      "col_00.stl",
+      "col_01.stl",
+      "col_02.stl",
+      "col_03.stl",
+      "col_04.stl",
+      "col_05.stl",
+      "col_06.stl",
+      "col_07.stl"
+    ],
+    "license": "CC-BY-4.0"
+  },
+  {
+    "id": "kitchenware_kettle_a01",
+    "name": "Kettle",
+    "category": "object",
+    "role": "prop",
+    "dims": [
+      0.1575,
+      0.2225,
+      0.2509
+    ],
+    "mass": 5.4026,
+    "friction": 0.4,
+    "collision": [
+      "col_00.stl",
+      "col_01.stl",
+      "col_02.stl",
+      "col_03.stl",
+      "col_04.stl",
+      "col_05.stl",
+      "col_06.stl",
+      "col_07.stl"
+    ],
+    "license": "CC-BY-4.0"
+  },
+  {
+    "id": "dishware_cup_tea_a01",
+    "name": "Teacup",
+    "category": "object",
+    "role": "prop",
+    "dims": [
+      0.1188,
+      0.0842,
+      0.1019
+    ],
+    "mass": 1.3483,
+    "friction": 0.3,
+    "collision": [
+      "col_00.stl",
+      "col_01.stl",
+      "col_02.stl",
+      "col_03.stl",
+      "col_04.stl",
+      "col_05.stl",
+      "col_06.stl",
+      "col_07.stl"
+    ],
+    "license": "CC-BY-4.0"
+  },
+  {
+    "id": "dishware_glass_wine_a01",
+    "name": "Wine glass",
+    "category": "object",
+    "role": "prop",
+    "dims": [
+      0.0818,
+      0.0818,
+      0.2271
+    ],
+    "mass": 0.9075,
+    "friction": 0.4,
+    "collision": [
+      "col_00.stl",
+      "col_01.stl",
+      "col_02.stl",
+      "col_03.stl",
+      "col_04.stl",
+      "col_05.stl",
+      "col_06.stl",
+      "col_07.stl"
+    ],
+    "license": "CC-BY-4.0"
+  },
+  {
+    "id": "food_beverage_coffeeCup_a01",
+    "name": "Coffee cup",
+    "category": "object",
+    "role": "prop",
+    "dims": [
+      0.0849,
+      0.0849,
+      0.117
+    ],
+    "mass": 0.0671,
+    "friction": 0.45,
+    "collision": [
+      "col_00.stl",
+      "col_01.stl",
+      "col_02.stl",
+      "col_03.stl",
+      "col_04.stl",
+      "col_05.stl",
+      "col_06.stl",
+      "col_07.stl"
+    ],
+    "license": "CC-BY-4.0"
+  },
+  {
+    "id": "food_produce_apple_redDelicous_a01",
+    "name": "Apple",
+    "category": "object",
+    "role": "prop",
+    "dims": [
+      0.0776,
+      0.081,
+      0.0954
+    ],
+    "mass": 0.2328,
+    "friction": 0.4,
+    "collision": [
+      "col_00.stl",
+      "col_01.stl",
+      "col_02.stl",
+      "col_03.stl",
+      "col_04.stl",
+      "col_05.stl",
+      "col_06.stl",
+      "col_07.stl"
+    ],
+    "license": "CC-BY-4.0"
+  },
+  {
+    "id": "food_produce_banana_a01",
+    "name": "Banana",
+    "category": "object",
+    "role": "prop",
+    "dims": [
+      0.116,
+      0.1622,
+      0.0316
+    ],
+    "mass": 0.2428,
+    "friction": 0.6,
+    "collision": [
+      "col_00.stl",
+      "col_01.stl",
+      "col_02.stl",
+      "col_03.stl"
+    ],
+    "license": "CC-BY-4.0"
+  },
+  {
+    "id": "food_produce_orange_a01",
+    "name": "Orange",
+    "category": "object",
+    "role": "prop",
+    "dims": [
+      0.0997,
+      0.1,
+      0.0793
+    ],
+    "mass": 0.5615,
+    "friction": 0.4,
+    "collision": [
+      "col_00.stl"
+    ],
+    "license": "CC-BY-4.0"
+  },
+  {
+    "id": "food_prepared_cupcake_a01",
+    "name": "Cupcake",
+    "category": "object",
+    "role": "prop",
+    "dims": [
+      0.067,
+      0.0651,
+      0.0843
+    ],
+    "mass": 0.085,
+    "friction": 0.35,
+    "collision": [
+      "col_00.stl",
+      "col_01.stl",
+      "col_02.stl",
+      "col_03.stl",
+      "col_04.stl",
+      "col_05.stl",
+      "col_06.stl",
+      "col_07.stl"
+    ],
+    "license": "CC-BY-4.0"
+  },
+  {
+    "id": "misc_glass_vase_a01",
+    "name": "Vase",
+    "category": "object",
+    "role": "prop",
+    "dims": [
+      0.0812,
+      0.0803,
+      0.2031
+    ],
+    "mass": 1.2747,
+    "friction": 0.4,
+    "collision": [
+      "col_00.stl",
+      "col_01.stl",
+      "col_02.stl",
+      "col_03.stl",
+      "col_04.stl",
+      "col_05.stl",
+      "col_06.stl",
+      "col_07.stl"
+    ],
+    "license": "CC-BY-4.0"
+  },
+  {
+    "id": "decor_candle_a01",
+    "name": "Candle",
+    "category": "object",
+    "role": "prop",
+    "dims": [
+      0.0745,
+      0.0744,
+      0.0752
+    ],
+    "mass": 1.0715,
+    "friction": 0.5,
+    "collision": [
+      "col_00.stl",
+      "col_01.stl",
+      "col_02.stl",
+      "col_03.stl",
+      "col_04.stl",
+      "col_05.stl",
+      "col_06.stl",
+      "col_07.stl"
+    ],
+    "license": "CC-BY-4.0"
+  },
+  {
+    "id": "measurement_clock_alarm_a01",
+    "name": "Alarm clock",
+    "category": "object",
+    "role": "prop",
+    "dims": [
+      0.1008,
+      0.2123,
+      0.2943
+    ],
+    "mass": 7.8966,
+    "friction": 0.4,
+    "collision": [
+      "col_00.stl",
+      "col_01.stl",
+      "col_02.stl",
+      "col_03.stl",
+      "col_04.stl",
+      "col_05.stl",
+      "col_06.stl",
+      "col_07.stl"
+    ],
+    "license": "CC-BY-4.0"
+  },
+  {
+    "id": "storage_basket_plastic_a01",
+    "name": "Basket",
+    "category": "object",
+    "role": "prop",
+    "dims": [
+      0.254,
+      0.3321,
+      0.1321
+    ],
+    "mass": 0.73,
+    "friction": 0.4,
+    "collision": [
+      "col_00.stl",
+      "col_01.stl",
+      "col_02.stl",
+      "col_03.stl",
+      "col_04.stl",
+      "col_05.stl",
+      "col_06.stl",
+      "col_07.stl"
+    ],
+    "license": "CC-BY-4.0"
+  },
+  {
+    "id": "misc_eyeGlasses_a01",
+    "name": "Glasses",
+    "category": "object",
+    "role": "prop",
+    "dims": [
+      0.1446,
+      0.1436,
+      0.0467
+    ],
+    "mass": 0.125,
+    "friction": 0.4,
+    "collision": [
+      "col_00.stl",
+      "col_01.stl",
+      "col_02.stl",
+      "col_03.stl",
+      "col_04.stl",
+      "col_05.stl"
+    ],
+    "license": "CC-BY-4.0"
+  },
+  {
+    "id": "primitives_block_wood_a01",
+    "name": "Wood block",
+    "category": "object",
+    "role": "prop",
+    "dims": [
+      0.0897,
+      0.2061,
+      0.0908
+    ],
+    "mass": 0.8402,
+    "friction": 0.5,
+    "collision": [
+      "col_00.stl"
+    ],
+    "license": "CC-BY-4.0"
   }
 ];

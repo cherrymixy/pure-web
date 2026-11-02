@@ -22,14 +22,21 @@ export function LibraryPanel({
   attached,
   onAttach,
   onPlaceAsset,
+  onResetScene,
 }: {
   attached: string[];
   onAttach: (motion: UserDataMotion) => void;
   /** 3D Asset tile: drop it into the scene (Library L3) */
   onPlaceAsset: (assetId: string) => void;
+  /** 3D Asset header: clear every placed object (asks first) */
+  onResetScene: () => void;
 }) {
   const [items, setItems] = useState<UserDataMotion[] | null>(null);
   const [page, setPage] = useState(0);
+  // 3D assets: 3 × 3 per page once there are 10 or more, ‹ › like Community
+  const [assetPage, setAssetPage] = useState(0);
+  const assetPages = SIMREADY_ASSETS.length >= 10 ? Math.ceil(SIMREADY_ASSETS.length / L.assetPageSize) : 1;
+  const assetsShown = assetPages > 1 ? SIMREADY_ASSETS.slice(assetPage * L.assetPageSize, (assetPage + 1) * L.assetPageSize) : SIMREADY_ASSETS;
 
   useEffect(() => {
     api<UserDataMotion[]>("/api/user-data?tab=popular").then(setItems, () => setItems([]));
@@ -68,13 +75,13 @@ export function LibraryPanel({
 
       <div className="mt-[27px]">
         <SectionHeader label={L.assets}>
-          <a href={L.assetsSource} target="_blank" rel="noreferrer" aria-label={L.openAssets} className="text-[var(--library-section)]">
-            <Icon name="square-top-down" size={16} />
-          </a>
+          <button type="button" onClick={onResetScene} aria-label={L.resetScene} title={L.resetScene} className="text-[var(--library-section)] hover:text-[var(--text-primary)]">
+            <Icon name="replay" size={16} />
+          </button>
         </SectionHeader>
       </div>
       <div className="ml-[12px] mt-[24px] grid grid-cols-[115px_115px_115px] gap-[15px]">
-        {SIMREADY_ASSETS.map((a) => (
+        {assetsShown.map((a) => (
           <button
             key={a.id}
             type="button"
@@ -88,6 +95,14 @@ export function LibraryPanel({
           </button>
         ))}
       </div>
+      {assetPages > 1 && (
+        <div className="mt-[16px] flex w-[376px] justify-center">
+          <div className="flex h-[36px] w-[66px] items-center justify-center gap-[24px] rounded-[18px] bg-[var(--library-pager)] text-[var(--library-pager-icon)]">
+            <PagerButton label={L.prev} disabled={assetPage === 0} onClick={() => setAssetPage((p) => p - 1)} flip />
+            <PagerButton label={L.next} disabled={assetPage >= assetPages - 1} onClick={() => setAssetPage((p) => p + 1)} />
+          </div>
+        </div>
+      )}
       {/* CC BY 4.0 asks for attribution where the assets are used */}
       <p className="ml-[12px] mt-[var(--space-16)] text-[12px] leading-[15px] text-[var(--text-tertiary)]">{SIMREADY_CREDIT}</p>
     </div>

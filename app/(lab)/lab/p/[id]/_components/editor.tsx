@@ -218,6 +218,15 @@ export function Editor({
   const [selectedProp, setSelectedProp] = useState<string | null>(null);
   const [robotMount, setRobotMount] = useState<string | null>(project.scene?.mount ?? null);
   const sceneSave = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [clearingScene, setClearingScene] = useState(false);
+  /** Community motion names for userData reference chips (ids like "ud-nod" → "Nod") */
+  const [motionNames, setMotionNames] = useState<Record<string, string>>({});
+  useEffect(() => {
+    api<UserDataMotion[]>("/api/user-data?tab=all").then(
+      (list) => setMotionNames(Object.fromEntries(list.map((m) => [m.id, m.name]))),
+      () => {},
+    );
+  }, []);
   const [timelineOpen, setTimelineOpen] = useState(false);
   const [renaming, setRenaming] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -817,6 +826,15 @@ export function Editor({
     saveScene();
   }
 
+  /** 3D Asset ↻: every placed prop removed, the robot back on the floor at its home spot. */
+  function clearScene() {
+    setClearingScene(false);
+    ctrl.current?.restoreProps([], null, { cell: [0, 0], turn: 0 });
+    setRobotMount(null);
+    selectProp(null);
+    saveScene();
+  }
+
   function mountRobot(key: string | null) {
     ctrl.current?.setRobotMount(key);
     setRobotMount(ctrl.current?.robotMount ?? null);
@@ -1148,6 +1166,7 @@ export function Editor({
               attached={context.references.filter((r) => r.kind === "userData").map((r) => r.path)}
               onAttach={attachCommunity}
               onPlaceAsset={placeAsset}
+              onResetScene={() => setClearingScene(true)}
             />
           )}
         </div>
@@ -1262,7 +1281,7 @@ export function Editor({
                   key={r.id}
                   className={`flex max-w-[200px] items-center gap-[var(--space-4)] rounded-[var(--radius-full)] border px-[var(--space-12)] py-[var(--space-4)] ${r.status === "failed" ? "border-[var(--border-error)] text-[var(--text-error)]" : "border-[var(--border-default)] text-[var(--text-primary)]"}`}
                 >
-                  <span className="truncate">{r.kind === "video" ? "▶" : "▣"} {r.path.split("/").pop()?.replace(/^[0-9a-f]{8}-/, "")}</span>
+                  <span className="truncate">{r.kind === "video" ? "▶" : r.kind === "userData" ? "◇" : "▣"} {r.kind === "userData" ? (motionNames[r.path] ?? r.path) : r.path.split("/").pop()?.replace(/^[0-9a-f]{8}-/, "")}</span>
                   <button type="button" aria-label={E.removeReference} onClick={() => setContext((c) => ({ ...c, references: c.references.filter((x) => x.id !== r.id) }))}>×</button>
                 </span>
               ))}
@@ -1452,6 +1471,15 @@ export function Editor({
       )}
 
       <PromptModal open={renaming} title={STRINGS.lab.rename.title} label={STRINGS.lab.rename.label} initial={name} maxLength={60} submitLabel={STRINGS.lab.rename.save} onSubmit={rename} onCancel={() => setRenaming(false)} />
+      <ConfirmModal
+        open={clearingScene}
+        title={LIBRARY.resetConfirm.title}
+        body={LIBRARY.resetConfirm.body}
+        confirmLabel={LIBRARY.resetConfirm.confirm}
+        danger
+        onConfirm={clearScene}
+        onCancel={() => setClearingScene(false)}
+      />
       <ConfirmModal open={deleting} title={E.deleteConfirm.title} body={E.deleteConfirm.body} confirmLabel={STRINGS.common.delete} danger onConfirm={remove} onCancel={() => setDeleting(false)} />
     </div>
   );
