@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { EDITOR_PANEL as R } from "@/data/editor-panel";
 import { STRINGS, fmt } from "@/data/strings";
 import { EASINGS, MAX_BEHAVIOR_DELAY, type MotionBehavior, type MotionProps, type Structure } from "@/lib/models";
-import { NEUTRAL_BEHAVIOR, type PropWarning } from "@/lib/expression";
+import { NEUTRAL_BEHAVIOR, speedProp, speedRate, type PropWarning } from "@/lib/expression";
 import { EASINGS as EASING_FNS } from "@/lib/sim/motion";
 import type { JointState } from "@/components/sim/sim-controller";
 import { Icon, type IconName } from "@/components/ui/icons/icon";
@@ -210,9 +210,6 @@ function SelectField<T extends string>({
 const nearest = <T,>(steps: readonly T[], value: number, of: (s: T) => number) =>
   steps.reduce((best, s) => (Math.abs(of(s) - value) < Math.abs(of(best) - value) ? s : best), steps[0]);
 
-/** Speed prop 0–100 ↔ × rate (PROP_RANGES.speed 0.5–1.5) */
-const speedRate = (prop: number) => 0.5 + prop / 100;
-const speedProp = (rate: number) => Math.round((rate - 0.5) * 100);
 
 // Motion Dynamics (452:2025): Amplitude · Duration · Smoothness · Speed · Frequency.
 export function MotionDynamics({

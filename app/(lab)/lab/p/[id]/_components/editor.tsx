@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LIBRARY } from "@/data/library";
 import { componentForSim } from "@/data/components";
+import { appliedPatterns } from "@/data/patterns";
 import { EDITOR_PANEL } from "@/data/editor-panel";
 import { SIMREADY_ASSETS } from "@/data/simready-assets";
 import { STRINGS, fmt } from "@/data/strings";
@@ -368,17 +369,22 @@ export function Editor({
 
   const editable = !!timelineClip;
   useEffect(() => {
-    const joint = selectedTrack && isJoint(selectedTrack) ? selectedTrack : null;
+    // Joints are picked only in Edit Detail (timeline open); elsewhere the robot is one object like the 3D assets.
+    const joint = timelineOpen && selectedTrack && isJoint(selectedTrack) ? selectedTrack : null;
     ctrl.current?.highlightJoint(joint);
     // No motion yet → nothing to key, so no ring to grab.
     ctrl.current?.showJointGizmo(editable ? joint : null);
-  }, [selectedTrack, editable]);
+  }, [selectedTrack, editable, timelineOpen]);
 
-  // Click a robot part → its joint is selected (ring + timeline layer); drag the ring → key at the playhead.
+  // Edit Detail only: click a robot part → its joint is selected (ring + timeline layer); drag the ring → key at the
+  // playhead. With the timeline closed a click anywhere on the robot selects the whole robot (propPick ROBOT_KEY).
   useEffect(() => {
-    ctrl.current?.enableJointGizmo(true);
+    ctrl.current?.enableJointGizmo(timelineOpen);
+    if (timelineOpen && selectedProp === ROBOT_KEY) selectProp(null);
     return () => ctrl.current?.enableJointGizmo(false);
-  }, []);
+    // selectProp only touches state + the controller ref
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timelineOpen]);
   /** Clip and key the current ring drag edits (taken at the grab, so every move starts from the same value). */
   const ringDrag = useRef<{ id: string; clip: Clip; index: number; base: number; previewed: boolean } | null>(null);
 
@@ -733,16 +739,13 @@ export function Editor({
 
   // ------------------------------------------------------------ library
 
-  /** Library › Community card: attach the motion as a userData reference (same as Community "Use"). */
+  /** Library › Community card: play the motion now and attach it as a userData reference (same as Community "Use"). */
   function attachCommunity(m: UserDataMotion) {
-    if (context.references.some((r) => r.kind === "userData" && r.path === m.id)) {
-      toast(fmt(LIBRARY.already, { name: m.name }));
-      return;
-    }
-    if (context.references.length + pending.length >= MAX_REFERENCES) {
-      toast(LIBRARY.full);
-      return;
-    }
+    // Play it on the robot right away (its preview recipe, once), then keep it as a reference for the next Generate
+    ctrl.current?.playRecipe({ ...m.preview, loop: false });
+    setPaused(false);
+    if (context.references.some((r) => r.kind === "userData" && r.path === m.id)) return;
+    if (context.references.length + pending.length >= MAX_REFERENCES) return;
     const ref: Reference = { id: `ref-${m.id}`, kind: "userData", path: m.id, thumb: "", status: "ok" };
     setContext((c) => ({ ...c, references: [...c.references, ref] }));
     void api(`/api/user-data/${m.id}/use`, { method: "POST" }).catch(() => {});
@@ -993,9 +996,9 @@ export function Editor({
   // Figma offset from the centre (x − 960), bottom items their distance from the bottom (1080 − y − h).
   return (
     <div className="relative h-[var(--app-vh)] overflow-hidden">
-      {/* Stage (Frame 2147240453 ×2: full width, 265 → bottom), same slot as structure / signature. Never zoom/transform the Viewport.
-          W02E-4: with the timeline open the slot ends just above the panel (10 + 367 + 10), so the robot is never under it. */}
-      <div className={`absolute left-0 ${timelineOpen ? "bottom-[387px] top-[120px]" : "bottom-0 top-[265px]"} ${activeRef && sideBySide ? "w-[calc(50%-2px)]" : "right-0"}`}>
+      {/* Stage: full width and full height from the top (the old 265 slot cut off a bigger robot / one standing on furniture).
+          Never zoom/transform the Viewport. W02E-4: with the timeline open the slot ends just above the panel (10 + 367 + 10). */}
+      <div className={`absolute left-0 top-0 ${timelineOpen ? "bottom-[387px]" : "bottom-0"} ${activeRef && sideBySide ? "w-[calc(50%-2px)]" : "right-0"}`}>
         <Viewport
           controllerRef={ctrl}
           structure={structure}
@@ -1035,20 +1038,6 @@ export function Editor({
       {/* Top of the stage (no Figma equivalent): signature, result badges, reasoning, empty hint */}
       <div className="pointer-events-none absolute left-[494px] right-[512px] top-[32px] z-10 flex flex-col items-center gap-[var(--space-12)]">
         <div className="pointer-events-auto flex flex-wrap items-center justify-center gap-[var(--space-8)]">
-          <span className={`${chip} text-[var(--text-secondary)]`}>{signature.name} · v0.{signature.version}</span>
-          {/* The robot's own base is a thin ring (the white dome is the base_yaw joint), so it gets a button too */}
-          <button
-            type="button"
-            data-testid="move-robot"
-            aria-pressed={selectedProp === ROBOT_KEY}
-            onClick={(e) => {
-              e.currentTarget.blur();
-              selectProp(selectedProp === ROBOT_KEY ? null : ROBOT_KEY);
-            }}
-            className={`${chip} ${selectedProp === ROBOT_KEY ? "bg-[var(--bg-inverse)] text-[var(--text-on-inverse)]" : "text-[var(--text-primary)]"}`}
-          >
-            {LIBRARY.moveRobot}
-          </button>
           {lastResult?.directClip && expression && !busy && (
             <span className={`${chip} text-[var(--web-3f77a1)]`} title={lastResult.directClip.reason}>
               {lastResult.directClip.used ? E.directClip.used : fmt(E.directClip.fallback, { reason: lastResult.directClip.reason ?? "" })}
@@ -1130,6 +1119,7 @@ export function Editor({
               context={context}
               behaviors={expression?.motion.recipe.steps.map((st) => st.behavior) ?? []}
               steps={steps}
+              patterns={expression && !busy ? appliedPatterns(expression.pattern, expression.components) : []}
               busy={busy}
               onChange={(patch) => setContext((c) => ({ ...c, ...patch }))}
               onOpenReference={(r) => r.kind !== "userData" && setActiveRef(activeRef?.id === r.id ? null : r)}
@@ -1164,11 +1154,13 @@ export function Editor({
         </div>
       )}
 
-      {/* Play bar (452:2414): white pill 550×68 (pad 10 · 21 right), centred, 156 above the composer — play 48 (pill grey 20%),
+      {/* Bottom stack: play bar 20 above the composer, so it rides up when attach chips make the composer taller */}
+      <div className="pointer-events-none absolute bottom-[32px] left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-[20px]">
+      {/* Play bar (452:2414): white pill 550×68 (pad 10 · 21 right), centred, 20 above the composer (user review; Figma 156) — play 48 (pill grey 20%),
           time Medium 14.986, 331×9 track (#829398 at 20%, fill full strength) with a 21 knob ring, volume 24 (mute).
           W02E-4: hidden under the Timeline Panel while it's open (its transport takes over). */}
       {!timelineOpen && (
-      <div className="absolute bottom-[294px] left-1/2 z-10 flex h-[68px] w-[550px] -translate-x-1/2 items-center gap-[14px] rounded-[var(--radius-full)] bg-[var(--bg-surface)] py-[10px] pl-[10px] pr-[21px]">
+      <div className="pointer-events-auto flex h-[68px] w-[550px] shrink-0 items-center gap-[14px] rounded-[var(--radius-full)] bg-[var(--bg-surface)] py-[10px] pl-[10px] pr-[21px]">
         <span data-testid="time" className="sr-only">{fmtT(time.t)} / {fmtT(time.duration)}</span>
         <button
           type="button"
@@ -1243,7 +1235,7 @@ export function Editor({
           Attach chips sit above the prompt. W02E-4 collapses it while the timeline is open. */}
       <form
         hidden={timelineOpen}
-        className="absolute bottom-[32px] left-1/2 z-10 flex w-[646px] -translate-x-1/2 flex-col items-center gap-[var(--space-12)]"
+        className="pointer-events-auto flex w-[646px] flex-col items-center gap-[var(--space-12)]"
         onSubmit={(e) => { e.preventDefault(); void generate(); }}
       >
         <div className="flex min-h-[106px] w-full flex-col justify-between gap-[var(--space-12)] rounded-[20px] border border-[var(--composer-border)] bg-[var(--bg-surface)] px-[16px] pb-[12px] pt-[16px] shadow-[var(--composer-shadow)]">
@@ -1313,6 +1305,7 @@ export function Editor({
         </div>
         <input ref={mediaInput} type="file" multiple accept="image/*,video/mp4,video/quicktime,video/webm" className="hidden" onChange={(e) => { if (e.target.files?.length) addFiles(e.target.files); e.target.value = ""; }} />
       </form>
+      </div>
 
       {/* Right panel (Figma 452:2024): content column 330 at 24 · divider at 378 · Motion / Face / Sound rail at 397, Edit Detail at the bottom */}
       <aside className={`absolute right-[32px] top-[32px] z-10 ${timelineOpen ? "bottom-[397px]" : "bottom-[32px]"} w-[448px] overflow-hidden rounded-[var(--radius-xl)] bg-[var(--bg-surface)] shadow-[var(--editor-panel-shadow)]`}>

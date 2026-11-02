@@ -14,8 +14,8 @@ export const EDITOR_PANEL = {
       { label: "Medium", value: 50 },
       { label: "Soft", value: 80 },
     ],
-    /** Speed steps (× playback rate; MotionProps.speed spans 0.5–1.5 ×, lib/expression PROP_RANGES) */
-    speedSteps: [0.5, 0.75, 1, 1.25, 1.5],
+    /** Speed steps (× playback rate; MotionProps.speed 0–50–100 = 0.5–1–2 ×, lib/expression speedRate) */
+    speedSteps: [0.5, 1, 1.5, 2],
   },
   behavior: {
     title: "Motion Behavior",

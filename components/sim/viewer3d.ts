@@ -178,8 +178,9 @@ export class LampViewer {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.08;
-    this.controls.minDistance = 0.3;
-    this.controls.maxDistance = 4;
+    const k = lamp.robot.scale ?? 1;
+    this.controls.minDistance = 0.3 * k;
+    this.controls.maxDistance = 4 * k;
     this.controls.maxPolarAngle = Math.PI * 0.495;
     this.setView(lamp.robot.heroView);
     this.sync();
@@ -191,12 +192,14 @@ export class LampViewer {
     this.scene.add(new THREE.HemisphereLight('#9aa2c2', '#141419', 2.1));
 
     const key = new THREE.DirectionalLight('#fff2e0', 3.0);
-    key.position.set(1.2, 2.0, 1.1);
+    // 로봇 크기(RobotSpec.scale)만큼 그림자 범위도 키운다
+    const k = this.lamp.robot.scale ?? 1;
+    key.position.set(1.2 * k, 2.0 * k, 1.1 * k);
     key.castShadow = true;
     key.shadow.mapSize.set(2048, 2048);
-    key.shadow.camera.near = 0.4;
-    key.shadow.camera.far = 6;
-    const d = 1.0;
+    key.shadow.camera.near = 0.4 * k;
+    key.shadow.camera.far = 6 * k;
+    const d = 1.0 * k;
     key.shadow.camera.left = -d;
     key.shadow.camera.right = d;
     key.shadow.camera.top = d;
@@ -237,12 +240,12 @@ export class LampViewer {
       this.options.stage === 'transparent'
         ? new THREE.ShadowMaterial({ opacity: 0.16 })
         : new THREE.MeshStandardMaterial({ color: this.options.floor, roughness: 0.9, metalness: 0.04 });
-    const floor = new THREE.Mesh(new THREE.CircleGeometry(3.2, 64), material);
+    const floor = new THREE.Mesh(new THREE.CircleGeometry(3.2 * (this.lamp.robot.scale ?? 1), 64), material);
     floor.receiveShadow = true;
     this.root.add(floor);
 
     if (!this.options.grid) return;
-    const grid = new THREE.GridHelper(4, 40, this.options.grid[0], this.options.grid[1]);
+    const grid = new THREE.GridHelper(4 * (this.lamp.robot.scale ?? 1), 40 * Math.round(this.lamp.robot.scale ?? 1), this.options.grid[0], this.options.grid[1]);
     grid.rotation.x = Math.PI / 2;
     grid.position.z = 0.001;
     (grid.material as THREE.Material).opacity = 0.45;
@@ -358,6 +361,9 @@ export class LampViewer {
     geometry.rotateX(Math.PI / 2);
     if (spec.pitchDeg) geometry.rotateX(THREE.MathUtils.degToRad(spec.pitchDeg));
     geometry.translate(...spec.center);
+    // display 값은 모델 원래 크기 기준 — 로봇 크기만큼 키운다
+    const k = this.lamp.robot.scale ?? 1;
+    if (k !== 1) geometry.scale(k, k, k);
 
     // 화면은 스스로 빛나므로 조명·톤매핑을 받지 않는다.
     const material = new THREE.MeshBasicMaterial({ color: SCREEN_OFF, toneMapped: false });
@@ -558,7 +564,7 @@ export class LampViewer {
     }
   }
 
-  /** 뷰포트에서 소품을 클릭하면 그 슬롯 key, 로봇 받침이면 ROBOT_KEY (빈 곳 = null) */
+  /** 뷰포트에서 소품을 클릭하면 그 슬롯 key, 로봇이면 ROBOT_KEY (관절 기즈모가 켜져 있으면 null), 빈 곳 = null */
   enablePropPick(onPick: ((key: string | null) => void) | null): void {
     this.propPickOff?.();
     this.propPickOff = null;
@@ -579,9 +585,8 @@ export class LampViewer {
       const hits = this.raycaster.intersectObjects([...shown.map((p) => p.node), ...robot], true);
       if (!hits.length) return onPick(null);
       if (robot.has(hits[0].object)) {
-        // 받침(로봇 트리 루트)을 누르면 로봇 선택, 다른 부품은 관절 기즈모 몫
-        const geom = this.geomNodes.find((g) => g.node === hits[0].object)!.geomId;
-        return onPick(this.lamp.model.geom_bodyid[geom] === this.lamp.robotRootBody ? ROBOT_KEY : null);
+        // 관절 기즈모가 켜져 있으면(에디터 Edit Detail) 부품 클릭은 기즈모 몫, 아니면 어디를 눌러도 로봇 전체 선택
+        return onPick(this.gizmoOff ? null : ROBOT_KEY);
       }
       let o: THREE.Object3D | null = hits[0].object;
       while (o && !shown.some((p) => p.node === o)) o = o.parent;
@@ -657,11 +662,11 @@ export class LampViewer {
   private buildRing(): THREE.Mesh {
     const color = new THREE.Color(this.options.highlight);
     const visible = new THREE.Mesh(
-      new THREE.TorusGeometry(RING_RADIUS, RING_TUBE, 12, 96),
+      new THREE.TorusGeometry(RING_RADIUS * (this.lamp.robot.scale ?? 1), RING_TUBE * (this.lamp.robot.scale ?? 1), 12, 96),
       new THREE.MeshBasicMaterial({ color, depthTest: false, transparent: true, opacity: 0.95 }),
     );
     const grab = new THREE.Mesh(
-      new THREE.TorusGeometry(RING_RADIUS, RING_GRAB, 8, 64),
+      new THREE.TorusGeometry(RING_RADIUS * (this.lamp.robot.scale ?? 1), RING_GRAB * (this.lamp.robot.scale ?? 1), 8, 64),
       new THREE.MeshBasicMaterial({ visible: false }),
     );
     visible.renderOrder = grab.renderOrder = 999;
@@ -805,12 +810,20 @@ export class LampViewer {
     const fx = Math.cos(el) * Math.cos(az);
     const fy = Math.cos(el) * Math.sin(az);
     const fz = Math.sin(el);
-    const [lx, ly, lz] = view.lookAt;
+    // Views are written at the model's own size and around its home spot: scale by RobotSpec.scale and
+    // follow the robot base wherever it was moved (props scene) — syncProps then tracks it from here.
+    const k = this.lamp.robot.scale ?? 1;
+    const m = this.lamp.mount;
+    this.mountAt = [m[0], m[1], m[2]];
+    const lx = view.lookAt[0] * k + m[0];
+    const ly = view.lookAt[1] * k + m[1];
+    const lz = view.lookAt[2] * k + m[2];
+    const dist = view.distance * k;
     const target = toWorld(lx, ly, lz);
     const pos = toWorld(
-      lx - view.distance * fx,
-      ly - view.distance * fy,
-      lz - view.distance * fz,
+      lx - dist * fx,
+      ly - dist * fy,
+      lz - dist * fz,
     );
     this.camera.position.copy(pos);
     this.controls.target.copy(target);

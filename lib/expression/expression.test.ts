@@ -10,7 +10,7 @@ import { GenerationOutputSchema } from "../llm/generation";
 import type { Clip } from "../models";
 import {
   applySoftener, autoAdjust, buildExpression, buildPureJson, clipToJointCommands, compatibility, fallback, limitCheck,
-  matchTiming, paramsToProps, parsePureJson, propsToParams, recipeToClip, sanitizeName, suggestName, validateClip,
+  matchTiming, paramsToProps, parsePureJson, propsToParams, speedProp, speedRate, recipeToClip, sanitizeName, suggestName, validateClip,
   faceAtTime, migrateCue, migrateFace, validateFace, validateRecipe, validateSound,
 } from ".";
 import { stepVelocities, velocityAllowance } from "./validate";
@@ -144,7 +144,7 @@ describe("face, sound, names", () => {
 describe("motion properties", () => {
   it("maps sliders to params and round-trips through the signature", () => {
     const { params } = propsToParams({ speed: 100, duration: 0, amplitude: 0, smoothness: 80, frequency: 100 });
-    expect(params.speed).toBeCloseTo(1.5 / 0.7);
+    expect(params.speed).toBeCloseTo(2 / 0.7);
     expect(params.amplitude).toBeCloseTo(0.3);
     expect(params.settle).toBeCloseTo(0.8);
     expect(params.rhythm).toBeCloseTo(2);
@@ -214,5 +214,14 @@ describe("match timing & softer", () => {
     const soft = applySoftener(expression);
     expect(soft.motion.props.speed).toBeLessThan(expression.motion.props.speed);
     expect(soft.motion.props.smoothness).toBeGreaterThan(expression.motion.props.smoothness);
+  });
+});
+
+describe("speed steps", () => {
+  it("0 / 50 / 100 = 0.5× / 1× / 2×, and the rate round-trips", () => {
+    expect(speedRate(0)).toBe(0.5);
+    expect(speedRate(50)).toBe(1);
+    expect(speedRate(100)).toBe(2);
+    for (const r of [0.5, 1, 1.5, 2]) expect(speedRate(speedProp(r))).toBeCloseTo(r, 6);
   });
 });

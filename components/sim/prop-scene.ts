@@ -1,19 +1,17 @@
 /**
- * 소품 배치 규칙 (Library L3): 칸(0.1 m) 단위 이동, 90° 회전, 그 칸의 가장 높은 면 위에서 떨어뜨리기,
+ * 소품 배치 규칙 (Library L3): 칸(0.1 m) 단위 이동, 45° 회전, 그 칸의 가장 높은 면 위에서 떨어뜨리기,
  * 로봇 받침을 가구 위로 올리기. 물리 상태는 LampSim, 보이는 건 LampViewer 가 맡는다.
  */
 
 import type { LampSim, PropSlot } from './lamp';
-import { DROP_GAP, PROP_CELL, dropHeight, footprint, freeCell, type PlacedBox, type PropPlacement } from './props';
+import { DROP_GAP, PROP_CELL, TURNS, dropHeight, insideTop, turnYaw, footprint, freeCell, type PlacedBox, type PropPlacement } from './props';
 
-/** 로봇 받침 반경 + 여유 (m) — 새 소품은 이 밖에 놓는다 */
-const ROBOT_CLEAR = 0.14;
+/** 로봇 받침 반경 + 여유 (m, 모델 원래 크기) — 새 소품은 이 밖에 놓는다. RobotSpec.scale 만큼 커진다. */
+const BASE_CLEAR = 0.14;
 /** 배치·이동 뒤 일시정지 중에도 물리를 돌리는 시간 (s) */
 const SETTLE = 2.5;
-/** 가구 위 로봇: 윗면 가장자리에서 이만큼 안쪽까지만 (m) */
-const TOP_MARGIN = 0.06;
-/** 막혔을 때 가구로 오르내리며 건너뛸 수 있는 칸 수 (받침 반경을 넘을 만큼) */
-const HOP_CELLS = 4;
+/** 가구 위 로봇: 윗면 가장자리에서 이만큼 안쪽까지만 (m, 모델 원래 크기 — RobotSpec.scale 만큼 커짐) */
+const BASE_TOP_MARGIN = 0.06;
 
 /** 뷰포트에서 로봇 받침을 골랐을 때의 선택 key */
 export const ROBOT_KEY = 'robot';
@@ -39,8 +37,16 @@ export class PropScene {
   /** 로봇 받침의 원래 자리 (칸 0,0 · 바닥 높이) */
   private readonly home: [number, number, number];
 
+  private readonly clear: number;
+  private readonly margin: number;
+  private readonly hop: number;
+
   constructor(private readonly lamp: LampSim) {
     this.home = lamp.mount;
+    this.clear = BASE_CLEAR * (lamp.robot.scale ?? 1);
+    this.margin = BASE_TOP_MARGIN * (lamp.robot.scale ?? 1);
+    // 막혔을 때 가구로 오르내리며 건너뛸 칸 수: 받침 반경 + 가장자리 여유를 넘을 만큼
+    this.hop = Math.ceil((this.clear + this.margin) / PROP_CELL) + 1;
     this.robotZ = this.home[2];
   }
 
@@ -92,7 +98,7 @@ export class PropScene {
       this.applyRobot();
       return true;
     }
-    for (let n = 1; n <= HOP_CELLS; n++) {
+    for (let n = 1; n <= this.hop; n++) {
       const c: [number, number] = [this.robotCell[0] + dx * n, this.robotCell[1] + dy * n];
       if (this.mountKey) {
         const was = this.mountKey;
@@ -123,17 +129,16 @@ export class PropScene {
     let best: Placed | undefined;
     for (const p of this.placed.values()) {
       if (p.slot.asset.role !== 'stage') continue;
-      const [hx, hy] = footprint(p.slot.asset.dims, p.turn);
       const [fx, fy] = this.cellPos(p);
-      if (Math.abs(x - fx) > hx - TOP_MARGIN || Math.abs(y - fy) > hy - TOP_MARGIN) continue;
+      if (!insideTop(p.slot.asset.dims, p.turn, fx, fy, x, y, this.margin)) continue;
       if (!best || p.slot.asset.dims[2] > best.slot.asset.dims[2]) best = p;
     }
     return best;
   }
 
-  /** 로봇 90° 회전 (받침이 둥글어 막히지 않는다) */
+  /** 로봇 45° 회전 (받침이 둥글어 막히지 않는다) */
   turnRobot(): void {
-    this.robotTurn = (this.robotTurn + 1) % 4;
+    this.robotTurn = (this.robotTurn + 1) % TURNS;
     this.applyRobot();
   }
 
@@ -142,14 +147,13 @@ export class PropScene {
     const y = this.home[1] + cell[1] * PROP_CELL;
     const m = this.mountKey ? this.placed.get(this.mountKey) : undefined;
     if (m) {
-      const [hx, hy] = footprint(m.slot.asset.dims, m.turn);
       const [fx, fy] = this.cellPos(m);
-      return Math.abs(x - fx) <= hx - TOP_MARGIN && Math.abs(y - fy) <= hy - TOP_MARGIN;
+      return insideTop(m.slot.asset.dims, m.turn, fx, fy, x, y, this.margin);
     }
     for (const b of this.boxes()) {
       const dx = Math.max(Math.abs(x - b.pos[0]) - b.half[0], 0);
       const dy = Math.max(Math.abs(y - b.pos[1]) - b.half[1], 0);
-      if (Math.hypot(dx, dy) < ROBOT_CLEAR) return false;
+      if (Math.hypot(dx, dy) < this.clear) return false;
     }
     return true;
   }
@@ -169,7 +173,7 @@ export class PropScene {
   /** 로봇 받침을 칸·회전·높이대로 옮긴다 */
   private applyRobot(): void {
     this.lamp.setMount([this.home[0] + this.robotCell[0] * PROP_CELL, this.home[1] + this.robotCell[1] * PROP_CELL, this.robotZ]);
-    this.lamp.setRobotYaw((this.robotTurn * Math.PI) / 2);
+    this.lamp.setRobotYaw(turnYaw(this.robotTurn));
     this.settling = SETTLE;
   }
 
@@ -179,9 +183,9 @@ export class PropScene {
     if (!slot) return null;
     // 로봇 받침도 하나의 상자로 넣어 피한다 (로봇이 어디로 옮겨졌든)
     const [rx, ry, rz] = this.lamp.mount;
-    const robotBox: PlacedBox = { key: ROBOT_KEY, pos: [rx, ry, rz], half: [ROBOT_CLEAR, ROBOT_CLEAR], height: 0 };
+    const robotBox: PlacedBox = { key: ROBOT_KEY, pos: [rx, ry, rz], half: [this.clear, this.clear], height: 0 };
     const at = cell ?? freeCell(footprint(slot.asset.dims, turn), [...this.boxes(), robotBox], 0);
-    const entry: Placed = { slot, cell: [at[0], at[1]], turn: ((turn % 4) + 4) % 4 };
+    const entry: Placed = { slot, cell: [at[0], at[1]], turn: ((turn % TURNS) + TURNS) % TURNS };
     this.placed.set(slot.key, entry);
     this.drop(entry);
     return slot.key;
@@ -199,25 +203,27 @@ export class PropScene {
     return true;
   }
 
-  /** 90° 회전. 돌리면 로봇과 겹치면 false. */
+  /** 45° 회전. 돌리면 로봇과 겹치면 false. */
   turn(key: string): boolean {
     const p = this.placed.get(key);
     if (!p) return false;
-    const turn = (p.turn + 1) % 4;
+    const turn = (p.turn + 1) % TURNS;
     if (this.hitsRobot(key, p.cell, turn)) return false;
     p.turn = turn;
     if (this.mountKey === key) {
-      // 가구와 함께 로봇도 가구 중심을 축으로 90° 돈다
+      // 가구와 함께 로봇도 가구 중심을 축으로 45° 돈다 (칸에 맞춰 반올림)
       const ox = this.robotCell[0] - p.cell[0];
       const oy = this.robotCell[1] - p.cell[1];
-      this.robotCell = [p.cell[0] - oy, p.cell[1] + ox];
-      this.robotTurn = (this.robotTurn + 1) % 4;
+      const c = Math.cos(turnYaw(1));
+      const sn = Math.sin(turnYaw(1));
+      this.robotCell = [p.cell[0] + Math.round(ox * c - oy * sn), p.cell[1] + Math.round(ox * sn + oy * c)];
+      this.robotTurn = (this.robotTurn + 1) % TURNS;
     }
     this.drop(p);
     return true;
   }
 
-  /** 로봇 받침 원(반경 ROBOT_CLEAR)과 그 칸의 발자국이 겹치나 — 로봇이 올라선 가구 자신은 예외 */
+  /** 로봇 받침 원(반경 clear)과 그 칸의 발자국이 겹치나 — 로봇이 올라선 가구 자신은 예외 */
   private hitsRobot(key: string, cell: [number, number], turn: number): boolean {
     if (this.mountKey === key) return false;
     const p = this.placed.get(key);
@@ -226,7 +232,7 @@ export class PropScene {
     const [rx, ry] = this.lamp.mount;
     const dx = Math.max(Math.abs(cell[0] * PROP_CELL - rx) - hx, 0);
     const dy = Math.max(Math.abs(cell[1] * PROP_CELL - ry) - hy, 0);
-    return Math.hypot(dx, dy) < ROBOT_CLEAR;
+    return Math.hypot(dx, dy) < this.clear;
   }
 
   remove(key: string): void {
@@ -284,7 +290,7 @@ export class PropScene {
   private drop(p: Placed): void {
     const [x, y] = this.cellPos(p);
     const z = dropHeight(x, y, footprint(p.slot.asset.dims, p.turn), this.boxes(p.slot.key));
-    this.lamp.setPropPose(p.slot, x, y, z, (p.turn * Math.PI) / 2);
+    this.lamp.setPropPose(p.slot, x, y, z, turnYaw(p.turn));
     // 떨어진 뒤 가라앉을 높이 (여유 높이 제외) 기준으로 로봇을 올린다
     if (this.mountKey === p.slot.key) {
       this.robotZ = z - DROP_GAP + p.slot.asset.dims[2];

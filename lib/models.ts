@@ -86,12 +86,12 @@ export type Signature = z.infer<typeof SignatureSchema>;
 
 // ------------------------------------------------------------------ project
 
-/** Library L3: 3D assets placed in the editor scene — the cell (0.1 m) and 90° turns each was put at. */
+/** Library L3: 3D assets placed in the editor scene — the cell (0.1 m) and 45° turns (0–7) each was put at. */
 export const PropPlacementSchema = z.object({
   key: z.string(),
   assetId: z.string(),
   cell: z.tuple([z.number().int(), z.number().int()]),
-  turn: z.number().int().min(0).max(3),
+  turn: z.number().int().min(0).max(7),
 });
 export type PropPlacement = z.infer<typeof PropPlacementSchema>;
 
@@ -99,8 +99,8 @@ export const SceneSchema = z.object({
   props: z.array(PropPlacementSchema),
   /** Key of the placed prop the robot stands on (null = floor) */
   mount: z.string().nullable(),
-  /** Robot base cell (0.1 m, from its home spot) and 90° turns */
-  robot: z.object({ cell: z.tuple([z.number().int(), z.number().int()]), turn: z.number().int().min(0).max(3) }).optional(),
+  /** Robot base cell (0.1 m, from its home spot) and 45° turns (0–7) */
+  robot: z.object({ cell: z.tuple([z.number().int(), z.number().int()]), turn: z.number().int().min(0).max(7) }).optional(),
 });
 export type Scene = z.infer<typeof SceneSchema>;
 

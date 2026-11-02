@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState, useId } from "react";
 import { componentForSim, guidelineSlugFor } from "@/data/components";
 import { simBehaviorLabel } from "@/data/sim-behaviors";
-import { SITUATION_PATTERNS } from "@/data/patterns";
+import type { appliedPatterns } from "@/data/patterns";
 import { STRINGS, fmt } from "@/data/strings";
 import type { Reference } from "@/lib/models";
 import { splitLog, type InputEntry } from "@/lib/ui/input-log";
@@ -39,12 +39,13 @@ const fileName = (r: Reference) =>
   r.kind === "userData" ? fmt(STRINGS.community.referenceLabel, { name: r.path }) : r.path.split("/").pop()?.replace(/^[0-9a-f]{8}-/, "") ?? "";
 
 // Context tab (Figma 452:2268, content x 19): Current Status (latest input, "show history" opens the log + Clear),
-// Reference = what the AI referenced, Component = channels per recipe step, Situation Pattern cards.
+// Reference = what the AI referenced, Component = channels per recipe step, Situation Pattern = the situations it fits.
 // Sections 40 apart; headers = icon 16 · 5 · Medium 16 #6f6d6e with a 50% "go to guideline" link on the right.
 export function ContextPanel({
   context,
   behaviors,
   steps = [],
+  patterns = [],
   busy,
   reading = [],
   activeReference,
@@ -57,6 +58,8 @@ export function ContextPanel({
   behaviors: string[];
   /** Channels per recipe step of the current expression (Component card) */
   steps?: ChannelTile[];
+  /** Situation patterns the current expression fits (data/patterns appliedPatterns) */
+  patterns?: ReturnType<typeof appliedPatterns>;
   busy: boolean;
   reading?: string[];
   activeReference: string | null;
@@ -146,36 +149,37 @@ export function ContextPanel({
         </div>
       </section>
 
-      {/* Situation Pattern (452:2389): 125×112 cards #f2f2f2 r 10, gap 8 — click to set the pattern for the next Generate */}
+      {/* Situation Pattern (452:2389): 125×112 cards #f2f2f2 r 10, gap 8 — the situations the current expression fits
+          (data/patterns appliedPatterns: the one it was generated for + those sharing its components). Not a picker. */}
       <section className="flex flex-col gap-[15px]">
         <SectionHeader icon="round-graph" label={E.pattern} href="/lab/guideline/situation" />
-        <div className="-mr-[17px] flex gap-[8px] overflow-x-auto pr-[17px] [scrollbar-width:none]" role="radiogroup" aria-label={E.pattern}>
-          {SITUATION_PATTERNS.map((p) => {
-            const on = context.pattern === p.id;
-            const art = "art" in p ? p.art : undefined;
-            return (
-              <button
-                key={p.id}
-                type="button"
-                role="radio"
-                aria-checked={on}
-                title={p.hint}
-                onClick={() => onChange({ pattern: on ? "" : p.id })}
-                className={`relative h-[112px] w-[125px] shrink-0 overflow-hidden rounded-[10px] bg-[var(--context-card)] shadow-[inset_0_0_20px_0_rgb(255_255_255/0.66)] ${on ? "outline outline-2 -outline-offset-2 outline-[var(--border-strong)]" : ""}`}
-              >
-                {art ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={art} alt="" className="absolute left-1/2 top-[11px] h-[62px] max-w-none -translate-x-1/2" />
-                ) : (
-                  <Icon name="round-graph" size={40} className="absolute left-1/2 top-[22px] -translate-x-1/2 text-[var(--editor-field-label)]" />
-                )}
-                <span className="absolute inset-x-0 top-[81px] truncate px-[var(--space-8)] text-center text-[14px] font-medium leading-[19px] text-[var(--context-strong)] opacity-80">
-                  {p.label}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+        {patterns.length === 0 ? (
+          <p className="text-[14px] leading-[18px] text-[var(--text-tertiary)]">{E.patternEmpty}</p>
+        ) : (
+          <div className="-mr-[17px] flex gap-[8px] overflow-x-auto pr-[17px] [scrollbar-width:none]" data-testid="applied-patterns">
+            {patterns.map((p) => {
+              const art = "art" in p ? p.art : undefined;
+              return (
+                <Link
+                  key={p.id}
+                  href={`/lab/guideline/situation/${p.id}`}
+                  title={p.hint}
+                  className="relative h-[112px] w-[125px] shrink-0 overflow-hidden rounded-[10px] bg-[var(--context-card)] shadow-[inset_0_0_20px_0_rgb(255_255_255/0.66)]"
+                >
+                  {art ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={art} alt="" className="absolute left-1/2 top-[11px] h-[62px] max-w-none -translate-x-1/2" />
+                  ) : (
+                    <Icon name="round-graph" size={40} className="absolute left-1/2 top-[22px] -translate-x-1/2 text-[var(--editor-field-label)]" />
+                  )}
+                  <span className="absolute inset-x-0 top-[81px] truncate px-[var(--space-8)] text-center text-[14px] font-medium leading-[19px] text-[var(--context-strong)] opacity-80">
+                    {p.label}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       <ConfirmModal

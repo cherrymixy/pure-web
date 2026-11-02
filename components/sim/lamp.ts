@@ -14,6 +14,7 @@ import {
 import type { RobotSpec } from '@/lib/sim/robots';
 import { SIMREADY_BASE } from '@/data/simready-assets';
 import { buildPropScene, propRobotXml, yawQuat, type PropAsset, type PropSlotSpec } from './props';
+import { scaleRobotXml } from './robot-scale';
 
 const DEG = Math.PI / 180;
 const RAD = 180 / Math.PI;
@@ -114,15 +115,20 @@ export async function createLamp(
   onProgress({ phase: 'Compiling model', loaded: files.length, total: files.length });
   let entry = `${dir}/scene_sim.xml`;
   let slots: PropSlotSpec[] = [];
-  if (props.length) {
-    // 소품 씬: 로봇 사본은 소품과만 부딪히게, scene_sim.xml 을 include 한 씬을 새로 쓴다.
-    // (가상 파일시스템은 매 로드마다 원본으로 다시 써지므로 소품 없는 씬에는 영향 없음)
+  const scale = robot.scale ?? 1;
+  if (props.length || scale !== 1) {
+    // 로봇 사본: 크기(RobotSpec.scale), 소품 씬이면 소품과만 부딪히게.
+    // (가상 파일시스템은 매 로드마다 원본으로 다시 써진다)
     const robotFile = manifest.xml.find((f) => f !== 'scene_sim.xml') ?? 'robot.xml';
     const robotXml = await fetch(`${base}/${robotFile}`).then((r) => {
       if (!r.ok) throw new Error(`Failed to fetch model file: ${base}/${robotFile} (${r.status})`);
       return r.text();
     });
-    mj.FS.writeFile(`${dir}/${robotFile}`, new TextEncoder().encode(propRobotXml(robotXml)));
+    const scaled = scaleRobotXml(robotXml, scale);
+    mj.FS.writeFile(`${dir}/${robotFile}`, new TextEncoder().encode(props.length ? propRobotXml(scaled) : scaled));
+  }
+  if (props.length) {
+    // 소품 씬: scene_sim.xml 을 include 한 씬을 새로 쓴다.
     const scene = buildPropScene('scene_sim.xml', props);
     mj.FS.writeFile(`${dir}/scene_props.xml`, new TextEncoder().encode(scene.xml));
     entry = `${dir}/scene_props.xml`;

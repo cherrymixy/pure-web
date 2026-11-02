@@ -3,7 +3,8 @@ import path from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { SIMREADY_ASSETS } from '@/data/simready-assets';
 import type { MjData, MjModel, MujocoModule } from './mujoco';
-import { buildPropScene, dropHeight, footprint, freeCell, propRobotXml, yawQuat } from './props';
+import { buildPropScene, dropHeight, footprint, freeCell, insideTop, propRobotXml, yawQuat } from './props';
+import { scaleRobotXml } from './robot-scale';
 import { LampSim } from './lamp';
 import { PropScene } from './prop-scene';
 import { PURE_DESK_ROBOT } from '@/lib/sim/robots';
@@ -33,7 +34,7 @@ beforeAll(async () => {
   }
   const manifest = JSON.parse(fs.readFileSync(path.join(MODEL, 'manifest.json'), 'utf8'));
   write(`${dir}/scene_sim.xml`, fs.readFileSync(path.join(MODEL, 'scene_sim.xml')));
-  write(`${dir}/robot.xml`, propRobotXml(fs.readFileSync(path.join(MODEL, 'robot.xml'), 'utf8')));
+  write(`${dir}/robot.xml`, propRobotXml(scaleRobotXml(fs.readFileSync(path.join(MODEL, 'robot.xml'), 'utf8'), PURE_DESK_ROBOT.scale ?? 1)));
   for (const m of manifest.meshes) write(`${dir}/assets/${m}`, fs.readFileSync(path.join(MODEL, 'assets', m)));
   for (const a of SIMREADY_ASSETS) {
     try {
@@ -182,7 +183,7 @@ describe('prop scene', () => {
     expect(scene.robot).toEqual({ cell: [1, 0], turn: 1 });
 
     // 소품(stage 가 아닌 것)에는 막히고, 가구(stage)에는 올라간다
-    const mug = scene.add('dishware_mug_a01', [1, 4])!;
+    const mug = scene.add('dishware_mug_a01', [1, 5])!;
     expect(scene.moveRobot(0, 1)).toBe(true); // (1,1)
     expect(scene.moveRobot(0, 1)).toBe(true); // (1,2)
     expect(scene.moveRobot(0, 1)).toBe(false); // 머그 앞에서 멈춤
@@ -209,6 +210,16 @@ describe('prop scene', () => {
     expect(lamp.mount[1]).toBeCloseTo(0.2, 6);
     expect(scene.robot.turn).toBe(3);
     scene.restore([], null);
+  });
+
+  it('45° turns: footprint grows to the rotated box, the top test follows the rotation', () => {
+    const [hx, hy] = footprint([1, 0.4, 0.5], 1);
+    expect(hx).toBeCloseTo((1 / 2 + 0.4 / 2) * Math.SQRT1_2, 6);
+    expect(hy).toBeCloseTo(hx, 6);
+    expect(footprint([1, 0.4, 0.5], 2)).toEqual([expect.closeTo(0.2, 6), expect.closeTo(0.5, 6)]);
+    // a 1 × 0.4 top turned 45°: (0.3, 0.3) lies on its long axis, (0.3, -0.3) is off the top
+    expect(insideTop([1, 0.4], 1, 0, 0, 0.3, 0.3, 0)).toBe(true);
+    expect(insideTop([1, 0.4], 1, 0, 0, 0.3, -0.3, 0)).toBe(false);
   });
 
   it('free cell avoids the robot base', () => {

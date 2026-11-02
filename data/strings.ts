@@ -250,6 +250,7 @@ export const STRINGS = {
     goToGuideline: "go to guideline",
     multimodal: "Multimodal",
     componentEmpty: "Generate to see the components and channels it uses.",
+    patternEmpty: "Generate to see the situations this motion fits.",
     clearStatusConfirm: { title: "Clear input history?", body: "Current Status and the input log will be emptied. The motion stays as it is." },
     showMore: "Show {n} more",
     showLess: "Show less",

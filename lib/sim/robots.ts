@@ -59,6 +59,12 @@ export type RetargetMatrix = Record<JointName, Partial<Record<JointName, number>
 
 export interface RobotSpec {
   id: RobotId;
+  /**
+   * Uniform size multiplier applied when the model loads (components/sim/robot-scale.ts): meshes and offsets ×s,
+   * masses ×s³, inertia and servo gains ×s⁵ so joint motions keep their feel. Camera views / display stay written
+   * at the model's own size; the viewer scales them. 1 = as modelled.
+   */
+  scale?: number;
   /** Short name for the robot picker */
   label: string;
   /** Folder under /public holding manifest.json, the scene XML and assets/ */
@@ -114,6 +120,8 @@ const PURE_DESK: RobotSpec = {
   id: 'pure-desk',
   label: 'PURE Desk',
   modelBase: '/pure-desk/model',
+  // Shown 1.5× its modelled ≈36 cm (≈54 cm) — closer to furniture scale next to the 3D assets.
+  scale: 1.5,
   headBody: 'head',
   baseBody: 'base',
   jointKeys: {

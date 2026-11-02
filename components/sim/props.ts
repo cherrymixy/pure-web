@@ -87,10 +87,29 @@ ${bodies.join('\n')}
   return { xml, slots };
 }
 
-/** 90° 회전 수 → 바닥 위 발자국 [x, y] 반폭 */
+/** 회전 한 번 = 45° (한 바퀴 8번) */
+export const TURN_STEP = Math.PI / 4;
+export const TURNS = 8;
+export const turnYaw = (turn: number) => turn * TURN_STEP;
+
+/** 회전 수 → 바닥 위 발자국(축 정렬 상자) [x, y] 반폭 — 45° 면 돌린 사각형을 감싸는 상자 */
 export function footprint(dims: readonly number[], turn: number): [number, number] {
-  const odd = ((turn % 4) + 4) % 2 === 1;
-  return odd ? [dims[1] / 2, dims[0] / 2] : [dims[0] / 2, dims[1] / 2];
+  const a = turnYaw(turn);
+  const c = Math.abs(Math.cos(a));
+  const s = Math.abs(Math.sin(a));
+  const hx = dims[0] / 2;
+  const hy = dims[1] / 2;
+  return [c * hx + s * hy, s * hx + c * hy];
+}
+
+/** (x, y) 가 그 회전의 윗면 사각형 안(가장자리에서 margin 안쪽)인가 — 중심 (cx, cy) */
+export function insideTop(dims: readonly number[], turn: number, cx: number, cy: number, x: number, y: number, margin: number): boolean {
+  const a = -turnYaw(turn);
+  const dx = x - cx;
+  const dy = y - cy;
+  const lx = dx * Math.cos(a) - dy * Math.sin(a);
+  const ly = dx * Math.sin(a) + dy * Math.cos(a);
+  return Math.abs(lx) <= dims[0] / 2 - margin && Math.abs(ly) <= dims[1] / 2 - margin;
 }
 
 export interface PlacedBox {

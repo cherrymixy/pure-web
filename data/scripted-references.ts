@@ -38,7 +38,7 @@ export const SCRIPTED_REFERENCES: ScriptedReference[] = [
             { behavior: "happy", speed: 1, amplitude: 1.1, repeat: 2, face: "smile" },
           ],
         },
-        props: { amplitude: 50, duration: 50, smoothness: 50, speed: 65, frequency: 50 },
+        props: { amplitude: 50, duration: 50, smoothness: 50, speed: 58, frequency: 50 },
       },
       face: { preset: "heart" },
       sound: { cues: [cueAt("robot-happy", 0.3), cueAt("robot-happy", 3), cueAt("robot-happy", 6), cueAt("robot-happy", 9), cueAt("robot-happy", 12)] },
