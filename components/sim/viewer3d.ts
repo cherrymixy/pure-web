@@ -11,7 +11,10 @@
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { SERVO_ID, type LampSim } from './lamp';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { SERVO_ID, type LampSim, type PropSlot } from './lamp';
+import type { PropScene } from './prop-scene';
+import { SIMREADY_BASE } from '@/data/simready-assets';
 import { JOINT_NAMES, type JointName } from '@/lib/sim/motion';
 import type { CameraView, FaceDisplay } from '@/lib/sim/robots';
 import { RingDrag, rayPlane, type Vec3 } from '@/lib/sim/gizmo';
@@ -129,6 +132,14 @@ export class LampViewer {
   private gizmoJoint: JointName | null = null;
   private gizmoOff: (() => void) | null = null;
   private readonly raycaster = new THREE.Raycaster();
+  /** 소품 GLB (props.ts) — 바디 위치를 매 프레임 따라간다 */
+  private readonly propNodes: { slot: PropSlot; node: THREE.Group }[] = [];
+  private propScene: PropScene | null = null;
+  private readonly propBox = new THREE.Box3();
+  private readonly propHelper = new THREE.Box3Helper(this.propBox, new THREE.Color('#789ba2'));
+  private propPickOff: (() => void) | null = null;
+  /** 로봇 받침이 올라간 높이 — 카메라를 그만큼 따라 올린다 */
+  private mountZ = 0;
 
   constructor(canvas: HTMLCanvasElement, lamp: LampSim, options: ViewerOptions = {}) {
     this.lamp = lamp;
@@ -415,6 +426,18 @@ export class LampViewer {
   /** 뷰어를 버릴 때 — 영상 디코더와 GPU 자원을 놓는다. */
   dispose(): void {
     this.gizmoOff?.();
+    this.propPickOff?.();
+    for (const { node } of this.propNodes) {
+      node.traverse((o) => {
+        const mesh = o as THREE.Mesh;
+        if (!mesh.isMesh) return;
+        mesh.geometry.dispose();
+        for (const m of [mesh.material].flat()) {
+          for (const v of Object.values(m)) if (v instanceof THREE.Texture) v.dispose();
+          m.dispose();
+        }
+      });
+    }
     for (const m of this.ring.children as THREE.Mesh[]) {
       m.geometry.dispose();
       (m.material as THREE.Material).dispose();
@@ -462,6 +485,119 @@ export class LampViewer {
         data.xquat[b * 4 + 3],
         data.xquat[b * 4],
       );
+    }
+    this.syncProps();
+  }
+
+  private syncProps(): void {
+    const scene = this.propScene;
+    if (!scene) return;
+    const { data } = this.lamp;
+    const placed = new Set(scene.keys);
+    let selected: THREE.Group | null = null;
+    for (const { slot, node } of this.propNodes) {
+      node.visible = placed.has(slot.key);
+      if (!node.visible) continue;
+      const b = slot.bodyId;
+      node.position.set(data.xpos[b * 3], data.xpos[b * 3 + 1], data.xpos[b * 3 + 2]);
+      node.quaternion.set(data.xquat[b * 4 + 1], data.xquat[b * 4 + 2], data.xquat[b * 4 + 3], data.xquat[b * 4]);
+      if (slot.key === scene.selected) selected = node;
+    }
+    this.propHelper.visible = selected !== null;
+    if (selected) {
+      selected.updateMatrixWorld(true);
+      this.propBox.setFromObject(selected);
+    }
+    const dz = scene.mountHeight - this.mountZ;
+    if (Math.abs(dz) > 1e-6) {
+      // MuJoCo z = Three 월드 y
+      this.camera.position.y += dz;
+      this.controls.target.y += dz;
+      this.mountZ = scene.mountHeight;
+    }
+  }
+
+  /** 소품 씬을 붙이고 에셋 GLB 를 불러온다 (에셋당 한 번, 슬롯마다 복제). */
+  attachProps(scene: PropScene): void {
+    this.propScene = scene;
+    this.scene.add(this.propHelper);
+    this.propHelper.visible = false;
+    const loader = new GLTFLoader();
+    const cache = new Map<string, Promise<THREE.Group>>();
+    for (const slot of this.lamp.props) {
+      const node = new THREE.Group();
+      node.visible = false;
+      this.root.add(node);
+      this.propNodes.push({ slot, node });
+      const id = slot.asset.id;
+      if (!cache.has(id)) cache.set(id, loader.loadAsync(`${SIMREADY_BASE}/${id}/model.glb`).then((g) => g.scene));
+      void cache.get(id)!.then((gltf) => {
+        // GLB 는 glTF Y-up — MuJoCo Z-up 루트 아래에서 세운다.
+        const model = gltf.clone(true);
+        model.rotation.x = Math.PI / 2;
+        model.traverse((o) => {
+          if ((o as THREE.Mesh).isMesh) {
+            o.castShadow = true;
+            o.receiveShadow = true;
+          }
+        });
+        node.add(model);
+      }, () => {});
+    }
+  }
+
+  /** 뷰포트에서 소품을 클릭하면 그 슬롯 key (빈 곳 = null) */
+  enablePropPick(onPick: ((key: string | null) => void) | null): void {
+    this.propPickOff?.();
+    this.propPickOff = null;
+    if (!onPick) return;
+    const el = this.renderer.domElement;
+    let down: { x: number; y: number } | null = null;
+    const onDown = (e: PointerEvent) => {
+      down = e.button === 0 ? { x: e.clientX, y: e.clientY } : null;
+    };
+    const onUp = (e: PointerEvent) => {
+      if (!down || Math.hypot(e.clientX - down.x, e.clientY - down.y) > CLICK_PX) return void (down = null);
+      down = null;
+      this.scene.updateMatrixWorld();
+      this.rayAt(e);
+      const shown = this.propNodes.filter((p) => p.node.visible);
+      // 로봇도 함께 쏜다 — 로봇에 가려진 소품은 고르지 않는다
+      const robot = new Set<THREE.Object3D>(this.geomNodes.map((g) => g.node));
+      const hits = this.raycaster.intersectObjects([...shown.map((p) => p.node), ...robot], true);
+      if (!hits.length || robot.has(hits[0].object)) return onPick(null);
+      let o: THREE.Object3D | null = hits[0].object;
+      while (o && !shown.some((p) => p.node === o)) o = o.parent;
+      onPick(shown.find((p) => p.node === o)?.slot.key ?? null);
+    };
+    el.addEventListener('pointerdown', onDown);
+    el.addEventListener('pointerup', onUp);
+    this.propPickOff = () => {
+      el.removeEventListener('pointerdown', onDown);
+      el.removeEventListener('pointerup', onUp);
+    };
+  }
+
+  /**
+   * 카메라 기준 화면 방향(위·아래·왼쪽·오른쪽)을 가장 가까운 월드 축 한 칸으로 —
+   * 이동 모드 방향키가 보이는 방향대로 움직이게.
+   */
+  screenStep(dir: 'up' | 'down' | 'left' | 'right'): [number, number] {
+    const f = new THREE.Vector3();
+    this.camera.getWorldDirection(f);
+    // Three (x, y, z) → MuJoCo (x, -z): 바닥 위 앞 방향
+    let fx = f.x;
+    let fy = -f.z;
+    if (Math.abs(fx) >= Math.abs(fy)) [fx, fy] = [Math.sign(fx), 0];
+    else [fx, fy] = [0, Math.sign(fy)];
+    // 오른쪽 = 앞을 시계 방향으로 90°
+    const rx = fy;
+    const ry = -fx;
+    switch (dir) {
+      case 'up': return [fx, fy];
+      case 'down': return [-fx, -fy];
+      case 'right': return [rx, ry];
+      case 'left': return [-rx, -ry];
     }
   }
 

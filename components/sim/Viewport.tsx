@@ -8,6 +8,7 @@
 import { useEffect, useRef, type RefObject } from "react";
 import type { Clip, FaceSpec, Recipe, SoundSpec, Structure } from "@/lib/models";
 import type { ViewerOptions } from "./viewer3d";
+import type { PropAsset } from "./props";
 import { SimController, type JointState, type PlaybackParams, type SimEventMap, type SoundEngine } from "./sim-controller";
 
 export type ViewportMode = "editor" | "structure" | "preview" | "share";
@@ -28,7 +29,8 @@ export type ViewportEvent =
   | { type: "jointState"; joints: JointState[] }
   | { type: "error"; message: string }
   | ({ type: "jointPick" } & SimEventMap["jointPick"])
-  | ({ type: "jointRotate" } & SimEventMap["jointRotate"]);
+  | ({ type: "jointRotate" } & SimEventMap["jointRotate"])
+  | ({ type: "propPick" } & SimEventMap["propPick"]);
 
 const MODES: Record<ViewportMode, { pan: boolean; zoom: boolean; idle: boolean }> = {
   editor: { pan: true, zoom: true, idle: true },
@@ -69,6 +71,8 @@ export interface ViewportProps {
   /** Start playing when `expression` changes (default false: cued at t = 0, paused). */
   autoPlay?: boolean;
   sound?: SoundEngine;
+  /** 3D asset catalog to compile into the scene (Library L3) — read once at mount. */
+  props?: PropAsset[];
   onEvent?: (e: ViewportEvent) => void;
   className?: string;
 }
@@ -82,6 +86,7 @@ export function Viewport({
   orbit = true,
   autoPlay = false,
   sound,
+  props,
   onEvent,
   className,
 }: ViewportProps) {
@@ -90,6 +95,7 @@ export function Viewport({
   const onEventRef = useRef(onEvent);
   onEventRef.current = onEvent;
   const soundRef = useRef(sound);
+  const propsRef = useRef(props);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -98,7 +104,7 @@ export function Viewport({
     if (mounted > 1 && process.env.NODE_ENV !== "production") {
       console.error(`[Viewport] ${mounted} instances mounted — one per page (docs/conventions.md rule 14).`);
     }
-    const ctrl = new SimController(canvas, { sound: soundRef.current, idle: MODES[mode].idle, viewer: stageFromTokens(canvas) });
+    const ctrl = new SimController(canvas, { sound: soundRef.current, idle: MODES[mode].idle, viewer: stageFromTokens(canvas), props: propsRef.current });
     ctrlRef.current = ctrl;
     if (controllerRef) controllerRef.current = ctrl;
 
@@ -113,6 +119,7 @@ export function Viewport({
       ctrl.on("error", (p) => send({ type: "error", ...p })),
       ctrl.on("jointPick", (p) => send({ type: "jointPick", ...p })),
       ctrl.on("jointRotate", (p) => send({ type: "jointRotate", ...p })),
+      ctrl.on("propPick", (p) => send({ type: "propPick", ...p })),
     ];
     ctrl.ready.catch(() => {});
 

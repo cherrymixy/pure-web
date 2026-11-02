@@ -17,6 +17,10 @@ import { FACE_DIR, FACE_VIDEOS } from '@/data/face-videos';
 import { faceAtTime, faceName } from '@/lib/expression/face';
 import { LEAD_IN, SimRuntime, type FaceSource, type JointState as RuntimeJointState, type PlaybackSource, type SimRuntimeOptions } from './runtime';
 import type { LimitEvent } from './limits';
+import type { PropPlacement } from './props';
+
+export type { PropPlacement };
+export type PropDirection = 'up' | 'down' | 'left' | 'right';
 
 export type { PlaybackParams };
 export { DEFAULT_PARAMS };
@@ -73,6 +77,8 @@ export type SimEventMap = {
   jointPick: { id: string | null };
   /** Editor gizmo: rotation ring dragged — degrees swept since the grab; `done` on release */
   jointRotate: { id: string; deltaDeg: number; done: boolean };
+  /** Library L3: a placed 3D asset was clicked in the viewport (slot key, null = empty space) */
+  propPick: { key: string | null };
 };
 export type SimEventName = keyof SimEventMap;
 
@@ -104,6 +110,9 @@ export class SimController {
   private orbit: { on: boolean; pan?: boolean; zoom?: boolean } = { on: true };
   private highlighted: string | null = null;
   private gizmo: { on: boolean; joint: string | null } = { on: false, joint: null };
+  private propPick = false;
+  /** Props to restore once the model is loaded */
+  private pendingProps: { placements: PropPlacement[]; mount: string | null } | null = null;
   private readonly handlers = new Map<SimEventName, Set<(payload: never) => void>>();
   private jointTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -142,6 +151,9 @@ export class SimController {
           break;
         case 'jointRotate':
           this.emit('jointRotate', { id: e.id, deltaDeg: e.deltaDeg, done: e.done });
+          break;
+        case 'propPick':
+          this.emit('propPick', { key: e.key });
           break;
         case 'limitExceeded': {
           const { type: _type, ...event } = e;
@@ -386,6 +398,11 @@ export class SimController {
     this.runtime.highlightJoint(this.highlighted);
     this.runtime.enableGizmo(this.gizmo.on);
     this.runtime.setGizmo(this.gizmo.joint);
+    this.runtime.enablePropPick(this.propPick);
+    if (this.pendingProps) {
+      this.runtime.props?.restore(this.pendingProps.placements, this.pendingProps.mount);
+      this.pendingProps = null;
+    }
   }
 
   /** Joint anchors in canvas pixels — structure screen joint numbers. */
@@ -400,6 +417,60 @@ export class SimController {
   /** PNG dataURL of the current frame ("" before the model loads). */
   capture(): string {
     return this.runtime.capture() ?? '';
+  }
+
+  // ---------------------------------------------------------------- 3D asset props (Library L3)
+  // Needs `props` (the asset catalog) in the controller options; without it these are no-ops.
+
+  /** Restore saved placements (queued until the model is ready). */
+  restoreProps(placements: PropPlacement[], mount: string | null): void {
+    if (this.runtime.props) this.runtime.props.restore(placements, mount);
+    else this.pendingProps = { placements, mount };
+  }
+
+  /** Drop an asset next to the robot. Returns its key, null when its slots are full (or no prop scene). */
+  placeProp(assetId: string): string | null {
+    return this.runtime.props?.add(assetId) ?? null;
+  }
+
+  /** One cell (0.1 m) in a screen direction — the nearest world axis to where the camera looks. false = the robot is in the way. */
+  moveProp(key: string, dir: PropDirection): boolean {
+    const [dx, dy] = this.runtime.screenStep(dir);
+    return this.runtime.props?.move(key, dx, dy) ?? false;
+  }
+
+  /** Turn 90°. false = turning would hit the robot. */
+  turnProp(key: string): boolean {
+    return this.runtime.props?.turn(key) ?? false;
+  }
+
+  removeProp(key: string): void {
+    this.runtime.props?.remove(key);
+  }
+
+  /** Placed props (cell + turn) — what the project saves. */
+  listProps(): PropPlacement[] {
+    return this.runtime.props?.list() ?? [];
+  }
+
+  /** Outline one prop (null clears). */
+  selectProp(key: string | null): void {
+    if (this.runtime.props) this.runtime.props.selected = key;
+  }
+
+  /** Put the robot on top of a placed prop (null = back on the floor). */
+  setRobotMount(key: string | null): void {
+    this.runtime.props?.setMount(key);
+  }
+
+  get robotMount(): string | null {
+    return this.runtime.props?.mount ?? null;
+  }
+
+  /** Click placed props in the viewport (event propPick). */
+  enablePropPick(on: boolean): void {
+    this.propPick = on;
+    this.runtime.enablePropPick(on);
   }
 
   /** Dev tools only: command joints directly by robot joint id (overdrive test). */

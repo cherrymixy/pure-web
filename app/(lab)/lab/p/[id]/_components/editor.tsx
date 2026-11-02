@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SUGGESTED_PROMPTS } from "@/data/prompts";
 import { LIBRARY } from "@/data/library";
+import { SIMREADY_ASSETS } from "@/data/simready-assets";
 import { STRINGS, fmt } from "@/data/strings";
 import { addFaceKey, addKey, autoAdjust, deleteFaceKey, deleteKey, formatTime, matchTiming, moveFaceKey, paramsToProps, propsToParams, recipeToClip, snapTime, updateKey } from "@/lib/expression";
 import { diffEnergy, energySamples } from "@/lib/reference/energy";
@@ -159,6 +160,10 @@ export function Editor({
   const [paused, setPaused] = useState(true);
   const [tab, setTab] = useState<Tab>("motion");
   const [leftTab, setLeftTab] = useState<"context" | "library">("context");
+  /** Library L3: the placed 3D asset being moved (slot key "<assetId>#n") */
+  const [selectedProp, setSelectedProp] = useState<string | null>(null);
+  const [robotMount, setRobotMount] = useState<string | null>(project.scene?.mount ?? null);
+  const sceneSave = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [timelineOpen, setTimelineOpen] = useState(false);
   const [renaming, setRenaming] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -682,6 +687,90 @@ export function Editor({
     toast(fmt(LIBRARY.attached, { name: m.name }));
   }
 
+  // ------------------------------------------------------------ 3D asset props (Library L3)
+
+  const propAsset = (key: string) => SIMREADY_ASSETS.find((a) => a.id === key.split("#")[0]);
+
+  /** Placements are saved on the project (debounced) — the cell and turn each prop was put at. */
+  const pendingScene = useRef<(() => void) | null>(null);
+  function saveScene() {
+    const c = ctrl.current;
+    if (!c) return;
+    // Read now (the controller may be gone when the timer fires), send after a short pause.
+    const scene = { props: c.listProps(), mount: c.robotMount };
+    const send = () => {
+      pendingScene.current = null;
+      void api(`/api/projects/${project.id}`, { method: "PATCH", body: JSON.stringify({ scene }) }).catch(() => toast(STRINGS.lab.toast.failed));
+    };
+    if (sceneSave.current) clearTimeout(sceneSave.current);
+    pendingScene.current = send;
+    sceneSave.current = setTimeout(send, 400);
+  }
+  // Leaving the editor: send what is still waiting.
+  useEffect(
+    () => () => {
+      if (sceneSave.current) clearTimeout(sceneSave.current);
+      pendingScene.current?.();
+    },
+    [],
+  );
+
+  function selectProp(key: string | null) {
+    setSelectedProp(key);
+    ctrl.current?.selectProp(key);
+  }
+
+  function placeAsset(assetId: string) {
+    const c = ctrl.current;
+    if (!c) return;
+    const key = c.placeProp(assetId);
+    const name = SIMREADY_ASSETS.find((a) => a.id === assetId)?.name ?? assetId;
+    // The tile keeps focus otherwise, and Space (play) would press it again.
+    (document.activeElement as HTMLElement | null)?.blur();
+    if (!key) return toast(fmt(LIBRARY.slotsFull, { name }));
+    selectProp(key);
+    saveScene();
+  }
+
+  function removeProp(key: string) {
+    ctrl.current?.removeProp(key);
+    setRobotMount(ctrl.current?.robotMount ?? null);
+    selectProp(null);
+    saveScene();
+  }
+
+  function mountRobot(key: string | null) {
+    ctrl.current?.setRobotMount(key);
+    setRobotMount(ctrl.current?.robotMount ?? null);
+    saveScene();
+  }
+
+  // Move mode while a prop is selected: arrows = one cell (screen direction), R = 90°, Delete = remove, Esc = done.
+  // e.code, not e.key — the Korean input mode turns R into "ㄱ".
+  useEffect(() => {
+    if (!selectedProp) return;
+    const dirs: Record<string, "up" | "down" | "left" | "right"> = { ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right" };
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.target as HTMLElement).closest("input, textarea, select")) return;
+      const c = ctrl.current;
+      if (!c) return;
+      if (dirs[e.code]) {
+        if (!c.moveProp(selectedProp, dirs[e.code])) toast(LIBRARY.robotInWay);
+      } else if (e.code === "KeyR" && !e.metaKey && !e.ctrlKey) {
+        if (!c.turnProp(selectedProp)) toast(LIBRARY.robotInWay);
+      }
+      else if (e.code === "Delete" || e.code === "Backspace") return void (e.preventDefault(), removeProp(selectedProp));
+      else if (e.code === "Escape") return void selectProp(null);
+      else return;
+      e.preventDefault();
+      saveScene();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // removeProp / saveScene read the controller (ref), not render state
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedProp]);
+
   async function stop() {
     if (job) await api(`/api/jobs/${job.id}/cancel`, { method: "POST" }).catch(() => {});
   }
@@ -712,6 +801,14 @@ export function Editor({
         break;
       case "jointRotate":
         rotateJoint(e.id, e.deltaDeg, e.done);
+        break;
+      case "ready":
+        ctrl.current?.restoreProps(project.scene?.props ?? [], project.scene?.mount ?? null);
+        ctrl.current?.enablePropPick(true);
+        setRobotMount(ctrl.current?.robotMount ?? null);
+        break;
+      case "propPick":
+        selectProp(e.key);
         break;
     }
   }
@@ -798,6 +895,7 @@ export function Editor({
           autoPlay={autoPlay}
           sound={sound}
           mode="editor"
+          props={SIMREADY_ASSETS}
           onEvent={onEvent}
           className="block size-full"
         />
@@ -836,6 +934,20 @@ export function Editor({
           )}
           {lastResult?.source === "demo" && expression && !busy && <span className={`${chip} text-[var(--web-ae7d24)]`}>{E.demoBadge}</span>}
         </div>
+        {selectedProp && (
+          <div data-testid="prop-bar" className={`${chip} pointer-events-auto flex items-center gap-[var(--space-12)] shadow-[var(--pure-shadow-chip)]`}>
+            <span className="font-semibold text-[var(--text-primary)]">{propAsset(selectedProp)?.name}</span>
+            <span className="text-[var(--text-secondary)]">{LIBRARY.moveHint}</span>
+            {propAsset(selectedProp)?.role === "stage" && (
+              <button type="button" onClick={() => mountRobot(robotMount === selectedProp ? null : selectedProp)} className="font-medium text-[var(--text-brand)]">
+                {robotMount === selectedProp ? LIBRARY.robotToFloor : LIBRARY.putRobot}
+              </button>
+            )}
+            <button type="button" onClick={() => removeProp(selectedProp)} className="font-medium text-[var(--text-error)]">
+              {LIBRARY.remove}
+            </button>
+          </div>
+        )}
         {expression && lastResult?.reasoning && (
           <p className="max-w-[760px] text-center text-[14px] leading-[18px] text-[var(--text-secondary)]">
             <b className="font-semibold text-[var(--text-primary)]">{E.reasoning}</b> · {lastResult.reasoning}
@@ -898,6 +1010,7 @@ export function Editor({
             <LibraryPanel
               attached={context.references.filter((r) => r.kind === "userData").map((r) => r.path)}
               onAttach={attachCommunity}
+              onPlaceAsset={placeAsset}
             />
           )}
         </div>

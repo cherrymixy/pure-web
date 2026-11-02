@@ -46,7 +46,7 @@ export interface Repo {
     list(filter?: { channels?: Channel[] }): Promise<Project[]>;
     get(id: string): Promise<Project>;
     create(input: NewProject): Promise<Project>;
-    update(id: string, patch: Partial<Pick<Project, "name" | "status" | "progress" | "channelsUsed">>): Promise<Project>;
+    update(id: string, patch: Partial<Pick<Project, "name" | "status" | "progress" | "channelsUsed" | "scene">>): Promise<Project>;
     duplicate(id: string): Promise<Project>;
     delete(id: string): Promise<void>;
     /** Edit limits can only narrow: the rig ranges must stay as stored. */

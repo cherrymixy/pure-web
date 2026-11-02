@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { LIBRARY as L } from "@/data/library";
 import { WAVEFORM_SRC, communityCard } from "@/data/community";
 import { SIMREADY_ASSETS, SIMREADY_BASE, SIMREADY_CREDIT } from "@/data/simready-assets";
-import { STRINGS } from "@/data/strings";
+import { STRINGS, fmt } from "@/data/strings";
 import type { UserDataMotion } from "@/lib/models";
 import { api } from "@/lib/ui/api";
 import { Icon } from "@/components/ui/icons/icon";
@@ -17,7 +17,17 @@ const U = STRINGS.community;
 // Library tab (Figma 451:1595, panel 430 wide, content x 21 · 376 wide):
 // Community — 2×2 motion cards (169×210, gaps 31 / 20) with a ‹ › pager pill; 3D Asset — 115 round tiles, 3 per row, gaps 15.
 // Saved expressions show up in Community too (User Data, uploaded), so clicking a card attaches it as a reference.
-export function LibraryPanel({ attached, onAttach }: { attached: string[]; onAttach: (motion: UserDataMotion) => void }) {
+// Clicking an asset tile drops it into the scene next to the robot.
+export function LibraryPanel({
+  attached,
+  onAttach,
+  onPlaceAsset,
+}: {
+  attached: string[];
+  onAttach: (motion: UserDataMotion) => void;
+  /** 3D Asset tile: drop it into the scene (Library L3) */
+  onPlaceAsset: (assetId: string) => void;
+}) {
   const [items, setItems] = useState<UserDataMotion[] | null>(null);
   const [page, setPage] = useState(0);
 
@@ -65,10 +75,17 @@ export function LibraryPanel({ attached, onAttach }: { attached: string[]; onAtt
       </div>
       <div className="ml-[12px] mt-[24px] grid grid-cols-[115px_115px_115px] gap-[15px]">
         {SIMREADY_ASSETS.map((a) => (
-          <div key={a.id} title={a.name} className="flex size-[115px] items-center justify-center overflow-hidden rounded-full bg-[var(--library-asset)]">
+          <button
+            key={a.id}
+            type="button"
+            title={fmt(L.place, { name: a.name })}
+            aria-label={fmt(L.place, { name: a.name })}
+            onClick={() => onPlaceAsset(a.id)}
+            className="flex size-[115px] items-center justify-center overflow-hidden rounded-full bg-[var(--library-asset)] transition-transform duration-[var(--motion-base)] ease-[var(--ease-standard)] hover:scale-[1.05] focus-visible:scale-[1.05]"
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={`${SIMREADY_BASE}/${a.id}/thumb.png`} alt={a.name} className="size-[88px] object-contain" />
-          </div>
+            <img src={`${SIMREADY_BASE}/${a.id}/thumb.png`} alt="" className="size-[88px] object-contain" />
+          </button>
         ))}
       </div>
     </div>

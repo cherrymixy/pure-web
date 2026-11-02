@@ -17,6 +17,8 @@ import { PURE_DESK_ROBOT, retargetMotion, type CameraView, type FaceManifest, ty
 import { motionPlayable, type Playable } from '@/lib/sim/sequence';
 import { CommandSmoother } from '@/lib/sim/smooth';
 import { createLamp, type LampSim, type LoadProgress } from './lamp';
+import { PropScene } from './prop-scene';
+import type { PropAsset } from './props';
 import { LimitMonitor, type JointLimits, type LimitEvent } from './limits';
 import { LampViewer, type JointScreenPoint, type ViewerOptions } from './viewer3d';
 
@@ -53,7 +55,9 @@ export type RuntimeEvent =
   /** Editor gizmo: a part was clicked (robot joint id, null = nothing that moves) */
   | { type: 'jointPick'; id: string | null }
   /** Editor gizmo: ring dragged — degrees swept since the grab (robot joint id) */
-  | { type: 'jointRotate'; id: string; deltaDeg: number; done: boolean };
+  | { type: 'jointRotate'; id: string; deltaDeg: number; done: boolean }
+  /** Library L3: a placed 3D asset was clicked (slot key, null = empty space) */
+  | { type: 'propPick'; key: string | null };
 
 /** What the runtime plays. `build(start)` makes the playable from the current pose. */
 export interface PlaybackSource {
@@ -77,6 +81,8 @@ export interface SimRuntimeOptions {
   idle?: boolean;
   /** Pause at the first limit overshoot (default true, PRD rule 8). */
   stopOnLimit?: boolean;
+  /** 3D asset props (Library L3) — their bodies are compiled into the scene; empty = the plain scene. */
+  props?: PropAsset[];
 }
 
 export class SimRuntime {
@@ -84,6 +90,8 @@ export class SimRuntime {
   readonly ready: Promise<void>;
   private lamp: LampSim | null = null;
   private viewer: LampViewer | null = null;
+  /** Placed 3D assets (null = plain scene) */
+  props: PropScene | null = null;
   private faceSource: FaceSource = { kind: 'video' };
   private faces: FaceManifest | null = null;
   private limits: LimitMonitor | null = null;
@@ -128,12 +136,16 @@ export class SimRuntime {
 
   private async load(): Promise<void> {
     try {
-      const lamp = await createLamp(this.robot, (progress) => this.emit({ type: 'progress', progress }));
+      const lamp = await createLamp(this.robot, (progress) => this.emit({ type: 'progress', progress }), this.options.props);
       if (this.disposed) return;
       this.lamp = lamp;
       this.limits = new LimitMonitor(this.robot, lamp.limits);
       if (this.pendingLimits) this.limits.setLimits(this.pendingLimits);
       this.viewer = new LampViewer(this.canvas, lamp, this.options.viewer);
+      if (lamp.props.length) {
+        this.props = new PropScene(lamp);
+        this.viewer.attachProps(this.props);
+      }
       const box = this.canvas.getBoundingClientRect();
       this.resize(box.width, box.height);
       await this.loadFaces();
@@ -425,7 +437,11 @@ export class SimRuntime {
         this.tickClock = 0;
         this.emitTick();
       }
+    } else if (this.props && this.props.settling > 0) {
+      // Paused: props still fall and stack; the robot is held where it is.
+      lamp.stepProps(Math.min(Math.round(wall / lamp.dt), MAX_STEPS));
     }
+    if (this.props) this.props.settling = Math.max(0, this.props.settling - wall);
 
     const viewer = this.viewer;
     if (viewer) {
@@ -522,5 +538,15 @@ export class SimRuntime {
 
   capture(): string | null {
     return this.viewer?.capture() ?? null;
+  }
+
+  /** Click a placed 3D asset to pick it (event propPick). */
+  enablePropPick(on: boolean): void {
+    this.viewer?.enablePropPick(on ? (key) => this.emit({ type: 'propPick', key }) : null);
+  }
+
+  /** Screen direction → one cell along the nearest world axis. */
+  screenStep(dir: 'up' | 'down' | 'left' | 'right'): [number, number] {
+    return this.viewer?.screenStep(dir) ?? [0, 0];
   }
 }

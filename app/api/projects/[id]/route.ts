@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { body, handle, type Ctx } from "@/lib/api";
-import { ChannelSchema } from "@/lib/models";
+import { ChannelSchema, SceneSchema } from "@/lib/models";
 import { getRepo } from "@/lib/repo-server";
 
 export const dynamic = "force-dynamic";
@@ -16,6 +16,7 @@ const PatchSchema = z
     status: z.enum(["analyzing", "draft", "ready"]),
     progress: z.number().min(0).max(100),
     channelsUsed: z.array(ChannelSchema),
+    scene: SceneSchema,
   })
   .partial();
 
