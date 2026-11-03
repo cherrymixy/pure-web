@@ -83,6 +83,8 @@ export function LabHome() {
         running.current = next;
         setProgress(next);
         if (finished) void load();
+        // No live job: a failed import stays "analyzing" in the list, polling it would never end.
+        if (Object.keys(next).length === 0) clearInterval(timer);
       } catch {
         // keep last progress
       }

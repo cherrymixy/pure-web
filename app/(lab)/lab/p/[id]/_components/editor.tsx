@@ -298,11 +298,14 @@ export function Editor({
 
   // ------------------------------------------------------------ persistence
 
+  const patchSeq = useRef(0);
   const patchExpression = useCallback(
     async (patch: Partial<Expression>) => {
       if (!expression) return null;
+      const seq = ++patchSeq.current;
       const next = await api<Expression>(`/api/expressions/${expression.id}`, { method: "PATCH", body: JSON.stringify(patch) });
-      setExpression(next);
+      // Overlapping edits: an older response arriving last must not roll the copy back (Export reads it).
+      if (seq === patchSeq.current) setExpression(next);
       return next;
     },
     [expression],

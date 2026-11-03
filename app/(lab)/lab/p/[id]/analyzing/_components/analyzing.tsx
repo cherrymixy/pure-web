@@ -72,7 +72,10 @@ export function Analyzing({ id }: { id: string }) {
         const [p, jobs] = await Promise.all([api<Project>(`/api/projects/${id}`), api<Job[]>(`/api/jobs?projectId=${id}`)]);
         if (!active) return;
         setProject(p);
-        setJob(latest(jobs));
+        const j = latest(jobs);
+        setJob(j);
+        // Failed / canceled stays on screen (E2): nothing more to wait for.
+        if (j?.status === "failed" || j?.status === "canceled") clearInterval(timer);
         setNow(Date.now());
       } catch (err) {
         if (active && (err as { status?: number }).status === 404) setMissing(true);
@@ -86,7 +89,8 @@ export function Analyzing({ id }: { id: string }) {
     };
   }, [id]);
 
-  const done = job?.status === "done" || (project && project.status !== "analyzing" && project.structure);
+  // Boolean on purpose: a fresh structure object every poll would re-run the effect and clear its timer.
+  const done = job?.status === "done" || Boolean(project && project.status !== "analyzing" && project.structure);
   useEffect(() => {
     if (!done || leaving.current) return;
     leaving.current = true;

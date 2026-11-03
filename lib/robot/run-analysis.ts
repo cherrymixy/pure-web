@@ -10,6 +10,7 @@ export type AnalyzeInput =
 
 const sleep = (ms: number, signal?: AbortSignal) =>
   new Promise<void>((resolve, reject) => {
+    if (signal?.aborted) return reject(new Error("canceled"));
     if (ms <= 0) return resolve();
     const t = setTimeout(resolve, ms);
     signal?.addEventListener("abort", () => {
@@ -47,7 +48,8 @@ export async function runAnalysis(opts: {
     const progress = Math.round((step / steps.length) * 100);
     await opts.report?.({ progress, step, stepLabel: steps[step] });
     await repo.projects.update(projectId, { progress });
-    if (step === 1 && failure) throw failure;
+    // >= 1: a resumed run past "Finding joints" must still fail instead of saving no structure.
+    if (step >= 1 && failure) throw failure;
     await sleep(ms, opts.signal);
   }
   await repo.projects.setStructure(projectId, structure!, { replace: true });

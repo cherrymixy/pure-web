@@ -43,6 +43,8 @@ export class OllamaClient implements LlmClient {
   }
 
   async chatJson(req: ChatJsonRequest): Promise<ChatJsonResponse> {
+    // An already-aborted signal never fires "abort": stop here instead of holding Ollama for a full timeout.
+    if (req.signal?.aborted) throw new LlmError("canceled", "Canceled");
     const model = req.model ?? this.defaultModel;
     const controller = new AbortController();
     let timedOut = false;

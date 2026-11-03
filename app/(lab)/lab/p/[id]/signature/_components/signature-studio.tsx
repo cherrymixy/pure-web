@@ -90,7 +90,7 @@ export function SignatureStudio({
 
   const current = versions.find((v) => v.id === currentId) ?? versions.at(-1);
   const running = job !== null && (job.status === "queued" || job.status === "running");
-  useUnsavedChanges(draft !== null);
+  const unsavedGuard = useUnsavedChanges(draft !== null);
 
   const reload = useCallback(async () => {
     const [list, project] = await Promise.all([
@@ -590,6 +590,7 @@ export function SignatureStudio({
           <Button onClick={() => setQuote(null)}>{STRINGS.common.close}</Button>
         </div>
       </Modal>
+      {unsavedGuard}
     </div>
   );
 }

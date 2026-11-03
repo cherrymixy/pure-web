@@ -40,7 +40,7 @@ export function StructureEditor({ projectId, name, initial }: { projectId: strin
   const [anchors, setAnchors] = useState<Anchor[]>([]);
   const [saving, setSaving] = useState(false);
   const dirty = useMemo(() => JSON.stringify(structure) !== JSON.stringify(initial), [structure, initial]);
-  useUnsavedChanges(dirty && !saving);
+  const unsavedGuard = useUnsavedChanges(dirty && !saving);
 
   // Joint numbers follow the model (projectJoints is in CSS px of the canvas).
   useEffect(() => {
@@ -218,6 +218,7 @@ export function StructureEditor({ projectId, name, initial }: { projectId: strin
       </section>
 
       <StageSteps current={0} className="absolute bottom-[67px] left-[calc(50%-341px)]" />
+      {unsavedGuard}
     </div>
   );
 }

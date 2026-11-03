@@ -1,8 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { PROMPT_DEMOS, COMPONENT_DEMOS } from "@/data/demo-recipes";
 import { LlmError } from "./client";
 import { DemoExtraction, OllamaExtraction } from "./extraction";
 import { FakeClient } from "./fake";
+import { OllamaClient } from "./ollama";
 import { DemoGeneration, GenerationOutputSchema, OllamaGeneration, demoToOutput, pickDemo, type GenerationOutput } from "./generation";
 
 const good: GenerationOutput = {
@@ -72,6 +73,17 @@ describe("OllamaGeneration with FakeClient", () => {
     expect(fake.calls[1].images).toBeUndefined();
     expect(fake.calls[1].user).toContain("A cat slowly nods off");
     expect(r.referenceSummary).toBe("A cat slowly nods off on a sofa.");
+  });
+});
+
+describe("OllamaClient", () => {
+  it("an already-aborted signal is canceled without calling Ollama", async () => {
+    const fetch = vi.spyOn(globalThis, "fetch");
+    const ctrl = new AbortController();
+    ctrl.abort();
+    await expect(new OllamaClient("http://x").chatJson({ system: "s", user: "u", schema: {}, signal: ctrl.signal })).rejects.toMatchObject({ kind: "canceled" });
+    expect(fetch).not.toHaveBeenCalled();
+    fetch.mockRestore();
   });
 });
 
