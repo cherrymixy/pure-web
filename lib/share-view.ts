@@ -12,6 +12,8 @@ export async function shareView(repo: Repo, id: string, unlocked: boolean) {
   // Locked links hide which expressions they hold (the ids open them through the library API).
   if (state === "password" && !unlocked) return { ...meta, expressionIds: [], expressions: null, robot: null };
   const expressions = await repo.shares.contents(id);
+  // Every expression was deleted from the library: say so instead of an empty viewer.
+  if (expressions.length === 0) throw new RepoError("NOT_FOUND", "This link no longer has anything to show");
   // The viewer plays on the robot the expressions were made for and builds pure.json from it.
   const project = expressions[0] ? await repo.projects.get(expressions[0].projectId).catch(() => null) : null;
   const robot = project?.structure ? { projectName: project.name, type: project.type, structure: project.structure } : null;

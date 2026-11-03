@@ -153,6 +153,9 @@ function useFresh(key: unknown, ms = NOTE_MS): boolean {
   return shown;
 }
 
+/** Referenced-set video frames per project + file: read and uploaded once per session, shared by repeat clicks and visits. */
+const SET_FRAMES = new Map<string, Promise<Pick<Reference, "frames" | "durationS">>>();
+
 export function Editor({
   project,
   structure,
@@ -195,7 +198,6 @@ export function Editor({
   /** Player caption for referenced-set items (uploads show their file name) */
   const [activeLabel, setActiveLabel] = useState<string | null>(null);
   /** Frames made for referenced-set videos, per public file, so Match timing works on them too */
-  const setFrames = useRef(new Map<string, Pick<Reference, "frames" | "durationS">>());
   const [sideBySide, setSideBySide] = useState(false);
   const [matching, setMatching] = useState(false);
   const [testOpen, setTestOpen] = useState(false);
@@ -269,7 +271,11 @@ export function Editor({
     }
   }, [project.id, context, contextLoaded]);
 
-  useEffect(() => sound.setQuietHours(quietHours), [sound, quietHours]);
+  // The sound player is shared across pages: leave quiet hours off for the next one.
+  useEffect(() => {
+    sound.setQuietHours(quietHours);
+    return () => sound.setQuietHours(false);
+  }, [sound, quietHours]);
 
   const { params, warnings } = useMemo(() => propsToParams(props, axes), [props, axes]);
   /** Context › Component card: channels per recipe step (live face / sound edits) */
@@ -646,13 +652,22 @@ export function Editor({
 
   useEffect(() => {
     if (!running(job) || !job) return;
+    // Polls can overlap on a slow response: only the first finished answer counts.
+    let stop = false;
     const timer = setInterval(async () => {
       const next = await api<Job>(`/api/jobs/${job.id}`).catch(() => null);
-      if (!next) return;
+      if (!next || stop) return;
+      if (!running(next)) {
+        stop = true;
+        clearInterval(timer);
+      }
       setJob(next);
       if (!running(next)) void finish(next);
     }, POLL_MS);
-    return () => clearInterval(timer);
+    return () => {
+      stop = true;
+      clearInterval(timer);
+    };
   }, [job, finish]);
 
   /**
@@ -747,19 +762,23 @@ export function Editor({
     const id = SET_REF + item.file;
     if (activeRef?.id === id) return setActiveRef(null);
     const isClip = item.file.endsWith(".webm");
-    const ref: Reference = { id, kind: isClip ? "video" : "image", path: item.file, thumb: item.poster ?? item.file, status: "ok", ...setFrames.current.get(item.file) };
-    setActiveRef(ref);
+    setActiveRef({ id, kind: isClip ? "video" : "image", path: item.file, thumb: item.poster ?? item.file, status: "ok" });
     setActiveLabel(item.title);
-    if (!isClip || ref.frames) return;
-    void (async () => {
-      const blob = await (await fetch(item.file)).blob();
-      const read = await extractFrames(new File([blob], item.file.split("/").pop() ?? "motion.webm", { type: blob.type || "video/webm" }));
-      const frames: string[] = [];
-      for (const [i, f] of read.frames.entries()) frames.push((await uploadFile(f, { projectId: project.id, kind: "frame", name: `set-${i + 1}.jpg` })).path);
-      const extra = { frames, durationS: Math.round(read.duration * 10) / 10 };
-      setFrames.current.set(item.file, extra);
-      setActiveRef((cur) => (cur?.id === id ? { ...cur, ...extra } : cur));
-    })().catch(() => {});
+    if (!isClip) return;
+    const key = `${project.id}:${item.file}`;
+    let read = SET_FRAMES.get(key);
+    if (!read) {
+      read = (async () => {
+        const blob = await (await fetch(item.file)).blob();
+        const r = await extractFrames(new File([blob], item.file.split("/").pop() ?? "motion.webm", { type: blob.type || "video/webm" }));
+        const frames: string[] = [];
+        for (const [i, f] of r.frames.entries()) frames.push((await uploadFile(f, { projectId: project.id, kind: "frame", name: `set-${i + 1}.jpg` })).path);
+        return { frames, durationS: Math.round(r.duration * 10) / 10 };
+      })();
+      SET_FRAMES.set(key, read);
+      read.catch(() => SET_FRAMES.delete(key));
+    }
+    read.then((extra) => setActiveRef((cur) => (cur?.id === id ? { ...cur, ...extra } : cur)), () => {});
   }
 
   // ------------------------------------------------------------ library

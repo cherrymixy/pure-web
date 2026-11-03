@@ -114,6 +114,12 @@ describe("LowRepo", () => {
     expect(await code(t.repo.shares.unlock(s.id, "pure"))).toBeNull();
   });
 
+  it("a finished job keeps its status (cancel after done does nothing)", async () => {
+    const j = await t.repo.jobs.create("dev-echo", null, {});
+    await t.repo.jobs.update(j.id, { status: "done", progress: 100 });
+    expect((await t.repo.jobs.update(j.id, { status: "canceled" })).status).toBe("done");
+  });
+
   it("locked share view hides its expression ids until unlocked", async () => {
     const s = await t.repo.shares.create({ expressionIds: ["e-sleepy-nod"], password: "pure", allowDownload: false });
     const locked = await shareView(t.repo, s.id, false);

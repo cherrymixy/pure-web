@@ -114,9 +114,15 @@ export function SignatureStudio({
 
   useEffect(() => {
     if (!running || !job) return;
+    // Polls can overlap on a slow response: only the first finished answer counts.
+    let stop = false;
     const timer = setInterval(async () => {
       const next = await api<Job>(`/api/jobs/${job.id}`).catch(() => null);
-      if (!next) return;
+      if (!next || stop) return;
+      if (next.status !== "queued" && next.status !== "running") {
+        stop = true;
+        clearInterval(timer);
+      }
       setJob(next);
       if (next.status === "done") {
         setLastExtract(next.result as ExtractResult);
@@ -126,7 +132,10 @@ export function SignatureStudio({
         setError({ code: next.errorCode ?? "FAILED", message: next.error ?? "" });
       }
     }, POLL_MS);
-    return () => clearInterval(timer);
+    return () => {
+      stop = true;
+      clearInterval(timer);
+    };
   }, [running, job, reload]);
 
   async function start(source: Source, regenerate = false) {

@@ -428,6 +428,8 @@ export class LowRepo implements Repo {
     update: (id, patch: JobPatch) =>
       this.write((data) => {
         const job = found(data.jobs.find((j) => j.id === id), "Job");
+        // Finished is final: a cancel landing right after "done" (or the reverse) must not flip it.
+        if (job.status === "done" || job.status === "failed" || job.status === "canceled") return job;
         Object.assign(job, patch, { updatedAt: this.iso() });
         return job;
       }),

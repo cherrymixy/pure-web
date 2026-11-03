@@ -106,6 +106,7 @@ export async function extractFromPdf(path: string, name: string): Promise<Extrac
 const MAX_BYTES = 2 * 1024 * 1024;
 
 async function fetchText(url: string, timeoutMs = 10_000): Promise<string> {
+  if (!/^https?:\/\//i.test(url)) throw new SignatureError("FETCH_FAILED", `Couldn't open ${url} (http or https only)`);
   let res: Response;
   try {
     res = await fetch(url, { signal: AbortSignal.timeout(timeoutMs), redirect: "follow", headers: { "user-agent": "PURE-Expert-Lab/0.1" } });
@@ -113,8 +114,19 @@ async function fetchText(url: string, timeoutMs = 10_000): Promise<string> {
     throw new SignatureError("FETCH_FAILED", `Couldn't open ${url} (${err instanceof Error ? err.message : String(err)})`);
   }
   if (!res.ok) throw new SignatureError("FETCH_FAILED", `Couldn't open ${url} (HTTP ${res.status})`);
-  const text = await res.text();
-  return text.slice(0, MAX_BYTES);
+  // Stop reading at MAX_BYTES: res.text() would buffer a huge file whole before the cut.
+  const reader = res.body?.getReader();
+  if (!reader) return "";
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  while (size < MAX_BYTES) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+    size += value.length;
+  }
+  await reader.cancel().catch(() => {});
+  return new TextDecoder().decode(Buffer.concat(chunks)).slice(0, MAX_BYTES);
 }
 
 const CSS_COLOR = /#([0-9a-f]{6}|[0-9a-f]{3})\b|rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})/gi;

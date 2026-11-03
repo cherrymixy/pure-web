@@ -38,8 +38,13 @@ export function CommunityBrowser() {
 
   useEffect(() => {
     const params = new URLSearchParams({ tab, ...(q.trim() ? { q: q.trim() } : {}) });
-    const timer = setTimeout(() => api<UserDataMotion[]>(`/api/user-data?${params}`).then(setItems, () => setItems([])), 150);
-    return () => clearTimeout(timer);
+    // A response for an older query that arrives late must not replace the newer one.
+    let stale = false;
+    const timer = setTimeout(() => api<UserDataMotion[]>(`/api/user-data?${params}`).then((r) => !stale && setItems(r), () => !stale && setItems([])), 150);
+    return () => {
+      stale = true;
+      clearTimeout(timer);
+    };
   }, [tab, q]);
 
   useEffect(() => setShown(COMMUNITY_PAGE_SIZE), [tab, q, robot]);

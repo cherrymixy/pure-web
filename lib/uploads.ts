@@ -74,8 +74,10 @@ export async function serveUpload(rel: string, req: Request): Promise<Response> 
   const type = TYPES[path.extname(abs).toLowerCase()] ?? "application/octet-stream";
   const range = req.headers.get("range")?.match(/bytes=(\d*)-(\d*)/);
   if (range) {
-    const start = range[1] ? Number(range[1]) : 0;
-    const end = range[2] ? Math.min(Number(range[2]), stat.size - 1) : stat.size - 1;
+    // "bytes=-N" = the last N bytes; a start past the end is unsatisfiable (416), not a broken stream.
+    const start = range[1] ? Number(range[1]) : range[2] ? Math.max(stat.size - Number(range[2]), 0) : 0;
+    const end = range[1] && range[2] ? Math.min(Number(range[2]), stat.size - 1) : stat.size - 1;
+    if (start >= stat.size || start > end) return new Response(null, { status: 416, headers: { "content-range": `bytes */${stat.size}` } });
     const stream = Readable.toWeb(fs.createReadStream(abs, { start, end })) as ReadableStream;
     return new Response(stream, {
       status: 206,
