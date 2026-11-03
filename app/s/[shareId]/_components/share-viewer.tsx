@@ -93,9 +93,9 @@ export function ShareViewer({ id }: { id: string }) {
   const header = (right?: React.ReactNode) => (
     <div className="px-[14px] pt-[var(--space-16)]">
       <header className="flex h-[88px] items-center justify-between rounded-[var(--radius-full)] border border-[var(--neutral-0)] bg-[var(--bg-surface)] px-[var(--space-40)]">
-        <Link href="/" aria-label={STRINGS.brand.name} className="flex items-center gap-[var(--space-12)]">
+        <Link href="/lab" aria-label={STRINGS.brand.name} className="flex items-center gap-[var(--space-12)]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/figma/landing/logo-mark.svg" alt="" width={30} height={30} className="block" />
+          <img src="/figma/brand/logo-mark.svg" alt="" width={30} height={30} className="block" />
           <span className="text-[20px] font-semibold leading-[1.26] text-[var(--sage-800)]">{STRINGS.brand.name}</span>
         </Link>
         {right}

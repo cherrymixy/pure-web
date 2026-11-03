@@ -269,7 +269,7 @@ const TYPE_IMAGE: Record<string, { src: string; w: number; h: number }> = {
   "jointless-driving": { src: "/figma/lab/robot-jointless-driving@2x.png", w: 163, h: 148 },
   "joint-driving": { src: "/figma/lab/robot-joint-driving@2x.png", w: 227, h: 269 },
   "joint-walking": { src: "/figma/project-thumb-desk@2x.png", w: 184, h: 184 },
-  "full-body": { src: "/figma/landing/type-full-body.png", w: 180, h: 270 },
+  "full-body": { src: "/figma/brand/type-full-body.png", w: 180, h: 270 },
 };
 
 function ProjectCard({

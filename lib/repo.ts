@@ -7,11 +7,11 @@ import type {
 } from "./models";
 
 export type ErrorCode =
-  | "VALIDATION" | "NOT_FOUND" | "CONFLICT" | "EXPIRED" | "LOCKED" | "PASSWORD_REQUIRED" | "WRONG_PASSWORD"
+  | "VALIDATION" | "NOT_FOUND" | "CONFLICT" | "EXPIRED" | "LOCKED" | "WRONG_PASSWORD"
   | "TOO_LARGE" | "UNSUPPORTED";
 
 export const ERROR_STATUS: Record<ErrorCode, number> = {
-  VALIDATION: 400, NOT_FOUND: 404, CONFLICT: 409, EXPIRED: 410, LOCKED: 423, PASSWORD_REQUIRED: 401,
+  VALIDATION: 400, NOT_FOUND: 404, CONFLICT: 409, EXPIRED: 410, LOCKED: 423,
   WRONG_PASSWORD: 401, TOO_LARGE: 413, UNSUPPORTED: 415,
 };
 
@@ -49,7 +49,6 @@ export interface Repo {
     update(id: string, patch: Partial<Pick<Project, "name" | "status" | "progress" | "channelsUsed" | "scene">>): Promise<Project>;
     duplicate(id: string): Promise<Project>;
     delete(id: string): Promise<void>;
-    /** Edit limits can only narrow: the rig ranges must stay as stored. */
     /** Edit limits keep the rig; `replace` (new 3D file / analysis) swaps the whole rig and the project type. */
     setStructure(id: string, structure: Structure, opts?: { replace?: boolean }): Promise<Project>;
   };

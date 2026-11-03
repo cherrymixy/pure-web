@@ -6,7 +6,7 @@ import { STRINGS } from "@/data/strings";
 import { Menu } from "@/components/ui/menu";
 import { ConfirmModal } from "@/components/ui/modal";
 
-// Sidebar user block (avatar mark + name, Figma 901:8325/8332) → Library / Profile & team / Log out (confirm → landing).
+// Sidebar user block (avatar mark + name, Figma 901:8325/8332) → Library / Profile & team / Log out (confirm → Lab home).
 export function UserMenu({ name, email }: { name: string; email: string }) {
   const router = useRouter();
   const [logOut, setLogOut] = useState(false);
@@ -39,7 +39,7 @@ export function UserMenu({ name, email }: { name: string; email: string }) {
         title={STRINGS.profile.logOutConfirm.title}
         body={STRINGS.profile.logOutConfirm.body}
         confirmLabel={STRINGS.sidebar.logOut}
-        onConfirm={() => router.push("/")}
+        onConfirm={() => router.push("/lab")}
         onCancel={() => setLogOut(false)}
       />
     </>

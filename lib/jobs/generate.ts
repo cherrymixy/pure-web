@@ -1,5 +1,4 @@
 import fs from "node:fs/promises";
-import path from "node:path";
 import { PURE_DEFAULT_SIGNATURE } from "@/data/signature";
 import { STRINGS } from "@/data/strings";
 import { buildExpression, type BuiltExpression } from "../expression/build";
@@ -11,7 +10,7 @@ import { demoToOutput, type GenerationClient, type GenerationOutput } from "../l
 import { propsToParams } from "../expression/props";
 import { sampleRecipe } from "../expression/sample";
 import type { Clip, MotionProps, Reference } from "../models";
-import { UPLOADS_DIR } from "../paths";
+import { UPLOADS_DIR, resolveUpload } from "../paths";
 import type { Repo } from "../repo";
 import { matchScripted, pause } from "./scripted";
 
@@ -47,8 +46,8 @@ export async function referenceImages(refs: Reference[], root = UPLOADS_DIR): Pr
   const files = refs.filter((r) => r.status === "ok").flatMap((r) => (r.frames?.length ? r.frames : r.kind === "image" ? [r.path] : []));
   const out: string[] = [];
   for (const rel of files.slice(0, MAX_IMAGES)) {
-    const abs = path.resolve(root, rel);
-    if (!abs.startsWith(path.resolve(root) + path.sep)) continue;
+    const abs = resolveUpload(rel, root);
+    if (!abs) continue;
     try {
       out.push((await fs.readFile(abs)).toString("base64"));
     } catch {

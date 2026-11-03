@@ -10,6 +10,7 @@ import type { Db } from "./models";
 import { RepoError } from "./repo";
 import { LowRepo, SHARE_LOCK_MS } from "./repo-lowdb";
 import { shareView } from "./share-view";
+import { resolveUpload } from "./paths";
 
 vi.mock("server-only", () => ({}));
 
@@ -201,5 +202,14 @@ describe("library ↔ user data, ownership", () => {
     const p = await t.repo.profile.setRole("minjun@purebot.com", "Owner");
     expect(p.team.find((m) => m.email === "minjun@purebot.com")?.role).toBe("Owner");
     expect(p.team.find((m) => m.email === "SeungA@purebot.com")?.role).toBe("Admin");
+  });
+});
+
+describe("resolveUpload", () => {
+  it("keeps paths inside the uploads root and refuses traversal", () => {
+    expect(resolveUpload("p/img/a.png", "/srv/up")).toBe("/srv/up/p/img/a.png");
+    expect(resolveUpload("../db.json", "/srv/up")).toBeNull();
+    expect(resolveUpload("/etc/passwd", "/srv/up")).toBeNull();
+    expect(resolveUpload("", "/srv/up")).toBeNull();
   });
 });

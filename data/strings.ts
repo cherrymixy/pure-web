@@ -1,11 +1,7 @@
 // UI copy (English). Sourced from the PRD flows; final wording is aligned to Figma in the design pass.
 export const STRINGS = {
   brand: { name: "PURE", product: "PURE Expert Lab" },
-  gnb: { guideline: "Guideline", signIn: "Sign in", tryPure: "Try PURE", openLab: "Open Lab" },
   sidebar: { lab: "Lab", guideline: "Guideline", community: "Community", library: "Library", profile: "Profile & team", logOut: "Log out" },
-  landing: {
-    sections: { why: "Why PURE", expert: "For Expert", robotTypes: "Robot types", guideline: "Guideline" },
-  },
   lab: {
     title: "Lab",
     import: "Import",
@@ -419,7 +415,7 @@ export const STRINGS = {
     edit: "Edit profile",
     invite: "Invite",
     pending: "Pending",
-    logOutConfirm: { title: "Log out?", body: "You'll return to the landing page." },
+    logOutConfirm: { title: "Log out?", body: "You'll return to the Lab home." },
     nameRule: "1–20 characters",
     name: "Name",
     email: "Email",

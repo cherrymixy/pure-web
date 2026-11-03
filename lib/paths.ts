@@ -7,3 +7,10 @@ import path from "node:path";
 export const DATA_DIR = process.env.VERCEL ? path.join(os.tmpdir(), "pure-data") : path.join(process.cwd(), "data");
 export const DB_FILE = path.join(DATA_DIR, "db.json");
 export const UPLOADS_DIR = path.join(DATA_DIR, "uploads");
+
+/** Absolute path of an upload, or null when `rel` would leave `root` (path traversal). */
+export function resolveUpload(rel: string, root = UPLOADS_DIR): string | null {
+  const base = path.resolve(root);
+  const abs = path.resolve(base, rel);
+  return abs.startsWith(base + path.sep) ? abs : null;
+}

@@ -1,6 +1,5 @@
-import path from "node:path";
 import type { ExtractionClient, ExtractionOutput } from "../llm/extraction";
-import { UPLOADS_DIR } from "../paths";
+import { resolveUpload } from "../paths";
 import type { SignatureDraft } from "../repo";
 import { axesFromTone } from "./axes";
 import { assertReadable, classifyUrl, extractFromPdf, extractFromUrl, type Extracted, type SourceInput } from "./extract";
@@ -15,8 +14,8 @@ export async function extractSource(source: SourceInput): Promise<Extracted> {
     }
     return extractFromUrl(source.url);
   }
-  const abs = path.resolve(UPLOADS_DIR, source.path);
-  if (!abs.startsWith(UPLOADS_DIR + path.sep)) throw new SignatureError("UNREADABLE", "Invalid file path");
+  const abs = resolveUpload(source.path);
+  if (!abs) throw new SignatureError("UNREADABLE", "Invalid file path");
   return extractFromPdf(abs, source.name);
 }
 
@@ -26,7 +25,9 @@ export async function toneFromSources(x: Extracted, client: ExtractionClient, op
 
 /** Extraction + tone → a signature draft ready for repo.signatures.addVersion. */
 export function buildDraft(x: Extracted, tone: ExtractionOutput, opts: { source: SourceInput; demo?: boolean }): SignatureDraft {
-  const evidence = tone.tone.map((t) => ({ keyword: t.keyword, page: x.kind === "pdf" ? t.page : undefined, quote: t.quote }));
+  // Demo tone quotes another brand guide, and model page numbers can point past the end: only cite real pages of this PDF.
+  const cite = (page?: number) => (x.kind === "pdf" && !opts.demo && page && page >= 1 && page <= x.pageCount ? page : undefined);
+  const evidence = tone.tone.map((t) => ({ keyword: t.keyword, page: cite(t.page), quote: t.quote }));
   const { axes, mapping } = axesFromTone(evidence);
   const sourceEntry =
     opts.source.kind === "pdf"

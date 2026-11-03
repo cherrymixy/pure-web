@@ -124,6 +124,8 @@ describe("versions", () => {
     expect(v2.version).toBe(2);
     const diff = compareSignatures(v1, v2);
     expect(diff.find((d) => d.axis === "tempo")!.delta).toBe(v2.axes.tempo - v1.axes.tempo);
+    const demo = buildDraft({ ...x, pageCount: 3 }, DEMO_EXTRACTION, { source, demo: true });
+    expect(demo.mapping.some((m) => m.page !== undefined)).toBe(false);
     const v3 = await repo.signatures.restore(p.id, 1);
     expect(v3.version).toBe(3);
     expect(v3.axes).toEqual(v1.axes);

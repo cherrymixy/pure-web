@@ -1,9 +1,8 @@
 import { createHash } from "node:crypto";
 import fs from "node:fs";
-import path from "node:path";
 import { SCRIPTED_REFERENCES, type ScriptedReference } from "@/data/scripted-references";
 import type { Reference } from "../models";
-import { UPLOADS_DIR } from "../paths";
+import { UPLOADS_DIR, resolveUpload } from "../paths";
 
 const hashes = new Map<string, string | null>();
 
@@ -23,8 +22,8 @@ async function sha256(abs: string): Promise<string | null> {
 /** The scripted reference for the first attached video whose file matches one (data/scripted-references.ts). */
 export async function matchScripted(refs: Reference[], root = UPLOADS_DIR): Promise<ScriptedReference | null> {
   for (const r of refs.filter((x) => x.kind === "video")) {
-    const abs = path.resolve(root, r.path);
-    if (!abs.startsWith(path.resolve(root) + path.sep)) continue;
+    const abs = resolveUpload(r.path, root);
+    if (!abs) continue;
     const digest = await sha256(abs);
     const hit = digest && SCRIPTED_REFERENCES.find((s) => s.sha256.includes(digest));
     if (hit) return hit;

@@ -28,7 +28,7 @@ export function DemoReset() {
     setOpen(false);
     await fetch("/api/dev/reset", { method: "POST" });
     toast(R.done);
-    router.push("/");
+    router.push("/lab");
     router.refresh();
   }
 

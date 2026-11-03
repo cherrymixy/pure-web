@@ -984,13 +984,22 @@ export function Editor({
 
   async function rename(next: string) {
     setRenaming(false);
-    await api(`/api/projects/${project.id}`, { method: "PATCH", body: JSON.stringify({ name: next }) });
+    try {
+      await api(`/api/projects/${project.id}`, { method: "PATCH", body: JSON.stringify({ name: next }) });
+    } catch {
+      return toast(STRINGS.lab.toast.failed);
+    }
     setName(next);
     toast(fmt(E.renamed, { name: next }));
   }
 
   async function remove() {
-    await api(`/api/projects/${project.id}`, { method: "DELETE" });
+    try {
+      await api(`/api/projects/${project.id}`, { method: "DELETE" });
+    } catch {
+      setDeleting(false);
+      return toast(STRINGS.lab.toast.failed);
+    }
     toast(fmt(STRINGS.lab.toast.deleted, { name }));
     router.push("/lab");
   }

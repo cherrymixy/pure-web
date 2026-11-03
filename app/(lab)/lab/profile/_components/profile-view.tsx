@@ -176,7 +176,7 @@ export function ProfileView({ initial }: { initial: Profile }) {
         onCancel={() => setConfirm(null)}
       />
       <ConfirmModal open={deleteAccount} title={P.deleteAccountConfirm.title} body={P.deleteAccountConfirm.body} confirmLabel={STRINGS.common.confirm} onConfirm={() => setDeleteAccount(false)} onCancel={() => setDeleteAccount(false)} />
-      <ConfirmModal open={logOut} title={P.logOutConfirm.title} body={P.logOutConfirm.body} confirmLabel={STRINGS.sidebar.logOut} onConfirm={() => router.push("/")} onCancel={() => setLogOut(false)} />
+      <ConfirmModal open={logOut} title={P.logOutConfirm.title} body={P.logOutConfirm.body} confirmLabel={STRINGS.sidebar.logOut} onConfirm={() => router.push("/lab")} onCancel={() => setLogOut(false)} />
     </div>
   );
 }

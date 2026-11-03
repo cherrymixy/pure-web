@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
-import { UPLOADS_DIR } from "./paths";
+import { UPLOADS_DIR, resolveUpload } from "./paths";
 import { RepoError } from "./repo";
 
 const MB = 1024 * 1024;
@@ -67,8 +67,8 @@ const TYPES: Record<string, string> = {
 
 /** Serve an uploaded file (with Range for video seeking). Paths outside data/uploads are refused. */
 export async function serveUpload(rel: string, req: Request): Promise<Response> {
-  const abs = path.resolve(UPLOADS_DIR, rel);
-  if (!abs.startsWith(UPLOADS_DIR + path.sep)) throw new RepoError("NOT_FOUND", "File not found");
+  const abs = resolveUpload(rel);
+  if (!abs) throw new RepoError("NOT_FOUND", "File not found");
   const stat = await fs.promises.stat(abs).catch(() => null);
   if (!stat?.isFile()) throw new RepoError("NOT_FOUND", "File not found");
   const type = TYPES[path.extname(abs).toLowerCase()] ?? "application/octet-stream";

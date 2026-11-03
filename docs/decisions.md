@@ -101,3 +101,4 @@ STEP마다 한 줄. `날짜 · STEP · 결정 · 근거`
 | 2026-11-03 | 감사 수정 1~5 | Retry = lastPrompt 재생성, 미리보기 클립·Auto-adjust·채널 칸·사운드 큐 클램프는 speed 1(재생 시계) 기준, 잠긴 공유는 expressionIds 숨김, Vercel에서 /api/dev/* 404(middleware) | 코드 감사 |
 | 2026-11-03 | 감사 수정 6~10 | 잡 after() 등록·삭제된 잡 실패 기록 무시, 스키마 repeat 소수 허용, validateClip 같은 시각 키는 나중 것만, Match timing은 120°/s 넘기는 이동 생략, README 배포본 한계 안내 | 코드 감사 |
 | 2026-11-03 | 감사 수정 11~15 | 분석 완료 done boolean, 앱 내 링크도 미저장 확인 모달(use-unsaved), PATCH 최신 응답만 반영, 이미 취소된 요청은 Ollama·분석 sleep 생략, 실패·취소 분석과 잡 없는 Lab 홈은 폴링 중단, 재개된 rig 없는 분석은 실패 처리 | 코드 감사 |
+| 2026-11-03 | 감사 수정 16~19 | 랜딩 코드·자산 삭제(로고·full-body 이미지는 public/figma/brand/), 로그아웃·리셋·공유 로고 → /lab, 이름 변경·삭제 실패 토스트, 데모·범위 밖 PDF 페이지 인용 제거, resolveUpload 하나로 경로 검사 통합, PASSWORD_REQUIRED 제거 | 코드 감사 |
