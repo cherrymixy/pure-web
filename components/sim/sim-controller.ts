@@ -11,7 +11,7 @@ import { BEHAVIORS, HOME } from '@/lib/sim/behaviors';
 import { engineJoint, toEngineClip } from '@/lib/sim/clip-map';
 import { DEFAULT_PARAMS, applyParams, resolveParams, scaleTime, type PlaybackParams } from '@/lib/sim/params';
 import { retargetMotion, type CameraView } from '@/lib/sim/robots';
-import { SequencePlayer, clipPlayable, motionPlayable } from '@/lib/sim/sequence';
+import { SequencePlayer, clipPlayable, loopIfRepeated, motionPlayable } from '@/lib/sim/sequence';
 import type { Clip, FaceSpec, Recipe, SoundCue, SoundSpec, Structure } from '@/lib/models';
 import { FACE_DIR, FACE_VIDEOS } from '@/data/face-videos';
 import { faceAtTime, faceName } from '@/lib/expression/face';
@@ -245,7 +245,7 @@ export class SimController {
             if (!motion) return [];
             const amplitude = this.params.amplitude * step.amplitude;
             const scaled = scaleTime(retargetMotion(robot, motion), step.speed > 0 ? step.speed : 1);
-            return [{ motion: applyParams(scaled, { ...this.params, amplitude }, HOME), repeat: step.repeat }];
+            return [{ motion: applyParams(loopIfRepeated(scaled, step.repeat), { ...this.params, amplitude }, HOME), repeat: step.repeat }];
           }),
           start,
           LEAD_IN,

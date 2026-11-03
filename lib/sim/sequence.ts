@@ -11,6 +11,12 @@
 import { sampleClip, type Clip as EngineClip } from './clip';
 import { MotionPlayer, type Motion, type Pose } from './motion';
 
+
+/** A step repeated N times plays as a loop: mark it before applyParams so anticipation runs once, not every cycle. */
+export function loopIfRepeated<M extends { loop?: boolean }>(motion: M, repeat: number): M {
+  return Math.round(repeat) > 1 ? { ...motion, loop: true } : motion;
+}
+
 export interface Playable {
   /** Seconds; Infinity for looping behaviours */
   readonly duration: number;

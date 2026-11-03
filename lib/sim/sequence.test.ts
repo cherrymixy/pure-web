@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import { BEHAVIORS, HOME } from "./behaviors";
 import { cycleTime, JOINT_NAMES } from "./motion";
 import { PURE_DESK_ROBOT, retargetMotion } from "./robots";
-import { SequencePlayer, motionPlayable } from "./sequence";
+import { SequencePlayer, loopIfRepeated, motionPlayable } from "./sequence";
+import { applyParams } from "./params";
 
 const m = (name: string) => retargetMotion(PURE_DESK_ROBOT, BEHAVIORS.find((b) => b.name === name)!);
 
@@ -51,5 +52,15 @@ describe("loop continuity (contract change, STEP 8)", () => {
       const b = player.target(t + 1 / 120);
       for (const j of JOINT_NAMES) expect(Math.abs(b[j] - a[j])).toBeLessThan(1.5);
     }
+  });
+});
+
+describe("loopIfRepeated", () => {
+  it("a repeated one-shot gets no anticipation (it would replay every cycle); a single one keeps it", () => {
+    const greet = m("greet");
+    const once = applyParams(loopIfRepeated(greet, 1), { antic: 1 }, HOME);
+    const thrice = applyParams(loopIfRepeated(greet, 3), { antic: 1 }, HOME);
+    expect(thrice.loop).toBe(true);
+    expect(once.keyframes.length).toBe(thrice.keyframes.length + 1);
   });
 });

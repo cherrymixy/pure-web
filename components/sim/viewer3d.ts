@@ -433,21 +433,16 @@ export class LampViewer {
   dispose(): void {
     this.gizmoOff?.();
     this.propPickOff?.();
-    for (const { node } of this.propNodes) {
-      node.traverse((o) => {
-        const mesh = o as THREE.Mesh;
-        if (!mesh.isMesh) return;
-        mesh.geometry.dispose();
-        for (const m of [mesh.material].flat()) {
-          for (const v of Object.values(m)) if (v instanceof THREE.Texture) v.dispose();
-          m.dispose();
-        }
-      });
-    }
-    for (const m of this.ring.children as THREE.Mesh[]) {
-      m.geometry.dispose();
-      (m.material as THREE.Material).dispose();
-    }
+    // Whole scene (robot, props, ring, floor): leaving only props behind kept the robot's GPU buffers per visit.
+    this.scene.traverse((o) => {
+      const mesh = o as THREE.Mesh;
+      if (!mesh.isMesh) return;
+      mesh.geometry.dispose();
+      for (const m of [mesh.material].flat()) {
+        for (const v of Object.values(m)) if (v instanceof THREE.Texture) v.dispose();
+        m.dispose();
+      }
+    });
     if (this.video) {
       this.video.pause();
       this.video.removeAttribute('src');
@@ -455,6 +450,9 @@ export class LampViewer {
     }
     this.videoTexture?.dispose();
     this.renderer.dispose();
+    // Free the WebGL context now: browsers keep ~16 and drop the oldest after many page visits (all-day exhibit).
+    // Only once the canvas has left the page: a remount on the same canvas (React StrictMode) needs a live context.
+    if (!this.renderer.domElement.isConnected) this.renderer.forceContextLoss();
   }
 
   // ---------------------------------------------------------------- 매 프레임

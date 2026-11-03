@@ -8,7 +8,7 @@ import { appliedPatterns } from "@/data/patterns";
 import { EDITOR_PANEL } from "@/data/editor-panel";
 import { SIMREADY_ASSETS } from "@/data/simready-assets";
 import { STRINGS, fmt } from "@/data/strings";
-import { addFaceKey, addKey, applyBehavior, autoAdjust, delayFace, delaySound, isNeutralBehavior, NEUTRAL_BEHAVIOR, deleteFaceKey, deleteKey, formatTime, matchTiming, moveFaceKey, paramsToProps, propsToParams, recipeToClip, snapTime, channelTiles, updateKey } from "@/lib/expression";
+import { addFaceKey, addKey, applyBehavior, autoAdjust, delayFace, delaySound, isNeutralBehavior, NEUTRAL_BEHAVIOR, deleteFaceKey, deleteKey, formatTime, limitCheck, matchTiming, moveFaceKey, paramsToProps, propsToParams, recipeToClip, snapTime, channelTiles, updateKey } from "@/lib/expression";
 import { diffEnergy, energySamples } from "@/lib/reference/energy";
 import { flowEnergy } from "@/lib/reference/flow";
 import type { Channel, Clip, Expression, FaceSpec, Key, Job, MotionBehavior, MotionProps, Project, Reference, Settings, UserDataMotion, Signature, SoundCue, SoundSpec, Structure } from "@/lib/models";
@@ -937,10 +937,14 @@ export function Editor({
     if (!expression) return setLimit(null);
     const base = clip ?? recipeToClip(expression.motion.recipe, { ...params, speed: 1 }, structure);
     const adjusted = autoAdjust(base, structure);
+    // Playback applies the behavior on top: if its easing still overshoots the limits, drop the easing.
+    const overshoots = behavior?.easing && limitCheck(applyBehavior(adjusted.clip, behavior, structure), structure).length > 0;
+    const nextBehavior = overshoots ? { ...behavior!, easing: undefined } : behavior;
     setLimit(null);
     setClip(adjusted.clip);
-    await commit({ clip: adjusted.clip }, E.limit.autoAdjust);
-    toast(fmt(E.adjusted, { n: adjusted.changes.length }));
+    if (overshoots) setBehavior(nextBehavior);
+    await commit({ clip: adjusted.clip, behavior: nextBehavior }, E.limit.autoAdjust);
+    toast(overshoots ? E.easingCleared : fmt(E.adjusted, { n: adjusted.changes.length }));
     setAutoPlay(true);
     setCue((c) => c + 1);
   }

@@ -6,7 +6,7 @@ import { sampleTrack } from "../sim/clip";
 import { JOINT_NAMES, type Pose } from "../sim/motion";
 import { applyParams, resolveParams, scaleTime, type PlaybackParams } from "../sim/params";
 import { PURE_DESK_ROBOT, retargetMotion, type RobotSpec } from "../sim/robots";
-import { SequencePlayer } from "../sim/sequence";
+import { SequencePlayer, loopIfRepeated } from "../sim/sequence";
 import type { Clip, JointId, Recipe, Structure } from "../models";
 
 /** Same lead-ins as components/sim/sim-controller.ts (LEAD_IN / JOIN_IN). */
@@ -29,7 +29,7 @@ export function recipePlayer(recipe: Recipe, params: PlaybackParams = {}, robot:
     const motion = BEHAVIORS.find((b) => b.name === step.behavior);
     if (!motion) return [];
     const scaled = scaleTime(retargetMotion(robot, motion), step.speed > 0 ? step.speed : 1);
-    return [{ motion: applyParams(scaled, { ...p, amplitude: p.amplitude * step.amplitude }, HOME), repeat: step.repeat }];
+    return [{ motion: applyParams(loopIfRepeated(scaled, step.repeat), { ...p, amplitude: p.amplitude * step.amplitude }, HOME), repeat: step.repeat }];
   });
   return new SequencePlayer(steps, HOME, LEAD_IN, JOIN_IN);
 }

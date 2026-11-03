@@ -234,6 +234,7 @@ export const STRINGS = {
     limitBody: "{joint} reached {value}° (limit {limit}°) at {t}s. Playback is paused.",
     limitColumns: { joint: "Joint", value: "Command", limit: "Limit" },
     adjusted: "Adjusted to joint limits ({n} keys clamped)",
+    easingCleared: "Behavior easing removed: its overshoot still went past the joint limits",
     warnOutside: "Outside the signature range ({lo}–{hi})",
     timelineSoon: "The timeline arrives with the channel panels.",
     statusPlaceholder: "How does the robot feel right now?",

@@ -94,9 +94,6 @@ export function sampleTrack(track: Track, t: number, duration: number, loop: boo
  * 키프레임은 반복 클립이면 duration 으로 감아서 보고, 오버레이(호흡)는
  * `MotionPlayer` 와 똑같이 **감지 않은** t 로 계산한다.
  */
-export const sampleKeys = (clip: Clip, t: number): Pose =>
-  sampleClip({ ...clip, overlays: undefined }, t);
-
 export function sampleClip(clip: Clip, t: number): Pose {
   const d = Math.max(clip.duration, 1e-6);
   const local = clip.loop ? ((t % d) + d) % d : Math.min(Math.max(t, 0), d);
@@ -120,6 +117,8 @@ const mergeInto = (base: Pose, update: Partial<Record<JointName, number>>): Pose
   for (const [k, v] of Object.entries(update)) if (v !== undefined) out[k as JointName] = v;
   return out;
 };
+
+const round3 = (v: number): number => Math.round(v * 1000) / 1000;
 
 /**
  * 기존 Motion 을 편집 가능한 Clip 으로 바꾼다.
@@ -181,156 +180,5 @@ export function motionToClip(motion: Motion): Clip {
     loop: !!motion.loop,
     tracks,
     overlays: motion.overlays ? motion.overlays.map((o) => ({ ...o })) : undefined,
-  };
-}
-
-// ------------------------------------------------------------------ 편집 연산
-
-const round3 = (v: number): number => Math.round(v * 1000) / 1000;
-
-export const emptyClip = (name = 'my_motion'): Clip => ({
-  name,
-  label: '새 동작',
-  description: '',
-  duration: 4,
-  loop: false,
-  tracks: JOINT_NAMES.map((joint) => ({ joint, keys: [{ t: 0, value: 0, easing: 'ease_in_out' }] })),
-});
-
-export const cloneClip = (clip: Clip): Clip => JSON.parse(JSON.stringify(clip)) as Clip;
-
-export const trackOf = (clip: Clip, joint: JointName): Track => {
-  let track = clip.tracks.find((tr) => tr.joint === joint);
-  if (!track) {
-    track = { joint, keys: [] };
-    clip.tracks.push(track);
-  }
-  return track;
-};
-
-/** 같은 시각(허용오차 내)에 키가 있으면 값을 덮어쓰고, 없으면 새로 넣는다. */
-export function setKey(clip: Clip, joint: JointName, t: number, value: number, easing?: EasingName): Key {
-  const track = trackOf(clip, joint);
-  t = round3(Math.max(0, Math.min(t, clip.duration)));
-  const existing = track.keys.find((k) => Math.abs(k.t - t) < 1e-3);
-  if (existing) {
-    existing.value = round3(value);
-    if (easing) existing.easing = easing;
-    return existing;
-  }
-  const key: Key = { t, value: round3(value), easing: easing ?? 'ease_in_out' };
-  track.keys.push(key);
-  sortTrack(track);
-  return key;
-}
-
-/**
- * 클립을 빈 상태로 되돌린다 — 모든 트랙의 키를 지우고 홈 자세 키 하나만 남기며,
- * 호흡 같은 절차적 오버레이도 함께 지운다.
- * 이름·길이·반복 설정은 유지하므로 "이 클립을 처음부터 다시" 에 해당한다.
- */
-export function clearKeys(clip: Clip): void {
-  for (const joint of JOINT_NAMES) {
-    trackOf(clip, joint).keys = [{ t: 0, value: 0, easing: 'ease_in_out' }];
-  }
-  clip.overlays = undefined;
-}
-
-export function removeKey(clip: Clip, joint: JointName, t: number): boolean {
-  const track = trackOf(clip, joint);
-  const idx = track.keys.findIndex((k) => Math.abs(k.t - t) < 1e-3);
-  // 트랙이 완전히 비면 평가가 0 으로 떨어지므로 마지막 한 개는 남긴다.
-  if (idx < 0 || track.keys.length <= 1) return false;
-  track.keys.splice(idx, 1);
-  return true;
-}
-
-/** 키를 새 시각으로 옮긴다. 같은 자리에 이미 키가 있으면 그 키를 밀어낸다. */
-export function moveKey(clip: Clip, joint: JointName, from: number, to: number): number {
-  const track = trackOf(clip, joint);
-  const key = track.keys.find((k) => Math.abs(k.t - from) < 1e-3);
-  if (!key) return from;
-  const t = round3(Math.max(0, Math.min(to, clip.duration)));
-  const collision = track.keys.find((k) => k !== key && Math.abs(k.t - t) < 1e-3);
-  if (collision) track.keys.splice(track.keys.indexOf(collision), 1);
-  key.t = t;
-  sortTrack(track);
-  return t;
-}
-
-export const sortTrack = (track: Track): void => {
-  track.keys.sort((a, b) => a.t - b.t);
-};
-
-/** 길이를 바꾸면 범위를 벗어난 키를 끝으로 당긴다. */
-export function setDuration(clip: Clip, duration: number): void {
-  clip.duration = round3(Math.max(0.2, duration));
-  for (const track of clip.tracks) {
-    for (const key of track.keys) key.t = Math.min(key.t, clip.duration);
-    // 잘려서 겹친 키 정리
-    track.keys = track.keys.filter(
-      (k, i, arr) => i === 0 || Math.abs(k.t - arr[i - 1].t) > 1e-3,
-    );
-    sortTrack(track);
-  }
-}
-
-/** 클립 안의 모든 키 시각 (합집합, 정렬) */
-export function keyTimes(clip: Clip): number[] {
-  const set = new Set<number>();
-  for (const track of clip.tracks) for (const key of track.keys) set.add(round3(key.t));
-  return [...set].sort((a, b) => a - b);
-}
-
-// ------------------------------------------------------------------ 직렬화
-
-export function serializeClip(clip: Clip): string {
-  return JSON.stringify({ format: CLIP_FORMAT, clip }, null, 2);
-}
-
-/** 외부에서 들어온 JSON 을 검증하며 Clip 으로 만든다. 잘못된 값은 예외를 던진다. */
-export function parseClip(text: string): Clip {
-  let raw: unknown;
-  try {
-    raw = JSON.parse(text);
-  } catch {
-    throw new Error('JSON 을 읽을 수 없습니다');
-  }
-  const body = (raw as { clip?: unknown }).clip ?? raw;
-  const c = body as Partial<Clip>;
-  if (!c || typeof c !== 'object' || !Array.isArray(c.tracks)) {
-    throw new Error('클립 형식이 아닙니다 (tracks 없음)');
-  }
-
-  const tracks: Track[] = [];
-  for (const joint of JOINT_NAMES) {
-    const src = c.tracks.find((tr) => tr && (tr as Track).joint === joint) as Track | undefined;
-    const keys: Key[] = ((src?.keys ?? []) as Key[])
-      .filter((k) => Number.isFinite(k?.t) && Number.isFinite(k?.value))
-      .map((k) => ({
-        t: round3(Math.max(0, k.t)),
-        value: round3(k.value),
-        easing: (k.easing in EASINGS ? k.easing : 'ease_in_out') as EasingName,
-      }));
-    keys.sort((a, b) => a.t - b.t);
-    tracks.push({ joint, keys: keys.length ? keys : [{ t: 0, value: 0, easing: 'ease_in_out' }] });
-  }
-
-  const duration = Number.isFinite(c.duration) && (c.duration as number) > 0
-    ? round3(c.duration as number)
-    : Math.max(...tracks.flatMap((t) => t.keys.map((k) => k.t)), 1);
-
-  return {
-    name: typeof c.name === 'string' && c.name ? c.name.slice(0, 40) : 'imported',
-    label: typeof c.label === 'string' && c.label ? c.label.slice(0, 40) : '불러온 동작',
-    description: typeof c.description === 'string' ? c.description.slice(0, 200) : '',
-    duration,
-    loop: !!c.loop,
-    tracks,
-    overlays: Array.isArray(c.overlays)
-      ? (c.overlays as Oscillation[]).filter(
-          (o) => o && JOINT_NAMES.includes(o.joint) && Number.isFinite(o.amplitude) && Number.isFinite(o.period),
-        )
-      : undefined,
   };
 }
