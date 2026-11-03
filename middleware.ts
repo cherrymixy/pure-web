@@ -4,6 +4,10 @@ import { NextResponse, type NextRequest } from "next/server";
 const COOKIE = "pure-dev";
 
 export function middleware(req: NextRequest) {
+  // The public deploy has no auth: dev APIs (DB dump, reset, raw LLM) stay local-only.
+  if (req.nextUrl.pathname.startsWith("/api/dev")) {
+    return process.env.VERCEL ? NextResponse.json({ error: { code: "NOT_FOUND", message: "Not found" } }, { status: 404 }) : NextResponse.next();
+  }
   if (req.nextUrl.searchParams.get("dev") === "1") {
     const res = NextResponse.next();
     res.cookies.set(COOKIE, "1", { path: "/", sameSite: "lax" });
@@ -13,4 +17,4 @@ export function middleware(req: NextRequest) {
   return NextResponse.rewrite(new URL("/_dev-hidden", req.url));
 }
 
-export const config = { matcher: ["/dev", "/dev/:path*"] };
+export const config = { matcher: ["/dev", "/dev/:path*", "/api/dev/:path*"] };

@@ -98,3 +98,4 @@ STEP마다 한 줄. `날짜 · STEP · 결정 · 근거`
 | 2026-11-02 | 3D 에셋 확장 | SimReady 20개 추가(TV·소파 2·모니터·키보드·주전자·찻주전자·찻잔·와인잔·커피컵·사과·바나나·오렌지·컵케이크·꽃병·초·자명종·바구니·안경·나무 블록, 총 33·101 MB), 썸네일 불투명 배경 투명화(convert.py clear_thumb_bg·--thumbs), 3D Asset ↗ → ↻ 초기화(확인 후 오브젝트 전부 제거·로봇 원위치), 10개 이상이면 3×3 페이지 ‹ ›, userData 첨부 칩 = 모션 이름 | 사용자 요청 |
 | 2026-11-02 | 배포 | Library·SimReady 3D 에셋·로봇 이동·에디터 U1~U3 리디자인과 리뷰 수정 15커밋을 Vercel 프로덕션에 반영 | GitHub main 푸시 → 자동 배포 |
 | 2026-11-03 | 첫 화면 | 랜딩(W00-1, 히어로) 건너뜀: next.config redirects `/` → `/lab` (307, 랜딩 코드는 유지) | 사용자 요청 |
+| 2026-11-03 | 감사 수정 1~5 | Retry = lastPrompt 재생성, 미리보기 클립·Auto-adjust·채널 칸·사운드 큐 클램프는 speed 1(재생 시계) 기준, 잠긴 공유는 expressionIds 숨김, Vercel에서 /api/dev/* 404(middleware) | 코드 감사 |

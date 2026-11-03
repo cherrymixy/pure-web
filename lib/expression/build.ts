@@ -23,7 +23,8 @@ export function buildExpression(output: GenerationOutput, ctx: BuildContext): { 
   const props = ctx.props ?? paramsToProps(sig.playback);
   const { params } = propsToParams(props, ctx.signature.axes);
   const recipe = validateRecipe(output.motion, ctx.structure, params);
-  const { duration } = sampleRecipe(recipe.recipe, params, 10);
+  // Cue times run on the playback clock (the scheduler divides by speed), so clamp to the unscaled length.
+  const { duration } = sampleRecipe(recipe.recipe, { ...params, speed: 1 }, 10);
   const face = validateFace(output.face);
   const sound = validateSound(output.sound.cues, { duration, maxCues: sig.sound.maxCues, pitchSt: sig.sound.pitchSt });
   const name = sanitizeName(output.name, output.currentStatus);

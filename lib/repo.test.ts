@@ -3,12 +3,15 @@ import os from "node:os";
 import path from "node:path";
 import { Memory } from "lowdb";
 import { JSONFile } from "lowdb/node";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { SEED_PROJECTS, seedDb } from "@/data/seed";
 import { PURE_DESK_STRUCTURE } from "@/data/pure-desk";
 import type { Db } from "./models";
 import { RepoError } from "./repo";
 import { LowRepo, SHARE_LOCK_MS } from "./repo-lowdb";
+import { shareView } from "./share-view";
+
+vi.mock("server-only", () => ({}));
 
 const DAY = 86_400_000;
 
@@ -108,6 +111,15 @@ describe("LowRepo", () => {
     expect(await code(t.repo.shares.unlock(s.id, "pure"))).toBe("LOCKED");
     t.clock.advance(SHARE_LOCK_MS);
     expect(await code(t.repo.shares.unlock(s.id, "pure"))).toBeNull();
+  });
+
+  it("locked share view hides its expression ids until unlocked", async () => {
+    const s = await t.repo.shares.create({ expressionIds: ["e-sleepy-nod"], password: "pure", allowDownload: false });
+    const locked = await shareView(t.repo, s.id, false);
+    expect(locked.expressionIds).toEqual([]);
+    expect(locked.expressions).toBeNull();
+    expect("passwordHash" in locked).toBe(false);
+    expect((await shareView(t.repo, s.id, true)).expressionIds).toEqual(["e-sleepy-nod"]);
   });
 
   it("expression update bumps version and keeps history", async () => {

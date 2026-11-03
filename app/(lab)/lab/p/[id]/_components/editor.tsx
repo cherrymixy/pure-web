@@ -274,7 +274,7 @@ export function Editor({
   const { params, warnings } = useMemo(() => propsToParams(props, axes), [props, axes]);
   /** Context › Component card: channels per recipe step (live face / sound edits) */
   const steps = useMemo(
-    () => (expression ? channelTiles(expression.motion.recipe, face, soundSpec, params, (b) => componentForSim(b)?.id ?? b) : []),
+    () => (expression ? channelTiles(expression.motion.recipe, face, soundSpec, { ...params, speed: 1 }, (b) => componentForSim(b)?.id ?? b) : []),
     [expression, face, soundSpec, params],
   );
   const playable = useMemo(
@@ -380,7 +380,7 @@ export function Editor({
 
   /** Recipe keys shown before the first edit (sampled like the playback). */
   const previewClip = useMemo(
-    () => (expression && !clip ? recipeToClip(expression.motion.recipe, params, structure) : null),
+    () => (expression && !clip ? recipeToClip(expression.motion.recipe, { ...params, speed: 1 }, structure) : null),
     // Recipe and playback params decide the sampled keys.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [expression?.id, expression?.version, clip, params, structure],
@@ -913,7 +913,7 @@ export function Editor({
 
   async function autoAdjustLimits() {
     if (!expression) return setLimit(null);
-    const base = clip ?? recipeToClip(expression.motion.recipe, params, structure);
+    const base = clip ?? recipeToClip(expression.motion.recipe, { ...params, speed: 1 }, structure);
     const adjusted = autoAdjust(base, structure);
     setLimit(null);
     setClip(adjusted.clip);
@@ -1416,7 +1416,7 @@ export function Editor({
         {failure && <p className="font-mono text-[14px] leading-[18px] text-[var(--text-tertiary)]">{fmt(E.failedReason, { reason: failure })}</p>}
         <ModalActions>
           <ModalButton onClick={() => router.push("/lab/community")}>{E.failedActions.browse}</ModalButton>
-          <ModalButton variant="primary" onClick={() => { setFailure(null); void generate(); }}>{E.failedActions.retry}</ModalButton>
+          <ModalButton variant="primary" onClick={() => { setFailure(null); void generate(context.lastPrompt, context, true); }}>{E.failedActions.retry}</ModalButton>
         </ModalActions>
       </Modal>
 

@@ -128,6 +128,15 @@ describe("face, sound, names", () => {
     expect(r.cues[0]).toMatchObject({ t: 0.5, sound: "sad-long", pitchSt: -2 });
     expect(r.issues.map((i) => i.message).join(" ")).toMatch(/boom.*99/);
   });
+  it("sound: cue times are clamped on the playback clock, not the speed-scaled wall clock", () => {
+    const fast = { ...PURE_DEFAULT_SIGNATURE, axes: { ...PURE_DEFAULT_SIGNATURE.axes, tempo: 100 } }; // speed ×1.4
+    const output = GenerationOutputSchema.parse(samples[0].output);
+    output.sound.cues = [{ ...output.sound.cues[0], t: 999 }];
+    const { expression } = buildExpression(output, { structure: S, signature: fast });
+    const { params } = propsToParams(expression.motion.props, fast.axes);
+    const playback = sampleRecipe(expression.motion.recipe, { ...params, speed: 1 }, 10).duration;
+    expect(expression.sound.cues[0].t).toBeCloseTo(playback - 0.1, 1);
+  });
   it("sound: old synth cues migrate to the recorded sounds, keeping the signature pitch offset", () => {
     expect(migrateCue({ id: "soft-breath@0.4", t: 0.4, timbre: "soft", pitchSt: -2.3, tempo: 0.7, lengthS: 1.2, volumeDb: -14 })).toEqual({ id: "soft-breath@0.4", t: 0.4, sound: "sad-long", pitchSt: -0.3, volumeDb: -6 });
     expect(migrateCue({ id: "cue-1", t: 1, timbre: "bright", pitchSt: 7, tempo: 1.2, lengthS: 0.35, volumeDb: -10 }).sound).toBe("excited");
