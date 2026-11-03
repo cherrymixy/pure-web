@@ -1,4 +1,5 @@
 import "server-only";
+import { after } from "next/server";
 import type { Job, JobKind } from "../models";
 import type { Repo } from "../repo";
 import { getRepo } from "../repo-server";
@@ -28,7 +29,7 @@ function run(repo: Repo, job: Job): void {
   const runner = RUNNERS[job.kind];
   const controller = new AbortController();
   state.controllers.set(job.id, controller);
-  (async () => {
+  const task = (async () => {
     try {
       if (!runner) throw new Error(`No runner for ${job.kind}`);
       let current = await repo.jobs.update(job.id, { status: "running" });
@@ -45,16 +46,21 @@ function run(repo: Repo, job: Job): void {
     } catch (err) {
       if (!controller.signal.aborted) {
         const code = (err as { code?: unknown }).code;
-        await repo.jobs.update(job.id, {
-          status: "failed",
-          error: err instanceof Error ? err.message : String(err),
-          ...(typeof code === "string" ? { errorCode: code } : {}),
-        });
+        // The job is gone when its project was deleted mid-run: nothing left to mark.
+        await repo.jobs
+          .update(job.id, {
+            status: "failed",
+            error: err instanceof Error ? err.message : String(err),
+            ...(typeof code === "string" ? { errorCode: code } : {}),
+          })
+          .catch(() => {});
       }
     } finally {
       state.controllers.delete(job.id);
     }
-  })();
+  })().catch(console.error);
+  // Serverless (Vercel) may freeze the instance once the response is sent; keep it alive until the job ends.
+  after(task);
 }
 
 export async function startJob(kind: JobKind, projectId: string | null, input: unknown): Promise<Job> {

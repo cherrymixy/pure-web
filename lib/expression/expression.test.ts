@@ -96,6 +96,12 @@ describe("validateClip", () => {
     expect(r.clip.duration).toBeCloseTo(2.55);
     expect(r.issues.some((i) => i.field === "timing")).toBe(true);
   });
+  it("keys sharing a time keep the later one (no zero-time jump)", () => {
+    const r = validateClip(clip({ base_yaw: [{ t: 0, value: 0, easing: "linear" }, { t: 1, value: 0, easing: "linear" }, { t: 1, value: 80, easing: "linear" }, { t: 2, value: 80, easing: "linear" }] }), S);
+    const ks = r.clip.tracks.base_yaw;
+    expect(new Set(ks.map((k) => k.t)).size).toBe(ks.length);
+    for (let i = 1; i < ks.length; i++) expect(Math.abs(ks[i].value - ks[i - 1].value) / (ks[i].t - ks[i - 1].t)).toBeLessThanOrEqual(120 + 1e-6);
+  });
   it("length 1–8 s and ≤ 24 keys", () => {
     const many = Array.from({ length: 60 }, (_, i) => ({ t: i * 0.15, value: Math.sin(i) * 10, easing: "linear" as const }));
     const r = validateClip(clip({ base_yaw: many }, 9), S);
@@ -217,6 +223,12 @@ describe("match timing & softer", () => {
     expect(r.clip.tracks.base_yaw.map((k) => k.t)).toEqual([0, 1.2, 2.8, 4]);
     expect(r.moved).toBe(2);
     expect(r.original).toBe(clip);
+  });
+  it("does not move a key where the new spacing would exceed 120°/s", () => {
+    // 0°@0 → 60°@1 (ease_in_out ×π/2 ≈ 94°/s); a peak at 0.76 s would make it ≈ 124°/s.
+    const clip: Clip = { format: "lelamp.clip/1", duration: 2, tracks: { base_yaw: [{ t: 0, value: 0, easing: "ease_in_out" }, { t: 1, value: 60, easing: "ease_in_out" }, { t: 2, value: 60, easing: "ease_in_out" }] } };
+    const energy = Array.from({ length: 51 }, (_, i) => ({ t: i * 0.04, value: i === 19 ? 10 : 1 }));
+    expect(matchTiming(clip, energy).moved).toBe(0);
   });
   it("softer = slower, smaller, smoother, quieter", () => {
     const { expression } = buildExpression(GenerationOutputSchema.parse(samples[0].output), { structure: S, signature: purebot });

@@ -99,3 +99,4 @@ STEP마다 한 줄. `날짜 · STEP · 결정 · 근거`
 | 2026-11-02 | 배포 | Library·SimReady 3D 에셋·로봇 이동·에디터 U1~U3 리디자인과 리뷰 수정 15커밋을 Vercel 프로덕션에 반영 | GitHub main 푸시 → 자동 배포 |
 | 2026-11-03 | 첫 화면 | 랜딩(W00-1, 히어로) 건너뜀: next.config redirects `/` → `/lab` (307, 랜딩 코드는 유지) | 사용자 요청 |
 | 2026-11-03 | 감사 수정 1~5 | Retry = lastPrompt 재생성, 미리보기 클립·Auto-adjust·채널 칸·사운드 큐 클램프는 speed 1(재생 시계) 기준, 잠긴 공유는 expressionIds 숨김, Vercel에서 /api/dev/* 404(middleware) | 코드 감사 |
+| 2026-11-03 | 감사 수정 6~10 | 잡 after() 등록·삭제된 잡 실패 기록 무시, 스키마 repeat 소수 허용, validateClip 같은 시각 키는 나중 것만, Match timing은 120°/s 넘기는 이동 생략, README 배포본 한계 안내 | 코드 감사 |

@@ -25,6 +25,12 @@ describe("OllamaGeneration with FakeClient", () => {
     expect(fake.calls[0].schema).toHaveProperty("properties.motion");
   });
 
+  it("a fractional repeat is accepted (validation rounds it), not thrown away for the demo", async () => {
+    const half = { ...good, motion: { steps: [{ ...good.motion.steps[0], repeat: 1.5 }] } };
+    const r = await new OllamaGeneration(new FakeClient([json(half)]), "m", "v").generate(req);
+    expect(r).toMatchObject({ source: "ollama", retried: false });
+  });
+
   it("retries once on broken JSON, quoting the problem", async () => {
     const fake = new FakeClient(["{not json", json(good)]);
     const r = await new OllamaGeneration(fake).generate(req);

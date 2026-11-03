@@ -184,7 +184,7 @@ function capDuration(recipe: Recipe, params: PlaybackParams, issues: Issue[], fu
 // ---------------------------------------------------------------- clip (Tier 2 / timeline edits)
 
 /** Peak slope of an easing relative to linear (for the velocity check between keys). */
-const EASE_PEAK: Record<Key["easing"], number> = {
+export const EASE_PEAK: Record<Key["easing"], number> = {
   linear: 1, ease_in_out: Math.PI / 2, ease_in: 2, ease_out: 2, ease_out_back: 2.7, ease_out_elastic: 4, ease_out_bounce: 3,
 };
 
@@ -201,7 +201,9 @@ export function validateClip(clip: Clip, structure: Structure): { clip: Clip; is
       continue;
     }
     const [lo, hi] = rangeOf(structure, id);
-    tracks[id] = [...keys].sort((a, b) => a.t - b.t).map((k) => {
+    // Keys sharing a time would jump in zero time: the later one wins (direct clips append tracks per joint).
+    const sorted = [...keys].sort((a, b) => a.t - b.t).filter((k, i, a) => i === a.length - 1 || a[i + 1].t !== k.t);
+    tracks[id] = sorted.map((k) => {
       const value = clampTo(k.value, lo, hi);
       if (value !== k.value) issues.push({ field: `tracks.${id}`, message: `${k.value.toFixed(1)}° → ${value.toFixed(1)}° at ${k.t.toFixed(2)}s (joint range)` });
       return { ...k, value };

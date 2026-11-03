@@ -27,7 +27,7 @@ export const GenerationOutputSchema = z.object({
   reasoning: z.string().min(1),
   motion: z.object({
     steps: z
-      .array(z.object({ behavior: BehaviorEnum, speed: z.number(), amplitude: z.number(), repeat: z.number().int(), face: FaceEnum.optional() }))
+      .array(z.object({ behavior: BehaviorEnum, speed: z.number(), amplitude: z.number(), repeat: z.number(), face: FaceEnum.optional() }))
       .min(1)
       .max(6),
   }),

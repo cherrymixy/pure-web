@@ -1,4 +1,6 @@
 import type { Clip } from "../models";
+import { MAX_DEG_PER_S } from "./sample";
+import { EASE_PEAK } from "./validate";
 
 // Match timing (W02E): align keyframe times to motion peaks in the reference video.
 
@@ -37,7 +39,7 @@ export function matchTiming(clip: Clip, energy: EnergySample[], windowRatio = 0.
     const prev = map.get(times[i - 1])!;
     const next = times[i + 1];
     const window = (next - prev) * windowRatio;
-    const candidates = peaks.filter((p) => Math.abs(p - times[i]) <= window && p > prev + 0.05 && p < next - 0.05);
+    const candidates = peaks.filter((p) => Math.abs(p - times[i]) <= window && p > prev + 0.05 && p < next - 0.05 && withinVelocity(clip, map, times[i], p));
     if (candidates.length === 0) continue;
     const best = candidates.reduce((a, b) => (Math.abs(b - times[i]) < Math.abs(a - times[i]) ? b : a));
     map.set(times[i], Math.round(best * 1000) / 1000);
@@ -45,4 +47,17 @@ export function matchTiming(clip: Clip, energy: EnergySample[], windowRatio = 0.
   }
   const tracks = Object.fromEntries(Object.entries(clip.tracks).map(([id, ks]) => [id, ks.map((k) => ({ ...k, t: map.get(k.t) ?? k.t }))]));
   return { clip: { ...clip, tracks }, original: clip, moved };
+}
+
+/** Moving the keys at `from` to `to` keeps every adjacent segment within 120°/s (neighbours: earlier ones already moved). */
+function withinVelocity(clip: Clip, map: Map<number, number>, from: number, to: number): boolean {
+  for (const ks of Object.values(clip.tracks)) {
+    const j = ks.findIndex((k) => k.t === from);
+    if (j < 0) continue;
+    const a = ks[j - 1];
+    const b = ks[j + 1];
+    if (a && Math.abs(ks[j].value - a.value) * EASE_PEAK[a.easing] > MAX_DEG_PER_S * (to - (map.get(a.t) ?? a.t))) return false;
+    if (b && Math.abs(b.value - ks[j].value) * EASE_PEAK[ks[j].easing] > MAX_DEG_PER_S * (b.t - to)) return false;
+  }
+  return true;
 }
