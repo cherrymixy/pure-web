@@ -155,6 +155,7 @@ export function LabHome() {
         {S.import}
       </button>
       <button
+        data-tour="try-robot"
         onClick={() => router.push("/lab/new/type")}
         className="flex h-[56px] items-center gap-[var(--space-12)] rounded-[var(--radius-full)] bg-[var(--neutral-800)] py-[var(--space-12)] pl-[var(--space-32)] pr-[var(--space-24)] text-[20px] font-medium leading-[26px] text-[var(--neutral-100)] hover:bg-[var(--neutral-700)]"
       >

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { STRINGS } from "@/data/strings";
+import { startTour } from "@/components/ui/tour";
 
 // Figma "pure" welcome popup (1066:545): 573 wide, radius 28, header gradient 230 tall + fade, content inset 28.
 // "다시 보지 않음" checked → localStorage (never again). Unchecked → shown on every new visit (per browser tab session).
@@ -35,12 +36,18 @@ export function WelcomePopup() {
     setOpen(false);
   };
 
+  const guided = () => {
+    close();
+    startTour();
+  };
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape" && e.key !== "Enter") return;
       e.preventDefault();
-      close();
+      if (e.key === "Enter") guided();
+      else close();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -97,7 +104,7 @@ export function WelcomePopup() {
             </button>
             <button
               type="button"
-              onClick={close}
+              onClick={guided}
               autoFocus
               className="flex items-center gap-[10px] rounded-[var(--radius-xs)] bg-[var(--sage-500)] py-[10px] pl-[14px] pr-[12px] hover:bg-[var(--sage-600)]"
             >

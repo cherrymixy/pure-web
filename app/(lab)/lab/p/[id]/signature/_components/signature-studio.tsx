@@ -334,6 +334,7 @@ export function SignatureStudio({
             </div>
             <button
               type="button"
+              data-tour="sig-sample"
               disabled={busy || running}
               onClick={useSample}
               className="self-start text-[12px] font-medium leading-[15px] text-[var(--text-link)] underline disabled:opacity-40"
@@ -518,7 +519,7 @@ export function SignatureStudio({
             )}
           </div>
 
-          <div className="mt-[33px] flex justify-center">
+          <div data-tour="sig-radar" className="mt-[33px] flex justify-center">
             <Radar size={304} axes={shown.axes} compare={compareSig?.axes as Record<Axis, number> | undefined} onChange={dragAxis} />
           </div>
           {compareSig && (
@@ -575,6 +576,7 @@ export function SignatureStudio({
             </button>
             <button
               type="button"
+              data-tour="sig-review"
               onClick={review}
               className="flex h-[54px] w-full items-center justify-center rounded-[var(--radius-full)] bg-[var(--sage-900)] text-[16px] font-medium leading-[20px] text-[var(--text-on-inverse)] hover:bg-[var(--sage-700)]"
             >

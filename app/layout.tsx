@@ -4,6 +4,7 @@ import { DemoReset } from "@/components/ui/demo-reset";
 import { MobileNotice } from "@/components/ui/mobile-notice";
 import { ToastProvider } from "@/components/ui/toast";
 import { WelcomePopup } from "@/components/ui/welcome-popup";
+import { Tour } from "@/components/ui/tour";
 import "./globals.css";
 
 // Figma F / Typography: Google Sans Flex only (OFL, app/fonts/OFL-GoogleSansFlex.txt). Variable: wght 1–1000, wdth, opsz, ROND, slnt.
@@ -41,6 +42,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <DemoReset />
         </ToastProvider>
         <WelcomePopup />
+        <Tour />
         <MobileNotice />
       </body>
     </html>

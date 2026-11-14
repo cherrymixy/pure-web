@@ -156,6 +156,7 @@ export function Analyzing({ id }: { id: string }) {
       </header>
 
       <section
+        data-tour="analyzing"
         aria-label={project.name}
         className="relative left-[8px] mt-[196px] flex w-[912px] items-center gap-[var(--space-48)] rounded-[var(--radius-2xl)] border-2 border-[var(--border-default)] bg-[var(--bg-surface)] px-[var(--space-48)] py-[var(--space-40)] shadow-[0_12px_24px_0_var(--effect-shadow)]"
       >

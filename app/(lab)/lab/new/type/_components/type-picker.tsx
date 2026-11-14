@@ -195,6 +195,7 @@ export function TypePicker({ initialSelected = false }: { initialSelected?: bool
           </Link>
           <button
             type="button"
+            data-tour="type-continue"
             disabled={!selected || busy}
             onClick={start}
             className="flex h-[56px] items-center gap-[var(--space-12)] rounded-[var(--radius-full)] bg-[var(--neutral-800)] px-[var(--space-24)] py-[var(--space-12)] text-[20px] font-medium leading-[26px] text-[var(--neutral-100)] hover:bg-[var(--neutral-700)] disabled:cursor-not-allowed disabled:bg-[var(--bg-disabled)] disabled:text-[var(--text-disabled)]"

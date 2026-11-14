@@ -1151,7 +1151,7 @@ export function Editor({
       {/* Left panel: Context / Library (Frame 2147240454 ×2) */}
       <aside className={`absolute left-[32px] top-[32px] z-10 flex ${timelineOpen ? "bottom-[397px]" : "bottom-[32px]"} w-[430px] flex-col overflow-hidden rounded-[var(--radius-xl)] bg-[var(--bg-surface)]`}>
         {/* Header (452:2269 / 2270): list icon 24 at 21,21, title Regular 20 #2c3030 at 66 */}
-        <div className="flex items-center gap-[21px] pl-[21px] pt-[21px]">
+        <div data-tour="project-menu" className="flex items-center gap-[21px] pl-[21px] pt-[21px]">
           <Menu
             label="Project menu"
             align="left"
@@ -1304,6 +1304,7 @@ export function Editor({
           placeholder), then attach / dictate tools (33, r 10) and a 74×33 Send. Centred, bottom 32 like the panels (Figma 24).
           Shown at 120% (zoom, user review). Attach chips sit above the prompt. W02E-4 collapses it while the timeline is open. */}
       <form
+        data-tour="composer"
         hidden={timelineOpen}
         className="pointer-events-auto flex w-[646px] flex-col items-center gap-[var(--space-12)] [zoom:1.2]"
         onSubmit={(e) => { e.preventDefault(); void generate(); }}
@@ -1410,7 +1411,7 @@ export function Editor({
             />
           )}
         </div>
-        <div className="absolute bottom-[22px] left-[24px]">
+        <div data-tour="edit-detail" className="absolute bottom-[22px] left-[24px]">
           <EditDetailButton open={timelineOpen} onClick={() => setTimelineOpen(!timelineOpen)} />
         </div>
         <span className="absolute bottom-[16px] left-[378px] top-[16px] w-px bg-[var(--editor-divider)]" aria-hidden />

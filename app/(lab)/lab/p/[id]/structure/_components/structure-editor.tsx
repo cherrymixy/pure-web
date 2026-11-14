@@ -208,6 +208,7 @@ export function StructureEditor({ projectId, name, initial }: { projectId: strin
 
         <button
           type="button"
+          data-tour="structure-confirm"
           disabled={saving || editing}
           onClick={confirm}
           className="flex h-[63px] w-full shrink-0 items-center justify-center gap-[var(--space-12)] rounded-[var(--radius-md)] bg-[var(--sage-800)] px-[var(--space-28)] text-[20px] font-medium leading-[25px] text-[var(--text-on-inverse)] hover:bg-[var(--sage-700)] disabled:bg-[var(--bg-disabled)] disabled:text-[var(--text-disabled)]"
