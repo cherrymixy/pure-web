@@ -400,7 +400,7 @@ UX 설계와 검증은 셋이 함께 맡고, 제품 · 브랜드 · 인터페이
 | 이름 | 역할 |
 |---|---|
 | **전승아** SeungA Jeon | Sound Effect Design · Visual & UI/GUI Design · Vibe Coding(웹 시뮬레이터 구현) |
-| **최성근** Seonggeun Choi | Face UI Design · Promotion Video · Project Leading |
+| **최성근** Seonggeun Choi ([@wmit1423-svg](https://github.com/wmit1423-svg)) | Face UI Design · Promotion Video · Project Leading |
 | **방태림** Taerim Bang | GUI Design & Prototyping · Product Design · Brand Design |
 | 공통 | UX Design · Validation and QA |
 
