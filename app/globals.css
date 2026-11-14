@@ -5,6 +5,10 @@
 html {
   zoom: var(--app-zoom);
 }
+/* Landing scales its own 1920×1080 stage to the window, so the app-wide 67 % zoom is off there. */
+html:has([data-landing]) {
+  zoom: 1;
+}
 body {
   background: white;
 }

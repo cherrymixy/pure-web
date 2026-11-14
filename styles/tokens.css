@@ -232,6 +232,20 @@
   --welcome-key-bg: #e8e9ee;
   --welcome-key-text: #6a6d7a;
   --welcome-key-border: #ffffff99;
+  /* Landing slides 1067:3102–3160 (get_design_context, no Figma variable) */
+  --landing-ink: #232323; /* nav pill, dark slides */
+  --landing-strong: #4a4a4a;
+  --landing-muted: #8a8a8a;
+  --landing-photo: #dddddd; /* moments placeholder */
+  --landing-frame: #d6d6d8; /* robot frame placeholder */
+  --landing-frame-shadow: 0 10.336px 31.007px 0 #00000014;
+  --landing-upload: #fafafb;
+  --landing-upload-border: #e6e6ea;
+  --landing-upload-shadow: 0 7.125px 28.499px 0 #0000000d;
+  /* Figma fonts: Pretendard (body) · Satoshi Bold (display). Files not added yet (user choice) — drop them into app/fonts
+     and they win; until then the PURE font renders. */
+  --font-landing: "Pretendard", "Pretendard Variable", var(--font-family-pure);
+  --font-landing-display: "Satoshi", var(--font-family-pure);
 }
 
 /* Tailwind v4 utilities that point at the tokens (bg-bg-surface, text-text-primary, rounded-md, text-title-l, shadow-card …) */

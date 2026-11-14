@@ -5,10 +5,7 @@ const nextConfig: NextConfig = {
   outputFileTracingExcludes: { "*": ["_ref/**"] },
   // pdf-parse bundles an old pdf.js that must run as plain Node code.
   serverExternalPackages: ["pdf-parse"],
-  // No landing: the app opens straight on the Lab home.
-  async redirects() {
-    return [{ source: "/", destination: "/lab", permanent: false }];
-  },
+  // "/" is the scroll landing (app/page.tsx); Click to Start goes to /lab.
 };
 
 export default nextConfig;

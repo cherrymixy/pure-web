@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { STRINGS } from "@/data/strings";
 import { startTour } from "@/components/ui/tour";
 
@@ -22,13 +23,22 @@ function write(storage: () => Storage, key: string) {
   } catch {}
 }
 
+/** Click to Start counts as a new visit: the popup shows again unless "다시 보지 않음" was checked. */
+export function allowWelcomeAgain() {
+  try {
+    sessionStorage.removeItem(SEEN_KEY);
+  } catch {}
+}
+
 export function WelcomePopup() {
   const [open, setOpen] = useState(false);
   const [dontShow, setDontShow] = useState(false);
+  const pathname = usePathname();
 
+  // Only inside the simulation (/lab…): the landing page comes first, the popup greets after Click to Start.
   useEffect(() => {
-    if (!read(() => localStorage, HIDE_KEY) && !read(() => sessionStorage, SEEN_KEY)) setOpen(true);
-  }, []);
+    if (pathname.startsWith("/lab") && !read(() => localStorage, HIDE_KEY) && !read(() => sessionStorage, SEEN_KEY)) setOpen(true);
+  }, [pathname]);
 
   const close = () => {
     write(() => sessionStorage, SEEN_KEY);
