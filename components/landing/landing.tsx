@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { LANDING as L } from "@/data/landing";
 import { allowWelcomeAgain } from "@/components/ui/welcome-popup";
@@ -13,7 +14,7 @@ const T = {
   moments: { in: [2, 2.3], enter: [2.1, 2.7], run: [2.7, 6.2], out: [6.2, 6.6] },
   robots: { in: [6.6, 7.8], run: [7.8, 10.6], out: [10.6, 11] },
   dark: { bg: [10.8, 11.3], slide: [11.2, 12.4] },
-  start: { up: [12.6, 13.4], circle: [12.9, 13.9], text: [13.6, 14.1] },
+  start: { up: [12.6, 13.4], circle: [13.3, 14.0], text: [13.8, 14.2] }, // up: words rise, dot drops to centre
   end: 14.6,
 } as const;
 
@@ -37,13 +38,28 @@ type Pin = "start" | "center" | "end";
 function Layer({ x = "center", y = "center", children, style }: { x?: Pin; y?: Pin; children: React.ReactNode; style?: React.CSSProperties }) {
   const s = useContext(Stage);
   const off = (pin: Pin, size: number, frame: number) => (pin === "start" ? 0 : pin === "center" ? (size - frame) / 2 : size - frame);
-  return <div className="absolute h-[1080px] w-[1920px]" style={{ ...style, left: off(x, s.w, W), top: off(y, s.h, H) }}>{children}</div>;
+  // Layers overlap the whole stage, so they let clicks through; links opt back in (pointer-events-auto).
+  return <div className="pointer-events-none absolute h-[1080px] w-[1920px]" style={{ ...style, left: off(x, s.w, W), top: off(y, s.h, H) }}>{children}</div>;
 }
 
 export function Landing() {
   const [t, setT] = useState(0);
   const [fit, setFit] = useState<{ scale: number; w: number; h: number } | null>(null);
   const [reduced, setReduced] = useState(false);
+  const router = useRouter();
+
+  // "Press Enter ↵" on the last slide starts too, once Click to Start is showing.
+  const ready = seg(t, T.start.text) > 0.5;
+  useEffect(() => {
+    if (!ready) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Enter") return;
+      allowWelcomeAgain();
+      router.push(L.outro.href);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [ready, router]);
 
   useEffect(() => {
     let raf = 0;
@@ -86,7 +102,7 @@ export function Landing() {
 }
 
 function Nav({ inverted }: { inverted: boolean }) {
-  const pill = "absolute flex items-center justify-center p-[10px] text-[16px] font-bold leading-[1.4] whitespace-nowrap transition-colors";
+  const pill = "pointer-events-auto absolute flex items-center justify-center p-[10px] text-[16px] font-bold leading-[1.4] whitespace-nowrap transition-colors";
   const solid = inverted ? "bg-white text-[var(--landing-ink)]" : "bg-[var(--landing-ink)] text-white";
   const line = inverted ? "border border-white text-white" : "border border-[var(--landing-ink)] text-[var(--landing-ink)]";
   const ext = (item: { label: string; href: string }, cls: string) =>
@@ -201,7 +217,7 @@ function Moments({ t }: { t: number }) {
       </div>
       </Layer>
       <Layer x="end">
-      <p className="absolute left-[1610px] top-[514px] whitespace-nowrap text-[21px] font-medium leading-[51.387px] text-black" style={{ opacity: settle }}>
+      <p className="absolute right-[81px] top-[514px] whitespace-nowrap text-right text-[21px] font-medium leading-[51.387px] text-black" style={{ opacity: settle }}>
         {items[active]?.caption}
       </p>
       </Layer>
@@ -209,106 +225,167 @@ function Moments({ t }: { t: number }) {
   );
 }
 
+// Slide 4 (1067:3131) as designed: 8 frames around the Upload box, every frame filled with a robot (user review).
+// Frames: centre (x, y) of each wrapper, inner size, rotation, radius — clockwise from the top.
+const FRAMES = [
+  { x: 960.5, y: 206.81, size: 193.797, rot: 0, r: 50.387 },
+  { x: 1193.46, y: 303.3, size: 206.716, rot: 22, r: 53.746 },
+  { x: 1289.96, y: 536.27, size: 200.256, rot: -6, r: 52.067 },
+  { x: 1193.46, y: 769.22, size: 206.716, rot: 18, r: 53.746 },
+  { x: 960.5, y: 865.72, size: 193.797, rot: -4, r: 50.387 },
+  { x: 727.54, y: 769.22, size: 213.176, rot: -14, r: 55.426 },
+  { x: 631.05, y: 536.27, size: 200.256, rot: 6, r: 52.067 },
+  { x: 727.54, y: 303.3, size: 206.716, rot: -28, r: 53.746 },
+];
 const CX = 960.12;
 const CY = 540.12;
-// Slide 4 (1067:3131): the 5 robot types on an even ring (user review: 5 frames, not Figma's 8), clockwise from the top.
-// Ring radius 333 = Figma top frame → centre; frame 206.716 / radius 53.746 and tilts taken from Figma's frames.
-const TILTS = [0, 22, -6, -14, 18];
-const FRAMES = TILTS.map((rot, i) => {
-  const a = -Math.PI / 2 + (i * 2 * Math.PI) / TILTS.length;
-  return { x: CX + Math.cos(a) * 333, y: CY + Math.sin(a) * 333, size: 206.716, rot, r: 53.746 };
-});
+const RING_STEP = 360 / FRAMES.length; // one frame per hold
+const TOP = -90; // degrees: the slot whose robot is named
 
-/** Slide 4: frames spin in around the centre, then each robot type is shown in turn. */
+const easeOutExpo = (x: number) => (x >= 1 ? 1 : 1 - 2 ** (-10 * x));
+
+/** Slide 4: frames whoosh straight in from off-screen to their slots (no spin), then the ring turns smoothly with
+ *  scroll — a robot grows as it nears the top and its name cross-fades in bottom-right. */
 function Robots({ t, reduced }: { t: number; reduced: boolean }) {
   const enter = seg(t, T.robots.in);
   const out = seg(t, T.robots.out);
   if (enter <= 0 || out >= 1) return null;
-  const typed = L.robots.frames.filter((f) => f.image).length;
-  const run = seg(t, T.robots.run);
-  const active = run > 0 ? Math.min(typed - 1, Math.floor(run * typed)) : -1;
+  const spin = easeInOut(seg(t, T.robots.run)) * (FRAMES.length - 1) * RING_STEP; // continuous, clockwise
+  const polar = FRAMES.map((f) => ({ a: (Math.atan2(f.y - CY, f.x - CX) * 180) / Math.PI, d: Math.hypot(f.x - CX, f.y - CY) }));
+  const gap = (a: number) => Math.abs(((((a + spin - TOP) % 360) + 540) % 360) - 180); // degrees from the top slot
+  const ready = enter >= 1 ? 1 : 0;
+  const near = polar.map((p) => ready * Math.max(0, Math.cos(Math.min(90, (gap(p.a) / RING_STEP) * 90) * (Math.PI / 180)))); // 1 at top → 0 a slot away
 
   return (
-    <section className="absolute inset-0" style={{ opacity: (reduced ? 1 : Math.min(1, enter * 3)) * (1 - out) }}>
+    <section className="absolute inset-0" style={{ opacity: 1 - out }}>
       <Layer>
-      <div
-        className="absolute size-[242.246px] -translate-x-1/2 -translate-y-1/2 rounded-[49.874px] border-[1.781px] border-[var(--landing-upload-border)] bg-[var(--landing-upload)] shadow-[var(--landing-upload-shadow)]"
-        style={{ left: CX, top: CY }}
-      />
-      {FRAMES.map((f, i) => {
-        const frame = L.robots.frames[i];
-        const e = reduced ? 1 : easeOut(clamp((enter - i * 0.05) / 0.6));
-        // Orbit in: half a turn around the centre while moving out to the ring, spinning on its own axis.
-        const dx = f.x - CX;
-        const dy = f.y - CY;
-        const ang = Math.atan2(dy, dx) - (1 - e) * Math.PI;
-        const rad = Math.hypot(dx, dy) * (0.25 + 0.75 * e);
-        const on = i === active;
-        return (
-          <div
-            key={i}
-            className="absolute overflow-hidden bg-[var(--landing-frame)] shadow-[var(--landing-frame-shadow)] transition-[opacity,scale] duration-300"
-            style={{
-              width: f.size,
-              height: f.size,
-              borderRadius: f.r,
-              left: CX + Math.cos(ang) * rad - f.size / 2,
-              top: CY + Math.sin(ang) * rad - f.size / 2,
-              rotate: `${f.rot - (1 - e) * 180}deg`,
-              opacity: e * (active === -1 || on ? 1 : 0.45),
-              scale: on ? 1.12 : 1,
-              zIndex: on ? 1 : 0,
-            }}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            {frame.image && <img src={frame.image} alt={frame.caption} className="size-full object-cover" />}
-          </div>
-        );
-      })}
+        <div
+          className="absolute size-[242.246px] -translate-x-1/2 -translate-y-1/2 rounded-[49.874px] border-[1.781px] border-[var(--landing-upload-border)] bg-[var(--landing-upload)] shadow-[var(--landing-upload-shadow)]"
+          style={{ left: CX, top: CY, opacity: Math.min(1, enter * 2) }}
+        />
+        {FRAMES.map((f, i) => {
+          const frame = L.robots.frames[L.robots.ring[i]];
+          // Whoosh: straight in along its own direction from 3.4× out, fast then settling (expo ease), staggered.
+          const e = reduced ? 1 : easeOutExpo(clamp((enter - i * 0.04) / 0.55));
+          const ang = ((polar[i].a + spin) * Math.PI) / 180;
+          const rad = polar[i].d * (1 + 2.4 * (1 - e));
+          return (
+            <div
+              key={i}
+              className="absolute overflow-hidden bg-[var(--landing-frame)] shadow-[var(--landing-frame-shadow)]"
+              style={{
+                width: f.size,
+                height: f.size,
+                borderRadius: f.r,
+                left: CX + Math.cos(ang) * rad - f.size / 2,
+                top: CY + Math.sin(ang) * rad - f.size / 2,
+                rotate: `${f.rot}deg`,
+                opacity: Math.min(1, e * 1.4) * (ready ? 0.55 + 0.45 * near[i] : 1),
+                scale: (0.7 + 0.3 * e) * (1 + 0.14 * near[i]),
+                zIndex: near[i] > 0.5 ? 1 : 0,
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={frame.image} alt={frame.caption} className="size-full object-cover" />
+            </div>
+          );
+        })}
       </Layer>
       <Layer x="start" y="end">
-      <div className="absolute left-[81px] top-[913px] text-[40.023px] font-medium leading-[62.535px] text-black">
-        {L.robots.lines.map((l) => (
-          <p key={l} className="h-[54px] whitespace-nowrap">{l}</p>
-        ))}
-      </div>
+        <div className="absolute left-[81px] top-[913px] text-[40.023px] font-medium leading-[62.535px] text-black" style={{ opacity: Math.min(1, enter * 2) }}>
+          {L.robots.lines.map((l) => (
+            <p key={l} className="h-[54px] whitespace-nowrap">{l}</p>
+          ))}
+        </div>
       </Layer>
       <Layer x="end" y="end">
-      <p key={active} className="anim-fade-in absolute left-[1610px] top-[953px] whitespace-nowrap text-[21px] font-medium leading-[51.387px] text-black">
-        {active >= 0 ? L.robots.frames[active].caption : ""}
-      </p>
+        {/* Names of the frames near the top cross-fade, drifting up as they leave. */}
+        {FRAMES.map((_, i) =>
+          near[i] > 0.02 ? (
+            <p
+              key={i}
+              className="absolute right-[81px] top-[953px] whitespace-nowrap text-right text-[21px] font-medium leading-[51.387px] text-black"
+              style={{ opacity: near[i] ** 2, translate: `0 ${(1 - near[i]) * 10}px` }}
+            >
+              {L.robots.frames[L.robots.ring[i]].caption}
+            </p>
+          ) : null,
+        )}
       </Layer>
     </section>
   );
 }
 
-/** Slides 5–6 (1067:3151 / 3160): on black, PURE slides in from the right and Web Simulation from the left;
- *  then both rise away and the white circle opens with Click to Start. */
+/** Slides 5–6 (1067:3151 / 3160), restyled (user review, ref "VANTE"): on black, a split headline — PURE WEB slides
+ *  in from the left, SIMULATION from the right — with a tiny caption and dot between, a short blurb bottom-left and a
+ *  small menu bottom-right. Then it all rises away and the white circle opens with Click to Start. */
+// Click to Start (user review: much smaller than Figma's 1287 circle, no lines): the caption dot drops to the centre
+// and grows into a 520 circle holding a quiet uppercase CLICK TO START with an ink dot above. Enter still starts.
+const DOT = 6;
+const CIRCLE = 520;
+const CIRCLE_LEFT = 960 - CIRCLE / 2;
+const CIRCLE_TOP = 540 - CIRCLE / 2;
+
 function Outro({ t }: { t: number }) {
   const slide = easeOut(seg(t, T.dark.slide));
   if (slide <= 0) return null;
+  const small = seg(t, [11.6, 12.2]); // caption, dot, blurb and menu fade in after the words land
   const up = easeInOut(seg(t, T.start.up)) * -922;
   const circle = easeOut(seg(t, T.start.circle));
   const text = seg(t, T.start.text);
-  const display = "absolute whitespace-nowrap font-[family-name:var(--font-landing-display)] text-[176.625px] font-bold leading-[275.977px] text-white";
+  const word = "absolute top-[540px] whitespace-nowrap font-[family-name:var(--font-landing-display)] text-[96px] font-medium uppercase leading-none tracking-[-0.01em] text-white";
+  const mono = "font-mono text-[11px] uppercase leading-[15px] tracking-[0.08em] text-[var(--landing-label)]";
+  const o = L.outro;
   return (
+    <>
     <Layer>
-      <p className={display} style={{ left: 1210.31, top: 333, transform: `translate(${(1 - slide) * 900}px, ${up}px)`, opacity: slide }}>{L.outro.top}</p>
-      <p className={display} style={{ left: 244, top: 471.84, transform: `translate(${-(1 - slide) * 1400}px, ${up}px)`, opacity: slide }}>{L.outro.bottom}</p>
+      <div style={{ transform: `translateY(${up}px)` }}>
+        {/* Gap 760 → 1160 holds the caption; words hug it from both sides. */}
+        <p className={word} style={{ right: 1920 - 760, translate: `${-(1 - slide) * 900}px -50%`, opacity: slide }}>{o.left}</p>
+        <p className={word} style={{ left: 1160, translate: `${(1 - slide) * 900}px -50%`, opacity: slide }}>{o.right}</p>
+        <div className={`absolute left-[760px] top-[540px] w-[400px] -translate-y-1/2 text-center ${mono}`} style={{ opacity: small }}>
+          {o.caption.map((c) => <p key={c}>{c}</p>)}
+        </div>
+      </div>
+      {/* The caption dot: stays while the words rise, drops to the centre, then the circle grows out of it. */}
+      <span
+        aria-hidden
+        className="absolute rounded-full bg-white"
+        style={{ width: DOT, height: DOT, left: 960 - DOT / 2, top: 383 + (540 - 383) * easeInOut(seg(t, T.start.up)) - DOT / 2, opacity: small }}
+      />
       {circle > 0 && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={L.outro.circle} alt="" width={1287} height={1287} className="absolute left-[316px] top-[-104px] size-[1287px]" style={{ scale: circle }} />
-      )}
-      {text > 0 && (
         <Link
-          href={L.outro.href}
+          href={o.href}
           onClick={allowWelcomeAgain}
-          className="absolute left-[658px] top-[402px] whitespace-nowrap font-[family-name:var(--font-landing-display)] text-[100px] font-bold leading-[275.977px] text-[var(--landing-ink)] underline decoration-from-font hover:opacity-80"
-          style={{ opacity: text, pointerEvents: text > 0.5 ? "auto" : "none" }}
+          aria-label={o.start}
+          className="group absolute flex flex-col items-center justify-center rounded-full text-[var(--landing-ink)]"
+          style={{ left: CIRCLE_LEFT, top: CIRCLE_TOP, width: CIRCLE, height: CIRCLE, pointerEvents: text > 0.5 ? "auto" : "none" }}
         >
-          {L.outro.start}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={o.circle}
+            alt=""
+            width={CIRCLE}
+            height={CIRCLE}
+            className="absolute inset-0 size-full transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+            style={{ scale: DOT / CIRCLE + (1 - DOT / CIRCLE) * circle }}
+          />
+          <span className="relative flex flex-col items-center" style={{ opacity: text, transform: `translateY(${(1 - text) * 12}px)` }}>
+            <span aria-hidden className="mb-[22px] rounded-full bg-[var(--landing-ink)]" style={{ width: DOT, height: DOT }} />
+            <span className="whitespace-nowrap font-[family-name:var(--font-landing-display)] text-[40px] font-medium uppercase leading-none tracking-[-0.01em]">{o.start}</span>
+          </span>
         </Link>
       )}
     </Layer>
+    <Layer x="start" y="end">
+      {/* Same slot and size as the first slide's footer copy (left 38 / right edge 1884, top 994, 14px), sentence case. */}
+      <p className="absolute left-[38px] top-[994px] w-[514px] text-[14px] font-medium leading-[1.4] text-white" style={{ opacity: small * (1 - seg(t, T.start.up) * 2) }}>{o.blurb}</p>
+    </Layer>
+    <Layer x="end" y="end">
+      <p className="absolute right-[36px] top-[994px] flex gap-[28px] text-[14px] font-medium leading-[1.4] text-white" style={{ opacity: small * (1 - seg(t, T.start.up) * 2) }}>
+        {o.menu.map((m) => <span key={m}>{m}</span>)}
+      </p>
+    </Layer>
+    </>
   );
 }

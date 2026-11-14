@@ -242,6 +242,9 @@
   --landing-upload: #fafafb;
   --landing-upload-border: #e6e6ea;
   --landing-upload-shadow: 0 7.125px 28.499px 0 #0000000d;
+  /* Dark slide (user review, no Figma frame) */
+  --landing-label: #ffffffb3; /* small caption / menu: white 70% */
+  --landing-label-ink: #23232399; /* mono labels inside the circle: ink 60% */
   /* Figma fonts: Pretendard (body) · Satoshi Bold (display). Files not added yet (user choice) — drop them into app/fonts
      and they win; until then the PURE font renders. */
   --font-landing: "Pretendard", "Pretendard Variable", var(--font-family-pure);

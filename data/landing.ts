@@ -26,8 +26,21 @@ export const LANDING = {
   },
   robots: {
     lines: ["Any type of robot", "Without restrictions"],
-    // One frame per PURE robot type, clockwise from the top.
+    // The 5 PURE robot types (image + name shown while it sits at the top of the ring).
     frames: ROBOT_TYPES.map((t) => ({ image: `/figma/type/${t.id}.png`, caption: t.name })),
+    // Figma's 8 ring frames (clockwise from the top) → which type each shows. Ordered so the ring, turning clockwise
+    // one frame at a time, brings all 5 types to the top first (frames 0, 7, 6, 5, 4 …).
+    ring: [0, 2, 1, 0, 4, 3, 2, 1],
   },
-  outro: { top: "PURE", bottom: "Web Simulation", start: "Click to Start", circle: "/figma/landing/start-circle.svg", href: "/lab" },
+  outro: {
+    // Split headline with a small centred caption between (user review, ref "VANTE — CRAFT IN | MOTION").
+    left: "PURE WEB",
+    right: "SIMULATION",
+    caption: ["Designing how robots", "move, look and sound."],
+    blurb: "From a brand guide to a robot's motion, face and sound, designed and tested in simulation.",
+    menu: ["Motion", "Face", "Sound", "Signature"],
+    start: "Click to Start",
+    circle: "/figma/landing/start-circle.svg",
+    href: "/lab",
+  },
 };
