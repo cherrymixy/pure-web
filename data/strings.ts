@@ -462,6 +462,18 @@ export const STRINGS = {
     resetDemo: { title: "Reset demo data?", body: "All projects, expressions and uploads go back to the exhibition seed. This can't be undone.", confirm: "Reset", done: "Demo data reset" },
     demoFallback: "Demo result",
   },
+  // Welcome popup (Figma 1066:545) — Korean copy as designed for the exhibition.
+  welcome: {
+    title: "PURE 시뮬레이션에 오신 것을 환영합니다!",
+    body: [
+      "우리는 로봇의 움직임이 단순히 명령을 수행하는 수단이 아니라, 사람과 관계를 맺고 감정을 전달하는 하나의 표현 방식이 될 수 있다고 생각합니다.",
+      "이러한 생각에서 출발한 PURE는 로봇이 주어진 기능을 수행하는 것을 넘어, 움직임과 행동을 통해 자신만의 개성을 표현할 수 있도록 돕는 졸업 프로젝트입니다.",
+      "본 웹은 PURE가 제안하는 핵심 가치와 로봇의 행동 설계 과정을 경험할 수 있도록 제작된 시연용 시뮬레이션입니다. 안내에 따라 단계별로 체험하거나 자유롭게 둘러보며 PURE가 제안하는 새로운 로봇 상호작용을 경험해 보세요.",
+    ],
+    explore: "직접 둘러보기",
+    guided: "안내에 따라 체험하기",
+    dontShow: "다시 보지 않음",
+  },
 } as const;
 
 /** Replace {name} placeholders. */
