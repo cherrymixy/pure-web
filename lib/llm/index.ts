@@ -3,7 +3,9 @@ import { getRepo } from "../repo-server";
 import type { LlmClient } from "./client";
 import { DemoExtraction, OllamaExtraction, type ExtractionClient } from "./extraction";
 import { DemoGeneration, OllamaGeneration, type GenerationClient } from "./generation";
+import { OPENAI_API_KEY } from "../env";
 import { OllamaClient } from "./ollama";
+import { OpenAiClient } from "./openai";
 import { DemoOptions, OllamaOptions, type OptionsClient } from "./options";
 
 // Factories used by API routes. Demo mode (DB settings) short-circuits to the demo
@@ -20,7 +22,7 @@ export interface LastCall {
 }
 
 export function llmClient(): LlmClient {
-  g.__pureLlm ??= new OllamaClient();
+  g.__pureLlm ??= OPENAI_API_KEY ? new OpenAiClient() : new OllamaClient();
   return g.__pureLlm;
 }
 

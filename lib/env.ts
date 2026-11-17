@@ -6,6 +6,10 @@ export const OLLAMA_VISION_MODEL = process.env.OLLAMA_VISION_MODEL ?? "gemma3:4b
 const keepAlive = process.env.OLLAMA_KEEP_ALIVE ?? "10m";
 export const OLLAMA_KEEP_ALIVE: string | number = /^-?\d+$/.test(keepAlive) ? Number(keepAlive) : keepAlive;
 
+/** Set → all LLM calls go to OpenAI instead of Ollama (the deployed site has no Ollama). */
+export const OPENAI_API_KEY = process.env.OPENAI_API_KEY ?? "";
+export const OPENAI_MODEL = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
+
 // Experimental flags — all default off (docs/conventions.md rule 13).
 export const FLAGS = {
   directClip: process.env.FLAG_DIRECT_CLIP === "1",
