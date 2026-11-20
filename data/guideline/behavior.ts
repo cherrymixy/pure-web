@@ -104,6 +104,7 @@ export const behavior: GuidelineSection = {
         {
           kind: "table",
           title: "Fields",
+          view: "cards",
           head: ["Field", "Content", "Note"],
           rows: [
             ["id · name", "cmp.curious · {ko, en}", ""],
@@ -127,6 +128,7 @@ export const behavior: GuidelineSection = {
         {
           kind: "table",
           title: "ρ scale",
+          view: "scale",
           head: ["ρ", "Meaning"],
           rows: [
             [RHO.high, "Style makes the personality"],
@@ -137,6 +139,7 @@ export const behavior: GuidelineSection = {
         {
           kind: "table",
           title: "Confusable pairs",
+          view: "pairs",
           head: ["Pair", "Told apart by"],
           rows: [
             ["Nod ↔ Bow", "Axis (head pitch vs whole body) · start pose · timing (after a question vs arriving and leaving)"],
@@ -184,8 +187,8 @@ export const behavior: GuidelineSection = {
       title: "Emphasis (rejected)",
       summary: "Rejected: pilot recognition 0% — everyone read it as \"urgent · annoyed\". Absorbed into \"point once more\".",
       body: [
-        { kind: "p", text: "Kept on record as REJECTED + Migration: uses of Emphasis move to Point repeated once." },
-        { kind: "table", title: "Pilot result", head: ["Measure", "Value"], rows: [["Pilot recognition", "0%"], ["Main misread", "Urgent · annoyed"], ["Perceived malfunction", "41.5 pt"]] },
+        { kind: "p", view: "note", text: "Kept on record as REJECTED + Migration: uses of Emphasis move to Point repeated once." },
+        { kind: "table", title: "Pilot result", view: "cards", head: ["Measure", "Value"], rows: [["Pilot recognition", "0%"], ["Main misread", "Urgent · annoyed"], ["Perceived malfunction", "41.5 pt"]] },
       ],
       related: ["point"],
       source: SRC,

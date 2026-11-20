@@ -25,9 +25,9 @@ const token = (t: TokenSpec): GuidelineEntry => ({
   title: t.title,
   summary: t.summary,
   body: [
-    { kind: "table", title: "Sizes", head: ["Size", "Value", "Use"], rows: t.sizes },
-    { kind: "list", title: "Rules", items: t.rules },
-    { kind: "p", title: "Evidence", text: t.evidence },
+    { kind: "table", title: "Sizes", view: "scale", head: ["Size", "Value", "Use"], rows: t.sizes },
+    { kind: "list", title: "Rules", view: "rules", items: t.rules },
+    { kind: "p", title: "Evidence", view: "evidence", text: t.evidence },
   ],
   related: t.related,
   source: `${SRC} ${t.section}`,
@@ -50,6 +50,7 @@ export const primitiveTokens: GuidelineSection = {
         {
           kind: "table",
           title: "Notation",
+          view: "cards",
           head: ["Item", "Rule"],
           rows: [
             ["ID", "tok.<channel>.<name>.<size> — e.g. tok.body.tilt.m, tok.face.eye.size.l"],
@@ -62,6 +63,7 @@ export const primitiveTokens: GuidelineSection = {
         {
           kind: "table",
           title: "Roles",
+          view: "cards",
           head: ["Role", "What it does", "Real parts (examples)"],
           rows: [
             ["role.attend", "Gaze — where it looks", "Head · visor · robot-arm wrist · (no head) whole body"],
@@ -74,6 +76,7 @@ export const primitiveTokens: GuidelineSection = {
         {
           kind: "table",
           title: "Spatial tokens × roles",
+          view: "matrix",
           head: ["Spatial token", "Attend", "Posture", "Locomote", "Gesture"],
           rows: [
             ["tilt", "●", "●", "", ""],
@@ -307,6 +310,7 @@ export const primitiveTokens: GuidelineSection = {
         {
           kind: "table",
           title: "Extensions",
+          view: "cards",
           head: ["ID", "Role"],
           rows: [
             ["tok.face.eyebrow", "Intensity and direction of the emotion"],

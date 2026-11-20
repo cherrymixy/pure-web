@@ -17,6 +17,7 @@ export const validation: GuidelineSection = {
         {
           kind: "table",
           title: "Measures",
+          view: "measures",
           head: ["Measure", "Meaning", "Criterion"],
           rows: [
             ["Recognition rate", "Share who read the intended meaning correctly (%)", "Strict criterion of the main study"],
@@ -25,6 +26,7 @@ export const validation: GuidelineSection = {
         },
         {
           kind: "p",
+          view: "note",
           text: "GQS (likeability · safety · animacy · intelligence) is used as an outcome measure only. Because of scale assignment and presentation order, types are not compared with each other — only within the same scale.",
         },
       ],
@@ -39,6 +41,7 @@ export const validation: GuidelineSection = {
         {
           kind: "table",
           title: "Checks",
+          view: "cards",
           head: ["Check", "From"],
           rows: [
             ["The 8 MUST violations", "Principles › MUST guardrails"],
@@ -59,6 +62,7 @@ export const validation: GuidelineSection = {
         {
           kind: "table",
           title: "Evidence table",
+          view: "evidence-bars",
           head: ["Stimulus", "Recognition", "Main misread", "Perceived malfunction", "Other"],
           rows: [
             ["Shake", "91%", "", "", "Highest recognition of 17"],
@@ -77,7 +81,7 @@ export const validation: GuidelineSection = {
             ["Emphasis (rejected)", "Pilot 0%", "Urgent · annoyed", "41.5", ""],
           ],
         },
-        { kind: "p", text: "To be checked once more against the raw data, especially the difference from the lenient criterion in the semantic guideline (e.g. Shake 87 vs 91)." },
+        { kind: "p", view: "note", text: "To be checked once more against the raw data, especially the difference from the lenient criterion in the semantic guideline (e.g. Shake 87 vs 91)." },
       ],
       related: ["measures", "semantic"],
       source: `${SRC}-3`,

@@ -13,7 +13,7 @@ export type GuidelineSectionId =
 
 /** title: starts a new section on the page (doc template); untitled blocks join the section above. */
 /** Presentation hint for the Lab-style doc page; content is the same either way (search / tokens read the plain block). */
-export type GuidelineBlockView = "tree" | "formula" | "cards" | "levels" | "steps" | "chips" | "checklist" | "note";
+export type GuidelineBlockView = "tree" | "formula" | "cards" | "levels" | "steps" | "chips" | "checklist" | "note" | "scale" | "rules" | "evidence" | "matrix" | "pattern" | "machine" | "transitions" | "roles" | "role-grid" | "tiles" | "radar" | "measures" | "evidence-bars" | "pairs";
 
 export type GuidelineBlock = {
   title?: string;

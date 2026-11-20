@@ -23,7 +23,8 @@ const ff = (f: Ff): GuidelineEntry => ({
     {
       kind: "table",
       title: "Roles",
-          head: ["Role", "Real part"],
+      view: "roles",
+      head: ["Role", "Real part"],
       rows: [
         ["role.attend", f.roles[0]],
         ["role.posture", f.roles[1]],
@@ -34,6 +35,7 @@ const ff = (f: Ff): GuidelineEntry => ({
     },
     {
       kind: "p",
+      view: "note",
       text: "Profile fields: roles (role → real joints) · limits (joint ranges · max_speed · max_accel) · channels (face class · speaker · light) · substitute (stand-ins for missing roles) · behaviors (each of the 16 behaviors as is / substituted / skipped).",
     },
   ],
@@ -55,6 +57,7 @@ export const templates: GuidelineSection = {
         {
           kind: "table",
           title: "Five form factors",
+          view: "role-grid",
           head: ["ID", "Form", "Also called", "Attend", "Posture", "Locomote", "Gesture", "Substitute"],
           rows: [
             ["ff.fixed_jointed", "Joint Fixed", "Stand · tabletop · robot arm", "Head · wrist", "Torso", "—", "(attend)", "Locomote → lean"],
@@ -94,6 +97,7 @@ export const templates: GuidelineSection = {
         {
           kind: "table",
           title: "Source profiles",
+          view: "cards",
           head: ["Source", "Source part → role", "Parts without a match"],
           rows: [
             ["src.human", "Head → attend · torso → posture · gait → locomote · arms and hands → gesture · expression → face", "—"],
@@ -102,7 +106,7 @@ export const templates: GuidelineSection = {
             ["src.character", "Animated character — the closest human or animal profile; exaggeration is split off into Style", "—"],
           ],
         },
-        { kind: "p", text: "The need is confirmed; the content is proposed." },
+        { kind: "p", view: "note", text: "The need is confirmed; the content is proposed." },
       ],
       related: ["pipeline", "presets"],
       source: `${SRC}-2`,
@@ -116,6 +120,7 @@ export const templates: GuidelineSection = {
         {
           kind: "table",
           title: "Spec",
+          view: "cards",
           head: ["Field", "Value"],
           rows: [
             ["form factor × face", "ff.legged × eyes"],
@@ -137,6 +142,7 @@ export const templates: GuidelineSection = {
         {
           kind: "table",
           title: "Spec",
+          view: "cards",
           head: ["Field", "Value"],
           rows: [
             ["form factor × face", "ff.fixed_jointed × eyes"],
@@ -146,6 +152,7 @@ export const templates: GuidelineSection = {
         },
         {
           kind: "p",
+          view: "note",
           text: "FaceUI v2 is the production spec of one robot's screen, so it sits here as the robot instance's face implementation spec, not in the Foundation (proposed).",
         },
       ],
@@ -156,7 +163,7 @@ export const templates: GuidelineSection = {
       slug: "export",
       title: "Export",
       summary: "PDF report · pure.json · CSV · dataset — class + channels + signature + patterns, bundled for the robot and the team.",
-      body: [{ kind: "list", title: "Formats", items: ["PDF report", "pure.json", "CSV", "Dataset"] }],
+      body: [{ kind: "list", title: "Formats", view: "tiles", items: ["PDF report", "pure.json", "CSV", "Dataset"] }],
       related: ["pure-desk"],
       source: `${SRC}-4`,
     },
