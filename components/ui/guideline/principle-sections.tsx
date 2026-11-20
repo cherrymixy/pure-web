@@ -93,7 +93,7 @@ function Arrow({ small = false }: { small?: boolean }) {
 
 function Proposed() {
   return (
-    <span className="inline-flex shrink-0 items-center rounded-[var(--radius-full)] border border-dashed border-[var(--neutral-400)] px-[var(--space-8)] py-[2px] text-[11px] font-medium leading-[14px] text-[var(--text-secondary)]">
+    <span className="inline-flex shrink-0 items-center rounded-[var(--radius-full)] border border-dashed border-[var(--neutral-400)] px-[var(--space-8)] py-[2px] text-[12px] font-medium leading-[16px] text-[var(--text-secondary)]">
       {STRINGS.guideline.proposed}
     </span>
   );
@@ -136,7 +136,7 @@ export function PrincipleCards({ s }: { s: Of<"p-cards"> }) {
           </div>
           {it.info && (
             <div className="mt-auto flex flex-col gap-[var(--space-4)] rounded-[var(--radius-xs)] bg-[var(--bg-canvas)] px-[var(--space-12)] py-[var(--space-8)]">
-              <span className="text-[10px] font-bold text-[var(--web-3f77a1)]">
+              <span className="text-[12px] font-bold text-[var(--web-3f77a1)]">
                 {it.infoLabel ?? s.label}
               </span>
               <span className="text-[12px] text-[var(--text-link)]">
@@ -189,7 +189,7 @@ export function PrincipleBullets({ s }: { s: Of<"p-bullets"> }) {
   return (
     <div className={`${COL} flex items-center gap-[var(--space-24)]`}>
       <div className="flex w-[498.59px] shrink-0 flex-col gap-[var(--space-24)]">
-        <span className="text-[22px] font-medium text-[var(--neutral-700)]">
+        <span className="text-[17px] font-semibold text-[var(--home-ink)]">
           {s.heading}
         </span>
         <ul className="flex flex-col gap-[var(--space-24)]">
@@ -260,11 +260,11 @@ export function PrinciplePhases({ s }: { s: Of<"p-phases"> }) {
                 <span className="whitespace-nowrap text-[14px] font-bold text-[var(--text-primary)]">
                   {p.title}
                 </span>
-                <span className="flex h-[40px] items-center justify-center whitespace-nowrap rounded-[var(--radius-sm)] bg-[var(--bg-surface)] p-[var(--space-12)] text-[10px] font-bold text-[var(--text-primary)]">
+                <span className="flex h-[40px] items-center justify-center whitespace-nowrap rounded-[var(--radius-sm)] bg-[var(--bg-surface)] p-[var(--space-12)] text-[12px] font-bold text-[var(--text-primary)]">
                   {p.time}
                 </span>
               </div>
-              <span className="max-w-[300px] text-[10px] text-[var(--text-secondary)]">
+              <span className="max-w-[300px] text-[12px] text-[var(--text-secondary)]">
                 {p.note}
               </span>
             </div>
@@ -286,14 +286,14 @@ export function PrinciplePhases({ s }: { s: Of<"p-phases"> }) {
                   {l.chips.map((c) => (
                     <span
                       key={c}
-                      className="flex h-[36.88px] items-center whitespace-nowrap rounded-[var(--radius-xs)] bg-[var(--bg-surface)] p-[var(--space-12)] text-[10px] font-bold text-[var(--web-7e7f7f)]"
+                      className="flex h-[36.88px] items-center whitespace-nowrap rounded-[var(--radius-xs)] bg-[var(--bg-surface)] p-[var(--space-12)] text-[12px] font-bold text-[var(--web-7e7f7f)]"
                     >
                       {c}
                     </span>
                   ))}
                 </div>
               </div>
-              <span className="whitespace-pre-line text-[10px] text-[var(--text-secondary)]">
+              <span className="whitespace-pre-line text-[12px] text-[var(--text-secondary)]">
                 {l.text}
               </span>
             </div>
@@ -323,7 +323,7 @@ export function PrincipleCompare({ s }: { s: Of<"p-compare"> }) {
             <span className="text-[16px] font-bold text-[var(--text-primary)]">
               {it.title}
             </span>
-            <span className="text-[10px] text-[var(--text-secondary)]">
+            <span className="text-[12px] text-[var(--text-secondary)]">
               {it.text}
             </span>
           </div>
@@ -351,7 +351,7 @@ export function PrincipleDonts({ s }: { s: Of<"p-donts"> }) {
           <span className="text-[16px] font-bold text-[var(--red-500)]">
             {it.title}
           </span>
-          <span className="text-[10px] text-[var(--text-secondary)]">
+          <span className="text-[12px] text-[var(--text-secondary)]">
             {it.text}
           </span>
         </div>

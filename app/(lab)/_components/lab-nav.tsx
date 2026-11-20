@@ -1,33 +1,40 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
-import { Fragment, Suspense } from "react";
+import { usePathname } from "next/navigation";
+import { Fragment } from "react";
 import { STRINGS } from "@/data/strings";
-import { tabOf, type CommunityTab } from "@/data/community";
 import { GuidelineTree } from "@/components/ui/guideline/guideline-tree";
+import { Icon, type IconName } from "@/components/ui/icons/icon";
+import { RobotArtLayers } from "@/components/ui/robot-art";
+import { useFavourites } from "./favourites-context";
+import type { RobotArt } from "@/data/lab-showcase";
 
-const ITEMS = [
-  { href: "/lab", label: STRINGS.sidebar.lab },
-  { href: "/lab/guideline", label: STRINGS.sidebar.guideline },
-  { href: "/lab/community", label: STRINGS.sidebar.community },
+const ITEMS: { href: string; label: string; icon: IconName }[] = [
+  { href: "/lab", label: STRINGS.sidebar.lab, icon: "nav-lab" },
+  { href: "/lab/guideline", label: STRINGS.sidebar.guideline, icon: "nav-guideline" },
+  { href: "/lab/user-data", label: STRINGS.sidebar.userData, icon: "nav-user-data" },
 ];
 
-// Lab is active for /lab and every project / new-project route; the others by prefix.
+// Lab is active for /lab and every project / new-project route; the others by prefix. The community list is User Data.
 function activeHref(path: string) {
-  if (path.startsWith("/lab/guideline")) return "/lab/guideline";
-  if (path.startsWith("/lab/community")) return "/lab/community";
-  if (path.startsWith("/lab/profile")) return null;
+  for (const prefix of ["/lab/guideline", "/lab/user-data"]) if (path.startsWith(prefix)) return prefix;
+  if (path === "/lab/community") return "/lab/user-data";
+  if (path.startsWith("/lab/profile") || path.startsWith("/lab/community")) return null;
   return "/lab";
 }
 
-/** docPaths: guideline routes on the component-page template — they nest the guideline tree under Guideline (Figma 808:1583). */
-export function LabNav({ docPaths = [] }: { docPaths?: string[] }) {
+// Nav row (Figma 1095:6568): px 12 py 11, gap 12, radius 10, icon 20, 17px; selected = bg #eef1f4, ink medium.
+const ROW = "flex w-full items-center gap-[var(--space-12)] overflow-clip rounded-[10px] px-[var(--space-12)] py-[11px] text-[17px] leading-normal";
+
+/** docPaths: guideline routes on the component-page template — they nest the guideline tree under Guideline (Figma 808:1583).
+ *  collapsed: icon-only rail (labels, trees and sub-lists hidden). */
+export function LabNav({ docPaths = [], collapsed = false }: { docPaths?: string[]; collapsed?: boolean }) {
   const path = usePathname() ?? "/lab";
   const active = activeHref(path);
-  const tree = docPaths.includes(path);
+  const tree = !collapsed && docPaths.includes(path);
   return (
-    <nav className={`flex flex-col gap-[11px] ${tree ? "-mr-[var(--space-12)] min-h-0 overflow-y-auto pr-[var(--space-12)]" : ""}`}>
+    <nav className="flex shrink-0 flex-col gap-[6px]">
       {ITEMS.map((item) => {
         const on = item.href === active;
         return (
@@ -35,42 +42,43 @@ export function LabNav({ docPaths = [] }: { docPaths?: string[] }) {
             <Link
               href={item.href}
               aria-current={on ? "page" : undefined}
-              className={`rounded-[var(--radius-xs)] p-[var(--space-12)] text-[20px] leading-[26px] text-[var(--text-link)] ${
-                on ? "bg-[var(--sage-50)] font-semibold" : "font-normal hover:bg-[var(--neutral-50)]"
-              }`}
+              title={collapsed ? item.label : undefined}
+              className={`${ROW} ${on ? "bg-[var(--home-nav-on)] font-medium text-[var(--home-ink)]" : "font-normal text-[var(--home-ink-2)] hover:bg-[var(--home-nav-on)]"}`}
             >
-              {item.label}
+              <Icon name={item.icon} size={20} className="shrink-0" />
+              {!collapsed && item.label}
             </Link>
             {tree && item.href === "/lab/guideline" && <GuidelineTree base="/lab/guideline" current={path} />}
           </Fragment>
         );
       })}
-      {path === "/lab/community" && (
-        <Suspense>
-          <CommunitySubNav />
-        </Suspense>
-      )}
     </nav>
   );
 }
 
-// Community sub-nav (Figma 943:1612 "Side nav"): All · Popular · Recently, 15 medium, selected on #dfe5e7 radius 10.
-function CommunitySubNav() {
-  const tab = tabOf(useSearchParams().get("tab"));
+export type FavouriteItem = { id: string; name: string; art: RobotArt };
+
+// Favourites (Figma 1095:6593 / 1104:1009): 14 medium #9aa1a6 header (p 12), rows px 12 py 8 — 30 avatar on #eef1f4 radius 8, 16 name.
+// Live: follows the stars on the Lab cards (FavouritesProvider).
+export function Favourites({ items }: { items: FavouriteItem[] }) {
+  const { stars } = useFavourites();
+  const shown = items.filter((f) => stars.has(f.id));
+  if (shown.length === 0) return null;
   return (
-    <div className="mt-[5px] flex flex-col gap-[var(--space-4)] px-[22px] py-[var(--space-12)]" role="group" aria-label={STRINGS.community.title}>
-      {(Object.keys(STRINGS.community.tabs) as CommunityTab[]).map((t) => (
-        <Link
-          key={t}
-          href={t === "all" ? "/lab/community" : `/lab/community?tab=${t}`}
-          aria-current={t === tab ? "page" : undefined}
-          className={`rounded-[10px] px-[11px] py-[var(--space-8)] text-[15px] font-medium leading-[22.5px] text-[var(--text-primary)] ${
-            t === tab ? "bg-[var(--community-subnav-selected)]" : "hover:bg-[var(--neutral-50)]"
-          }`}
-        >
-          {STRINGS.community.tabs[t]}
-        </Link>
-      ))}
+    <div className="flex flex-col gap-[6px]">
+      <p className="p-[var(--space-12)] text-[14px] font-medium leading-normal text-[var(--home-ink-3)]">{STRINGS.sidebar.favourites}</p>
+      <ul className="flex flex-col gap-[6px]">
+        {shown.map((f) => (
+          <li key={f.id}>
+            <Link href={`/lab/p/${f.id}`} className="flex items-center gap-[var(--space-12)] rounded-[10px] px-[var(--space-12)] py-[var(--space-8)] hover:bg-[var(--home-nav-on)]">
+              <span className="relative size-[30px] shrink-0 overflow-clip rounded-[var(--radius-xs)] bg-[var(--home-nav-on)]">
+                <RobotArtLayers art={f.art} />
+              </span>
+              <span className="truncate text-[16px] leading-normal text-[var(--home-ink)]">{f.name}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

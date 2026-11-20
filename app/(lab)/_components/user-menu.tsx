@@ -6,8 +6,9 @@ import { STRINGS } from "@/data/strings";
 import { Menu } from "@/components/ui/menu";
 import { ConfirmModal } from "@/components/ui/modal";
 
-// Sidebar user block (avatar mark + name, Figma 901:8325/8332) → Library / Profile & team / Log out (confirm → Lab home).
-export function UserMenu({ name, email }: { name: string; email: string }) {
+// Sidebar user card (Figma 1095:6630: initial avatar, plan pill, name) → Library / Profile & team / Log out (confirm → Lab home).
+/** compact: avatar only (collapsed sidebar). */
+export function UserMenu({ name, email, compact = false }: { name: string; email: string; compact?: boolean }) {
   const router = useRouter();
   const [logOut, setLogOut] = useState(false);
 
@@ -16,16 +17,21 @@ export function UserMenu({ name, email }: { name: string; email: string }) {
       <Menu
         label={STRINGS.common.userMenu}
         align="left"
-        triggerClassName="flex w-full items-center gap-[11px] rounded-[var(--radius-xs)] text-left hover:bg-[var(--neutral-50)]"
+        up
+        triggerClassName={`flex w-full items-center gap-[var(--space-12)] overflow-clip rounded-[14px] bg-[var(--neutral-0)] text-left hover:bg-[var(--home-nav-on)] ${compact ? "justify-center p-[2px]" : "p-[var(--space-12)]"}`}
         trigger={
           <>
-            <span aria-hidden className="relative size-[36px] shrink-0 rounded-[var(--radius-full)] bg-[var(--neutral-800)]">
-              <span className="absolute left-[8px] top-[8px] size-[8.4px] rounded-[var(--radius-2xs)] bg-[var(--bg-canvas)]" />
-              <span className="absolute left-[16.4px] top-[16.4px] size-[11.6px] rounded-[var(--radius-2xs)] bg-[var(--bg-canvas)]" />
+            <span aria-hidden className="flex size-[40px] shrink-0 items-center justify-center rounded-[20px] bg-[var(--home-ink)] text-[16.667px] font-semibold text-[var(--neutral-0)]">
+              {name.charAt(0)}
             </span>
-            <span className="truncate text-[20px] font-medium leading-[26px] text-[var(--text-primary)]" title={email}>
-              {name}
-            </span>
+            {!compact && <span className="flex min-w-0 flex-col items-start gap-[2.644px]">
+              <span className="flex h-[20.267px] w-[37.891px] items-center justify-center rounded-[35.248px] border-[0.881px] border-[var(--home-plan-line)] bg-[var(--home-plan-bg)] text-[11.455px] text-[var(--sage-500)]">
+                {STRINGS.sidebar.plan}
+              </span>
+              <span className="truncate text-[14.099px] font-medium text-[var(--home-ink)]" title={email}>
+                {name}
+              </span>
+            </span>}
           </>
         }
         items={[

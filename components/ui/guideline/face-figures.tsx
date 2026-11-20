@@ -29,7 +29,7 @@ export function FaceTypes({ s }: { s: Of<"face-types"> }) {
             <span className="text-[12px] text-[var(--text-secondary)]">{it.subtitle}</span>
           </div>
           <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-xs)] bg-[var(--bg-canvas)] px-[var(--space-12)] py-[var(--space-8)]">
-            <span className="text-[10px] font-bold text-[var(--web-3f77a1)]">{s.label}</span>
+            <span className="text-[12px] font-bold text-[var(--web-3f77a1)]">{s.label}</span>
             <span className="text-[12px] text-[var(--text-link)]">{it.text}</span>
           </div>
         </div>
@@ -101,7 +101,7 @@ export function FaceChange({ s }: { s: Of<"face-change"> }) {
 
       <div className="flex items-center gap-[var(--space-24)]">
         <div className="flex w-[498.59px] shrink-0 flex-col gap-[var(--space-24)]">
-          <span className="whitespace-nowrap text-[22px] font-medium text-[var(--neutral-700)]">{s.valence.title}</span>
+          <span className="whitespace-nowrap text-[17px] font-semibold text-[var(--home-ink)]">{s.valence.title}</span>
           <ul className="flex flex-col gap-[var(--space-24)]">
             {s.valence.bullets.map((b, i) => (
               <li key={i} className="flex items-start gap-[var(--space-12)]">
@@ -236,7 +236,7 @@ export function FaceTransitions({ s }: { s: Of<"face-transitions"> }) {
           </div>
           <div className="flex w-[435.15px] flex-col gap-[var(--space-4)]">
             <span className="text-[16px] font-bold text-[var(--text-primary)]">{it.title}</span>
-            <span className="text-[10px] text-[var(--text-secondary)]">{it.text}</span>
+            <span className="text-[12px] text-[var(--text-secondary)]">{it.text}</span>
           </div>
         </div>
       ))}
@@ -258,7 +258,7 @@ export function FaceDonts({ s }: { s: Of<"face-donts"> }) {
             </div>
           </div>
           <span className="text-[16px] font-bold text-[var(--red-500)]">{it.title}</span>
-          <span className="text-[10px] text-[var(--text-secondary)]">{it.text}</span>
+          <span className="text-[12px] text-[var(--text-secondary)]">{it.text}</span>
         </div>
       ))}
     </div>

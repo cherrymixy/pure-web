@@ -6,7 +6,7 @@ const SRC = "PURE guideline final structure v3 (2026-10-19)";
 
 export const overview: GuidelineSection = {
   id: "overview",
-  title: "Overview",
+  title: "Foundations",
   summary:
     "How the PURE Motion System is layered, the premises behind it, how values are written, and where each layer is used when AI generates motion.",
   entries: [
@@ -18,6 +18,7 @@ export const overview: GuidelineSection = {
         {
           kind: "code",
           title: "Layer map",
+          view: "tree",
           lang: "text",
           text: [
             "PURE Motion System",
@@ -48,6 +49,8 @@ export const overview: GuidelineSection = {
         {
           kind: "table",
           title: "Rules between layers",
+          view: "cards",
+          figures: ["downward", "values-only", "body", "one-source"],
           head: ["Rule", "Meaning"],
           rows: [
             ["Refer only downward", "A Component uses only Foundation token and operator names. A Pattern uses only Components. Tokens are never written into a Pattern directly."],
@@ -68,6 +71,8 @@ export const overview: GuidelineSection = {
         {
           kind: "table",
           title: "Four premises",
+          view: "cards",
+          figures: ["many-forms", "ai-input", "style", "web"],
           head: ["#", "Premise", "Effect on the design"],
           rows: [
             ["1", "It is for many robot forms (stand, humanoid, wheeled …), not for a single robot.", "Rules and tokens are not tied to joint names → role-based, normalized units."],
@@ -79,6 +84,7 @@ export const overview: GuidelineSection = {
         {
           kind: "table",
           title: "Ranges, not values",
+          view: "levels",
           head: ["Level", "Meaning", "Who can change it", "On violation"],
           rows: [
             ["MUST", "Breaking it reads as malfunction, misunderstanding or danger. Grounded in the main study.", "Nobody", "Auto-corrected + user notice (HARD)"],
@@ -98,6 +104,8 @@ export const overview: GuidelineSection = {
         {
           kind: "table",
           title: "Units",
+          view: "cards",
+          figures: ["perceived", "body-ratio", "face-ratio"],
           head: ["Kind of value", "How it is written", "Example"],
           rows: [
             ["Perceived by people (independent of robot size)", "Absolute: time ms · angle ° · pitch semitones (st)", "End hold 300 ms, tilt 12°"],
@@ -105,10 +113,12 @@ export const overview: GuidelineSection = {
             ["Face size", "Ratio of screen height", "eye.size 0.24"],
           ],
         },
-        { kind: "p", text: "Tilt angles stay in degrees because they are perceptual thresholds. They are clamped to the joint limits of the robot class." },
+        { kind: "p", view: "note", text: "Tilt angles stay in degrees because they are perceptual thresholds. They are clamped to the joint limits of the robot class." },
         {
           kind: "table",
           title: "Evidence tags",
+          view: "cards",
+          figures: ["strength-4", "strength-3", "strength-2", "strength-1"],
           head: ["Tag", "Meaning"],
           rows: [
             ["Empirical", "Confirmed in the PURE main study (n=47) or pilot (n=4)"],
@@ -119,6 +129,7 @@ export const overview: GuidelineSection = {
         },
         {
           kind: "p",
+          view: "note",
           text: "Notation: \"%\" = share of respondents; \"pt\" = a 7-point mean converted to 0–100 ((mean − 1) ÷ 6 × 100). Recognition rates use the strict criterion of the main study only.",
         },
       ],
@@ -133,6 +144,7 @@ export const overview: GuidelineSection = {
         {
           kind: "table",
           title: "Steps",
+          view: "steps",
           head: ["Step", "Question", "Reads"],
           rows: [
             ["1 Meaning recognition", "Which behavior is this movement?", "Component.recognize"],
@@ -142,10 +154,11 @@ export const overview: GuidelineSection = {
             ["5 Guardrail check", "Fix MUST violations, joint and speed limits", "Foundation MUST + Template limits"],
           ],
         },
-        { kind: "p", text: "Input: a dog video, an image or link, or a conversation. Output: pure.json + preview + correction notices." },
+        { kind: "p", view: "note", text: "Input: a dog video, an image or link, or a conversation. Output: pure.json + preview + correction notices." },
         {
           kind: "code",
           title: "Formula",
+          view: "formula",
           lang: "text",
           text: [
             "final = clamp( source + w × ρ × (style − source), guardrail range )",
@@ -159,6 +172,7 @@ export const overview: GuidelineSection = {
         },
         {
           kind: "p",
+          view: "note",
           text: "Example: Joy (high ρ) takes on the animation style strongly; Shake (low ρ) keeps almost its original shape. A dog shaking its body irregularly hits \"no irregular tremor\", is corrected to an even rhythm (pulse), and the user is told.",
         },
       ],
@@ -173,6 +187,7 @@ export const overview: GuidelineSection = {
         {
           kind: "table",
           title: "ID prefixes",
+          view: "chips",
           head: ["Layer", "Prefix", "Example"],
           rows: [
             ["Semantic principle", "sp.", "sp.4"],
@@ -192,6 +207,7 @@ export const overview: GuidelineSection = {
         {
           kind: "list",
           title: "Seven rules for AI-readable data",
+          view: "checklist",
           items: [
             "Every item has a unique ID with its layer prefix.",
             "Body parts are role-based.",

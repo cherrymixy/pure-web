@@ -14,6 +14,8 @@ export interface GuidelineNavItem {
   path?: string;
   /** small uppercase divider instead of a page */
   tag?: true;
+  /** downloads the pure tokens JSON instead of opening a page */
+  download?: true;
 }
 
 export interface GuidelineNavGroup extends GuidelineNavItem {
@@ -91,5 +93,5 @@ export const GUIDELINE_NAV: GuidelineNavGroup[] = [
   { label: "Templates", path: "templates", children: pagesOf(templates) },
   { label: "Style", path: "style", children: pagesOf(style) },
   { label: "Validation", path: "validation", children: pagesOf(validation) },
-  { label: "Download" },
+  { label: "Download", download: true },
 ];

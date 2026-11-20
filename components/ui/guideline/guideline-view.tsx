@@ -3,6 +3,7 @@ import { GUIDELINE } from "@/data/guideline";
 import { entryDoc, sectionDoc } from "@/lib/ui/guideline-doc";
 import { ComponentDocPage } from "./component-doc";
 import { DownloadTokens } from "./download-tokens";
+import { GuidelineIndexPage } from "./guideline-index";
 
 /** /lab/guideline (sidebar; the guideline is lab-only): [] → overview, [section], [section, slug]. Every page uses the doc template. */
 export function GuidelineView({ base, slug = [] }: { base: string; slug?: string[] }) {
@@ -14,6 +15,8 @@ export function GuidelineView({ base, slug = [] }: { base: string; slug?: string
   if (entry)
     return <ComponentDocPage title={entry.title} proposed={entry.proposed} doc={entryDoc(section, entry)} base={base} />;
   const download = section.id === "overview" || section.id === "primitive-tokens";
+  // Section pages (Overview, Principles, …) are on the Lab home v2 style; entry pages still use the doc template.
+  if (base === "/lab/guideline") return <GuidelineIndexPage title={section.title} doc={sectionDoc(section)} base={base} download={download} />;
   return (
     <ComponentDocPage title={section.title} doc={sectionDoc(section)} base={base} actions={download ? <DownloadTokens /> : undefined} />
   );

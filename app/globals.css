@@ -9,6 +9,10 @@ html {
 html:has([data-landing]) {
   zoom: 1;
 }
+/* Lab home v2 runs at the fitted frame zoom instead of 67 % (--app-vh follows). */
+html:has([data-fit-frame]) {
+  --app-zoom: var(--frame-zoom);
+}
 body {
   background: white;
 }

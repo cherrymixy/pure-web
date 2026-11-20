@@ -4,6 +4,10 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { GuidelineSearchItem } from "@/data/guideline";
 import { searchGuideline } from "@/lib/ui/guideline-search";
+import { Icon } from "../icons/icon";
+
+// Lab style (same as the section-page rail): small header, nav rows 15 / sub rows 14, current = #eef1f4 + ink medium.
+const HEAD = "px-[var(--space-12)] pb-[6px] text-[12px] font-medium text-[var(--home-ink-3)]";
 
 export interface TocItem {
   id: string;
@@ -62,17 +66,17 @@ export function DocToc({
       key={it.id}
       href={`#${it.id}`}
       aria-current={it.id === active ? "location" : undefined}
-      className={`w-fit hover:text-[var(--text-primary)] ${
-        it.id === active ? (sub ? "font-semibold text-[var(--sage-200)]" : "font-semibold text-[var(--text-primary)]") : sub ? "font-light text-[var(--text-tertiary)]" : "text-[var(--text-tertiary)]"
+      className={`rounded-[10px] px-[var(--space-12)] py-[7px] hover:bg-[var(--home-nav-on)] ${
+        it.id === active ? "bg-[var(--home-nav-on)] font-medium text-[var(--home-ink)]" : "text-[var(--home-ink-2)]"
       }`}
     >
-      {sub ? `-${it.label}` : it.label}
+      {it.label}
     </a>
   );
   return (
-    <div className="flex flex-col gap-[26px] leading-normal">
-      <label className="flex items-center gap-[var(--space-12)] rounded-[var(--radius-full)] bg-[var(--neutral-200)] px-[var(--space-24)] py-[var(--space-12)]">
-        <img src="/figma/guideline/icons/search.svg" alt="" width={19.92} height={19.92} className="shrink-0" />
+    <div className="flex flex-col gap-[var(--space-16)] leading-normal">
+      <label className="flex h-[44px] items-center gap-[10px] rounded-[var(--radius-sm)] bg-[var(--home-glass)] px-[var(--space-16)]">
+        <Icon name="search-18" size={18} className="shrink-0 text-[var(--home-ink-3)]" />
         <input
           type="search"
           value={q}
@@ -80,34 +84,36 @@ export function DocToc({
           onKeyDown={(e) => e.key === "Escape" && setQ("")}
           placeholder={searchLabel}
           aria-label={searchLabel}
-          className="min-w-0 flex-1 bg-transparent text-[16px] text-[var(--text-primary)] outline-none placeholder:text-[var(--sage-500)] placeholder:opacity-50"
+          className="min-w-0 flex-1 bg-transparent text-[15px] text-[var(--home-ink)] outline-none placeholder:text-[var(--home-ink-3)]"
         />
       </label>
       {results ? (
-        <nav aria-label={resultsLabel} className="flex flex-col gap-[14px] text-[16px]">
+        <nav aria-label={resultsLabel} className="flex flex-col gap-[2px] text-[15px]">
+          <p className={HEAD}>{resultsLabel}</p>
           {results.map((r) => (
-            <Link key={r.href} href={r.href} onClick={() => setQ("")} className="flex w-fit flex-col gap-[2px] hover:text-[var(--text-primary)]">
-              <span className="text-[var(--text-primary)]">{r.title}</span>
-              {r.section && <span className="text-[12px] text-[var(--text-tertiary)]">{r.section}</span>}
+            <Link key={r.href} href={r.href} onClick={() => setQ("")} className="flex flex-col gap-[2px] rounded-[10px] px-[var(--space-12)] py-[7px] hover:bg-[var(--home-nav-on)]">
+              <span className="text-[var(--home-ink)]">{r.title}</span>
+              {r.section && <span className="text-[12px] text-[var(--home-ink-3)]">{r.section}</span>}
             </Link>
           ))}
-          {!results.length && <span className="text-[var(--text-tertiary)]">{emptyLabel}</span>}
+          {!results.length && <span className="px-[var(--space-12)] text-[14px] text-[var(--home-ink-3)]">{emptyLabel}</span>}
         </nav>
       ) : pages ? (
-        <nav aria-label={title} className="flex flex-col gap-[14px] text-[16px]">
+        <nav aria-label={title} className="flex flex-col gap-[2px] text-[15px]">
           {pages.map((p) =>
             p.current ? (
-              <div key={p.href} className="flex flex-col gap-[14px]">
-                <a href="#top" aria-current="page" className="w-fit font-semibold text-[var(--text-primary)]">{p.label}</a>
-                <div className="flex flex-col gap-[7px] pl-[11px] text-[14px]">{items.map((it) => tocLink(it, true))}</div>
+              <div key={p.href} className="flex flex-col gap-[2px]">
+                <a href="#top" aria-current="page" className="rounded-[10px] px-[var(--space-12)] py-[7px] font-medium text-[var(--home-ink)] hover:bg-[var(--home-nav-on)]">{p.label}</a>
+                <div className="ml-[21px] flex flex-col gap-[2px] border-l border-[var(--home-line)] pl-[var(--space-8)] text-[14px]">{items.map((it) => tocLink(it, true))}</div>
               </div>
             ) : (
-              <Link key={p.href} href={p.href} className="w-fit text-[var(--text-tertiary)] hover:text-[var(--text-primary)]">{p.label}</Link>
+              <Link key={p.href} href={p.href} className="rounded-[10px] px-[var(--space-12)] py-[7px] text-[var(--home-ink-2)] hover:bg-[var(--home-nav-on)]">{p.label}</Link>
             ),
           )}
         </nav>
       ) : (
-        <nav aria-label={title} className="flex flex-col gap-[14px] text-[16px]">
+        <nav aria-label={title} className="flex flex-col gap-[2px] text-[15px]">
+          <p className={HEAD}>{title}</p>
           {items.map((it) => tocLink(it, false))}
         </nav>
       )}

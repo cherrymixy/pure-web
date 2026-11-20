@@ -2,7 +2,9 @@ import Link from "next/link";
 import { searchIndex } from "@/data/guideline";
 import type { ComponentDoc, ComponentDocSection, DocChannel, GuidelineBlock } from "@/data/guideline/types";
 import { STRINGS } from "@/data/strings";
+import { BlockView } from "./block-views";
 import { DocToc, type TocItem } from "./doc-toc";
+import { GuideCard } from "./guide-card";
 import { FaceChange, FaceDonts, FaceRhythm, FaceTransitions, FaceTypes } from "./face-figures";
 import { PrincipleBullets, PrincipleCards, PrincipleCompare, PrincipleDonts, PrincipleFlow, PrinciplePhases } from "./principle-sections";
 
@@ -10,6 +12,8 @@ const G = STRINGS.guideline;
 const A = "/figma/guideline/approach";
 const I = "/figma/guideline/icons";
 
+// Lab home v2 style (1095:6556) since the guideline restyle: canvas + glow at the fitted 1× frame zoom, hairline white cards, glass
+// pills, right rail = search + On this page. Type scale shared with Lab: 60 / 22 / 17 / 15 / 14 / 12.
 // Doc template for every guideline page — Figma W03-4L "Components · Approach" (808:1254) / W03-2L "Principle · Face" (808:1649),
 // 960 frame ×2 (decisions: STEP 22). Pages without a Figma frame get a doc derived in lib/ui/guideline-doc.ts.
 // Content card 808:1255 = main column + search / On this page (808:1580, 808:1277…). In the lab the guideline tree lives in
@@ -31,38 +35,35 @@ export function ComponentDocPage({
 }) {
   const sections = doc.rows.flatMap((r) => (Array.isArray(r) ? r : [r]));
   const toc: TocItem[] = [...(doc.topToc ? [{ id: "top", label: doc.topToc }] : []), ...sections.map((s) => ({ id: s.id, label: s.toc ?? s.title }))];
-  const stickyTop = "top-[var(--space-32)]";
-  const scrollMt = "scroll-mt-[var(--space-32)]";
+  const stickyTop = "top-[42px]";
+  const scrollMt = "scroll-mt-[42px]";
 
   return (
-    <div className={`flex items-start gap-[29px] pb-[var(--space-32)] pr-[var(--space-32)] pt-[var(--space-32)] pl-[29px]`}>
+    <div data-fit-frame className="relative px-[var(--space-40)] py-[42px]">
+      <img src="/figma/lab/home/glow.svg" alt="" aria-hidden className="pointer-events-none absolute left-[26px] top-[-360px] h-[680px] w-[1360px] max-w-none" />
 
-      <div className="flex min-w-0 flex-1 items-start gap-[118px] rounded-[var(--radius-xl)] bg-[var(--bg-surface)] pb-[75px] pl-[69px] pr-[61px] pt-[62px] leading-normal">
+      <div className="relative flex min-w-0 items-start gap-[var(--space-40)] leading-normal">
         <article className="flex min-w-0 flex-1 flex-col">
-          <span className="flex items-center gap-[var(--space-12)] text-[14px] font-medium text-[var(--text-primary)]">
-            {doc.breadcrumb}
-            {doc.ref && <code className="font-mono text-[13px] font-normal text-[var(--text-tertiary)]">{doc.ref}</code>}
-          </span>
-          <header id="top" className={`mt-[var(--space-28)] flex flex-col gap-[var(--space-32)] ${scrollMt}`}>
-            <div className="flex flex-col gap-[var(--space-28)]">
-              <h1 className="flex items-center gap-[var(--space-16)] text-[60px] font-semibold text-[var(--text-primary)]">
+          <header id="top" className={`flex flex-col gap-[var(--space-24)] ${scrollMt}`}>
+            <div className="flex flex-col gap-[var(--space-12)]">
+              <h1 className="flex items-center gap-[var(--space-16)] text-[60px] font-semibold text-[var(--home-ink)]">
                 {title}
                 {proposed && <ProposedBadge label={G.proposedNote} />}
               </h1>
-              <p className="text-[18px] text-[var(--text-secondary)]">
+              <p className="max-w-[760px] text-[17px] text-[var(--home-ink-2)]">
                 {doc.lead.map((l, i) => <span key={i} className="block">{l}</span>)}
               </p>
             </div>
             {doc.resources?.length || actions ? (
               <div className="flex flex-wrap items-center gap-[var(--space-12)]">
-                {doc.resources?.map((r) => (r.href ? <Link key={r.label} href={r.href} className={`${PILL} hover:bg-[var(--neutral-50)]`}>{r.label}</Link> : <span key={r.label} className={PILL}>{r.label}</span>))}
+                {doc.resources?.map((r) => (r.href ? <Link key={r.label} href={r.href} className={`${PILL} hover:bg-[var(--neutral-0)]`}>{r.label}</Link> : <span key={r.label} className={PILL}>{r.label}</span>))}
                 {actions}
               </div>
             ) : null}
           </header>
 
           {/* Without resource pills the first section sits 55 px under the lead (Face 808:1652 → 808:1667) */}
-          <div className={`${doc.resources?.length || actions ? "mt-[50px]" : "mt-[55px]"} flex max-w-[981.31px] flex-col gap-[119px]`}>
+          <div className="mt-[var(--space-40)] flex flex-col gap-[80px]">
             {doc.rows.map((r, i) =>
               Array.isArray(r) ? (
                 <div key={i} className="flex items-start gap-[var(--space-48)]">
@@ -76,17 +77,17 @@ export function ComponentDocPage({
           </div>
 
           {(doc.prev || doc.next) && (
-            <footer className="mt-[118px] grid max-w-[981.31px] grid-cols-2 gap-[var(--space-12)]">
+            <footer className="mt-[80px] grid grid-cols-2 gap-[16.483px]">
               {doc.prev ? <NeighborCard href={`${base}/${doc.prev.path}`} label={G.prevDoc} title={doc.prev.title} /> : <span />}
               {doc.next ? <NeighborCard href={`${base}/${doc.next.path}`} label={G.nextDoc} title={doc.next.title} end /> : <span />}
             </footer>
           )}
         </article>
 
-        <aside className={`sticky -mt-[30px] w-[333px] shrink-0 ${stickyTop}`}>
+        <aside className={`sticky w-[280px] shrink-0 ${stickyTop}`}>
           <DocToc
             title={G.onThisPage}
-            searchLabel={G.search}
+            searchLabel={G.searchPlaceholder}
             emptyLabel={G.noMatch}
             resultsLabel={G.searchResults}
             items={toc}
@@ -99,9 +100,9 @@ export function ComponentDocPage({
   );
 }
 
-const PILL = "rounded-[var(--radius-full)] border-[1.5px] border-[var(--border-default)] bg-[var(--bg-surface)] px-[var(--space-16)] py-[var(--space-8)] text-[14px] font-medium text-[var(--text-primary)]";
+const PILL = "flex h-[36px] items-center rounded-[10px] border border-[var(--home-line)] bg-[var(--home-glass)] px-[14px] text-[14px] font-medium text-[var(--home-ink)]";
 
-/** Every page keeps the Figma column (808:1667 / Approach 808:1285) — 490.66 ×2 = 981.31 px. */
+/** Text sections span the content column like the section pages; Figma illustrations keep their own 981.31 px column (face / principle figures). */
 /** Derived sections (blocks · cards · links) sit 28 px under their heading, like Face "What is changing?" (808:1734) */
 const DERIVED = new Set<ComponentDocSection["kind"]>(["blocks", "cards", "links"]);
 
@@ -109,9 +110,9 @@ function Section({ s, base, scrollMt, className = "" }: { s: ComponentDocSection
   return (
     <section id={s.id} aria-labelledby={`${s.id}-h`} className={`flex flex-col ${scrollMt} ${className}`} style={{ gap: s.gap ?? (DERIVED.has(s.kind) ? 28 : 40) }}>
       <div className="flex flex-col gap-[var(--space-8)]">
-        <h2 id={`${s.id}-h`} className="text-[26px] font-medium text-[var(--text-primary)]">{s.title}</h2>
+        <h2 id={`${s.id}-h`} className="text-[22px] font-semibold text-[var(--home-ink)]">{s.title}</h2>
         {s.text && (
-          <p className="text-[14px] text-[var(--text-secondary)]">
+          <p className="text-[15px] leading-[1.6] text-[var(--home-ink-2)]">
             {s.text.split("\n").map((l, i) => <span key={i} className="block">{l}</span>)}
           </p>
         )}
@@ -125,26 +126,15 @@ function SectionBody({ s, base }: { s: ComponentDocSection; base: string }) {
   switch (s.kind) {
     case "blocks":
       return (
-        <div className="flex max-w-[981.31px] flex-col gap-[var(--space-24)]">
+        <div className="flex flex-col gap-[var(--space-24)]">
           {s.blocks.map((b, i) => <Block key={i} b={b} />)}
         </div>
       );
     case "cards":
       return (
-        <div className="grid max-w-[981.31px] grid-cols-2 gap-[var(--space-20)]">
-          {s.items.map((it) => (
-            <Link
-              key={it.path}
-              href={`${base}/${it.path}`}
-              className="flex flex-col gap-[var(--space-8)] rounded-[var(--radius-lg)] border-[0.85px] border-[var(--border-default)] bg-[var(--bg-surface)] p-[var(--space-20)] hover:bg-[var(--neutral-50)]"
-            >
-              <span className="flex items-center gap-[var(--space-8)] text-[16px] font-bold text-[var(--text-primary)]">
-                {it.title}
-                {it.proposed && <ProposedBadge />}
-              </span>
-              {it.ref && <code className="font-mono text-[12px] text-[var(--web-3f77a1)]">{it.ref}</code>}
-              <span className="text-[14px] text-[var(--text-secondary)]">{it.summary}</span>
-            </Link>
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-[var(--space-20)]">
+          {s.items.map((it, i) => (
+            <GuideCard key={it.path} href={`${base}/${it.path}`} index={i} title={it.title} summary={it.summary} refId={it.ref} proposed={it.proposed} />
           ))}
         </div>
       );
@@ -152,7 +142,7 @@ function SectionBody({ s, base }: { s: ComponentDocSection; base: string }) {
       return (
         <div className="flex flex-wrap gap-[var(--space-12)]">
           {s.items.map((it) => (
-            <Link key={it.path} href={`${base}/${it.path}`} className={`${PILL} hover:bg-[var(--neutral-50)]`}>{it.title}</Link>
+            <Link key={it.path} href={`${base}/${it.path}`} className={`${PILL} hover:bg-[var(--neutral-0)]`}>{it.title}</Link>
           ))}
         </div>
       );
@@ -167,7 +157,7 @@ function SectionBody({ s, base }: { s: ComponentDocSection; base: string }) {
                   key={c.label}
                   aria-current={on ? "true" : undefined}
                   className={`flex h-[40px] items-center gap-[var(--space-8)] px-[var(--space-16)] py-[var(--space-8)] text-[14px] ${
-                    on ? "rounded-[var(--radius-full)] bg-[var(--sage-100)] text-[var(--text-primary)]" : "rounded-[var(--radius-sm)] text-[var(--text-tertiary)]"
+                    on ? "rounded-[10px] bg-[var(--home-nav-on)] font-medium text-[var(--home-ink)]" : "rounded-[10px] text-[var(--home-ink-3)]"
                   }`}
                 >
                   <ClassIcon icon={c.icon} on={on} />
@@ -183,21 +173,21 @@ function SectionBody({ s, base }: { s: ComponentDocSection; base: string }) {
       return (
         <div className="flex gap-[var(--space-16)]">
           {s.levels.map((l) => (
-            <div key={l.title} className="flex min-w-0 flex-1 flex-col gap-[var(--space-12)] rounded-[var(--radius-lg)] border-[1.5px] border-[var(--border-default)] bg-[var(--bg-surface)] p-[var(--space-20)]">
+            <div key={l.title} className="flex min-w-0 flex-1 flex-col gap-[var(--space-12)] rounded-[14.985px] border-[0.749px] border-[var(--home-line)] bg-[var(--neutral-0)] p-[var(--space-20)]">
               {/* Illustration 808:1372 in a 136.57-wide preview, x as % so it spans any card width: ghost = start, dot = reach, bar = target */}
               <div aria-hidden className="relative h-[119px] overflow-hidden rounded-[var(--radius-sm)] bg-[var(--sage-50)]">
                 <img src={`${A}/int-ghost.png`} alt="" width={59.47} height={59.47} className="absolute left-[16.45%] top-[29.74px] opacity-30" />
                 <img src={`${A}/int-ball.svg`} alt="" width={59.47} height={59.47} className="absolute top-[29.74px]" style={{ left: `${((22.47 + 25.35 * l.reach) / 136.57) * 100}%` }} />
                 <span className="absolute left-[94.54%] top-[9.92px] h-[99.12px] w-[3.96px] rounded-[var(--radius-full)] bg-[var(--neutral-700)]" />
               </div>
-              <span className="text-[18px] font-medium text-[var(--text-primary)]">{l.title}</span>
+              <span className="text-[17px] font-semibold text-[var(--home-ink)]">{l.title}</span>
               <div className="flex flex-wrap items-start justify-between gap-y-[var(--space-8)]">
                 <div className="flex items-center gap-[var(--space-8)]">
                   {l.chips.map((c) => (
                     <span key={c} className="rounded-[var(--radius-xs)] bg-[var(--bg-canvas)] px-[var(--space-16)] py-[var(--space-8)] text-[12px] text-[var(--text-link)]">{c}</span>
                   ))}
                 </div>
-                <code className="flex h-[48px] items-center rounded-[var(--radius-xs)] border-2 border-[var(--neutral-50)] p-[var(--space-12)] font-mono text-[10px] font-medium text-[var(--neutral-600)]">{l.token}</code>
+                <code className="flex h-[48px] items-center rounded-[var(--radius-xs)] border-2 border-[var(--neutral-50)] p-[var(--space-12)] font-mono text-[12px] font-medium text-[var(--neutral-600)]">{l.token}</code>
               </div>
             </div>
           ))}
@@ -206,14 +196,14 @@ function SectionBody({ s, base }: { s: ComponentDocSection; base: string }) {
     case "timeline":
       return (
         <div className="flex flex-col gap-[13px]">
-          <div className="flex justify-between pl-[142px] pr-[18px] text-[14px] text-[var(--web-7e7f7f)]">
+          <div className="flex justify-between pl-[142px] pr-[18px] text-[12px] text-[var(--home-ink-3)]">
             <span>0 s</span>
             <span>{s.duration} s</span>
           </div>
           <div className="flex flex-col gap-[var(--space-12)]">
             {s.tracks.map((t) => (
               <div key={t.channel} className="flex items-center">
-                <span className="flex w-[142px] shrink-0 items-center gap-[var(--space-8)] text-[20px] font-semibold text-[var(--neutral-950)]">
+                <span className="flex w-[142px] shrink-0 items-center gap-[var(--space-8)] text-[15px] font-semibold text-[var(--home-ink)]">
                   <img src={`${I}/tl-${t.channel}.svg`} alt="" width={29.74} height={29.74} />
                   {t.label}
                 </span>
@@ -221,7 +211,7 @@ function SectionBody({ s, base }: { s: ComponentDocSection; base: string }) {
                   {t.clips.map((c, i) => (
                     <span
                       key={i}
-                      className={`absolute bottom-[8.92px] top-[8.92px] flex items-center overflow-hidden whitespace-nowrap rounded-[var(--radius-sm)] text-[14px] font-bold text-[var(--text-on-inverse)] ${CLIP[t.channel]} ${
+                      className={`absolute bottom-[8.92px] top-[8.92px] flex items-center overflow-hidden whitespace-nowrap rounded-[var(--radius-sm)] text-[13px] font-semibold text-[var(--text-on-inverse)] ${CLIP[t.channel]} ${
                         c.align === "start" ? "pl-[18px]" : "justify-center"
                       }`}
                       style={{ left: `${(c.from / s.duration) * 100}%`, width: `${((c.to - c.from) / s.duration) * 100}%` }}
@@ -239,12 +229,12 @@ function SectionBody({ s, base }: { s: ComponentDocSection; base: string }) {
       const col = (j: number) => (s.widths[j] == null ? "min-w-0 flex-1" : "shrink-0");
       const w = (j: number) => (s.widths[j] == null ? undefined : { width: s.widths[j]! });
       return (
-        <div role="table" className="flex flex-col overflow-hidden rounded-[var(--radius-sm)] border-[1.5px] border-[var(--border-default)] bg-[var(--bg-surface)] text-[16px]">
-          <div role="row" className="flex items-center gap-[var(--space-16)] bg-[var(--bg-canvas)] px-[var(--space-16)] py-[var(--space-12)] font-medium text-[var(--text-secondary)]">
+        <div role="table" className="flex flex-col overflow-hidden rounded-[var(--radius-sm)] border border-[var(--home-line)] bg-[var(--neutral-0)] text-[14px]">
+          <div role="row" className="flex items-center gap-[var(--space-16)] bg-[var(--home-pill)] px-[var(--space-16)] py-[10px] text-[13px] font-medium text-[var(--home-ink-2)]">
             {s.head.map((h, j) => <span role="columnheader" key={j} className={col(j)} style={w(j)}>{h}</span>)}
           </div>
           {s.rows.map((r, i) => (
-            <div role="row" key={i} className={`flex items-center gap-[var(--space-16)] px-[var(--space-16)] py-[var(--space-12)] ${i ? "border-t-[0.5px] border-[var(--border-default)]" : ""}`}>
+            <div role="row" key={i} className={`flex items-center gap-[var(--space-16)] px-[var(--space-16)] py-[var(--space-12)] ${i ? "border-t border-[var(--home-line)]" : ""}`}>
               {r.map((c, j) => (
                 <span role="cell" key={j} className={`${col(j)} ${CELL[s.cols[j]]}`} style={w(j)}>
                   {s.cols[j] === "track" && isChannel(c) ? (
@@ -286,9 +276,9 @@ function SectionBody({ s, base }: { s: ComponentDocSection; base: string }) {
       return <PrincipleDonts s={s} />;
     case "states":
       return (
-        <ul className="flex flex-col items-start gap-[var(--space-8)] text-[16px]">
+        <ul className="flex flex-col items-start gap-[var(--space-8)] text-[15px]">
           {s.items.map((it) => (
-            <li key={it.state} className="flex gap-[var(--space-8)] whitespace-nowrap rounded-[var(--radius-xs)] border-[1.5px] border-[var(--border-default)] bg-[var(--bg-surface)] px-[var(--space-16)] py-[var(--space-8)]">
+            <li key={it.state} className="flex gap-[var(--space-8)] whitespace-nowrap rounded-[10px] border border-[var(--home-line)] bg-[var(--neutral-0)] px-[var(--space-16)] py-[var(--space-8)]">
               <span className="font-medium text-[var(--text-primary)]">{it.state}</span>
               <span className={`text-[var(--text-secondary)] ${s.plain ? "" : "ms-[var(--space-24)] list-item list-disc"}`}>{it.effect}</span>
             </li>
@@ -415,25 +405,26 @@ function Fill({ src, inset }: { src: string; inset: string }) {
 
 /** Body blocks in the doc style: tables like the Approach spec table, text in the Face section sizes. */
 function Block({ b }: { b: GuidelineBlock }) {
+  if (b.view) return <BlockView b={b} />;
   switch (b.kind) {
     case "p":
-      return <p className="text-[16px] text-[var(--text-link)]">{b.text}</p>;
+      return <p className="text-[15px] leading-[1.6] text-[var(--home-ink-2)]">{b.text}</p>;
     case "list":
       return (
-        <ul className="flex list-disc flex-col gap-[var(--space-8)] pl-[var(--space-24)] text-[16px] text-[var(--text-link)] marker:text-[var(--sage-400)]">
+        <ul className="flex list-disc flex-col gap-[var(--space-8)] pl-[var(--space-24)] text-[15px] leading-[1.6] text-[var(--home-ink-2)] marker:text-[var(--sage-400)]">
           {b.items.map((it, i) => <li key={i}>{it}</li>)}
         </ul>
       );
     case "code":
-      return <pre className="overflow-x-auto rounded-[var(--radius-sm)] bg-[var(--bg-inverse)] px-[var(--space-24)] py-[var(--space-20)] font-mono text-[14px] leading-[1.6] text-[var(--neutral-100)]">{b.text}</pre>;
+      return <pre className="overflow-x-auto rounded-[var(--radius-sm)] bg-[var(--bg-inverse)] px-[var(--space-24)] py-[var(--space-20)] font-mono text-[13px] leading-[1.6] text-[var(--neutral-100)]">{b.text}</pre>;
     case "table":
       return (
-        <div role="table" className="flex flex-col overflow-hidden rounded-[var(--radius-sm)] border-[1.5px] border-[var(--border-default)] bg-[var(--bg-surface)] text-[16px]">
-          <div role="row" className="flex gap-[var(--space-16)] bg-[var(--bg-canvas)] px-[var(--space-16)] py-[var(--space-12)] font-medium text-[var(--text-secondary)]">
+        <div role="table" className="flex flex-col overflow-hidden rounded-[var(--radius-sm)] border border-[var(--home-line)] bg-[var(--neutral-0)] text-[14px]">
+          <div role="row" className="flex gap-[var(--space-16)] bg-[var(--home-pill)] px-[var(--space-16)] py-[10px] text-[13px] font-medium text-[var(--home-ink-2)]">
             {b.head.map((h, j) => <span role="columnheader" key={j} className={j ? "min-w-0 flex-[2]" : "min-w-0 flex-1"}>{h}</span>)}
           </div>
           {b.rows.map((r, i) => (
-            <div role="row" key={i} className="flex gap-[var(--space-16)] border-t-[0.5px] border-[var(--border-default)] px-[var(--space-16)] py-[var(--space-12)]">
+            <div role="row" key={i} className="flex gap-[var(--space-16)] border-t border-[var(--home-line)] px-[var(--space-16)] py-[var(--space-12)]">
               {r.map((c, j) => <span role="cell" key={j} className={`min-w-0 break-words ${j ? `flex-[2] ${CELL.body}` : `flex-1 ${CELL.name}`}`}>{c}</span>)}
             </div>
           ))}
@@ -455,10 +446,10 @@ function NeighborCard({ href, label, title, end }: { href: string; label: string
   return (
     <Link
       href={href}
-      className={`flex min-w-0 flex-col gap-[var(--space-4)] rounded-[var(--radius-md)] border-[1.5px] border-[var(--border-default)] bg-[var(--bg-surface)] px-[var(--space-20)] py-[var(--space-16)] hover:bg-[var(--neutral-50)] ${end ? "items-end text-right" : ""}`}
+      className={`flex min-w-0 flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] bg-[color-mix(in_srgb,var(--neutral-0)_50%,transparent)] px-[var(--space-20)] py-[var(--space-16)] transition-[transform,background-color] hover:bg-[var(--neutral-0)] duration-[var(--motion-slow)] hover:-translate-y-[2px] ${end ? "items-end text-right" : ""}`}
     >
-      <span className="text-[12px] text-[var(--text-tertiary)]">{label}</span>
-      <span className="max-w-full truncate text-[18px] font-medium text-[var(--text-primary)]">{title}</span>
+      <span className="text-[12px] text-[var(--home-ink-3)]">{label}</span>
+      <span className="max-w-full truncate text-[17px] font-semibold text-[var(--home-ink)]">{title}</span>
     </Link>
   );
 }

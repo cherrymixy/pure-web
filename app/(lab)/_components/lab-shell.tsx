@@ -1,6 +1,30 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { useLayoutEffect } from "react";
+
+const FRAME_W = 1920;
+
+/** Live --frame-zoom = min(1, window width / 1920): the scale at which the 1× sidebar + home frame fit the window.
+ *  --sidebar-zoom = that scale divided by the page's own html zoom (`zoom` can't take calc(), so it's a plain number). */
+function useFrameZoom(pathname: string) {
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    const fit = () => {
+      const frame = Math.min(1, window.innerWidth / FRAME_W);
+      root.style.setProperty("--frame-zoom", String(frame));
+      const page = parseFloat(getComputedStyle(root).zoom) || 1;
+      root.style.setProperty("--sidebar-zoom", String(frame / page));
+    };
+    fit();
+    window.addEventListener("resize", fit);
+    return () => {
+      window.removeEventListener("resize", fit);
+      root.style.removeProperty("--frame-zoom");
+      root.style.removeProperty("--sidebar-zoom");
+    };
+  }, [pathname]);
+}
 
 /** Project setup and editor frames (Figma W02B-1 … W02F-4) and the community motion detail (943:1619) are full-bleed on
  *  bg/canvas; only the lab pages carry the sidebar. */
@@ -10,11 +34,12 @@ export function isFullBleed(pathname: string): boolean {
 
 export function LabShell({ sidebar, children }: { sidebar: React.ReactNode; children: React.ReactNode }) {
   const pathname = usePathname() ?? "";
+  useFrameZoom(pathname);
   if (isFullBleed(pathname)) {
     return <main className="flex min-h-[var(--app-vh)] min-w-0 flex-col bg-[var(--bg-canvas)]">{children}</main>;
   }
   return (
-    <div className="flex min-h-[var(--app-vh)] bg-[var(--neutral-50)]">
+    <div className="flex min-h-[var(--app-vh)] bg-[var(--home-canvas)]">
       {sidebar}
       <main className="flex min-w-0 flex-1 flex-col">{children}</main>
     </div>

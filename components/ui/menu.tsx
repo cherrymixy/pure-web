@@ -12,12 +12,15 @@ export function Menu({
   label,
   items,
   align = "right",
+  up = false,
   triggerClassName = "rounded-[var(--radius-xs)] px-[var(--space-8)] py-[var(--space-4)] text-[16px] leading-[20px] text-[var(--text-link)] hover:bg-[var(--bg-canvas)]",
 }: {
   trigger: React.ReactNode;
   label: string;
   items: MenuItem[];
   align?: "left" | "right";
+  /** Open above the trigger (sidebar footer). */
+  up?: boolean;
   triggerClassName?: string;
 }) {
   const [open, setOpen] = useState(false);
@@ -50,7 +53,7 @@ export function Menu({
         {trigger}
       </button>
       {open && (
-        <div role="menu" className={`absolute z-30 mt-[var(--space-8)] flex min-w-[240px] flex-col rounded-[var(--radius-md)] bg-[var(--bg-surface)] p-[var(--space-8)] shadow-[var(--pure-shadow-float)] ${align === "right" ? "right-0" : "left-0"}`}>
+        <div role="menu" className={`absolute z-30 ${up ? "bottom-full mb-[var(--space-8)]" : "mt-[var(--space-8)]"} flex min-w-[240px] flex-col rounded-[var(--radius-md)] bg-[var(--bg-surface)] p-[var(--space-8)] shadow-[var(--pure-shadow-float)] ${align === "right" ? "right-0" : "left-0"}`}>
           {items.map((item) => (
             <button
               key={item.label}

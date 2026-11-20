@@ -12,7 +12,15 @@ export type GuidelineSectionId =
   | "validation";
 
 /** title: starts a new section on the page (doc template); untitled blocks join the section above. */
-export type GuidelineBlock = { title?: string } & (
+/** Presentation hint for the Lab-style doc page; content is the same either way (search / tokens read the plain block). */
+export type GuidelineBlockView = "tree" | "formula" | "cards" | "levels" | "steps" | "chips" | "checklist" | "note";
+
+export type GuidelineBlock = {
+  title?: string;
+  view?: GuidelineBlockView;
+  /** view "cards": one small illustration key per row (components/ui/guideline/figures.tsx) */
+  figures?: string[];
+} & (
   | { kind: "p"; text: string }
   | { kind: "list"; items: string[] }
   | { kind: "table"; head: string[]; rows: string[][] }
