@@ -219,3 +219,16 @@ describe("resolveUpload", () => {
     expect(resolveUpload("", "/srv/up")).toBeNull();
   });
 });
+
+describe("shared storage (Vercel + Redis)", () => {
+  it("a project created by one instance is found by another", async () => {
+    // Copies like Redis does, so instances never share an object in memory.
+    let saved: string | null = null;
+    const store = { read: async () => (saved ? (JSON.parse(saved) as Db) : null), write: async (d: Db) => void (saved = JSON.stringify(d)) };
+    const a = new LowRepo(store, { seed: seedDb, shared: true });
+    const b = new LowRepo(store, { seed: seedDb, shared: true });
+    await b.projects.list(); // b loads before a writes
+    const p = await a.projects.create({ name: "Shared", type: "joint-fixed", source: "pure-desk" });
+    expect((await b.projects.get(p.id)).name).toBe("Shared");
+  });
+});

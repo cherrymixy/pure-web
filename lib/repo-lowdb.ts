@@ -25,6 +25,8 @@ export interface LowRepoOptions {
   clearUploads?: () => Promise<void>;
   /** Brings data saved by an earlier version up to date, in memory, right after the file loads. */
   migrate?: (db: Db) => void;
+  /** Storage is shared with other server instances (Vercel): re-read it on every access instead of caching. */
+  shared?: boolean;
 }
 
 const DAY = 86_400_000;
@@ -90,12 +92,22 @@ export class LowRepo implements Repo {
 
   private async read(): Promise<Db> {
     await this.load();
+    if (this.opts.shared) await this.reload();
     return this.db.data;
+  }
+
+  private async reload(): Promise<void> {
+    const latest = await this.adapter.read();
+    if (!latest) return;
+    this.opts.migrate?.(latest);
+    this.db.data = latest;
   }
 
   private write<T>(fn: (data: Db) => T | Promise<T>): Promise<T> {
     const run = this.queue.then(async () => {
       await this.load();
+      // shortcut: last write wins across instances (no lock) — fine for a one-person demo, add WATCH/version check if it gets concurrent use.
+      if (this.opts.shared) await this.reload();
       const result = await fn(this.db.data);
       await this.db.write();
       return result;

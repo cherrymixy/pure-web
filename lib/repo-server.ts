@@ -8,6 +8,7 @@ import type { Db } from "./models";
 import { DATA_DIR, UPLOADS_DIR, DB_FILE } from "./paths";
 import type { Repo } from "./repo";
 import { LowRepo } from "./repo-lowdb";
+import { RedisJson, redisEnv } from "./redis-adapter";
 import { fitDbToRig } from "./robot/rig";
 import { migrateDbFaces } from "./expression/face";
 import { migrateDbSounds } from "./expression/sound";
@@ -19,7 +20,10 @@ const g = globalThis as typeof globalThis & { __pureRepo?: Repo };
 
 export function getRepo(): Repo {
   if (!g.__pureRepo) mkdirSync(DATA_DIR, { recursive: true });
-  g.__pureRepo ??= new LowRepo(new JSONFile<Db>(DB_FILE), {
+  // Deployed with Redis connected: one shared DB for all instances. Otherwise the local data/db.json.
+  const redis = redisEnv();
+  g.__pureRepo ??= new LowRepo(redis ? new RedisJson<Db>(redis.url, redis.token, "pure:db") : new JSONFile<Db>(DB_FILE), {
+    shared: Boolean(redis),
     seed: seedDb,
     migrate: (db) => {
       fitDbToRig(db);
