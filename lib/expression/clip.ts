@@ -1,6 +1,6 @@
 import type { Clip, JointId, Key, Recipe, Structure } from "../models";
 import type { PlaybackParams } from "../sim/params";
-import { jointIds, rangeOf, sampleModelClip, sampleRecipe, type JointPose } from "./sample";
+import { jointIds, rangeOf, robotOf, sampleModelClip, sampleRecipe, type JointPose } from "./sample";
 
 export const CLIP_FPS = 30;
 export const MAX_KEYS = 24;
@@ -40,7 +40,7 @@ export function reduceTrack(points: { t: number; v: number }[], maxKeys = MAX_KE
 
 /** Recipe → editable model clip (timeline). Keys are linear segments within 0.5° of the playback. */
 export function recipeToClip(recipe: Recipe, params: PlaybackParams, structure: Structure): Clip {
-  const { frames, duration } = sampleRecipe(recipe, params, CLIP_FPS);
+  const { frames, duration } = sampleRecipe(recipe, params, CLIP_FPS, robotOf(structure));
   const tracks: Clip["tracks"] = {};
   for (const id of jointIds(structure)) {
     tracks[id] = reduceTrack(frames.map((f) => ({ t: f.t, v: f.pose[id] ?? 0 })));

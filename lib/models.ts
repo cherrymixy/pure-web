@@ -51,7 +51,7 @@ export const StructureSchema = z.object({
   type: RobotTypeSchema,
   joints: z.array(JointSchema),
   channels: z.array(ChannelSchema),
-  source: z.enum(["pure-desk", "import"]),
+  source: z.enum(["pure-desk", "pure-rover", "import"]),
   file: z.object({ name: z.string(), size: z.number(), path: z.string() }).optional(),
 });
 export type Structure = z.infer<typeof StructureSchema>;

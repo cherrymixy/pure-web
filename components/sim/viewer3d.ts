@@ -12,6 +12,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { toCreasedNormals } from 'three/addons/utils/BufferGeometryUtils.js';
 import { SERVO_ID, type LampSim, type PropSlot } from './lamp';
 import { ROBOT_KEY, type PropScene } from './prop-scene';
 import { SIMREADY_BASE } from '@/data/simready-assets';
@@ -282,6 +283,9 @@ export class LampViewer {
     }
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    // Scanned (decimated) meshes look faceted with per-face normals: smooth below the robot's crease angle.
+    const crease = this.lamp.robot.creaseAngleDeg;
+    if (crease) return toCreasedNormals(geometry, THREE.MathUtils.degToRad(crease));
     geometry.computeVertexNormals();
     return geometry;
   }

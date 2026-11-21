@@ -9,7 +9,7 @@ import { faceName } from "./face";
 import type { Clip, FaceSpec, Key, Recipe, RecipeStep, SoundCue, Structure } from "../models";
 import type { PlaybackParams } from "../sim/params";
 import { reduceTrack, MAX_KEYS } from "./clip";
-import { MAX_DEG_PER_S, jointIds, rangeOf, sampleRecipe } from "./sample";
+import { MAX_DEG_PER_S, jointIds, rangeOf, robotOf, sampleRecipe } from "./sample";
 
 export interface Issue {
   field: string;
@@ -26,7 +26,7 @@ export const RECIPE_LIMITS = { steps: 6, speed: [0.5, 1.5], amplitude: [0.3, 1.3
 function overshootBySteps(recipe: Recipe, params: PlaybackParams, structure: Structure): Set<number> {
   const bad = new Set<number>();
   const ids = jointIds(structure);
-  for (const f of sampleRecipe(recipe, params, 30).frames) {
+  for (const f of sampleRecipe(recipe, params, 30, robotOf(structure)).frames) {
     for (const id of ids) {
       const [lo, hi] = rangeOf(structure, id);
       if (f.pose[id] > hi + 1e-6 || f.pose[id] < lo - 1e-6) bad.add(f.step);
@@ -39,7 +39,7 @@ const allowanceCache = new Map<string, number>();
 
 /** max(120°/s, the behavior's own peak at speed 1 / amplitude 1 / default params). */
 export function velocityAllowance(behavior: string, structure: Structure): number {
-  const key = `${behavior}|${structure.joints.map((j) => `${j.min},${j.max}`).join(";")}`;
+  const key = `${structure.source}|${behavior}|${structure.joints.map((j) => `${j.min},${j.max}`).join(";")}`;
   let v = allowanceCache.get(key);
   if (v === undefined) {
     v = Math.max(MAX_DEG_PER_S, stepVelocities({ steps: [{ behavior, speed: 1, amplitude: 1, repeat: 1 }] }, {}, structure)[0] * 1.02);
@@ -50,7 +50,7 @@ export function velocityAllowance(behavior: string, structure: Structure): numbe
 
 /** Peak angular velocity per step, in real time (°/s). */
 export function stepVelocities(recipe: Recipe, params: PlaybackParams, structure: Structure): number[] {
-  const { frames } = sampleRecipe(recipe, params, 60);
+  const { frames } = sampleRecipe(recipe, params, 60, robotOf(structure));
   const peaks = recipe.steps.map(() => 0);
   const ids = jointIds(structure);
   for (let i = 1; i < frames.length; i++) {

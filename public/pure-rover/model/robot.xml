@@ -1,0 +1,108 @@
+<?xml version="1.0" ?>
+<!--
+  PURE Rover (Pure bot v2 body: round shell with a front screen on two wheels), 30 cm tall.
+  Meshes: Tripo scan "white robot rover 3d model.glb", decimated, split into shell / screen / wheels
+  and coloured by the texture (white vs dark), scaled 0.30 / 0.849, metres, +Z up, the screen faces -Y.
+
+  Kinematic rover, rooted at a base fixed to the world (no freejoint): the five command channels are
+    1 body yaw (turn in place) · 2 drive (slide along the heading, + = forward toward -Y, ±35 cm)
+    3 rock (whole shell about the wheel axle, + = lean forward) · 4 roll (side lean)
+    5 nod (shell about its centre, − = look down)
+  Wheels spin with the drive through equality constraints (angle = drive / radius); they stay
+  out of the rock / roll / nod chain so they keep touching the floor.
+
+  Body frames all sit at the world origin at rest; joint pivots are set with joint pos.
+  PROVISIONAL: masses are estimates.
+-->
+<mujoco model="pure_rover">
+  <compiler angle="degree" meshdir="assets" autolimits="true"/>
+
+  <default>
+    <default class="servo">
+      <joint damping="0.60" frictionloss="0.052" armature="0.028"/>
+      <position kp="17.8" kv="1.2" forcerange="-3.35 3.35"/>
+    </default>
+    <default class="drive">
+      <joint damping="4" armature="0.05"/>
+      <position kp="80" kv="8" forcerange="-25 25"/>
+    </default>
+    <default class="visual">
+      <geom type="mesh" contype="0" conaffinity="0" group="2"/>
+    </default>
+  </default>
+
+  <asset>
+    <material name="shell" rgba="0.93 0.93 0.92 1"/>
+    <material name="bezel" rgba="0.05 0.05 0.05 1"/>
+    <material name="tire"  rgba="0.12 0.12 0.13 1"/>
+    <material name="hub"   rgba="0.82 0.82 0.83 1"/>
+    <mesh name="body_white"    file="body_white.stl"/>
+    <mesh name="body_dark"     file="body_dark.stl"/>
+    <mesh name="wheel_l_dark"  file="wheel_l_dark.stl"/>
+    <mesh name="wheel_l_white" file="wheel_l_white.stl"/>
+    <mesh name="wheel_r_dark"  file="wheel_r_dark.stl"/>
+    <mesh name="wheel_r_white" file="wheel_r_white.stl"/>
+  </asset>
+
+  <worldbody>
+    <body name="base" pos="0 0 0">
+      <inertial pos="0 -0.02 0.02" mass="0.2" diaginertia="0.0004 0.0004 0.0004"/>
+
+      <body name="yaw" pos="0 0 0">
+        <joint name="1" class="servo" axis="0 0 1" pos="0 -0.02 0" range="-170 170"/>
+        <inertial pos="0 -0.02 0.03" mass="0.05" diaginertia="0.0001 0.0001 0.0001"/>
+
+        <body name="chassis" pos="0 0 0">
+          <joint name="2" class="drive" type="slide" axis="0 -1 0" range="-0.35 0.35"/>
+          <inertial pos="0 -0.02 0.08" mass="0.15" diaginertia="0.0003 0.0003 0.0003"/>
+
+          <body name="wheel_l" pos="0 0 0">
+            <joint name="wheel_l" axis="1 0 0" pos="-0.14 -0.02 0.0823" damping="0.01"/>
+            <inertial pos="-0.14 -0.02 0.0823" mass="0.08" diaginertia="0.00015 0.0001 0.0001"/>
+            <geom class="visual" mesh="wheel_l_dark" material="tire"/>
+            <geom class="visual" mesh="wheel_l_white" material="hub"/>
+          </body>
+          <body name="wheel_r" pos="0 0 0">
+            <joint name="wheel_r" axis="1 0 0" pos="0.14 -0.02 0.0823" damping="0.01"/>
+            <inertial pos="0.14 -0.02 0.0823" mass="0.08" diaginertia="0.00015 0.0001 0.0001"/>
+            <geom class="visual" mesh="wheel_r_dark" material="tire"/>
+            <geom class="visual" mesh="wheel_r_white" material="hub"/>
+          </body>
+
+          <body name="rock" pos="0 0 0">
+            <joint name="3" class="servo" axis="1 0 0" pos="0 -0.02 0.0823" range="-22 22"/>
+            <inertial pos="0 -0.02 0.12" mass="0.05" diaginertia="0.0001 0.0001 0.0001"/>
+
+            <body name="roll" pos="0 0 0">
+              <joint name="4" class="servo" axis="0 1 0" pos="0 -0.02 0.0823" range="-12 12"/>
+              <inertial pos="0 -0.02 0.12" mass="0.05" diaginertia="0.0001 0.0001 0.0001"/>
+
+              <body name="shell" pos="0 0 0">
+                <joint name="5" class="servo" axis="-1 0 0" pos="0 0 0.15" range="-18 18"/>
+                <inertial pos="0 0 0.16" mass="0.3" diaginertia="0.0012 0.0012 0.0012"/>
+                <geom class="visual" mesh="body_white" material="shell"/>
+                <geom class="visual" mesh="body_dark" material="bezel"/>
+                <!-- The face display is drawn by the web viewer (RobotSpec.display in lib/sim/robots.ts). -->
+                <site name="head_site" pos="0 -0.12 0.2"/>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <equality>
+    <!-- rolling without slip: wheel angle (rad) = drive (m) / wheel radius 0.0823 m -->
+    <joint joint1="wheel_l" joint2="2" polycoef="0 12.15 0 0 0"/>
+    <joint joint1="wheel_r" joint2="2" polycoef="0 12.15 0 0 0"/>
+  </equality>
+
+  <actuator>
+    <position class="servo" name="1" joint="1" inheritrange="1"/>
+    <position class="drive" name="2" joint="2" inheritrange="1"/>
+    <position class="servo" name="3" joint="3" inheritrange="1"/>
+    <position class="servo" name="4" joint="4" inheritrange="1"/>
+    <position class="servo" name="5" joint="5" inheritrange="1"/>
+  </actuator>
+</mujoco>

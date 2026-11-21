@@ -9,6 +9,7 @@ import { useEffect, useRef, type RefObject } from "react";
 import type { Clip, FaceSpec, Recipe, SoundSpec, Structure } from "@/lib/models";
 import type { ViewerOptions } from "./viewer3d";
 import type { PropAsset } from "./props";
+import { robotForSource } from "@/lib/sim/robots";
 import { SimController, type JointState, type PlaybackParams, type SimEventMap, type SoundEngine } from "./sim-controller";
 
 export type ViewportMode = "editor" | "structure" | "preview" | "share";
@@ -77,7 +78,7 @@ export interface ViewportProps {
   className?: string;
 }
 
-export function Viewport({
+function ViewportInner({
   controllerRef,
   structure,
   signatureParams,
@@ -104,7 +105,7 @@ export function Viewport({
     if (mounted > 1 && process.env.NODE_ENV !== "production") {
       console.error(`[Viewport] ${mounted} instances mounted — one per page (docs/conventions.md rule 14).`);
     }
-    const ctrl = new SimController(canvas, { sound: soundRef.current, idle: MODES[mode].idle, viewer: stageFromTokens(canvas), props: propsRef.current });
+    const ctrl = new SimController(canvas, { sound: soundRef.current, idle: MODES[mode].idle, viewer: stageFromTokens(canvas), props: propsRef.current, robot: robotForSource(structure?.source) });
     ctrlRef.current = ctrl;
     if (controllerRef) controllerRef.current = ctrl;
 
@@ -171,4 +172,9 @@ export function Viewport({
   }, [expression, autoPlay]);
 
   return <canvas ref={canvasRef} className={className} />;
+}
+
+/** One simulated robot per structure source (PURE Desk / PURE Rover): a different robot remounts the viewport. */
+export function Viewport(props: ViewportProps) {
+  return <ViewportInner key={robotForSource(props.structure?.source).id} {...props} />;
 }

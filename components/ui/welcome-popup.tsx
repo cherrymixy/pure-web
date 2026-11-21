@@ -72,6 +72,8 @@ export function WelcomePopup() {
         role="dialog"
         aria-modal="true"
         aria-label={t.title}
+        // Figma layout at 0.8× (user review: 573 wide read too large next to the Lab frame) — zoom keeps every inner value in proportion.
+        style={{ zoom: 0.8 }}
         className="anim-pop-in relative flex max-h-[calc(var(--app-vh)-48px)] w-[573px] flex-col overflow-y-auto overflow-x-clip rounded-[var(--radius-xl)] bg-[var(--welcome-bg)] shadow-[var(--pure-shadow-modal)]"
       >
         <div

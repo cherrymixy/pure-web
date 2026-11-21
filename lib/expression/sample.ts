@@ -5,7 +5,7 @@ import { BEHAVIORS, HOME } from "../sim/behaviors";
 import { sampleTrack } from "../sim/clip";
 import { JOINT_NAMES, type Pose } from "../sim/motion";
 import { applyParams, resolveParams, scaleTime, type PlaybackParams } from "../sim/params";
-import { PURE_DESK_ROBOT, retargetMotion, type RobotSpec } from "../sim/robots";
+import { PURE_DESK_ROBOT, retargetMotion, robotForSource, type RobotSpec } from "../sim/robots";
 import { SequencePlayer, loopIfRepeated } from "../sim/sequence";
 import type { Clip, JointId, Recipe, Structure } from "../models";
 
@@ -42,14 +42,18 @@ export interface Frame {
 }
 
 /** Sample a recipe at `fps`, in wall-clock time (the sim clock runs at params.speed). */
-export function sampleRecipe(recipe: Recipe, params: PlaybackParams = {}, fps = 60): { frames: Frame[]; duration: number } {
-  const player = recipePlayer(recipe, params);
+/** robot: whose joints the frames are keyed by (default PURE Desk; robotOf(structure) for a project). */
+/** The simulated robot a structure plays on. */
+export const robotOf = (structure: Pick<Structure, "source">): RobotSpec => robotForSource(structure.source);
+
+export function sampleRecipe(recipe: Recipe, params: PlaybackParams = {}, fps = 60, robot: RobotSpec = PURE_DESK_ROBOT): { frames: Frame[]; duration: number } {
+  const player = recipePlayer(recipe, params, robot);
   const speed = resolveParams(params).speed;
   const frames: Frame[] = [];
   const n = Math.ceil(player.duration * fps);
   for (let i = 0; i <= n; i++) {
     const tp = Math.min(i / fps, player.duration);
-    frames.push({ t: tp / speed, pose: toJointPose(player.target(tp)), step: player.stepAt(tp) });
+    frames.push({ t: tp / speed, pose: toJointPose(player.target(tp), robot), step: player.stepAt(tp) });
   }
   return { frames, duration: player.duration / speed };
 }

@@ -1,0 +1,14 @@
+{
+  "xml": [
+    "scene_sim.xml",
+    "robot.xml"
+  ],
+  "meshes": [
+    "body_white.stl",
+    "body_dark.stl",
+    "wheel_l_dark.stl",
+    "wheel_l_white.stl",
+    "wheel_r_dark.stl",
+    "wheel_r_white.stl"
+  ]
+}

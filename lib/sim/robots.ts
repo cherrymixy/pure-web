@@ -16,7 +16,7 @@
 import { JOINT_NAMES, type JointName, type Motion, type Oscillation, type Pose } from './motion';
 import { HOME } from './behaviors';
 
-export type RobotId = 'pure-desk';
+export type RobotId = 'pure-desk' | 'pure-rover';
 
 export interface CameraView {
   azimuth: number;
@@ -86,6 +86,8 @@ export interface RobotSpec {
   facesManifest: string | null;
   /** LeLamp channel space → this robot. null = identity. */
   retarget: RetargetMatrix | null;
+  /** Smooth mesh normals below this angle (degrees) in the web viewer — for scanned meshes. Unset = flat per-face shading. */
+  creaseAngleDeg?: number;
   /** Extra gain on the negative side of a retargeted channel (e.g. leaning back), applied after `retarget`. */
   backGain?: Partial<Record<JointName, number>>;
 }
@@ -167,11 +169,87 @@ const PURE_DESK: RobotSpec = {
   backGain: { base_pitch: 0.5 },
 };
 
+// ------------------------------------------------------------- PURE Rover
+
+/**
+ * PURE Rover (Pure bot v2: round shell with a front screen on two wheels, 30 cm, Jointless Driving).
+ *   1 body yaw · 2 drive (slide, metres) · 3 rock about the axle · 4 side roll · 5 nod about the shell centre
+ * The wheels follow the drive through equality constraints in robot.xml.
+ *
+ * Retarget from LeLamp channel space (library ranges: yaw ±65°, shoulder −26…34°, elbow −62…18°,
+ * wrist roll −95…52°, wrist pitch −45…78°):
+ * - Gaze turns the whole body (1:1).
+ * - Shoulder lean drives the rover along its heading: 0.34 → −26…34° becomes −8.8…11.6° of command
+ *   = about −15…20 cm (a slide reads its command in radians as metres). Leaning in rolls toward the
+ *   person, leaning back rolls away, and turns while driving trace a path on the floor.
+ * - The arm bend rocks the shell on its axle (elbow 0.25 + shoulder 0.25 → about −22…13°).
+ * - Wrist roll becomes a small side lean (0.1); wrist pitch a small nod (0.2), like the desk head tilt.
+ */
+const PURE_ROVER_RETARGET: RetargetMatrix = {
+  base_yaw: { base_yaw: 1 },
+  base_pitch: { base_pitch: 0.34 },
+  elbow_pitch: { elbow_pitch: 0.25, base_pitch: 0.25 },
+  wrist_roll: { wrist_roll: 0.1 },
+  wrist_pitch: { wrist_pitch: 0.2 },
+};
+
+const PURE_ROVER: RobotSpec = {
+  id: 'pure-rover',
+  label: 'PURE Rover',
+  modelBase: '/pure-rover/model',
+  headBody: 'shell',
+  baseBody: 'base',
+  jointKeys: {
+    base_yaw: 'body_yaw',
+    base_pitch: 'drive',
+    elbow_pitch: 'rock',
+    wrist_roll: 'roll',
+    wrist_pitch: 'nod',
+  },
+  jointLabels: {
+    base_yaw: 'Turn',
+    base_pitch: 'Drive',
+    elbow_pitch: 'Rock',
+    wrist_roll: 'Roll',
+    wrist_pitch: 'Nod',
+  },
+  jointHints: {
+    base_yaw: 'Turns in place on the wheels',
+    base_pitch: 'Drives forward / back along its heading (+ toward the person)',
+    elbow_pitch: 'Rocks the shell on the axle (+ leans forward)',
+    wrist_roll: 'Leans to one side',
+    wrist_pitch: 'Nods the shell (− looks down)',
+  },
+  // 30 cm tall, screen toward −Y: camera in front, a little above the screen.
+  heroView: { azimuth: 62, elevation: -10, distance: 0.75, lookAt: [0, -0.02, 0.14] },
+  beam: null,
+  /*
+   * Flat 5 : 3 panel just in front of the black visor, centred on it (visor front at z 0.205 sits at y −0.124);
+   * the visor leans back about 23°, so the panel does too.
+   */
+  display: {
+    center: [0, -0.1265, 0.205],
+    halfWidth: 0.075,
+    halfHeight: 0.045,
+    radius: 0.018,
+    bleed: 0,
+    pitchDeg: -23,
+  },
+  facesManifest: '/pure-desk/faces/faces.json',
+  retarget: PURE_ROVER_RETARGET,
+  creaseAngleDeg: 50,
+};
+
 export const ROBOTS: Record<RobotId, RobotSpec> = {
   'pure-desk': PURE_DESK,
+  'pure-rover': PURE_ROVER,
 };
 
 export const PURE_DESK_ROBOT = PURE_DESK;
+export const PURE_ROVER_ROBOT = PURE_ROVER;
+
+/** The simulated robot for a project structure source ("pure-rover" → PURE Rover, anything else → PURE Desk). */
+export const robotForSource = (source: string | undefined): RobotSpec => (source === 'pure-rover' ? PURE_ROVER : PURE_DESK);
 
 export const ROBOT_IDS = Object.keys(ROBOTS) as RobotId[];
 

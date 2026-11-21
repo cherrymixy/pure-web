@@ -2,6 +2,7 @@ import type { Db, Expression, Profile, Project, RobotDevice, SavedExpression, Sh
 import { SIM_BEHAVIORS } from "./sim-behaviors";
 import { COMPONENT_DEMOS, PROMPT_DEMOS, type DemoExpression } from "./demo-recipes";
 import { PURE_DESK_STRUCTURE } from "./pure-desk";
+import { PURE_ROVER_STRUCTURE } from "./pure-rover";
 import { PURE_DEFAULT_SIGNATURE } from "./signature";
 
 // Demo data loaded by "Reset demo data" (STEP 5). Dates are fixed so the demo is repeatable.
@@ -47,7 +48,7 @@ export const SEED_PROJECTS: Project[] = [
     updatedAt: "2026-10-14T11:05:00.000Z",
   },
   {
-    id: "p-surprising", name: "Surprising", type: "joint-fixed", status: "draft", structure: PURE_DESK_STRUCTURE,
+    id: "p-surprising", name: "Surprising", type: "jointless-driving", status: "draft", structure: PURE_ROVER_STRUCTURE,
     signatureHistory: [], channelsUsed: ["motion"], updatedAt: "2026-10-12T09:30:00.000Z",
   },
   {
