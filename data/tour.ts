@@ -52,11 +52,18 @@ export const TOUR_STEPS: TourStep[] = [
     body: "PURE가 로봇의 관절과 움직일 수 있는 범위를 읽고 있어요. 끝나면 자동으로 넘어가요.",
   },
   {
+    // No target: nothing is dimmed or blocked, so the 3D stage and the panel can be explored freely.
+    path: /^\/lab\/p\/[^/]+\/structure$/,
+    advance: "next",
+    title: "구조 둘러보기",
+    body: "분석된 관절 구조를 3D로 살펴보세요. 화면을 드래그해 로봇을 돌려 보고, 번호를 눌러 관절을 하나씩 확인할 수 있어요. 다 둘러봤다면 다음을 눌러 주세요.",
+  },
+  {
     path: /^\/lab\/p\/[^/]+\/structure$/,
     target: '[data-tour="structure-confirm"]',
     advance: "click",
     title: "구조 확인",
-    body: "분석된 관절 구조를 3D로 확인할 수 있어요. 구조가 맞다면 버튼을 눌러 주세요.",
+    body: "구조가 맞다면 버튼을 눌러 다음 단계로 넘어가요.",
   },
   {
     path: /^\/lab\/p\/[^/]+\/signature$/,
