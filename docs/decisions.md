@@ -114,3 +114,4 @@ STEP마다 한 줄. `날짜 · STEP · 결정 · 근거`
 | 2026-11-21 | PURE Rover (Surprising) | Tripo 로버 GLB를 Blender로 리깅: 조각 용접·스무딩·감축, 몸통/화면/바퀴 분리, 텍스처 밝기+다수결+화면 윤곽으로 흰/검 재질, 30 cm. MuJoCo 운동학 모델(회전·주행 ±35 cm 슬라이드·축 흔들기·좌우 기울기·끄덕임, 바퀴는 주행에 equality 연동). 시뮬 봉인 해제 승인: robots.ts에 pure-rover + retarget, Viewport가 structure.source로 로봇 선택, 로버만 creaseAngle 매끈 셰이딩. 생성 엔진 샘플링·검증·클립이 구조의 로봇 사용. Surprising = Jointless Driving 로버, 표정 영상은 PURE Desk 것 재사용. 환영 팝업 0.8배(사용자 리뷰) | 사용자 승인 |
 | 2026-11-21 | 투어 구조 둘러보기 | 구조 화면에 타깃 없는 "구조 둘러보기" 단계 추가(가림·클릭 차단 없음, 다음 버튼) 후 Confirm structure 단계, 12 → 13단계(사용자 리뷰) | 사용자 승인 |
 | 2026-11-21 | 배포 DB 공유 저장 | Vercel 인스턴스별 /tmp DB라 새 프로젝트가 다른 인스턴스·재배포에서 404 → Upstash Redis(무료) 연결, KV_REST_API_* 있으면 DB 전체를 키 pure:db 하나에 저장하고 매 접근 재조회(shared). 로컬은 data/db.json 그대로. 업로드 파일은 아직 /tmp | 사용자 승인 |
+| 2026-11-22 | 랜딩 건너뛰기 | / → /lab 리다이렉트(Click to Start 랜딩 일단 제외, 코드는 유지·page.tsx 두 줄로 복구) | 사용자 리뷰 |
