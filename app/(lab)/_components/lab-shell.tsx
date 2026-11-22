@@ -4,17 +4,19 @@ import { usePathname } from "next/navigation";
 import { useLayoutEffect } from "react";
 
 const FRAME_W = 1920;
+const APP_ZOOM = 0.67; // = --app-zoom in styles/tokens.css
 
 /** Live --frame-zoom = min(1, window width / 1920): the scale at which the 1× sidebar + home frame fit the window.
- *  --sidebar-zoom = that scale divided by the page's own html zoom (`zoom` can't take calc(), so it's a plain number). */
+ *  --sidebar-zoom = that scale divided by the html zoom of a 67 % page (`zoom` can't take calc(), so it's a plain number).
+ *  Fit-frame pages already run html at the frame zoom: globals.css sets --sidebar-zoom to 1 there, so the sidebar
+ *  doesn't depend on whether the page had rendered when this ran (it read the live zoom before and stuck enlarged). */
 function useFrameZoom(pathname: string) {
   useLayoutEffect(() => {
     const root = document.documentElement;
     const fit = () => {
       const frame = Math.min(1, window.innerWidth / FRAME_W);
       root.style.setProperty("--frame-zoom", String(frame));
-      const page = parseFloat(getComputedStyle(root).zoom) || 1;
-      root.style.setProperty("--sidebar-zoom", String(frame / page));
+      root.style.setProperty("--sidebar-zoom", String(frame / APP_ZOOM));
     };
     fit();
     window.addEventListener("resize", fit);

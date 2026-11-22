@@ -61,6 +61,9 @@ const FAV_SHADOW_3: ArtShadow = { src: `${H}/fav-shadow-3.svg`, box: [5.34, 21.7
 /** Joint filter options and card tags, in this order. */
 export const JOINT_TAGS = ["Joint Fixed", "Joint Driving", "Joint Walking", "Jointless Driving", "Full-Body"] as const;
 
+/** Showcase projects that open for now (user review): the rest are dimmed and can't be clicked. */
+export const LAB_OPEN = new Set(["p-test-01"]);
+
 export const LAB_SHOWCASE: ShowcaseCard[] = [
   {
     projectId: "p-test-01",

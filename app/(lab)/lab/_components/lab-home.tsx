@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { JOINT_TAGS, LAB_SHOWCASE, type ShowcaseCard } from "@/data/lab-showcase";
+import { JOINT_TAGS, LAB_OPEN, LAB_SHOWCASE, type ShowcaseCard } from "@/data/lab-showcase";
 import { STRINGS, fmt } from "@/data/strings";
 import type { Channel, Project } from "@/lib/models";
 import { api } from "@/lib/ui/api";
@@ -210,12 +210,19 @@ const MODULE: Record<Channel, { icon: string; bg: string }> = {
 
 // Card (1095:6686): min 357.638 wide (stretches with the grid column), white, 0.749 #e6e8ea, radius 14.985 — header · 16:9 picture · footer.
 // Type scale tuned after review (Figma card text was 9.7–12.7, too small): title 15 / meta 13 / labels + tag 11, nothing under 11.
+/** Locked showcase entries: dimmed, no clicks, out of the tab order (opacity/pointer-events go on the style so the
+ *  link's own className stays as is). */
+function lockProps(id: string) {
+  return LAB_OPEN.has(id) ? {} : { "aria-disabled": true, tabIndex: -1, style: { opacity: 0.4, pointerEvents: "none" as const } };
+}
+
 function ProjectCard({ project: p, card, author, starred, onStar }: { project: Project; card: ShowcaseCard; author: string; starred: boolean; onStar: () => void }) {
   const router = useRouter();
   return (
     <Link
       href={projectHref(p)}
       data-testid="project-card"
+      {...lockProps(p.id)}
       className="group flex w-full min-w-0 flex-col overflow-clip rounded-[14.985px] border-[0.749px] border-[var(--home-line)] bg-[var(--neutral-0)]"
     >
       <div className="flex w-full items-center gap-[8.991px] px-[13.486px] py-[11.988px]">
@@ -324,6 +331,7 @@ function ProjectList({
           href={projectHref(p)}
           role="row"
           data-testid="project-row"
+          {...lockProps(p.id)}
           className={`flex items-center gap-[var(--space-12)] px-[var(--space-16)] py-[10px] hover:bg-[var(--home-canvas)] ${i < rows.length - 1 ? "border-b border-[var(--home-list-line)]" : ""}`}
         >
           <span role="cell" className="flex min-w-0 flex-1 items-center gap-[14px]">
