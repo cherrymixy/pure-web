@@ -46,11 +46,11 @@ function PreviewArt({ type }: { type: Project["type"] }) {
 }
 
 function StepIcon({ state }: { state: StepState }) {
-  if (state === "done") return <Icon name="step-done" size={20} className="anim-check-pop shrink-0 text-[var(--bg-inverse)]" />;
-  if (state === "active") return <Icon name="step-active" size={20} className="shrink-0 text-[var(--bg-inverse)]" />;
+  if (state === "done") return <Icon name="step-done" size={20} className="anim-check-pop shrink-0 text-[var(--home-ink)]" />;
+  if (state === "active") return <Icon name="step-active" size={20} className="shrink-0 text-[var(--home-ink)]" />;
   return (
     <span
-      className={`size-[20px] shrink-0 rounded-[var(--radius-full)] border-2 ${state === "failed" ? "border-[var(--border-error)]" : "border-[var(--border-default)]"}`}
+      className={`size-[20px] shrink-0 rounded-[var(--radius-full)] border-2 ${state === "failed" ? "border-[var(--border-error)]" : "border-[var(--home-line)]"}`}
     />
   );
 }

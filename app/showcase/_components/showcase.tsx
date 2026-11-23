@@ -78,19 +78,19 @@ export function Showcase() {
   const robotLabel = robot === "on" ? S.robotOn : robot === "connecting" ? S.robotConnecting : S.robot;
 
   return (
-    <div className="flex h-[var(--app-vh)] flex-col bg-[var(--bg-canvas)]">
+    <div className="flex h-[var(--app-vh)] flex-col bg-[var(--home-canvas)]">
       <header className="flex items-center justify-between px-[var(--space-40)] pb-[var(--space-16)] pt-[var(--space-24)]">
         <div className="flex items-center gap-[var(--space-12)]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/figma/brand/logo-mark.svg" alt="" width={30} height={30} />
-          <span className="text-[22px] font-semibold text-[var(--sage-800)]">{STRINGS.brand.name}</span>
-          <span className="text-[18px] text-[var(--text-secondary)]">{S.subtitle}</span>
+          <span className="text-[22px] font-semibold text-[var(--home-ink)]">{STRINGS.brand.name}</span>
+          <span className="text-[18px] text-[var(--home-ink-3)]">{S.subtitle}</span>
         </div>
         <h1 className="sr-only">{S.title}</h1>
       </header>
 
       <main className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_440px] gap-[var(--space-24)] px-[var(--space-32)] pb-[var(--space-32)]">
-        <div className="relative min-h-0 overflow-hidden rounded-[var(--radius-2xl)] bg-[var(--bg-surface)]">
+        <div className="relative min-h-0 overflow-hidden rounded-[var(--radius-2xl)] bg-[var(--neutral-0)]">
           <Viewport
             controllerRef={ctrl}
             mode="share"
@@ -103,12 +103,12 @@ export function Showcase() {
             className="block size-full"
           />
           <div className="absolute bottom-[var(--space-24)] left-[var(--space-24)] flex flex-col gap-[4px]">
-            <span className="text-[40px] font-semibold leading-none text-[var(--text-primary)]">{motion.title}</span>
-            <span className="text-[18px] text-[var(--text-secondary)]">{motion.summary}</span>
+            <span className="text-[40px] font-semibold leading-none text-[var(--home-ink)]">{motion.title}</span>
+            <span className="text-[18px] text-[var(--home-ink-3)]">{motion.summary}</span>
           </div>
         </div>
 
-        <aside className="flex min-h-0 flex-col gap-[var(--space-24)] overflow-y-auto rounded-[var(--radius-xl)] bg-[var(--bg-surface)] p-[var(--space-32)]">
+        <aside className="flex min-h-0 flex-col gap-[var(--space-24)] overflow-y-auto rounded-[var(--radius-xl)] bg-[var(--neutral-0)] p-[var(--space-32)]">
           <ul className="flex flex-col gap-[var(--space-8)]">
             {SHOWCASE_MOTIONS.map((m, i) => (
               <li key={m.id}>
@@ -117,13 +117,13 @@ export function Showcase() {
                   onClick={() => { setSelected(i); setCue((c) => c + 1); }}
                   aria-pressed={i === selected}
                   className={`flex w-full items-center gap-[var(--space-16)] rounded-[var(--radius-md)] border-[1.5px] px-[var(--space-20)] py-[var(--space-16)] text-left ${
-                    i === selected ? "border-[var(--border-strong)] bg-[var(--bg-surface)]" : "border-transparent bg-[var(--bg-canvas)] hover:bg-[var(--neutral-150)]"
+                    i === selected ? "border-[var(--home-ink-3)] bg-[var(--neutral-0)]" : "border-transparent bg-[var(--home-canvas)] hover:bg-[var(--neutral-150)]"
                   }`}
                 >
-                  <span className={`text-[15px] font-semibold tabular-nums ${i === selected ? "text-[var(--text-primary)]" : "text-[var(--text-tertiary)]"}`}>{String(i + 1).padStart(2, "0")}</span>
+                  <span className={`text-[15px] font-semibold tabular-nums ${i === selected ? "text-[var(--home-ink)]" : "text-[var(--home-ink-3)]"}`}>{String(i + 1).padStart(2, "0")}</span>
                   <span className="flex min-w-0 flex-col gap-[2px]">
-                    <span className="text-[18px] font-medium leading-[24px] text-[var(--text-primary)]">{m.title}</span>
-                    <span className="text-[14px] leading-[20px] text-[var(--text-secondary)]">{m.summary}</span>
+                    <span className="text-[18px] font-medium leading-[24px] text-[var(--home-ink)]">{m.title}</span>
+                    <span className="text-[14px] leading-[20px] text-[var(--home-ink-3)]">{m.summary}</span>
                   </span>
                 </button>
               </li>
@@ -131,7 +131,7 @@ export function Showcase() {
           </ul>
 
           <div className="flex flex-wrap gap-[var(--space-8)]">
-            <button type="button" onClick={() => setCue((c) => c + 1)} className={`${pill} bg-[var(--bg-canvas)] text-[var(--text-primary)]`}>
+            <button type="button" onClick={() => setCue((c) => c + 1)} className={`${pill} bg-[var(--home-canvas)] text-[var(--home-ink)]`}>
               <Icon name="replay" size={20} />
               {S.replay}
             </button>
@@ -139,28 +139,28 @@ export function Showcase() {
               type="button"
               aria-pressed={loop}
               onClick={() => { setLoop(!loop); ctrl.current?.setLoop(!loop); }}
-              className={`${pill} ${loop ? "bg-[var(--neutral-800)] text-[var(--text-on-inverse)]" : "bg-[var(--bg-canvas)] text-[var(--text-primary)]"}`}
+              className={`${pill} ${loop ? "bg-[var(--neutral-800)] text-[var(--neutral-0)]" : "bg-[var(--home-canvas)] text-[var(--home-ink)]"}`}
             >
               {S.loop}
             </button>
           </div>
 
-          <div className="mt-auto flex flex-col gap-[var(--space-12)] border-t border-[var(--border-default)] pt-[var(--space-24)]">
+          <div className="mt-auto flex flex-col gap-[var(--space-12)] border-t border-[var(--home-line)] pt-[var(--space-24)]">
             <button
               type="button"
               aria-pressed={robot === "on"}
               onClick={() => void toggleRobot()}
-              className={`${pill} justify-center ${robot === "on" ? "bg-[var(--neutral-800)] text-[var(--text-on-inverse)]" : "bg-[var(--bg-canvas)] text-[var(--text-primary)]"}`}
+              className={`${pill} justify-center ${robot === "on" ? "bg-[var(--neutral-800)] text-[var(--neutral-0)]" : "bg-[var(--home-canvas)] text-[var(--home-ink)]"}`}
             >
               <Icon name="bluetooth" size={20} />
               {robotLabel}
             </button>
             {robot === "offline" && <span className="text-[14px] text-[var(--text-error)]" role="alert">{S.robotOffline}</span>}
-            <button type="button" onClick={() => void downloadCode()} className={`${pill} justify-center bg-[var(--bg-canvas)] text-[var(--text-primary)]`}>
+            <button type="button" onClick={() => void downloadCode()} className={`${pill} justify-center bg-[var(--home-canvas)] text-[var(--home-ink)]`}>
               <Icon name="download-minimalistic" size={20} />
               {S.code}
             </button>
-            {note && <span className="text-[14px] text-[var(--text-secondary)]" role="status">{note}</span>}
+            {note && <span className="text-[14px] text-[var(--home-ink-3)]" role="status">{note}</span>}
           </div>
         </aside>
       </main>

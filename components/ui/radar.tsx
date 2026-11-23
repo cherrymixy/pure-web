@@ -79,7 +79,7 @@ export function Radar({ axes, compare, onChange, size = 320 }: { axes: Axes; com
       onPointerLeave={() => setDrag(null)}
     >
       {RINGS.map((ring) => (
-        <polygon key={ring} points={AXIS_ORDER.map((_, i) => point(i, ring).join(",")).join(" ")} fill="none" stroke="var(--sage-100)" strokeLinejoin="round" />
+        <polygon key={ring} points={AXIS_ORDER.map((_, i) => point(i, ring).join(",")).join(" ")} fill="none" stroke="var(--home-line)" strokeLinejoin="round" />
       ))}
       {AXIS_ORDER.map((ax, i) => {
         const [x2, y2] = point(i, 100);
@@ -88,7 +88,7 @@ export function Radar({ axes, compare, onChange, size = 320 }: { axes: Axes; com
         const sin = Math.sin(angle(i));
         return (
           <g key={ax}>
-            <line x1={c} y1={c} x2={x2} y2={y2} stroke="var(--border-default)" strokeLinecap="round" />
+            <line x1={c} y1={c} x2={x2} y2={y2} stroke="var(--home-line)" strokeLinecap="round" />
             <text
               x={lx}
               y={ly}
@@ -96,7 +96,7 @@ export function Radar({ axes, compare, onChange, size = 320 }: { axes: Axes; com
               fontWeight={500}
               textAnchor={cos > 0.3 ? "start" : cos < -0.3 ? "end" : "middle"}
               dominantBaseline={sin < -0.3 ? "auto" : sin > 0.3 ? "hanging" : "middle"}
-              fill="var(--text-secondary)"
+              fill="var(--home-ink-3)"
             >
               {drag === ax ? `${ax} ${axes[ax]}` : ax}
               <title>{`${AXIS_INFO[ax].label} ${axes[ax]}`}</title>
@@ -104,13 +104,13 @@ export function Radar({ axes, compare, onChange, size = 320 }: { axes: Axes; com
           </g>
         );
       })}
-      {compare && <polygon data-testid="radar-compare" points={poly(compare)} fill="none" stroke="var(--text-secondary)" strokeWidth={1.5} strokeDasharray="5 4" />}
-      <polygon points={poly(shape)} fill="var(--sage-300)" fillOpacity={0.28} stroke="var(--sage-300)" strokeWidth={2} strokeLinejoin="round" />
+      {compare && <polygon data-testid="radar-compare" points={poly(compare)} fill="none" stroke="var(--home-ink-3)" strokeWidth={1.5} strokeDasharray="5 4" />}
+      <polygon points={poly(shape)} fill="var(--home-ink)" fillOpacity={0.08} stroke="var(--home-ink)" strokeWidth={2} strokeLinejoin="round" />
       {AXIS_ORDER.map((ax, i) => {
         const [x, y] = point(i, shape[ax]);
         return (
           <g key={ax}>
-            <circle cx={x} cy={y} r={drag === ax ? 5 : 3.5} fill="var(--sage-300)" />
+            <circle cx={x} cy={y} r={drag === ax ? 5 : 3.5} fill="var(--home-ink)" />
             {onChange && (
               <circle
                 cx={x}

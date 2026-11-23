@@ -55,7 +55,7 @@ export function LibraryPanel({
       </SectionHeader>
 
       {shown.length === 0 ? (
-        <p className="mt-[var(--space-24)] text-[14px] leading-[18px] text-[var(--text-tertiary)]">{L.empty}</p>
+        <p className="mt-[var(--space-24)] text-[14px] leading-[18px] text-[var(--home-ink-3)]">{L.empty}</p>
       ) : (
         <div className="mt-[16px] grid grid-cols-[182px_182px] gap-x-[12px] gap-y-[12px]">
           {shown.map((m) => (
@@ -75,7 +75,7 @@ export function LibraryPanel({
 
       <div className="mt-[27px]">
         <SectionHeader label={L.assets}>
-          <button type="button" onClick={onResetScene} aria-label={L.resetScene} title={L.resetScene} className="text-[var(--library-section)] hover:text-[var(--text-primary)]">
+          <button type="button" onClick={onResetScene} aria-label={L.resetScene} title={L.resetScene} className="text-[var(--library-section)] hover:text-[var(--home-ink)]">
             <Icon name="replay" size={16} />
           </button>
         </SectionHeader>
@@ -104,7 +104,7 @@ export function LibraryPanel({
         </div>
       )}
       {/* CC BY 4.0 asks for attribution where the assets are used */}
-      <p className="ml-[12px] mt-[var(--space-16)] text-[12px] leading-[15px] text-[var(--text-tertiary)]">{SIMREADY_CREDIT}</p>
+      <p className="ml-[12px] mt-[var(--space-16)] text-[12px] leading-[15px] text-[var(--home-ink-3)]">{SIMREADY_CREDIT}</p>
     </div>
   );
 }

@@ -90,12 +90,12 @@ export function Timeline(p: TimelineProps) {
     const fill = selected
       ? "bg-[var(--neutral-800)]"
       : atPlayhead(t)
-        ? "bg-[var(--bg-surface)]"
+        ? "bg-[var(--neutral-0)]"
         : shape === "dot"
           ? "bg-[var(--web-e2a1c1)]"
           : shape === "square"
             ? "bg-[var(--web-ecc377)]"
-            : "bg-[var(--sage-300)]";
+            : "bg-[var(--web-75add7)]";
     const form = shape === "diamond" ? "size-[9px] rotate-45 rounded-[var(--radius-2xs)]" : shape === "dot" ? "size-[10px] rounded-[var(--radius-full)]" : "size-[9px] rounded-[2px]";
     return (
       <button
@@ -143,7 +143,7 @@ export function Timeline(p: TimelineProps) {
   const jointKey = selKey && selKey.track !== "face" && selKey.track !== "sound" ? p.clip.tracks[selKey.track]?.[selKey.index] : undefined;
 
   const chip = "flex items-center gap-[var(--space-8)] rounded-[var(--radius-full)] px-[var(--space-12)] py-[var(--space-8)] text-[12px] leading-[15px] whitespace-nowrap";
-  const transportBtn = "flex size-[28px] items-center justify-center rounded-[var(--radius-full)] text-[var(--text-primary)] hover:bg-[var(--bg-surface-muted)]";
+  const transportBtn = "flex size-[28px] items-center justify-center rounded-[var(--radius-full)] text-[var(--home-ink)] hover:bg-[var(--home-canvas)]";
   const ROW = "h-[39px] shrink-0 rounded-[var(--radius-sm)]";
 
   // W02E-4 Timeline Panel (901:12348 ×2): header (title · transport · time · fps | loop · ease · + Keyframe), body (Track List 228 | Lanes).
@@ -152,8 +152,8 @@ export function Timeline(p: TimelineProps) {
       {/* Timeline Header */}
       <div className="flex shrink-0 items-center justify-between gap-[var(--space-24)]">
         <div className="flex min-w-0 items-center gap-[var(--space-24)]">
-          <h2 className="text-[16px] leading-[20px] text-[var(--text-primary)]">{T.header}</h2>
-          <div className="flex items-center gap-[var(--space-8)] rounded-[var(--radius-full)] bg-[var(--bg-canvas)] p-[var(--space-8)]">
+          <h2 className="text-[16px] leading-[20px] text-[var(--home-ink)]">{T.header}</h2>
+          <div className="flex items-center gap-[var(--space-8)] rounded-[var(--radius-full)] bg-[var(--home-canvas)] p-[var(--space-8)]">
             <button type="button" aria-label="Skip to start" className={transportBtn} onClick={() => p.onSeek(0)}>
               <span className="flex items-center gap-[4px]" aria-hidden>
                 <span className="h-[10.5px] w-[2px] rounded-[var(--radius-full)] bg-current" />
@@ -161,14 +161,14 @@ export function Timeline(p: TimelineProps) {
               </span>
             </button>
             <button type="button" aria-label="Stop" className={transportBtn} onClick={() => { if (p.playing) p.onTogglePlay(); p.onSeek(0); }}>
-              <span className="size-[9px] rounded-[var(--radius-2xs)] bg-[var(--bg-inverse)]" aria-hidden />
+              <span className="size-[9px] rounded-[var(--radius-2xs)] bg-[var(--home-ink)]" aria-hidden />
             </button>
             <button
               type="button"
               onClick={p.onTogglePlay}
               aria-label={p.playing ? STRINGS.editor.pause : STRINGS.editor.play}
               title={p.playing ? STRINGS.editor.pause : STRINGS.editor.play}
-              className="flex size-[28px] items-center justify-center rounded-[var(--radius-full)] bg-[var(--primary)] text-[var(--bg-canvas)]"
+              className="flex size-[28px] items-center justify-center rounded-[var(--radius-full)] bg-[var(--primary)] text-[var(--home-canvas)]"
             >
               {p.playing ? (
                 <span className="flex gap-[3px]" aria-hidden>
@@ -187,31 +187,31 @@ export function Timeline(p: TimelineProps) {
             </button>
           </div>
           <span className="flex items-center gap-[var(--space-8)] whitespace-pre text-[16px] leading-[20px] tabular-nums" data-testid="timeline-time">
-            <span className="text-[var(--sage-300)]">{formatTime(p.t)}</span>
+            <span className="text-[var(--home-ink)]">{formatTime(p.t)}</span>
             <span className="text-[var(--neutral-500)]">{`/  ${formatTime(duration)}`}</span>
           </span>
-          <span className={`${chip} bg-[var(--bg-surface-muted)] tabular-nums text-[var(--text-primary)]`}>
+          <span className={`${chip} bg-[var(--home-canvas)] tabular-nums text-[var(--home-ink)]`}>
             {fmt(T.frame, { n: Math.round(p.t * CLIP_FPS) })}, {T.fps}
           </span>
-          {p.fromRecipe && <span className="min-w-0 truncate text-[12px] leading-[15px] text-[var(--text-tertiary)]">{T.recipeNote}</span>}
+          {p.fromRecipe && <span className="min-w-0 truncate text-[12px] leading-[15px] text-[var(--home-ink-3)]">{T.recipeNote}</span>}
         </div>
         <div className="flex shrink-0 items-center gap-[var(--space-8)]">
           <button
             type="button"
             aria-pressed={p.loop}
             onClick={() => p.onLoop(!p.loop)}
-            className={`${chip} ${p.loop ? "bg-[var(--sage-300)] text-[var(--neutral-950)]" : "bg-[var(--bg-surface-muted)] text-[var(--text-primary)]"}`}
+            className={`${chip} ${p.loop ? "bg-[var(--home-ink)] text-[var(--neutral-0)]" : "bg-[var(--home-canvas)] text-[var(--home-ink)]"}`}
           >
             {T.loop}
           </button>
-          <label className={`${chip} relative bg-[var(--bg-surface-muted)] text-[var(--text-primary)] ${jointKey ? "" : "opacity-40"}`}>
+          <label className={`${chip} relative bg-[var(--home-canvas)] text-[var(--home-ink)] ${jointKey ? "" : "opacity-40"}`}>
             <span>{T.ease}:</span>
             <select
               disabled={!jointKey}
               value={jointKey?.easing ?? "ease_in_out"}
               onChange={(e) => selKey && p.onApplyKey(selKey, { easing: e.target.value as Easing })}
               aria-label={T.ease}
-              className="-ml-[var(--space-4)] appearance-none bg-transparent text-[12px] leading-[15px] text-[var(--text-primary)] outline-none disabled:cursor-not-allowed"
+              className="-ml-[var(--space-4)] appearance-none bg-transparent text-[12px] leading-[15px] text-[var(--home-ink)] outline-none disabled:cursor-not-allowed"
             >
               {EASINGS.map((e) => <option key={e} value={e}>{T.easings[e]}</option>)}
             </select>
@@ -220,7 +220,7 @@ export function Timeline(p: TimelineProps) {
             type="button"
             disabled={!p.selectedTrack || p.selectedTrack === "sound"}
             onClick={p.onAddKey}
-            className={`${chip} bg-[var(--sage-300)] text-[var(--neutral-950)] disabled:cursor-not-allowed disabled:opacity-40`}
+            className={`${chip} bg-[var(--home-ink)] text-[var(--neutral-0)] disabled:cursor-not-allowed disabled:opacity-40`}
           >
             {T.addKey}
           </button>
@@ -232,7 +232,7 @@ export function Timeline(p: TimelineProps) {
         <div className="flex min-h-0 min-w-0 flex-1 gap-[var(--space-16)] overflow-y-auto" onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerLeave={() => setDrag(null)}>
           {/* Track List 228 */}
           <div className="flex w-[228px] shrink-0 flex-col gap-[var(--space-8)]">
-            <div className="sticky top-0 z-[3] flex h-[25px] shrink-0 items-center justify-between bg-[var(--bg-surface)] pl-[var(--space-12)] text-[12px] leading-[15px] text-[var(--neutral-500)]">
+            <div className="sticky top-0 z-[3] flex h-[25px] shrink-0 items-center justify-between bg-[var(--neutral-0)] pl-[var(--space-12)] text-[12px] leading-[15px] text-[var(--neutral-500)]">
               <span>{T.layers}</span>
               <span>{T.layerValue}</span>
             </div>
@@ -245,16 +245,16 @@ export function Timeline(p: TimelineProps) {
                   type="button"
                   aria-pressed={sel}
                   onClick={() => p.onSelectTrack(r.track)}
-                  className={`${ROW} flex w-full items-center justify-between gap-[var(--space-8)] px-[var(--space-12)] text-left ${sel ? "bg-[var(--sage-100)]" : "bg-[var(--bg-canvas)] hover:bg-[var(--bg-surface-muted)]"}`}
+                  className={`${ROW} flex w-full items-center justify-between gap-[var(--space-8)] px-[var(--space-12)] text-left ${sel ? "bg-[var(--home-canvas)]" : "bg-[var(--home-canvas)] hover:bg-[var(--home-canvas)]"}`}
                 >
                   <span className="flex min-w-0 items-center gap-[var(--space-8)] text-[14px] leading-[18px]">
-                    <span className="size-[5px] shrink-0 rounded-[var(--radius-full)] bg-[var(--sage-300)]" aria-hidden />
+                    <span className="size-[5px] shrink-0 rounded-[var(--radius-full)] bg-[var(--home-ink)]" aria-hidden />
                     <span className="text-[var(--neutral-500)]">{i + 1}</span>
-                    <span className="truncate text-[var(--text-primary)]">{r.label}</span>
+                    <span className="truncate text-[var(--home-ink)]">{r.label}</span>
                   </span>
                   <span className="flex shrink-0 items-center gap-[var(--space-8)]">
                     <span className="text-[12px] leading-[15px] tabular-nums text-[var(--neutral-500)]">{metaOf(r.track)}</span>
-                    <span className={`size-[8px] rotate-45 rounded-[2px] ${keyHere ? "bg-[var(--sage-300)]" : "border border-[var(--sage-300)]"}`} aria-hidden />
+                    <span className={`size-[8px] rotate-45 rounded-[2px] ${keyHere ? "bg-[var(--home-ink)]" : "border border-[var(--home-ink)]"}`} aria-hidden />
                   </span>
                 </button>
               );
@@ -264,7 +264,7 @@ export function Timeline(p: TimelineProps) {
           {/* Lanes */}
           <div ref={lanes} className="relative flex min-w-0 flex-1 select-none flex-col gap-[var(--space-8)]">
             <div
-              className="sticky top-0 z-[3] h-[25px] shrink-0 cursor-ew-resize bg-[var(--bg-surface)]"
+              className="sticky top-0 z-[3] h-[25px] shrink-0 cursor-ew-resize bg-[var(--neutral-0)]"
               onPointerDown={(e) => {
                 (e.currentTarget as Element).setPointerCapture?.(e.pointerId);
                 p.onSeek(timeAt(e.clientX));
@@ -282,7 +282,7 @@ export function Timeline(p: TimelineProps) {
                   </span>
                 );
               })}
-              <span className="absolute inset-x-0 bottom-0 h-px bg-[var(--sage-100)]" />
+              <span className="absolute inset-x-0 bottom-0 h-px bg-[var(--home-canvas)]" />
             </div>
             {rows.map((r) => {
               const times = timesOf(r.track);
@@ -291,12 +291,12 @@ export function Timeline(p: TimelineProps) {
               return (
                 <div
                   key={r.track}
-                  className={`${ROW} relative ${p.selectedTrack === r.track ? "bg-[var(--sage-50)]" : "bg-[var(--bg-canvas)]"}`}
+                  className={`${ROW} relative ${p.selectedTrack === r.track ? "bg-[var(--home-canvas)]" : "bg-[var(--home-canvas)]"}`}
                   onPointerDown={() => p.onSelectTrack(r.track)}
                 >
                   {times.length > 1 && r.track !== "face" && r.track !== "sound" && (
                     <span
-                      className="absolute top-1/2 h-[19px] -translate-y-1/2 rounded-[var(--radius-xs)] border border-[var(--sage-300)] bg-[color-mix(in_srgb,var(--sage-300)_30%,transparent)]"
+                      className="absolute top-1/2 h-[19px] -translate-y-1/2 rounded-[var(--radius-xs)] border border-[var(--home-ink)] bg-[color-mix(in_srgb,var(--home-ink)_12%,transparent)]"
                       style={{ left: pct(lo), width: `calc(${pct(hi)} - ${pct(lo)})` }}
                       aria-hidden
                     />
@@ -307,8 +307,8 @@ export function Timeline(p: TimelineProps) {
             })}
             {/* Playhead: 2px sage/300 line + head */}
             <div className="pointer-events-none absolute inset-y-0 z-[4] w-[12px] -translate-x-1/2" style={{ left: pct(p.t) }} data-testid="playhead">
-              <span className="absolute inset-y-0 left-1/2 w-[2px] -translate-x-1/2 bg-[var(--sage-300)]" />
-              <span className="absolute left-1/2 top-0 size-0 -translate-x-1/2 border-x-[5.5px] border-t-[8px] border-x-transparent border-t-[var(--sage-300)]" />
+              <span className="absolute inset-y-0 left-1/2 w-[2px] -translate-x-1/2 bg-[var(--home-ink)]" />
+              <span className="absolute left-1/2 top-0 size-0 -translate-x-1/2 border-x-[5.5px] border-t-[8px] border-x-transparent border-t-[var(--home-ink)]" />
             </div>
           </div>
         </div>
@@ -333,18 +333,18 @@ function Inspector(p: TimelineProps & { jointKey: Key | undefined }) {
     setValue(p.jointKey ? p.jointKey.value.toFixed(1) : "");
   }, [keyT, p.jointKey, sel?.track, sel?.index]);
 
-  const box = "flex w-[280px] shrink-0 flex-col gap-[var(--space-12)] self-start rounded-[var(--radius-lg)] bg-[var(--bg-canvas)] px-[var(--space-20)] py-[var(--space-16)]";
-  const field = "w-[112px] rounded-[var(--radius-xs)] bg-[var(--bg-surface)] px-[var(--space-8)] py-[var(--space-4)] text-right text-[14px] leading-[18px] tabular-nums text-[var(--text-primary)] outline-none";
-  const label = "text-[14px] leading-[18px] text-[var(--text-secondary)]";
+  const box = "flex w-[280px] shrink-0 flex-col gap-[var(--space-12)] self-start rounded-[var(--radius-lg)] bg-[var(--home-canvas)] px-[var(--space-20)] py-[var(--space-16)]";
+  const field = "w-[112px] rounded-[var(--radius-xs)] bg-[var(--neutral-0)] px-[var(--space-8)] py-[var(--space-4)] text-right text-[14px] leading-[18px] tabular-nums text-[var(--home-ink)] outline-none";
+  const label = "text-[14px] leading-[18px] text-[var(--home-ink-3)]";
   const btn = "flex-1 rounded-[var(--radius-full)] px-[var(--space-12)] py-[var(--space-8)] text-[12px] leading-[15px]";
 
-  if (!sel || keyT === undefined) return <aside className={`${box} text-[14px] leading-[18px] text-[var(--text-secondary)]`}>{T.pickKey}</aside>;
+  if (!sel || keyT === undefined) return <aside className={`${box} text-[14px] leading-[18px] text-[var(--home-ink-3)]`}>{T.pickKey}</aside>;
 
   const v = Number(value);
   const outOfRange = !!joint && (!Number.isFinite(v) || v < joint.min || v > joint.max);
   return (
     <aside className={box} data-testid="inspector">
-      <h3 className="text-[16px] leading-[20px] text-[var(--text-primary)]">{T.inspector}: {joint?.label ?? (sel.track === "face" ? T.faceTrack : T.soundTrack)}</h3>
+      <h3 className="text-[16px] leading-[20px] text-[var(--home-ink)]">{T.inspector}: {joint?.label ?? (sel.track === "face" ? T.faceTrack : T.soundTrack)}</h3>
       <label className="flex items-center justify-between gap-[var(--space-8)]">
         <span className={label}>{T.time}</span>
         <input type="number" step={1 / CLIP_FPS} min={0} max={p.clip.duration} value={t} onChange={(e) => setT(e.target.value)} className={field} />
@@ -364,23 +364,23 @@ function Inspector(p: TimelineProps & { jointKey: Key | undefined }) {
               className={`${field} ${outOfRange ? "text-[var(--text-error)] outline outline-1 outline-[var(--border-error)]" : ""}`}
             />
           </label>
-          <span className={`text-[12px] leading-[15px] ${outOfRange ? "text-[var(--text-error)]" : "text-[var(--text-tertiary)]"}`}>{fmt(T.range, { min: joint.min, max: joint.max })}</span>
+          <span className={`text-[12px] leading-[15px] ${outOfRange ? "text-[var(--text-error)]" : "text-[var(--home-ink-3)]"}`}>{fmt(T.range, { min: joint.min, max: joint.max })}</span>
         </>
       )}
       {faceKey && <span className={label}>{faceLabel(faceKey.preset)}</span>}
       {faceKey && (
-        <button type="button" className={`${btn} bg-[var(--bg-surface-muted)] text-[var(--text-primary)]`} onClick={() => p.onFaceKeyFromCurrent(sel.index)}>{T.fromFace}</button>
+        <button type="button" className={`${btn} bg-[var(--home-canvas)] text-[var(--home-ink)]`} onClick={() => p.onFaceKeyFromCurrent(sel.index)}>{T.fromFace}</button>
       )}
       <div className="flex gap-[var(--space-8)]">
         <button
           type="button"
-          className={`${btn} bg-[var(--sage-300)] text-[var(--neutral-950)] disabled:cursor-not-allowed disabled:opacity-40`}
+          className={`${btn} bg-[var(--home-ink)] text-[var(--neutral-0)] disabled:cursor-not-allowed disabled:opacity-40`}
           disabled={outOfRange || !Number.isFinite(Number(t))}
           onClick={() => p.onApplyKey(sel, joint ? { t: Number(t), value: v } : { t: Number(t) })}
         >
           {T.apply}
         </button>
-        <button type="button" className={`${btn} bg-[var(--bg-surface)] text-[var(--text-error)]`} onClick={() => p.onDeleteKey(sel)}>{T.delete}</button>
+        <button type="button" className={`${btn} bg-[var(--neutral-0)] text-[var(--text-error)]`} onClick={() => p.onDeleteKey(sel)}>{T.delete}</button>
       </div>
     </aside>
   );

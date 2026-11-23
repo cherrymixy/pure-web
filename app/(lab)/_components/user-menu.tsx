@@ -25,7 +25,7 @@ export function UserMenu({ name, email, compact = false }: { name: string; email
               {name.charAt(0)}
             </span>
             {!compact && <span className="flex min-w-0 flex-col items-start gap-[2.644px]">
-              <span className="flex h-[20.267px] w-[37.891px] items-center justify-center rounded-[35.248px] border-[0.881px] border-[var(--home-plan-line)] bg-[var(--home-plan-bg)] text-[11.455px] text-[var(--sage-500)]">
+              <span className="flex h-[20.267px] w-[37.891px] items-center justify-center rounded-[35.248px] border-[0.881px] border-[var(--home-plan-line)] bg-[var(--home-plan-bg)] text-[11.455px] text-[var(--home-ink-2)]">
                 {STRINGS.sidebar.plan}
               </span>
               <span className="truncate text-[14.099px] font-medium text-[var(--home-ink)]" title={email}>

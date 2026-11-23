@@ -13,7 +13,7 @@ export function Menu({
   items,
   align = "right",
   up = false,
-  triggerClassName = "rounded-[var(--radius-xs)] px-[var(--space-8)] py-[var(--space-4)] text-[16px] leading-[20px] text-[var(--text-link)] hover:bg-[var(--bg-canvas)]",
+  triggerClassName = "rounded-[var(--radius-xs)] px-[var(--space-8)] py-[var(--space-4)] text-[16px] leading-[20px] text-[var(--home-ink-2)] hover:bg-[var(--home-canvas)]",
 }: {
   trigger: React.ReactNode;
   label: string;
@@ -53,7 +53,7 @@ export function Menu({
         {trigger}
       </button>
       {open && (
-        <div role="menu" className={`absolute z-30 ${up ? "bottom-full mb-[var(--space-8)]" : "mt-[var(--space-8)]"} flex min-w-[240px] flex-col rounded-[var(--radius-md)] bg-[var(--bg-surface)] p-[var(--space-8)] shadow-[var(--pure-shadow-float)] ${align === "right" ? "right-0" : "left-0"}`}>
+        <div role="menu" className={`absolute z-30 ${up ? "bottom-full mb-[var(--space-8)]" : "mt-[var(--space-8)]"} flex min-w-[240px] flex-col rounded-[var(--radius-md)] bg-[var(--neutral-0)] p-[var(--space-8)] shadow-[var(--pure-shadow-float)] ${align === "right" ? "right-0" : "left-0"}`}>
           {items.map((item) => (
             <button
               key={item.label}
@@ -64,7 +64,7 @@ export function Menu({
                 setOpen(false);
                 item.onSelect();
               }}
-              className={`whitespace-nowrap rounded-[14px] p-[var(--space-12)] text-left text-[16px] leading-[22px] hover:bg-[var(--bg-surface-muted)] focus-visible:bg-[var(--bg-surface-muted)] focus-visible:outline-none ${item.danger ? "text-[var(--text-error)]" : "text-[var(--text-primary)]"}`}
+              className={`whitespace-nowrap rounded-[14px] p-[var(--space-12)] text-left text-[16px] leading-[22px] hover:bg-[var(--home-canvas)] focus-visible:bg-[var(--home-canvas)] focus-visible:outline-none ${item.danger ? "text-[var(--text-error)]" : "text-[var(--home-ink)]"}`}
             >
               {item.label}
             </button>

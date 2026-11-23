@@ -22,10 +22,10 @@ const clock = (s: number) => {
 
 /** Label / value row (W02F-2, W02F-4): Body 16 secondary · Label 16 medium. */
 function Row({ label, value, tone = "primary" }: { label: string; value: React.ReactNode; tone?: "primary" | "success" | "error" }) {
-  const color = tone === "success" ? "text-[var(--status-success)]" : tone === "error" ? "text-[var(--text-error)]" : "text-[var(--text-primary)]";
+  const color = tone === "success" ? "text-[var(--status-success)]" : tone === "error" ? "text-[var(--text-error)]" : "text-[var(--home-ink)]";
   return (
     <div className="flex items-start justify-between gap-[var(--space-16)] whitespace-nowrap text-[16px] leading-[20px]">
-      <span className="text-[var(--text-secondary)]">{label}</span>
+      <span className="text-[var(--home-ink-3)]">{label}</span>
       <span className={`font-medium ${color}`}>{value}</span>
     </div>
   );
@@ -185,11 +185,11 @@ export function TestModal({
                     aria-checked={on}
                     data-testid="robot-row"
                     onClick={() => setSelected(r.id)}
-                    className={`flex w-full items-center gap-[var(--space-16)] rounded-[var(--radius-md)] border-[1.5px] px-[var(--space-20)] py-[var(--space-16)] text-left ${on ? "border-[var(--border-strong)] bg-[var(--bg-canvas)]" : "border-[var(--border-default)] bg-[var(--bg-surface)] hover:bg-[var(--bg-canvas)]"}`}
+                    className={`flex w-full items-center gap-[var(--space-16)] rounded-[var(--radius-md)] border-[1.5px] px-[var(--space-20)] py-[var(--space-16)] text-left ${on ? "border-[var(--home-ink-3)] bg-[var(--home-canvas)]" : "border-[var(--home-line)] bg-[var(--neutral-0)] hover:bg-[var(--home-canvas)]"}`}
                   >
                     <span className="flex min-w-0 flex-1 flex-col gap-[var(--space-4)]">
-                      <span className="text-[16px] font-medium leading-[20px] text-[var(--text-primary)]">{r.name}</span>
-                      <span className="text-[14px] leading-[18px] text-[var(--text-secondary)]">
+                      <span className="text-[16px] font-medium leading-[20px] text-[var(--home-ink)]">{r.name}</span>
+                      <span className="text-[14px] leading-[18px] text-[var(--home-ink-3)]">
                         {joints ? fmt(TS.joints, { type: typeName(r.type), n: joints }) : typeName(r.type)}
                       </span>
                       {r.type !== projectType && <span className="text-[14px] leading-[18px] text-[var(--text-error)]">{fmt(TS.typeWarning, { type: typeName(r.type) })}</span>}
@@ -232,7 +232,7 @@ export function TestModal({
 
 function Pending({ label }: { label: string }) {
   return (
-    <div role="status" className="flex items-center gap-[var(--space-12)] rounded-[var(--radius-md)] border-[1.5px] border-[var(--border-default)] px-[var(--space-20)] py-[var(--space-16)] text-[16px] leading-[20px] text-[var(--text-secondary)]">
+    <div role="status" className="flex items-center gap-[var(--space-12)] rounded-[var(--radius-md)] border-[1.5px] border-[var(--home-line)] px-[var(--space-20)] py-[var(--space-16)] text-[16px] leading-[20px] text-[var(--home-ink-3)]">
       <Icon name="spinner" size={20} className="animate-spin" />
       {label}
     </div>

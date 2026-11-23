@@ -8,18 +8,18 @@ import { STRINGS } from "@/data/strings";
 // Title 24 semibold · Body 16 secondary, pill actions, PURE/Shadow/Modal, Dim = bg/overlay.
 
 const BUTTON = {
-  secondary: "border-2 border-[var(--border-default)] bg-[var(--bg-surface)] text-[var(--text-link)] hover:bg-[var(--bg-canvas)]",
-  primary: "bg-[var(--bg-inverse)] text-[var(--text-on-inverse)] hover:bg-[var(--neutral-800)]",
-  danger: "bg-[var(--status-error)] text-[var(--text-on-inverse)] hover:opacity-90",
+  secondary: "border border-[var(--home-line)] bg-[var(--neutral-0)] text-[var(--home-ink)] hover:border-[var(--home-ink-3)]",
+  primary: "bg-[var(--home-ink)] text-[var(--neutral-0)] hover:bg-[var(--neutral-800)]",
+  danger: "bg-[var(--status-error)] text-[var(--neutral-0)] hover:opacity-90",
 };
 
-/** Figma modal pill button (Cancel / Connect …): Label 16 medium, px 20 · py 12, radius full. */
+/** Modal button, Lab style (h 44, radius sm). Was the Figma modal pill button (Cancel / Connect …): Label 16 medium, px 20 · py 12, radius full. */
 export function ModalButton({ variant = "secondary", className = "", ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: keyof typeof BUTTON }) {
   return (
     <button
       type="button"
       {...props}
-      className={`shrink-0 whitespace-nowrap rounded-[var(--radius-full)] px-[var(--space-20)] py-[var(--space-12)] text-[16px] font-medium leading-[20px] disabled:cursor-not-allowed disabled:opacity-40 ${BUTTON[variant]} ${className}`}
+      className={`h-[44px] shrink-0 whitespace-nowrap rounded-[var(--radius-sm)] px-[var(--space-20)] text-[15px] font-medium disabled:cursor-not-allowed disabled:opacity-40 ${BUTTON[variant]} ${className}`}
     />
   );
 }
@@ -34,11 +34,11 @@ export function ModalCard({ title, description, children, className = "", ...res
   return (
     <div
       {...rest}
-      className={`flex flex-col gap-[var(--space-40)] rounded-[var(--radius-xl)] bg-[var(--bg-surface)] px-[var(--space-36)] pb-[var(--space-20)] pt-[var(--space-32)] text-[var(--text-primary)] shadow-[var(--pure-shadow-modal)] ${className}`}
+      className={`flex flex-col gap-[var(--space-40)] rounded-[24px] bg-[var(--neutral-0)] px-[var(--space-36)] pb-[var(--space-20)] pt-[var(--space-32)] text-[var(--home-ink)] shadow-[var(--pure-shadow-modal)] ${className}`}
     >
       <div className="flex flex-col gap-[var(--space-20)]">
-        <h2 className="text-[24px] font-semibold leading-[30px] text-[var(--text-primary)]">{title}</h2>
-        {description && <p className="text-[16px] leading-[20px] text-[var(--text-secondary)]">{description}</p>}
+        <h2 className="text-[24px] font-semibold leading-[30px] text-[var(--home-ink)]">{title}</h2>
+        {description && <p className="text-[16px] leading-[20px] text-[var(--home-ink-3)]">{description}</p>}
       </div>
       {children}
     </div>
@@ -135,13 +135,13 @@ export function PromptModal({
           }}
         >
           <label className="flex flex-col gap-[var(--space-16)]">
-            <span className="text-[16px] font-medium leading-[20px] text-[var(--text-link)]">{label}</span>
+            <span className="text-[16px] font-medium leading-[20px] text-[var(--home-ink-2)]">{label}</span>
             <input
               ref={input}
               value={value}
               maxLength={maxLength}
               onChange={(e) => setValue(e.target.value)}
-              className="rounded-[var(--radius-md)] border-[1.5px] border-[var(--border-default)] bg-[var(--bg-surface)] px-[var(--space-20)] py-[var(--space-16)] text-[16px] leading-[20px] text-[var(--text-primary)] outline-none focus:border-[var(--border-strong)]"
+              className="rounded-[var(--radius-md)] border-[1.5px] border-[var(--home-line)] bg-[var(--neutral-0)] px-[var(--space-20)] py-[var(--space-16)] text-[16px] leading-[20px] text-[var(--home-ink)] outline-none focus:border-[var(--home-ink-3)]"
             />
           </label>
           <ModalActions>

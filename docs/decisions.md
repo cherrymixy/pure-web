@@ -139,3 +139,4 @@ STEP마다 한 줄. `날짜 · STEP · 결정 · 근거`
 | 2026-11-23 | 구조 화면 정리 | 상단 PREVIEW 태그와 보조 안내문(Preview plays on PURE Desk…) 삭제, 본문은 한 문장만 | 사용자 리뷰 |
 | 2026-11-23 | 타입·Import 하단 안내 삭제, 시그니처 화면 Lab 무드 | 타입 선택 하단 안내문·Import 링크 삭제(Continue만), Import 하단 안내+샘플 로봇 링크 행 삭제, 고를 수 없는 타입 카드 흐리게(40%). Signature(W02C-1~3)를 구조 화면과 같은 Lab 토큰으로(유리 상단 버튼, PREVIEW 삭제, 흰 패널·home-line 테두리, Lab 버튼), 왼쪽 패널 가로 넘침 수정 | 사용자 리뷰 |
 | 2026-11-23 | 시그니처 How it maps 읽기 쉽게 | `calm → tempo 16, speed ×0.81` 코드식 한 줄 → 행마다 특성 이름(Tempo)·쉬운 말(Unhurried/Balanced/Brisk)·0–100 막대·“from “calm” · p.6”, 원래 수치는 hover 툴팁 | 사용자 리뷰 |
+| 2026-11-24 | 서비스 전체 Lab 무드 통일 | Lab·쇼케이스·공유·공통 UI에서 옛 토큰(sage·text-link·bg-surface·border-default 등) → home-* 토큰, 공통 Button·ModalButton 알약(border-2·radius-full·16) → Lab 버튼(h44·radius-sm·15·1px 선), 모달·공유 카드 radius 24, 레이더 sage → 잉크 선+옅은 채움, 타임라인 강조(재생 헤드·활성 칩) 잉크·모션 키 Lab 모션 파랑. 가이드라인 문서 그림·sim·/dev 제외 | 사용자 리뷰 |

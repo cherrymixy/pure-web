@@ -11,7 +11,7 @@ const SIZE = {
 
 export function chipClass({ size = "M", selected = false, dimmed = false }: { size?: keyof typeof SIZE; selected?: boolean; dimmed?: boolean } = {}) {
   return `inline-flex shrink-0 items-center justify-center gap-[var(--space-8)] whitespace-nowrap rounded-[var(--radius-full)] text-[13px] font-medium leading-[18px] ${SIZE[size]} ${
-    selected ? "bg-[var(--bg-inverse)] text-[var(--text-on-inverse)]" : "bg-[var(--bg-surface)] text-[var(--text-primary)] hover:bg-[var(--neutral-100)]"
+    selected ? "bg-[var(--home-ink)] text-[var(--neutral-0)]" : "bg-[var(--neutral-0)] text-[var(--home-ink)] hover:bg-[var(--neutral-100)]"
   } ${dimmed ? "opacity-40" : ""}`;
 }
 
@@ -23,16 +23,16 @@ export function Chip({ size = "M", selected = false, dimmed = false, className =
 // label Body/S 13 secondary, gap 6; field h56 px20 radius md, bg/surface, Body/L 16 text/primary;
 // FIELD_BOX carries no fill: add bg/surface (on canvas) or bg/canvas (on a surface).
 // Focused 1.5px border/strong · Error 1.5px border/error · Disabled bg/disabled + text/disabled.
-export const FIELD_LABEL = "text-[13px] leading-[18px] text-[var(--text-secondary)]";
+export const FIELD_LABEL = "text-[13px] leading-[18px] text-[var(--home-ink-3)]";
 export const FIELD_BOX =
-  "flex min-h-[56px] items-center gap-[var(--space-8)] rounded-[var(--radius-md)] border-[1.5px] border-transparent px-[var(--space-20)] text-[16px] leading-[22px] text-[var(--text-primary)] focus-within:border-[var(--border-strong)] has-[[aria-invalid=true]]:border-[var(--border-error)]";
-export const FIELD_INPUT = "min-w-0 flex-1 bg-transparent text-[16px] leading-[22px] text-[var(--text-primary)] outline-none placeholder:text-[var(--text-tertiary)] disabled:text-[var(--text-disabled)]";
-export const FIELD_HELPER = "text-[13px] leading-[18px] text-[var(--text-secondary)]";
+  "flex min-h-[56px] items-center gap-[var(--space-8)] rounded-[var(--radius-md)] border-[1.5px] border-transparent px-[var(--space-20)] text-[16px] leading-[22px] text-[var(--home-ink)] focus-within:border-[var(--home-ink-3)] has-[[aria-invalid=true]]:border-[var(--border-error)]";
+export const FIELD_INPUT = "min-w-0 flex-1 bg-transparent text-[16px] leading-[22px] text-[var(--home-ink)] outline-none placeholder:text-[var(--home-ink-3)] disabled:text-[var(--text-disabled)]";
+export const FIELD_HELPER = "text-[13px] leading-[18px] text-[var(--home-ink-3)]";
 
 /** Bare DS text field input (single line) inside the field box. `tone` = surface on canvas, canvas on surface (modals / cards). */
 export function TextInput({ tone = "surface", className = "", ...props }: InputHTMLAttributes<HTMLInputElement> & { tone?: "surface" | "canvas" }) {
   return (
-    <span className={`${FIELD_BOX} ${props.disabled ? "bg-[var(--bg-disabled)]" : tone === "canvas" ? "bg-[var(--bg-canvas)]" : "bg-[var(--bg-surface)]"} ${className}`}>
+    <span className={`${FIELD_BOX} ${props.disabled ? "bg-[var(--bg-disabled)]" : tone === "canvas" ? "bg-[var(--home-canvas)]" : "bg-[var(--neutral-0)]"} ${className}`}>
       <input {...props} className={FIELD_INPUT} />
     </span>
   );
@@ -44,7 +44,7 @@ export function ChipSelect({ chipSize = "S", className = "", children, ...props 
     <span className={`relative inline-flex ${className}`}>
       <select
         {...props}
-        className={`${chipClass({ size: chipSize })} cursor-pointer appearance-none border border-[var(--border-default)] pr-[36px] outline-none focus-visible:border-[var(--border-strong)]`}
+        className={`${chipClass({ size: chipSize })} cursor-pointer appearance-none border border-[var(--home-line)] pr-[36px] outline-none focus-visible:border-[var(--home-ink-3)]`}
       >
         {children}
       </select>

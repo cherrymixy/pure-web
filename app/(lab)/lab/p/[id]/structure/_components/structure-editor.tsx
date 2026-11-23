@@ -97,8 +97,8 @@ export function StructureEditor({ projectId, name, initial }: { projectId: strin
               style={{ left: a.x, top: a.y }}
               aria-label={a.id}
               aria-pressed={selected === a.id}
-              className={`absolute flex size-[42px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[var(--radius-full)] text-[20px] font-medium leading-[25px] text-[var(--text-on-inverse)] ${
-                selected === a.id ? "bg-[var(--bg-inverse)] outline-2 outline-offset-2 outline-[var(--bg-inverse)]" : "bg-[var(--neutral-700)]"
+              className={`absolute flex size-[42px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[var(--radius-full)] text-[20px] font-medium leading-[25px] text-[var(--neutral-0)] ${
+                selected === a.id ? "bg-[var(--home-ink)] outline-2 outline-offset-2 outline-[var(--home-ink)]" : "bg-[var(--neutral-700)]"
               }`}
             >
               {index.get(a.id)}

@@ -30,11 +30,11 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           <div
             key={t.id}
             data-testid="toast"
-            className="anim-rise-in pointer-events-auto flex max-w-[720px] items-center gap-[var(--space-16)] rounded-[var(--radius-md)] bg-[var(--bg-inverse)] px-[var(--space-24)] py-[var(--space-16)] text-[16px] leading-[20px] text-[var(--text-on-inverse)] shadow-[var(--pure-shadow-float)]"
+            className="anim-rise-in pointer-events-auto flex max-w-[720px] items-center gap-[var(--space-16)] rounded-[var(--radius-md)] bg-[var(--home-ink)] px-[var(--space-24)] py-[var(--space-16)] text-[16px] leading-[20px] text-[var(--neutral-0)] shadow-[var(--pure-shadow-float)]"
           >
             <span>{t.text}</span>
             {t.action && (
-              <button className="shrink-0 font-medium text-[var(--text-on-inverse)] hover:underline" onClick={t.action.onClick}>{t.action.label}</button>
+              <button className="shrink-0 font-medium text-[var(--neutral-0)] hover:underline" onClick={t.action.onClick}>{t.action.label}</button>
             )}
           </div>
         ))}

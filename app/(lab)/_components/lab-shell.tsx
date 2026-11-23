@@ -38,7 +38,7 @@ export function LabShell({ sidebar, children }: { sidebar: React.ReactNode; chil
   const pathname = usePathname() ?? "";
   useFrameZoom(pathname);
   if (isFullBleed(pathname)) {
-    return <main className="flex min-h-[var(--app-vh)] min-w-0 flex-col bg-[var(--bg-canvas)]">{children}</main>;
+    return <main className="flex min-h-[var(--app-vh)] min-w-0 flex-col bg-[var(--home-canvas)]">{children}</main>;
   }
   return (
     <div className="flex min-h-[var(--app-vh)] bg-[var(--home-canvas)]">

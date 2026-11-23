@@ -139,10 +139,10 @@ export function ExportModal({
                   role="radio"
                   aria-checked={destination === d}
                   onClick={() => setDestination(d)}
-                  className={`flex min-w-0 flex-1 flex-col items-start gap-[var(--space-4)] rounded-[var(--radius-md)] border-[1.5px] p-[var(--space-16)] text-left ${destination === d ? "border-[var(--border-strong)] bg-[var(--bg-canvas)]" : "border-[var(--border-default)] bg-[var(--bg-surface)] hover:bg-[var(--bg-canvas)]"}`}
+                  className={`flex min-w-0 flex-1 flex-col items-start gap-[var(--space-4)] rounded-[var(--radius-md)] border-[1.5px] p-[var(--space-16)] text-left ${destination === d ? "border-[var(--home-ink-3)] bg-[var(--home-canvas)]" : "border-[var(--home-line)] bg-[var(--neutral-0)] hover:bg-[var(--home-canvas)]"}`}
                 >
-                  <span className="text-[16px] font-medium leading-[20px] text-[var(--text-primary)]">{X.destinations[d]}</span>
-                  <span className="max-w-full truncate text-[14px] leading-[18px] text-[var(--text-secondary)]">{fmt(X.destinationNotes[d], { robot: robot?.name ?? "" })}</span>
+                  <span className="text-[16px] font-medium leading-[20px] text-[var(--home-ink)]">{X.destinations[d]}</span>
+                  <span className="max-w-full truncate text-[14px] leading-[18px] text-[var(--home-ink-3)]">{fmt(X.destinationNotes[d], { robot: robot?.name ?? "" })}</span>
                 </button>
               ))}
             </div>
@@ -150,7 +150,7 @@ export function ExportModal({
 
           <section className="flex flex-col gap-[var(--space-16)]">
             <h3 className={SECTION}>{X.optionsTitle}</h3>
-            <label className="flex items-center justify-between gap-[var(--space-12)] text-[16px] leading-[20px] text-[var(--text-link)]">
+            <label className="flex items-center justify-between gap-[var(--space-12)] text-[16px] leading-[20px] text-[var(--home-ink-2)]">
               <span>{X.options.target}</span>
               <select value={target} onChange={(e) => setTarget(e.target.value)} className={FIELD}>
                 {robots.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
@@ -161,7 +161,7 @@ export function ExportModal({
             <Check checked={toLibrary || destination === "share"} disabled={destination === "share"} onChange={setToLibrary} label={X.options.library} />
             {destination === "share" && (
               <>
-                <label className="flex items-center justify-between gap-[var(--space-12)] text-[16px] leading-[20px] text-[var(--text-link)]">
+                <label className="flex items-center justify-between gap-[var(--space-12)] text-[16px] leading-[20px] text-[var(--home-ink-2)]">
                   <span>{SH.expiresIn}</span>
                   <select value={days} onChange={(e) => setDays(Number(e.target.value) as (typeof DAYS)[number])} className={FIELD}>
                     {DAYS.map((d) => <option key={d} value={d}>{SH.days[d]}</option>)}
@@ -175,14 +175,14 @@ export function ExportModal({
           </section>
 
           <div
-            className={`flex flex-col gap-[var(--space-12)] rounded-[var(--radius-md)] border-[1.5px] bg-[var(--bg-surface)] px-[var(--space-20)] py-[var(--space-16)] ${open_.length ? "border-[var(--border-error)]" : "border-[var(--border-default)]"}`}
+            className={`flex flex-col gap-[var(--space-12)] rounded-[var(--radius-md)] border-[1.5px] bg-[var(--neutral-0)] px-[var(--space-20)] py-[var(--space-16)] ${open_.length ? "border-[var(--border-error)]" : "border-[var(--home-line)]"}`}
             data-testid="compat"
           >
             {open_.length === 0 ? (
               <div className="flex items-center gap-[var(--space-16)]">
                 <span className="flex min-w-0 flex-1 flex-col gap-[var(--space-4)]">
-                  <b className="text-[16px] font-medium leading-[20px] text-[var(--text-primary)]">{X.ready}</b>
-                  <span className="text-[14px] leading-[18px] text-[var(--text-secondary)]">{X.readyBody}</span>
+                  <b className="text-[16px] font-medium leading-[20px] text-[var(--home-ink)]">{X.ready}</b>
+                  <span className="text-[14px] leading-[18px] text-[var(--home-ink-3)]">{X.readyBody}</span>
                 </span>
                 <span className="text-[14px] font-medium leading-[18px] text-[var(--status-success)]" aria-hidden>✓</span>
               </div>
@@ -191,7 +191,7 @@ export function ExportModal({
                 <b className="text-[16px] font-medium leading-[20px] text-[var(--text-error)]">{fmt(open_.length === 1 ? X.issues : X.issuesN, { n: open_.length })}</b>
                 {open_.map((i, n) => (
                   <div key={n} className="flex items-center gap-[var(--space-12)]">
-                    <span className="min-w-0 flex-1 text-[14px] leading-[18px] text-[var(--text-link)]">{i.message}</span>
+                    <span className="min-w-0 flex-1 text-[14px] leading-[18px] text-[var(--home-ink-2)]">{i.message}</span>
                     {i.fix === "editor" ? (
                       <ModalButton onClick={() => onFix(i)}>{X.fix}</ModalButton>
                     ) : (
@@ -199,7 +199,7 @@ export function ExportModal({
                     )}
                   </div>
                 ))}
-                {blocked && <span className="text-[14px] leading-[18px] text-[var(--text-secondary)]">{X.blockRobot}</span>}
+                {blocked && <span className="text-[14px] leading-[18px] text-[var(--home-ink-3)]">{X.blockRobot}</span>}
               </>
             )}
           </div>
@@ -214,23 +214,23 @@ export function ExportModal({
   );
 }
 
-const SECTION = "text-[16px] font-medium leading-[20px] text-[var(--text-link)]";
+const SECTION = "text-[16px] font-medium leading-[20px] text-[var(--home-ink-2)]";
 const FIELD =
-  "rounded-[var(--radius-full)] border-[1.5px] border-[var(--border-default)] bg-[var(--bg-surface)] px-[var(--space-16)] py-[var(--space-8)] text-[16px] leading-[20px] text-[var(--text-primary)] outline-none focus:border-[var(--border-strong)]";
+  "rounded-[var(--radius-full)] border-[1.5px] border-[var(--home-line)] bg-[var(--neutral-0)] px-[var(--space-16)] py-[var(--space-8)] text-[16px] leading-[20px] text-[var(--home-ink)] outline-none focus:border-[var(--home-ink-3)]";
 
 /** W02F-3 option row: 16px checkbox (radius 2xs, filled inverse when on) · gap 12 · Body 16 link. */
 function Check({ checked, onChange, label, disabled }: { checked: boolean; onChange: (v: boolean) => void; label: string; disabled?: boolean }) {
   return (
-    <label className={`flex items-center gap-[var(--space-12)] text-[16px] leading-[20px] text-[var(--text-link)] ${disabled ? "opacity-60" : "cursor-pointer"}`}>
+    <label className={`flex items-center gap-[var(--space-12)] text-[16px] leading-[20px] text-[var(--home-ink-2)] ${disabled ? "opacity-60" : "cursor-pointer"}`}>
       <span className="relative size-[16px] shrink-0">
         <input
           type="checkbox"
           checked={checked}
           disabled={disabled}
           onChange={(e) => onChange(e.target.checked)}
-          className="peer absolute inset-0 m-0 appearance-none rounded-[var(--radius-2xs)] border-[1.5px] border-[var(--border-default)] bg-[var(--bg-surface)] checked:border-[var(--bg-inverse)] checked:bg-[var(--bg-inverse)]"
+          className="peer absolute inset-0 m-0 appearance-none rounded-[var(--radius-2xs)] border-[1.5px] border-[var(--home-line)] bg-[var(--neutral-0)] checked:border-[var(--home-ink)] checked:bg-[var(--home-ink)]"
         />
-        <Icon name="checkbox-tick" size={16} className="pointer-events-none absolute inset-0 hidden text-[var(--text-on-inverse)] peer-checked:block" />
+        <Icon name="checkbox-tick" size={16} className="pointer-events-none absolute inset-0 hidden text-[var(--neutral-0)] peer-checked:block" />
       </span>
       {label}
     </label>
@@ -241,8 +241,8 @@ function Check({ checked, onChange, label, disabled }: { checked: boolean; onCha
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-start justify-between gap-[var(--space-16)] text-[16px] leading-[20px]">
-      <span className="shrink-0 text-[var(--text-secondary)]">{label}</span>
-      <span className="truncate text-right font-medium text-[var(--text-primary)]">{value}</span>
+      <span className="shrink-0 text-[var(--home-ink-3)]">{label}</span>
+      <span className="truncate text-right font-medium text-[var(--home-ink)]">{value}</span>
     </div>
   );
 }

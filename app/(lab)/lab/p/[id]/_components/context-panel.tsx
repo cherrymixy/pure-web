@@ -88,12 +88,12 @@ export function ContextPanel({
         {latest ? (
           <InputCard entry={latest} strong reading={reading} activeReference={activeReference} onOpen={onOpenReference} />
         ) : (
-          <p className={`${STATUS} text-[var(--text-tertiary)]`}>{E.statusEmpty}</p>
+          <p className={`${STATUS} text-[var(--home-ink-3)]`}>{E.statusEmpty}</p>
         )}
         {latest && history && (
           <div className="flex flex-col gap-[var(--space-8)]" data-testid="input-log">
-            <span className="text-[14px] leading-[18px] text-[var(--text-secondary)]">{E.inputLog}</span>
-            {shown.length === 0 && <span className="text-[14px] leading-[18px] text-[var(--text-tertiary)]">{E.noHistory}</span>}
+            <span className="text-[14px] leading-[18px] text-[var(--home-ink-3)]">{E.inputLog}</span>
+            {shown.length === 0 && <span className="text-[14px] leading-[18px] text-[var(--home-ink-3)]">{E.noHistory}</span>}
             {shown.map((entry) => (
               <InputCard key={entry.id} entry={entry} reading={reading} activeReference={activeReference} onOpen={onOpenReference} />
             ))}
@@ -102,7 +102,7 @@ export function ContextPanel({
               type="button"
               disabled={busy}
               onClick={() => setConfirmClear(true)}
-              className="self-end text-[14px] leading-[18px] text-[var(--text-link)] underline disabled:opacity-40"
+              className="self-end text-[14px] leading-[18px] text-[var(--home-ink-2)] underline disabled:opacity-40"
             >
               {E.clearStatus}
             </button>
@@ -138,7 +138,7 @@ export function ContextPanel({
             ))}
           </div>
           {steps.length === 0 ? (
-            <p className="absolute left-[13px] right-[13px] top-[100px] text-[14px] leading-[18px] text-[var(--text-tertiary)]">{E.componentEmpty}</p>
+            <p className="absolute left-[13px] right-[13px] top-[100px] text-[14px] leading-[18px] text-[var(--home-ink-3)]">{E.componentEmpty}</p>
           ) : (
             <div className="absolute left-[13px] right-[13px] top-[94px] flex overflow-x-auto [scrollbar-width:none]">
               {steps.map((s, i) => (
@@ -154,7 +154,7 @@ export function ContextPanel({
       <section className="flex flex-col gap-[15px]">
         <SectionHeader icon="round-graph" label={E.pattern} href="/lab/guideline/situation" />
         {patterns.length === 0 ? (
-          <p className="text-[14px] leading-[18px] text-[var(--text-tertiary)]">{E.patternEmpty}</p>
+          <p className="text-[14px] leading-[18px] text-[var(--home-ink-3)]">{E.patternEmpty}</p>
         ) : (
           <div className="-mr-[17px] flex gap-[8px] overflow-x-auto pr-[17px] [scrollbar-width:none]" data-testid="applied-patterns">
             {patterns.map((p) => {
@@ -336,7 +336,7 @@ function InputCard({
       className={`flex flex-col gap-[var(--space-12)] ${strong ? STATUS : "rounded-[10px] border border-[var(--context-status-border)] py-[14px] pl-[12px] pr-[18px]"}`}
       data-testid={strong ? "current-status" : "input-entry"}
     >
-      <span className={`text-[16px] leading-[20px] ${strong ? "text-[var(--context-title)]" : "text-[var(--text-secondary)]"}`}>{entry.text}</span>
+      <span className={`text-[16px] leading-[20px] ${strong ? "text-[var(--context-title)]" : "text-[var(--home-ink-3)]"}`}>{entry.text}</span>
       {entry.attachments.length > 0 && (
         <div className="flex flex-wrap gap-[var(--space-8)]">
           {entry.attachments.map((r) => (
@@ -344,7 +344,7 @@ function InputCard({
               key={r.id}
               title={r.summary ?? fileName(r)}
               onClick={() => onOpen(r)}
-              className={`flex items-center gap-[var(--space-8)] rounded-[var(--radius-sm)] border bg-[var(--bg-surface)] px-[var(--space-8)] py-[var(--space-4)] text-[14px] leading-[18px] ${r.status === "failed" ? "border-[var(--border-error)] text-[var(--text-error)]" : activeReference === r.id ? "border-[var(--border-strong)] text-[var(--text-primary)]" : "border-[var(--border-default)] text-[var(--text-primary)]"}`}
+              className={`flex items-center gap-[var(--space-8)] rounded-[var(--radius-sm)] border bg-[var(--neutral-0)] px-[var(--space-8)] py-[var(--space-4)] text-[14px] leading-[18px] ${r.status === "failed" ? "border-[var(--border-error)] text-[var(--text-error)]" : activeReference === r.id ? "border-[var(--home-ink-3)] text-[var(--home-ink)]" : "border-[var(--home-line)] text-[var(--home-ink)]"}`}
             >
               {r.thumb ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -358,7 +358,7 @@ function InputCard({
           ))}
         </div>
       )}
-      {!strong && <span className="text-[12px] leading-[15px] text-[var(--text-tertiary)]">{timeAgo(entry.at)}</span>}
+      {!strong && <span className="text-[12px] leading-[15px] text-[var(--home-ink-3)]">{timeAgo(entry.at)}</span>}
     </div>
   );
 }

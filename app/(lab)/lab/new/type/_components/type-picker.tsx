@@ -63,7 +63,7 @@ function CardArt({ type }: { type: RobotType }) {
     case "jointless-driving":
       return (
         <>
-          <div className="absolute bg-[var(--bg-surface)]" style={box(49.69, 57.66, 43.22, 28.228)} />
+          <div className="absolute bg-[var(--neutral-0)]" style={box(49.69, 57.66, 43.22, 28.228)} />
           <div className="absolute overflow-hidden" style={box(25, 30, 113.82, 103)}>
             {img("/figma/type/jointless-driving.png", crop(-8.27, -28.32, 118.64, 156.09))}
           </div>
@@ -76,8 +76,8 @@ function CardArt({ type }: { type: RobotType }) {
           <div className="absolute left-0 h-[96.19%] w-[89.78%] overflow-hidden" style={{ top: `${(6.5 / 170.5) * 100}%` }}>
             {img("/figma/type/joint-fixed.png", crop(-101.32, 0, 395.58, 223.33))}
           </div>
-          <div className="absolute h-[8.5%] w-[9.09%] rounded-[var(--radius-2xs)] bg-[var(--bg-surface)]" style={{ left: "44.24%", top: "26.69%" }} />
-          <div className="absolute h-[8.5%] w-[9.09%] rounded-[var(--radius-2xs)] bg-[var(--bg-surface)]" style={{ left: "27.88%", top: "26.69%" }} />
+          <div className="absolute h-[8.5%] w-[9.09%] rounded-[var(--radius-2xs)] bg-[var(--neutral-0)]" style={{ left: "44.24%", top: "26.69%" }} />
+          <div className="absolute h-[8.5%] w-[9.09%] rounded-[var(--radius-2xs)] bg-[var(--neutral-0)]" style={{ left: "27.88%", top: "26.69%" }} />
         </div>
       );
   }

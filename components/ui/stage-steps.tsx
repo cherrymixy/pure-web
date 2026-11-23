@@ -14,7 +14,7 @@ export function StageSteps({ current, className, labels }: { current: number; cl
     <footer className={className ?? "flex justify-center py-[var(--space-24)]"}>
       <ol className="relative flex" aria-label="Stages">
         <span aria-hidden className="absolute top-[9px] h-[2px] rounded-[var(--radius-full)] bg-[var(--neutral-150)]" style={{ left: STEP / 2, width: (stages.length - 1) * STEP }} />
-        <span aria-hidden className="absolute top-[9px] h-[2px] rounded-[var(--radius-full)] bg-[var(--bg-inverse)]" style={{ left: STEP / 2, width: filled }} />
+        <span aria-hidden className="absolute top-[9px] h-[2px] rounded-[var(--radius-full)] bg-[var(--home-ink)]" style={{ left: STEP / 2, width: filled }} />
         {stages.map((s, i) => (
           <li
             key={s}
@@ -23,11 +23,11 @@ export function StageSteps({ current, className, labels }: { current: number; cl
             style={{ width: STEP }}
           >
             {i <= current ? (
-              <Icon name="step-done" size={20} className="anim-check-pop text-[var(--bg-inverse)]" />
+              <Icon name="step-done" size={20} className="anim-check-pop text-[var(--home-ink)]" />
             ) : (
-              <span className="size-[20px] rounded-[var(--radius-full)] border-[3px] border-[var(--border-default)] bg-[var(--bg-canvas)]" />
+              <span className="size-[20px] rounded-[var(--radius-full)] border-[3px] border-[var(--home-line)] bg-[var(--home-canvas)]" />
             )}
-            <span className={`whitespace-nowrap text-[12px] leading-[15px] ${i <= current ? "text-[var(--text-primary)]" : "text-[var(--neutral-500)]"}`}>{s}</span>
+            <span className={`whitespace-nowrap text-[12px] leading-[15px] ${i <= current ? "text-[var(--home-ink)]" : "text-[var(--neutral-500)]"}`}>{s}</span>
           </li>
         ))}
       </ol>

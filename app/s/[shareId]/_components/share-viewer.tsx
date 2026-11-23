@@ -92,22 +92,22 @@ export function ShareViewer({ id }: { id: string }) {
   // (white radius 2xl, 2px border/default, soft shadow, px 48 · py 40); player on a rounded stage; DS Text Field / Chip.
   const header = (right?: React.ReactNode) => (
     <div className="px-[14px] pt-[var(--space-16)]">
-      <header className="flex h-[88px] items-center justify-between rounded-[var(--radius-full)] border border-[var(--neutral-0)] bg-[var(--bg-surface)] px-[var(--space-40)]">
+      <header className="flex h-[88px] items-center justify-between rounded-[var(--radius-full)] border border-[var(--neutral-0)] bg-[var(--neutral-0)] px-[var(--space-40)]">
         <Link href="/lab" aria-label={STRINGS.brand.name} className="flex items-center gap-[var(--space-12)]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/figma/brand/logo-mark.svg" alt="" width={30} height={30} className="block" />
-          <span className="text-[20px] font-semibold leading-[1.26] text-[var(--sage-800)]">{STRINGS.brand.name}</span>
+          <span className="text-[20px] font-semibold leading-[1.26] text-[var(--home-ink)]">{STRINGS.brand.name}</span>
         </Link>
         {right}
       </header>
     </div>
   );
   const shell = (icon: IconName, children: React.ReactNode, tone: "default" | "error" = "default") => (
-    <div className="flex min-h-[var(--app-vh)] flex-col bg-[var(--bg-canvas)]">
+    <div className="flex min-h-[var(--app-vh)] flex-col bg-[var(--home-canvas)]">
       {header()}
       <main className="flex flex-1 items-center justify-center p-[var(--space-40)]">
-        <div className="flex w-[640px] items-start gap-[var(--space-32)] rounded-[var(--radius-2xl)] border-2 border-[var(--border-default)] bg-[var(--bg-surface)] px-[var(--space-48)] py-[var(--space-40)] shadow-[0_12px_24px_0_var(--effect-shadow)]">
-          <span className={`flex size-[88px] shrink-0 items-center justify-center rounded-[var(--radius-xl)] bg-[var(--bg-canvas)] ${tone === "error" ? "text-[var(--text-error)]" : "text-[var(--icon-primary)]"}`}>
+        <div className="flex w-[640px] items-start gap-[var(--space-32)] rounded-[24px] border border-[var(--home-line)] bg-[var(--neutral-0)] px-[var(--space-48)] py-[var(--space-40)] shadow-[0_12px_24px_0_var(--effect-shadow)]">
+          <span className={`flex size-[88px] shrink-0 items-center justify-center rounded-[var(--radius-xl)] bg-[var(--home-canvas)] ${tone === "error" ? "text-[var(--text-error)]" : "text-[var(--icon-primary)]"}`}>
             <Icon name={icon} size={36} />
           </span>
           <div className="flex min-w-0 flex-1 flex-col gap-[var(--space-8)] self-center">{children}</div>
@@ -115,8 +115,8 @@ export function ShareViewer({ id }: { id: string }) {
       </main>
     </div>
   );
-  const title = "text-[22px] font-semibold leading-[28px] text-[var(--text-primary)]";
-  const body = "text-[16px] leading-[20px] text-[var(--text-secondary)]";
+  const title = "text-[22px] font-semibold leading-[28px] text-[var(--home-ink)]";
+  const body = "text-[16px] leading-[20px] text-[var(--home-ink-3)]";
 
   if (state.kind === "loading") return shell("spinner", <Loading label={STRINGS.common.loading} />);
   if (state.kind === "expired") return shell("history", <><h1 className={title}>{SH.expired.title}</h1><p className={body}>{SH.expired.body}</p></>);
@@ -148,22 +148,22 @@ export function ShareViewer({ id }: { id: string }) {
 
   const daysLeft = Math.ceil((new Date(view.expiresAt).getTime() - Date.now()) / DAY);
   const typeName = ROBOT_TYPES.find((t) => t.id === view.type)?.name ?? view.type;
-  const meta = `${chipClass({ size: "S" })} pointer-events-none !bg-[var(--bg-canvas)]`;
+  const meta = `${chipClass({ size: "S" })} pointer-events-none !bg-[var(--home-canvas)]`;
 
   return (
-    <div className="flex min-h-[var(--app-vh)] flex-col bg-[var(--bg-canvas)]">
-      {header(<span className="text-[20px] leading-[1.26] text-[var(--text-link)]">{fmt(SH.viewer.by, { team: view.team })}</span>)}
+    <div className="flex min-h-[var(--app-vh)] flex-col bg-[var(--home-canvas)]">
+      {header(<span className="text-[20px] leading-[1.26] text-[var(--home-ink-2)]">{fmt(SH.viewer.by, { team: view.team })}</span>)}
       <main className="grid w-full grid-cols-[minmax(0,1fr)_440px] gap-[var(--space-24)] px-[var(--space-32)] py-[var(--space-24)]">
         <div className="flex flex-col gap-[var(--space-12)]">
-          <div className="relative h-[calc(var(--app-vh)-180px)] min-h-[640px] overflow-hidden rounded-[var(--radius-2xl)] bg-[var(--bg-surface)]">
+          <div className="relative h-[calc(var(--app-vh)-180px)] min-h-[640px] overflow-hidden rounded-[var(--radius-2xl)] bg-[var(--neutral-0)]">
             <Viewport mode="share" orbit structure={view.robot?.structure} signatureParams={params} expression={playable} autoPlay sound={sound} className="block size-full" />
           </div>
-          <span className="flex items-center gap-[var(--space-8)] px-[var(--space-8)] text-[13px] leading-[18px] text-[var(--text-tertiary)]">
+          <span className="flex items-center gap-[var(--space-8)] px-[var(--space-8)] text-[13px] leading-[18px] text-[var(--home-ink-3)]">
             <Icon name="replay" size={16} />
             {SH.rotateHint}
           </span>
         </div>
-        <aside className="flex flex-col gap-[var(--space-24)] self-start rounded-[var(--radius-xl)] bg-[var(--bg-surface)] p-[var(--space-32)]">
+        <aside className="flex flex-col gap-[var(--space-24)] self-start rounded-[var(--radius-xl)] bg-[var(--neutral-0)] p-[var(--space-32)]">
           <div className="flex flex-wrap gap-[var(--space-8)]" data-testid="share-meta">
             <span className={meta}>{fmt(SH.viewer.count, { n: view.expressions.length })}</span>
             <span className={meta}>{fmt(SH.viewer.signature, { v: view.signatureVersion })}</span>
@@ -177,13 +177,13 @@ export function ShareViewer({ id }: { id: string }) {
                   onClick={() => setSelected(i)}
                   aria-pressed={i === selected}
                   className={`flex w-full items-center gap-[var(--space-16)] rounded-[var(--radius-md)] border-[1.5px] px-[var(--space-20)] py-[var(--space-16)] text-left ${
-                    i === selected ? "border-[var(--border-strong)] bg-[var(--bg-surface)]" : "border-transparent bg-[var(--bg-canvas)] hover:bg-[var(--neutral-150)]"
+                    i === selected ? "border-[var(--home-ink-3)] bg-[var(--neutral-0)]" : "border-transparent bg-[var(--home-canvas)] hover:bg-[var(--neutral-150)]"
                   }`}
                 >
                   <Icon name="play_arrow" size={24} className={`shrink-0 ${i === selected ? "text-[var(--icon-primary)]" : "text-[var(--icon-secondary)]"}`} />
                   <span className="flex min-w-0 flex-col gap-[2px]">
-                    <span className="truncate text-[16px] font-medium leading-[22px] text-[var(--text-primary)]">{e.name}</span>
-                    <span className="truncate text-[14px] leading-[20px] text-[var(--text-secondary)]">{e.currentStatus}</span>
+                    <span className="truncate text-[16px] font-medium leading-[22px] text-[var(--home-ink)]">{e.name}</span>
+                    <span className="truncate text-[14px] leading-[20px] text-[var(--home-ink-3)]">{e.currentStatus}</span>
                   </span>
                 </button>
               </li>
@@ -195,9 +195,9 @@ export function ShareViewer({ id }: { id: string }) {
               {STRINGS.export.download}
             </Button>
           )}
-          {!view.allowDownload && <span className="text-[13px] leading-[18px] text-[var(--text-tertiary)]">{STRINGS.common.viewOnly}</span>}
+          {!view.allowDownload && <span className="text-[13px] leading-[18px] text-[var(--home-ink-3)]">{STRINGS.common.viewOnly}</span>}
           {expr && (
-            <div className="border-t border-[var(--border-default)] pt-[var(--space-24)]">
+            <div className="border-t border-[var(--home-line)] pt-[var(--space-24)]">
               <ReferencedSets key={expr.id} behaviors={expr.motion.recipe.steps.map((st) => st.behavior)} />
             </div>
           )}

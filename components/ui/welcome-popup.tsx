@@ -81,7 +81,7 @@ export function WelcomePopup() {
           className="pointer-events-none absolute inset-x-0 top-0 h-[230px]"
           style={{
             backgroundImage:
-              "linear-gradient(180deg, var(--welcome-fade) 0%, var(--welcome-fade-15) 35%, var(--welcome-bg) 85%, var(--welcome-bg) 100%), linear-gradient(90deg, var(--sage-600) 0%, var(--sage-400) 30%, var(--sage-200) 58%, var(--welcome-gradient-mid) 80%, var(--sage-200) 100%)",
+              "linear-gradient(180deg, var(--welcome-fade) 0%, var(--welcome-fade-15) 35%, var(--welcome-bg) 85%, var(--welcome-bg) 100%), linear-gradient(90deg, var(--home-ink-2) 0%, var(--home-ink-3) 30%, var(--home-line) 58%, var(--welcome-gradient-mid) 80%, var(--home-line) 100%)",
           }}
         />
         <div className="relative flex flex-col px-[28px] pt-[218px]">
@@ -101,7 +101,7 @@ export function WelcomePopup() {
               type="checkbox"
               checked={dontShow}
               onChange={(e) => setDontShow(e.target.checked)}
-              className="size-[16px] cursor-pointer accent-[var(--sage-500)]"
+              className="size-[16px] cursor-pointer accent-[var(--home-ink-2)]"
             />
             {t.dontShow}
           </label>
@@ -118,7 +118,7 @@ export function WelcomePopup() {
               type="button"
               onClick={guided}
               autoFocus
-              className="flex items-center gap-[10px] rounded-[var(--radius-xs)] bg-[var(--sage-500)] py-[10px] pl-[14px] pr-[12px] hover:bg-[var(--sage-600)]"
+              className="flex items-center gap-[10px] rounded-[var(--radius-xs)] bg-[var(--home-ink-2)] py-[10px] pl-[14px] pr-[12px] hover:bg-[var(--neutral-800)]"
             >
               <span className="font-mono text-[15px] font-medium leading-[20px] text-white">{t.guided}</span>
               <kbd className="rounded-[var(--radius-2xs)] border-[1.2px] border-[var(--welcome-key-border)] px-[6px] py-[2px] font-sans text-[14px] font-semibold text-white">↵</kbd>

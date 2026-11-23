@@ -81,9 +81,9 @@ export function MotionDetail({ motion, projects }: { motion: UserDataMotion; pro
 
   const progress = time.duration > 0 && Number.isFinite(time.duration) ? Math.min(time.t / time.duration, 1) : 0;
   const sectionTitle = "flex items-center gap-[var(--space-8)] text-[18px] leading-[23px] text-[var(--neutral-800)]";
-  const box = "flex w-full flex-col gap-[var(--space-12)] rounded-[var(--radius-lg)] bg-[var(--bg-canvas)] px-[18px] py-[14px]";
+  const box = "flex w-full flex-col gap-[var(--space-12)] rounded-[var(--radius-lg)] bg-[var(--home-canvas)] px-[18px] py-[14px]";
   const row = "flex w-full items-center justify-between text-[16px] leading-[20px] text-[var(--neutral-800)]";
-  const tabTint: Record<Tab, string> = { motion: "text-[var(--text-primary)]", face: "text-[var(--web-e2a1c1)]", sound: "text-[var(--web-ecc377)]" };
+  const tabTint: Record<Tab, string> = { motion: "text-[var(--home-ink)]", face: "text-[var(--web-e2a1c1)]", sound: "text-[var(--web-ecc377)]" };
 
   return (
     <div className="relative h-[var(--app-vh)] overflow-hidden">
@@ -94,12 +94,12 @@ export function MotionDetail({ motion, projects }: { motion: UserDataMotion; pro
 
       {/* Title block (943:1891 / 2030 / 1890) */}
       <div className="absolute left-[425px] top-[68px] z-10 flex flex-col">
-        <Link href="/lab/community" className="w-fit text-[20px] font-semibold leading-[25px] text-[var(--text-link)] hover:underline">
+        <Link href="/lab/community" className="w-fit text-[20px] font-semibold leading-[25px] text-[var(--home-ink-2)] hover:underline">
           {U.title}
         </Link>
         <div className="mt-[13px] flex items-center gap-[var(--space-16)]">
           <h1 className="text-[40px] font-semibold leading-[50px] tracking-[-0.8px] text-[var(--neutral-1000)]">{motion.name}</h1>
-          <button type="button" onClick={() => setPicking(true)} aria-label={U.bringToLab} title={U.bringToLab} className="text-[var(--neutral-700)] hover:text-[var(--text-primary)]">
+          <button type="button" onClick={() => setPicking(true)} aria-label={U.bringToLab} title={U.bringToLab} className="text-[var(--neutral-700)] hover:text-[var(--home-ink)]">
             <Icon name="inbox-in" size={24} />
           </button>
         </div>
@@ -107,10 +107,10 @@ export function MotionDetail({ motion, projects }: { motion: UserDataMotion; pro
       </div>
 
       {/* Left panel: Context (943:1770) */}
-      <aside className="absolute bottom-[32px] left-[32px] top-[32px] z-10 flex w-[343px] flex-col overflow-hidden rounded-[var(--radius-xl)] bg-[var(--bg-surface)]">
+      <aside className="absolute bottom-[32px] left-[32px] top-[32px] z-10 flex w-[343px] flex-col overflow-hidden rounded-[var(--radius-xl)] bg-[var(--neutral-0)]">
         {/* Back, in the editor's menu slot (24 icon before the panel title) */}
         <div className="ml-[23px] mt-[26px] flex items-center gap-[var(--space-12)]">
-          <button type="button" onClick={back} aria-label={U.back} title={U.back} className="flex size-[24px] items-center justify-center text-[var(--neutral-800)] hover:text-[var(--text-primary)]">
+          <button type="button" onClick={back} aria-label={U.back} title={U.back} className="flex size-[24px] items-center justify-center text-[var(--neutral-800)] hover:text-[var(--home-ink)]">
             <Icon name="chevron-right-small" size={24} className="rotate-180" />
           </button>
           <h2 className="text-[20px] font-semibold leading-[25px] text-[var(--neutral-800)] underline">{U.context}</h2>
@@ -125,9 +125,9 @@ export function MotionDetail({ motion, projects }: { motion: UserDataMotion; pro
             </h3>
             <div className={box}>
               {components.map((c) => (
-                <Link key={c.id} href={`/lab/guideline/behavior/${guidelineSlugFor(c.id)}`} title={c.description} className={`${row} hover:text-[var(--text-primary)]`}>
+                <Link key={c.id} href={`/lab/guideline/behavior/${guidelineSlugFor(c.id)}`} title={c.description} className={`${row} hover:text-[var(--home-ink)]`}>
                   {c.label}
-                  <Icon name="chevron-right-thin" size={24} className="text-[var(--text-tertiary)]" />
+                  <Icon name="chevron-right-thin" size={24} className="text-[var(--home-ink-3)]" />
                 </Link>
               ))}
             </div>
@@ -140,19 +140,19 @@ export function MotionDetail({ motion, projects }: { motion: UserDataMotion; pro
             </h3>
             <div className={box}>
               {patterns.map((p) => (
-                <Link key={p.id} href={`/lab/guideline/situation/${p.id}`} className={`${row} hover:text-[var(--text-primary)]`} title={p.hint}>
+                <Link key={p.id} href={`/lab/guideline/situation/${p.id}`} className={`${row} hover:text-[var(--home-ink)]`} title={p.hint}>
                   {p.label}
-                  <Icon name="chevron-right-thin" size={24} className="text-[var(--text-tertiary)]" />
+                  <Icon name="chevron-right-thin" size={24} className="text-[var(--home-ink-3)]" />
                 </Link>
               ))}
             </div>
           </section>
 
-          <section className="-mt-[28px] flex w-[301px] flex-col gap-[var(--space-16)] border-t-2 border-[var(--border-default)] pt-[28px]">
+          <section className="-mt-[28px] flex w-[301px] flex-col gap-[var(--space-16)] border-t-2 border-[var(--home-line)] pt-[28px]">
             <h3 className={sectionTitle}>
               <Icon name="library" size={24} className="shrink-0" />
               <span className="flex-1">{U.reviews}</span>
-              <Icon name="chevron-right-thin" size={24} className="text-[var(--text-tertiary)]" />
+              <Icon name="chevron-right-thin" size={24} className="text-[var(--home-ink-3)]" />
             </h3>
             <div className="relative -mr-[32px] overflow-hidden">
               <div className="flex gap-[var(--space-12)] overflow-x-auto pr-[32px] [scrollbar-width:none]">
@@ -165,22 +165,22 @@ export function MotionDetail({ motion, projects }: { motion: UserDataMotion; pro
                   </figure>
                 ))}
               </div>
-              <div className="pointer-events-none absolute inset-y-0 right-0 w-[64px] bg-gradient-to-l from-[var(--bg-surface)] from-[37%] to-transparent" />
+              <div className="pointer-events-none absolute inset-y-0 right-0 w-[64px] bg-gradient-to-l from-[var(--neutral-0)] from-[37%] to-transparent" />
             </div>
           </section>
         </div>
       </aside>
 
       {/* Right panel (943:1704): channel tabs · Joint / references · Bring to Lab */}
-      <aside className="absolute bottom-[32px] right-[32px] top-[32px] z-10 flex w-[380px] flex-col gap-[29px] overflow-hidden rounded-[var(--radius-xl)] bg-[var(--bg-surface)] px-[var(--space-24)] pb-[29px] pt-[var(--space-24)]">
-        <div className="grid h-[49px] w-[330px] shrink-0 grid-cols-3 gap-[var(--space-8)] rounded-[var(--radius-sm)] bg-[var(--bg-canvas)] px-[var(--space-8)] py-[7px]" role="tablist">
+      <aside className="absolute bottom-[32px] right-[32px] top-[32px] z-10 flex w-[380px] flex-col gap-[29px] overflow-hidden rounded-[var(--radius-xl)] bg-[var(--neutral-0)] px-[var(--space-24)] pb-[29px] pt-[var(--space-24)]">
+        <div className="grid h-[49px] w-[330px] shrink-0 grid-cols-3 gap-[var(--space-8)] rounded-[var(--radius-sm)] bg-[var(--home-canvas)] px-[var(--space-8)] py-[7px]" role="tablist">
           {(["motion", "face", "sound"] as const).map((c) => (
             <button
               key={c}
               role="tab"
               aria-selected={tab === c}
               onClick={() => setTab(c)}
-              className={`flex h-[36px] items-center justify-center rounded-[var(--radius-xs)] text-[15px] leading-[20px] ${tab === c ? "bg-[var(--neutral-300)] text-[var(--text-primary)]" : tabTint[c]}`}
+              className={`flex h-[36px] items-center justify-center rounded-[var(--radius-xs)] text-[15px] leading-[20px] ${tab === c ? "bg-[var(--neutral-300)] text-[var(--home-ink)]" : tabTint[c]}`}
             >
               {E.tabs[c]}
             </button>
@@ -192,7 +192,7 @@ export function MotionDetail({ motion, projects }: { motion: UserDataMotion; pro
         <button
           type="button"
           onClick={() => setPicking(true)}
-          className="h-[55px] w-[332px] shrink-0 rounded-[var(--radius-lg)] bg-[var(--neutral-800)] text-[21px] leading-[21px] tracking-[-0.42px] text-[var(--text-on-inverse)] hover:bg-[var(--neutral-900)]"
+          className="h-[55px] w-[332px] shrink-0 rounded-[var(--radius-lg)] bg-[var(--neutral-800)] text-[21px] leading-[21px] tracking-[-0.42px] text-[var(--neutral-0)] hover:bg-[var(--neutral-900)]"
         >
           {U.bringToLab}
         </button>
@@ -225,7 +225,7 @@ export function MotionDetail({ motion, projects }: { motion: UserDataMotion; pro
             </div>
             <span
               aria-hidden
-              className="absolute top-0 size-[21px] -translate-x-1/2 rounded-[var(--radius-full)] border-[5px] border-[var(--community-progress)] bg-[var(--bg-surface)]"
+              className="absolute top-0 size-[21px] -translate-x-1/2 rounded-[var(--radius-full)] border-[5px] border-[var(--community-progress)] bg-[var(--neutral-0)]"
               style={{ left: `${Math.min(Math.max(progress * 404, 10.5), 393.5)}px` }}
             />
             <input
@@ -249,7 +249,7 @@ export function MotionDetail({ motion, projects }: { motion: UserDataMotion; pro
       <Modal open={picking} onClose={() => setPicking(false)} title={U.pickProject} description={U.pickBody}>
         {projects.length === 0 ? (
           <div className="flex flex-col gap-[var(--space-24)]">
-            <span className="text-[16px] leading-[20px] text-[var(--text-secondary)]">{U.noProjects}</span>
+            <span className="text-[16px] leading-[20px] text-[var(--home-ink-3)]">{U.noProjects}</span>
             <ModalActions>
               <ModalButton onClick={() => setPicking(false)}>{STRINGS.common.cancel}</ModalButton>
               <ModalButton variant="primary" onClick={() => router.push("/lab/new/type")}>{STRINGS.lab.tryRobot}</ModalButton>
@@ -261,10 +261,10 @@ export function MotionDetail({ motion, projects }: { motion: UserDataMotion; pro
               <li key={p.id}>
                 <button
                   onClick={() => void use(p.id)}
-                  className="flex w-full items-center justify-between gap-[var(--space-12)] rounded-[var(--radius-md)] bg-[var(--bg-canvas)] px-[var(--space-20)] py-[var(--space-16)] text-left hover:bg-[var(--neutral-150)]"
+                  className="flex w-full items-center justify-between gap-[var(--space-12)] rounded-[var(--radius-md)] bg-[var(--home-canvas)] px-[var(--space-20)] py-[var(--space-16)] text-left hover:bg-[var(--neutral-150)]"
                 >
-                  <span className="truncate text-[16px] font-medium leading-[22px] text-[var(--text-primary)]">{p.name}</span>
-                  <span className="shrink-0 text-[14px] leading-[20px] text-[var(--text-secondary)]">{ROBOT_TYPES.find((t) => t.id === p.type)?.name}</span>
+                  <span className="truncate text-[16px] font-medium leading-[22px] text-[var(--home-ink)]">{p.name}</span>
+                  <span className="shrink-0 text-[14px] leading-[20px] text-[var(--home-ink-3)]">{ROBOT_TYPES.find((t) => t.id === p.type)?.name}</span>
                 </button>
               </li>
             ))}
@@ -283,17 +283,17 @@ function ChannelReferences({ channel, behaviors }: { channel: Exclude<ReferenceC
   const icon: IconName = channel === "face" ? "smile-square" : "sound";
   return (
     <section className="flex w-[332px] flex-col gap-[var(--space-16)]">
-      <h3 className="text-[18px] leading-[23px] text-[var(--text-primary)]">{E.tabs[channel]}</h3>
+      <h3 className="text-[18px] leading-[23px] text-[var(--home-ink)]">{E.tabs[channel]}</h3>
       {items.length === 0 ? (
-        <p className="text-[14px] leading-[18px] text-[var(--text-tertiary)]">{fmt(U.noChannel, { channel: E.tabs[channel].toLowerCase() })}</p>
+        <p className="text-[14px] leading-[18px] text-[var(--home-ink-3)]">{fmt(U.noChannel, { channel: E.tabs[channel].toLowerCase() })}</p>
       ) : (
-        <div className="flex flex-col gap-[var(--space-16)] rounded-[var(--radius-lg)] bg-[var(--bg-canvas)] px-[18px] py-[14px]">
+        <div className="flex flex-col gap-[var(--space-16)] rounded-[var(--radius-lg)] bg-[var(--home-canvas)] px-[18px] py-[14px]">
           {items.map(({ behavior, item }) => (
             <figure key={behavior} className="flex flex-col gap-[var(--space-8)]">
-              <figcaption className="flex items-center gap-[var(--space-8)] text-[16px] leading-[20px] text-[var(--text-primary)]">
-                <Icon name={icon} size={20} className="shrink-0 text-[var(--text-secondary)]" />
+              <figcaption className="flex items-center gap-[var(--space-8)] text-[16px] leading-[20px] text-[var(--home-ink)]">
+                <Icon name={icon} size={20} className="shrink-0 text-[var(--home-ink-3)]" />
                 <span className="truncate">{item!.title}</span>
-                <span className="ml-auto shrink-0 text-[14px] text-[var(--text-secondary)]">{behaviorLabel(behavior)}</span>
+                <span className="ml-auto shrink-0 text-[14px] text-[var(--home-ink-3)]">{behaviorLabel(behavior)}</span>
               </figcaption>
               {item!.file.endsWith(".ogg") ? (
                 <audio src={item!.file} controls className="h-[32px] w-full" />
@@ -303,7 +303,7 @@ function ChannelReferences({ channel, behaviors }: { channel: Exclude<ReferenceC
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={item!.file} alt={item!.title} className="aspect-video w-full rounded-[var(--radius-xs)] object-cover" />
               )}
-              <span className="text-[13px] leading-[18px] text-[var(--text-link)]">{item!.note}</span>
+              <span className="text-[13px] leading-[18px] text-[var(--home-ink-2)]">{item!.note}</span>
             </figure>
           ))}
         </div>

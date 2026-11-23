@@ -268,7 +268,7 @@ function ProjectCard({ project: p, card, author, starred, onStar, onRename }: { 
             e.stopPropagation();
             onStar();
           }}
-          className={`shrink-0 ${starred ? "text-[var(--sage-300)]" : "text-[var(--home-star-off)]"}`}
+          className={`shrink-0 ${starred ? "text-[var(--home-ink-3)]" : "text-[var(--home-star-off)]"}`}
         >
           <Icon name="star" size={22} />
         </button>
@@ -377,7 +377,7 @@ function ProjectList({
                 e.stopPropagation();
                 onStar(p.id);
               }}
-              className={`shrink-0 ${stars.has(p.id) ? "text-[var(--sage-300)]" : "text-[var(--home-star-off)]"}`}
+              className={`shrink-0 ${stars.has(p.id) ? "text-[var(--home-ink-3)]" : "text-[var(--home-star-off)]"}`}
             >
               <Icon name="star" size={23.57} />
             </button>

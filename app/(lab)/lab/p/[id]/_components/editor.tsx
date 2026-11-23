@@ -1094,7 +1094,7 @@ export function Editor({
   // Notes that only matter right after something happened go away after 30 s (the prop bar and empty hint stay)
   const changesShown = useFresh(history.changes[history.changes.length - 1]?.id);
   const resultShown = useFresh(lastResult);
-  const chip = "rounded-[var(--radius-full)] bg-[var(--bg-surface)] px-[var(--space-16)] py-[var(--space-8)] text-[14px] leading-[18px]";
+  const chip = "rounded-[var(--radius-full)] bg-[var(--neutral-0)] px-[var(--space-16)] py-[var(--space-8)] text-[14px] leading-[18px]";
   /** Play bar time "0:03" (Figma), minutes unpadded */
   const mclock = (sec: number) => (Number.isFinite(sec) ? `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, "0")}` : "-:--");
   /** Composer tool button (452:2431): 33, r 10, #f0f0f0 + 1px #eaeaea, inner white glow */
@@ -1124,7 +1124,7 @@ export function Editor({
         />
       </div>
       {activeRef && sideBySide && (
-        <div className="absolute left-[calc(50%-2px)] top-[265px] h-[560px] w-[518px] overflow-hidden rounded-[var(--radius-xl)] bg-[var(--bg-surface)]">{referencePlayer}</div>
+        <div className="absolute left-[calc(50%-2px)] top-[265px] h-[560px] w-[518px] overflow-hidden rounded-[var(--radius-xl)] bg-[var(--neutral-0)]">{referencePlayer}</div>
       )}
       {activeRef && !sideBySide && <div className="absolute bottom-[230px] left-[494px] z-10">{referencePlayer}</div>}
 
@@ -1135,11 +1135,11 @@ export function Editor({
           {history.changes.slice(-3).map((c, i, list) => (
             <span
               key={c.id}
-              className="anim-rise-in flex items-center gap-[var(--space-12)] whitespace-pre rounded-[var(--radius-full)] bg-[var(--bg-surface)] px-[var(--space-16)] py-[var(--space-8)] text-[14px] font-medium leading-[18px] text-[var(--text-primary)] shadow-[var(--pure-shadow-chip)]"
+              className="anim-rise-in flex items-center gap-[var(--space-12)] whitespace-pre rounded-[var(--radius-full)] bg-[var(--neutral-0)] px-[var(--space-16)] py-[var(--space-8)] text-[14px] font-medium leading-[18px] text-[var(--home-ink)] shadow-[var(--pure-shadow-chip)]"
             >
               {c.label}
               {i === list.length - 1 && (
-                <button type="button" className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]" onClick={() => void undo()}>{E.undo}</button>
+                <button type="button" className="text-[var(--home-ink-3)] hover:text-[var(--home-ink)]" onClick={() => void undo()}>{E.undo}</button>
               )}
             </span>
           ))}
@@ -1147,7 +1147,7 @@ export function Editor({
       )}
 
       {/* Robot colour swatches (no Figma equivalent): repaint the robot body; session only */}
-      <div role="radiogroup" aria-label={ROBOT_COLOR_LABEL} className="absolute left-[494px] top-[32px] z-10 flex items-center gap-[var(--space-12)] rounded-[var(--radius-full)] bg-[var(--bg-surface)] p-[9px] shadow-[var(--pure-shadow-chip)]">
+      <div role="radiogroup" aria-label={ROBOT_COLOR_LABEL} className="absolute left-[494px] top-[32px] z-10 flex items-center gap-[var(--space-12)] rounded-[var(--radius-full)] bg-[var(--neutral-0)] p-[9px] shadow-[var(--pure-shadow-chip)]">
         {ROBOT_COLORS.map((c, i) => (
           <button
             key={c.label}
@@ -1160,7 +1160,7 @@ export function Editor({
               setRobotColor(i);
               ctrl.current?.setMaterialColor(ROBOT_BODY_MATERIAL, c.hex);
             }}
-            className={`size-[42px] rounded-[var(--radius-full)] border border-[var(--border-default)] outline-offset-[3px] ${i === robotColor ? "outline outline-2 outline-[var(--text-primary)]" : ""}`}
+            className={`size-[42px] rounded-[var(--radius-full)] border border-[var(--home-line)] outline-offset-[3px] ${i === robotColor ? "outline outline-2 outline-[var(--home-ink)]" : ""}`}
             style={{ background: c.hex ?? "var(--neutral-0)" }}
           />
         ))}
@@ -1176,7 +1176,7 @@ export function Editor({
             key={label}
             type="button"
             onClick={onClick}
-            className="flex items-center gap-[var(--space-8)] rounded-[var(--radius-full)] bg-[var(--bg-surface)] px-[var(--space-16)] py-[10px] text-[15px] font-medium text-[var(--text-primary)] shadow-[var(--pure-shadow-chip)]"
+            className="flex items-center gap-[var(--space-8)] rounded-[var(--radius-full)] bg-[var(--neutral-0)] px-[var(--space-16)] py-[10px] text-[15px] font-medium text-[var(--home-ink)] shadow-[var(--pure-shadow-chip)]"
           >
             <Icon name={icon} size={18} />
             {label}
@@ -1196,8 +1196,8 @@ export function Editor({
         </div>
         {selectedProp && (
           <div data-testid="prop-bar" className={`${chip} pointer-events-auto flex items-center gap-[var(--space-12)] shadow-[var(--pure-shadow-chip)]`}>
-            <span className="font-semibold text-[var(--text-primary)]">{selectedProp === ROBOT_KEY ? LIBRARY.robot : propAsset(selectedProp)?.name}</span>
-            <span className="text-[var(--text-secondary)]">{selectedProp === ROBOT_KEY ? LIBRARY.robotHint : LIBRARY.moveHint}</span>
+            <span className="font-semibold text-[var(--home-ink)]">{selectedProp === ROBOT_KEY ? LIBRARY.robot : propAsset(selectedProp)?.name}</span>
+            <span className="text-[var(--home-ink-3)]">{selectedProp === ROBOT_KEY ? LIBRARY.robotHint : LIBRARY.moveHint}</span>
             {selectedProp === ROBOT_KEY && robotMount && (
               <button type="button" onClick={() => mountRobot(null)} className="font-medium text-[var(--text-brand)]">
                 {LIBRARY.robotToFloor}
@@ -1216,20 +1216,20 @@ export function Editor({
           </div>
         )}
         {resultShown && expression && lastResult?.reasoning && (
-          <p className="max-w-[760px] text-center text-[14px] leading-[18px] text-[var(--text-secondary)]">
-            <b className="font-semibold text-[var(--text-primary)]">{E.reasoning}:</b> {lastResult.reasoning}
+          <p className="max-w-[760px] text-center text-[14px] leading-[18px] text-[var(--home-ink-3)]">
+            <b className="font-semibold text-[var(--home-ink)]">{E.reasoning}:</b> {lastResult.reasoning}
           </p>
         )}
         {!expression && !busy && (
           <div className="flex flex-col items-center gap-[var(--space-4)] text-center">
-            <span className="text-[22px] font-medium leading-[28px] text-[var(--text-primary)]">{E.empty.title}</span>
-            <span className="text-[16px] leading-[20px] text-[var(--text-secondary)]">{E.empty.body}</span>
+            <span className="text-[22px] font-medium leading-[28px] text-[var(--home-ink)]">{E.empty.title}</span>
+            <span className="text-[16px] leading-[20px] text-[var(--home-ink-3)]">{E.empty.body}</span>
           </div>
         )}
       </div>
 
       {/* Left panel: Context / Library (Frame 2147240454 ×2) */}
-      <aside className={`absolute left-[32px] top-[32px] z-10 flex ${timelineOpen ? "bottom-[397px]" : "bottom-[32px]"} w-[430px] flex-col overflow-hidden rounded-[var(--radius-xl)] bg-[var(--bg-surface)]`}>
+      <aside className={`absolute left-[32px] top-[32px] z-10 flex ${timelineOpen ? "bottom-[397px]" : "bottom-[32px]"} w-[430px] flex-col overflow-hidden rounded-[var(--radius-xl)] bg-[var(--neutral-0)]`}>
         {/* Header (452:2269 / 2270): list icon 24 at 21,21, title Regular 20 #2c3030 at 66 */}
         <div data-tour="project-menu" className="flex items-center gap-[21px] pl-[21px] pt-[21px]">
           <Menu
@@ -1293,14 +1293,14 @@ export function Editor({
       {busy && job && (
         <div className="pointer-events-auto flex flex-col items-center gap-[var(--space-8)]">
           <div
-            className="anim-rise-in flex items-center gap-[var(--space-16)] rounded-[var(--radius-full)] bg-[var(--bg-surface)] px-[var(--space-24)] py-[var(--space-16)] shadow-[var(--pure-shadow-modal)]"
+            className="anim-rise-in flex items-center gap-[var(--space-16)] rounded-[var(--radius-full)] bg-[var(--neutral-0)] px-[var(--space-24)] py-[var(--space-16)] shadow-[var(--pure-shadow-modal)]"
             data-testid="generating"
             title={`${job.stepLabel} ${job.progress}%`}
           >
-            <Icon name="spinner" size={20} className="shrink-0 animate-spin text-[var(--text-primary)]" />
-            <span className="whitespace-nowrap text-[16px] font-medium leading-[20px] text-[var(--text-primary)]">{E.generating}</span>
+            <Icon name="spinner" size={20} className="shrink-0 animate-spin text-[var(--home-ink)]" />
+            <span className="whitespace-nowrap text-[16px] font-medium leading-[20px] text-[var(--home-ink)]">{E.generating}</span>
             <span className="sr-only" aria-live="polite">{job.stepLabel} {job.progress}%</span>
-            <button type="button" onClick={stop} className="text-[16px] font-medium leading-[20px] text-[var(--text-secondary)] hover:text-[var(--text-primary)]">{E.stop}</button>
+            <button type="button" onClick={stop} className="text-[16px] font-medium leading-[20px] text-[var(--home-ink-3)] hover:text-[var(--home-ink)]">{E.stop}</button>
           </div>
           <div aria-hidden className="anim-pulse h-[4px] w-[240px] rounded-[var(--radius-full)] bg-[var(--primary)]" />
         </div>
@@ -1309,7 +1309,7 @@ export function Editor({
           time Medium 14.986, 331×9 track (#829398 at 20%, fill full strength) with a 21 knob ring, volume 24 (mute).
           W02E-4: hidden under the Timeline Panel while it's open (its transport takes over). Shown at 80% (zoom, user review). */}
       {!timelineOpen && (
-      <div className="pointer-events-auto flex h-[68px] w-[550px] shrink-0 [zoom:0.8] items-center gap-[14px] rounded-[var(--radius-full)] bg-[var(--bg-surface)] py-[10px] pl-[10px] pr-[21px]">
+      <div className="pointer-events-auto flex h-[68px] w-[550px] shrink-0 [zoom:0.8] items-center gap-[14px] rounded-[var(--radius-full)] bg-[var(--neutral-0)] py-[10px] pl-[10px] pr-[21px]">
         <span data-testid="time" className="sr-only">{fmtT(time.t)} / {fmtT(time.duration)}</span>
         <button
           type="button"
@@ -1361,7 +1361,7 @@ export function Editor({
             <div className="absolute inset-y-0 left-0 bg-[var(--playbar-track)]" style={{ width: progress * 331 }} />
           </div>
           <span
-            className="absolute top-0 size-[21px] rounded-full border-[5px] border-[var(--playbar-track)] bg-[var(--bg-surface)]"
+            className="absolute top-0 size-[21px] rounded-full border-[5px] border-[var(--playbar-track)] bg-[var(--neutral-0)]"
             style={{ left: Math.min(Math.max(progress * 331 - 13, 0), 310) }}
             aria-hidden
           />
@@ -1388,20 +1388,20 @@ export function Editor({
         className="pointer-events-auto flex w-[646px] flex-col items-center gap-[var(--space-12)] [zoom:1.2]"
         onSubmit={(e) => { e.preventDefault(); void generate(); }}
       >
-        <div className="flex min-h-[106px] w-full flex-col justify-between gap-[var(--space-12)] rounded-[20px] border border-[var(--composer-border)] bg-[var(--bg-surface)] px-[16px] pb-[12px] pt-[16px] shadow-[var(--composer-shadow)]">
+        <div className="flex min-h-[106px] w-full flex-col justify-between gap-[var(--space-12)] rounded-[20px] border border-[var(--composer-border)] bg-[var(--neutral-0)] px-[16px] pb-[12px] pt-[16px] shadow-[var(--composer-shadow)]">
           {(context.references.length > 0 || pending.length > 0) && (
             <div className="flex flex-wrap items-center gap-[var(--space-8)] text-[14px] leading-[18px]" data-testid="attach-chips">
               {context.references.map((r) => (
                 <span
                   key={r.id}
-                  className={`flex max-w-[200px] items-center gap-[var(--space-4)] rounded-[var(--radius-full)] border px-[var(--space-12)] py-[var(--space-4)] ${r.status === "failed" ? "border-[var(--border-error)] text-[var(--text-error)]" : "border-[var(--border-default)] text-[var(--text-primary)]"}`}
+                  className={`flex max-w-[200px] items-center gap-[var(--space-4)] rounded-[var(--radius-full)] border px-[var(--space-12)] py-[var(--space-4)] ${r.status === "failed" ? "border-[var(--border-error)] text-[var(--text-error)]" : "border-[var(--home-line)] text-[var(--home-ink)]"}`}
                 >
                   <span className="truncate">{r.kind === "video" ? "▶" : r.kind === "userData" ? "◇" : "▣"} {r.kind === "userData" ? (motionNames[r.path] ?? r.path) : r.path.split("/").pop()?.replace(/^[0-9a-f]{8}-/, "")}</span>
                   <button type="button" aria-label={E.removeReference} onClick={() => setContext((c) => ({ ...c, references: c.references.filter((x) => x.id !== r.id) }))}>×</button>
                 </span>
               ))}
               {pending.map((p) => (
-                <span key={p.id} className="max-w-[200px] truncate rounded-[var(--radius-full)] border border-dashed border-[var(--border-default)] px-[var(--space-12)] py-[var(--space-4)] text-[var(--text-tertiary)]">
+                <span key={p.id} className="max-w-[200px] truncate rounded-[var(--radius-full)] border border-dashed border-[var(--home-line)] px-[var(--space-12)] py-[var(--space-4)] text-[var(--home-ink-3)]">
                   {p.name}, {E.referenceUploading}
                 </span>
               ))}
@@ -1415,7 +1415,7 @@ export function Editor({
             placeholder={E.promptPlaceholder}
             aria-label={E.promptPlaceholder}
             maxLength={500}
-            className="w-full bg-transparent text-[16px] leading-none tracking-[-0.32px] text-[var(--text-primary)] outline-none placeholder:text-[var(--composer-placeholder)] disabled:opacity-60"
+            className="w-full bg-transparent text-[16px] leading-none tracking-[-0.32px] text-[var(--home-ink)] outline-none placeholder:text-[var(--composer-placeholder)] disabled:opacity-60"
           />
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-[5px]">
@@ -1447,7 +1447,7 @@ export function Editor({
               type="submit"
               title={E.generate}
               disabled={busy || !prompt.trim()}
-              className="flex h-[33px] w-[74px] items-center justify-center rounded-[10px] bg-[var(--composer-send)] p-[7px] text-[16px] font-medium leading-none text-[var(--text-on-inverse)] disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex h-[33px] w-[74px] items-center justify-center rounded-[10px] bg-[var(--composer-send)] p-[7px] text-[16px] font-medium leading-none text-[var(--neutral-0)] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {E.send}
             </button>
@@ -1458,7 +1458,7 @@ export function Editor({
       </div>
 
       {/* Right panel (Figma 452:2024): content column 330 at 24 · divider at 378 · Motion / Face / Sound rail at 397, Edit Detail at the bottom */}
-      <aside className={`absolute right-[32px] top-[32px] z-10 ${timelineOpen ? "bottom-[397px]" : "bottom-[32px]"} w-[448px] overflow-hidden rounded-[var(--radius-xl)] bg-[var(--bg-surface)] shadow-[var(--editor-panel-shadow)]`}>
+      <aside className={`absolute right-[32px] top-[32px] z-10 ${timelineOpen ? "bottom-[397px]" : "bottom-[32px]"} w-[448px] overflow-hidden rounded-[var(--radius-xl)] bg-[var(--neutral-0)] shadow-[var(--editor-panel-shadow)]`}>
         {/* Scroll column starts 8 left of the content so field borders and the focus ring aren't clipped */}
         <div className="absolute bottom-[96px] left-[16px] top-[24px] flex w-[354px] flex-col gap-[40px] overflow-y-auto overflow-x-hidden pb-[var(--space-8)] pl-[8px] pr-[16px] pt-[4px] -mt-[4px]">
           {tab === "motion" && (
@@ -1501,7 +1501,7 @@ export function Editor({
 
       {/* Edit Detail timeline (W02E-4 Timeline Panel 901:12348 ×2): 32,703 · 1856 wide, down to 10 above the bottom */}
       {timelineOpen && timelineClip && (
-        <div className="absolute bottom-[10px] left-[32px] right-[32px] z-20 h-[367px] overflow-hidden rounded-[var(--radius-xl)] bg-[var(--bg-surface)]">
+        <div className="absolute bottom-[10px] left-[32px] right-[32px] z-20 h-[367px] overflow-hidden rounded-[var(--radius-xl)] bg-[var(--neutral-0)]">
           <Timeline
             clip={timelineClip}
             fromRecipe={!clip}
@@ -1528,7 +1528,7 @@ export function Editor({
       )}
 
       <Modal open={failure !== null} onClose={() => setFailure(null)} title={E.failed.title} description={E.failed.body}>
-        {failure && <p className="font-mono text-[14px] leading-[18px] text-[var(--text-tertiary)]">{fmt(E.failedReason, { reason: failure })}</p>}
+        {failure && <p className="font-mono text-[14px] leading-[18px] text-[var(--home-ink-3)]">{fmt(E.failedReason, { reason: failure })}</p>}
         <ModalActions>
           <ModalButton onClick={() => router.push("/lab/community")}>{E.failedActions.browse}</ModalButton>
           <ModalButton variant="primary" onClick={() => { setFailure(null); void generate(context.lastPrompt, context, true); }}>{E.failedActions.retry}</ModalButton>
@@ -1538,11 +1538,11 @@ export function Editor({
       <Modal open={limit !== null} onClose={() => setLimit(null)} title={E.limit.title}>
         {limit && (
           <>
-            <p className="text-[16px] leading-[20px] text-[var(--text-secondary)]">
+            <p className="text-[16px] leading-[20px] text-[var(--home-ink-3)]">
               {fmt(E.limitBody, { joint: structure.joints.find((j) => j.id === limit.joint)?.label ?? limit.joint, value: limit.value.toFixed(1), limit: limit.limit.toFixed(1), t: limit.t.toFixed(2) })}
             </p>
             <table className="text-[16px] leading-[20px]">
-              <thead className="text-left text-[14px] leading-[18px] text-[var(--text-secondary)]">
+              <thead className="text-left text-[14px] leading-[18px] text-[var(--home-ink-3)]">
                 <tr><th className="font-normal">{E.limitColumns.joint}</th><th className="font-normal">{E.limitColumns.value}</th><th className="font-normal">{E.limitColumns.limit}</th></tr>
               </thead>
               <tbody className="font-mono">

@@ -143,7 +143,7 @@ export function Tour() {
           <div className="pointer-events-auto absolute inset-x-0 bottom-0 bg-[var(--bg-overlay)]" style={{ top: box.top + box.height }} />
           <div className="pointer-events-auto absolute left-0 bg-[var(--bg-overlay)]" style={{ top: box.top, height: box.height, width: Math.max(box.left, 0) }} />
           <div className="pointer-events-auto absolute right-0 bg-[var(--bg-overlay)]" style={{ top: box.top, height: box.height, left: box.left + box.width }} />
-          <div className="absolute rounded-[var(--radius-sm)] ring-2 ring-[var(--sage-300)]" style={box} />
+          <div className="absolute rounded-[var(--radius-sm)] ring-2 ring-[var(--home-ink-3)]" style={box} />
         </>
       )}
       <div
@@ -165,7 +165,7 @@ export function Tour() {
               <button
                 type="button"
                 onClick={() => setStep(current.advance === "done" ? null : step + 1)}
-                className="rounded-[var(--radius-xs)] bg-[var(--sage-500)] px-[14px] py-[8px] font-mono text-[14px] font-medium leading-[20px] text-white hover:bg-[var(--sage-600)]"
+                className="rounded-[var(--radius-xs)] bg-[var(--home-ink-2)] px-[14px] py-[8px] font-mono text-[14px] font-medium leading-[20px] text-white hover:bg-[var(--neutral-800)]"
               >
                 {current.advance === "done" ? TOUR_LABELS.done : TOUR_LABELS.next}
               </button>

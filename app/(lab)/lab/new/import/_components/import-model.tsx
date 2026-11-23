@@ -138,7 +138,7 @@ export function ImportModel() {
           <p className="text-[28px] font-semibold text-[var(--home-ink)]">{dragging ? S.dropHere : S.drop}</p>
           <p className="text-[17px] text-[var(--home-ink-2)]">
             {S.or}
-            <button type="button" onClick={() => input.current?.click()} className="font-medium text-[var(--home-ink)] underline underline-offset-4 hover:text-[var(--sage-500)]">
+            <button type="button" onClick={() => input.current?.click()} className="font-medium text-[var(--home-ink)] underline underline-offset-4 hover:text-[var(--home-ink-2)]">
               {S.browse}
             </button>
           </p>
@@ -217,12 +217,12 @@ export function ImportModel() {
               setDragging(false);
               if (!busy) pick(e.dataTransfer.files);
             }}
-            className={`relative flex h-[340px] flex-col items-center justify-center rounded-[24px] text-center transition-colors ${dragging ? "bg-[var(--sage-50)]" : "bg-[var(--home-canvas)]"}`}
+            className={`relative flex h-[340px] flex-col items-center justify-center rounded-[24px] text-center transition-colors ${dragging ? "bg-[var(--home-canvas)]" : "bg-[var(--home-canvas)]"}`}
           >
             <div
               aria-hidden
               className={`pointer-events-none absolute inset-[var(--space-12)] rounded-[18px] border-[1.5px] border-dashed ${
-                dragging ? "border-[var(--sage-400)]" : phase.kind === "error" ? "border-[var(--border-error)]" : "border-[var(--neutral-300)]"
+                dragging ? "border-[var(--home-ink-3)]" : phase.kind === "error" ? "border-[var(--border-error)]" : "border-[var(--neutral-300)]"
               }`}
             />
             {zoneContent}

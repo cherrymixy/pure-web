@@ -55,26 +55,26 @@ export function ProfileView({ initial }: { initial: Profile }) {
 
   // No Figma frame: lab paddings; sections are white radius-xl cards on the shell background (sidebar panel),
   // DS Text Field / Chip for inputs, shared pill Buttons.
-  const card = "flex flex-col gap-[var(--space-24)] rounded-[var(--radius-xl)] bg-[var(--bg-surface)] p-[var(--space-32)]";
-  const h2 = "text-[22px] font-medium leading-[29px] text-[var(--text-primary)]";
+  const card = "flex flex-col gap-[var(--space-24)] rounded-[var(--radius-xl)] bg-[var(--neutral-0)] p-[var(--space-32)]";
+  const h2 = "text-[22px] font-medium leading-[29px] text-[var(--home-ink)]";
   return (
     <div className="flex max-w-[1200px] flex-col gap-[var(--space-24)] pb-[var(--space-32)] pl-[33px] pr-[var(--space-32)] pt-[49px]">
-      <h1 className="flex h-[56px] items-center text-[32px] font-semibold leading-[40px] text-[var(--sage-800)]">{P.title}</h1>
+      <h1 className="flex h-[56px] items-center text-[32px] font-semibold leading-[40px] text-[var(--home-ink)]">{P.title}</h1>
 
       <section className={`${card} !flex-row items-start justify-between`}>
         <div className="flex items-center gap-[var(--space-24)]">
-          <span aria-hidden className="flex size-[88px] shrink-0 items-center justify-center rounded-[var(--radius-full)] bg-[var(--sage-50)] text-[32px] font-semibold leading-[40px] text-[var(--sage-600)]">
+          <span aria-hidden className="flex size-[88px] shrink-0 items-center justify-center rounded-[var(--radius-full)] bg-[var(--home-canvas)] text-[32px] font-semibold leading-[40px] text-[var(--home-ink-2)]">
             {profile.name.slice(0, 1).toUpperCase()}
           </span>
           <dl className="grid grid-cols-[120px_1fr] items-baseline gap-x-[var(--space-16)] gap-y-[var(--space-8)]">
-            <dt className="text-[13px] leading-[18px] text-[var(--text-secondary)]">{P.name}</dt>
-            <dd className="text-[20px] font-semibold leading-[26px] text-[var(--text-primary)]" data-testid="profile-name">{profile.name}</dd>
-            <dt className="text-[13px] leading-[18px] text-[var(--text-secondary)]">{P.email}</dt>
-            <dd className="text-[16px] leading-[22px] text-[var(--text-primary)]">{profile.email}</dd>
-            <dt className="text-[13px] leading-[18px] text-[var(--text-secondary)]">{P.company}</dt>
-            <dd className="text-[16px] leading-[22px] text-[var(--text-primary)]">{profile.company}</dd>
+            <dt className="text-[13px] leading-[18px] text-[var(--home-ink-3)]">{P.name}</dt>
+            <dd className="text-[20px] font-semibold leading-[26px] text-[var(--home-ink)]" data-testid="profile-name">{profile.name}</dd>
+            <dt className="text-[13px] leading-[18px] text-[var(--home-ink-3)]">{P.email}</dt>
+            <dd className="text-[16px] leading-[22px] text-[var(--home-ink)]">{profile.email}</dd>
+            <dt className="text-[13px] leading-[18px] text-[var(--home-ink-3)]">{P.company}</dt>
+            <dd className="text-[16px] leading-[22px] text-[var(--home-ink)]">{profile.company}</dd>
             <dt />
-            <dd className="text-[13px] leading-[18px] text-[var(--text-tertiary)]">{fmt(P.signedInWith, { provider: profile.signedInWith })}</dd>
+            <dd className="text-[13px] leading-[18px] text-[var(--home-ink-3)]">{fmt(P.signedInWith, { provider: profile.signedInWith })}</dd>
           </dl>
         </div>
         <Button onClick={() => setEditing(true)}>{P.edit}</Button>
@@ -84,7 +84,7 @@ export function ProfileView({ initial }: { initial: Profile }) {
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-[var(--space-4)]">
             <h2 className={h2}>{P.team}</h2>
-            {!isOwner && <p className="text-[13px] leading-[18px] text-[var(--text-secondary)]">{P.ownerOnly}</p>}
+            {!isOwner && <p className="text-[13px] leading-[18px] text-[var(--home-ink-3)]">{P.ownerOnly}</p>}
           </div>
           <Button variant="primary" disabled={!isOwner} onClick={() => setInviting(true)}>
             <Icon name="add" size={20} />
@@ -93,7 +93,7 @@ export function ProfileView({ initial }: { initial: Profile }) {
         </div>
         <table className="w-full">
           <thead className="text-left">
-            <tr className="text-[13px] leading-[18px] text-[var(--text-secondary)]">
+            <tr className="text-[13px] leading-[18px] text-[var(--home-ink-3)]">
               <th className="pb-[var(--space-12)] font-normal">{P.member}</th>
               <th className="w-[200px] pb-[var(--space-12)] font-normal">{P.role}</th>
               <th className="pb-[var(--space-12)]" />
@@ -104,18 +104,18 @@ export function ProfileView({ initial }: { initial: Profile }) {
               const self = m.email === profile.email;
               const editable = isOwner && !self && m.role !== "Owner";
               return (
-                <tr key={m.email} className="border-t border-[var(--border-default)]" data-testid="team-row">
+                <tr key={m.email} className="border-t border-[var(--home-line)]" data-testid="team-row">
                   <td className="py-[var(--space-16)]">
                     <div className="flex items-center gap-[var(--space-16)]">
-                      <span aria-hidden className="flex size-[44px] shrink-0 items-center justify-center rounded-[var(--radius-full)] bg-[var(--bg-canvas)] text-[16px] font-medium leading-[22px] text-[var(--text-link)]">
+                      <span aria-hidden className="flex size-[44px] shrink-0 items-center justify-center rounded-[var(--radius-full)] bg-[var(--home-canvas)] text-[16px] font-medium leading-[22px] text-[var(--home-ink-2)]">
                         {m.name.slice(0, 1).toUpperCase()}
                       </span>
                       <div className="flex min-w-0 flex-col gap-[2px]">
-                        <div className="text-[16px] font-medium leading-[22px] text-[var(--text-primary)]">
+                        <div className="text-[16px] font-medium leading-[22px] text-[var(--home-ink)]">
                           {m.name}
-                          {self ? <span className="font-normal text-[var(--text-secondary)]">{` (${P.you})`}</span> : ""}
+                          {self ? <span className="font-normal text-[var(--home-ink-3)]">{` (${P.you})`}</span> : ""}
                         </div>
-                        <div className="text-[14px] leading-[20px] text-[var(--text-secondary)]">
+                        <div className="text-[14px] leading-[20px] text-[var(--home-ink-3)]">
                           {m.email}
                           {m.pending && m.expiresAt ? `, ${fmt(P.pendingUntil, { date: new Date(m.expiresAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }) })}` : ""}
                         </div>
@@ -278,7 +278,7 @@ function InviteModal({ open, onClose, onInvited }: { open: boolean; onClose: () 
         <div className="flex flex-col gap-[var(--space-20)]">
           <label className="flex flex-col gap-[6px]">
             <span className={FIELD_LABEL}>{P.inviteEmails}</span>
-            <div className={`${FIELD_BOX} flex-wrap bg-[var(--bg-canvas)] py-[var(--space-8)]`}>
+            <div className={`${FIELD_BOX} flex-wrap bg-[var(--home-canvas)] py-[var(--space-8)]`}>
               {chips.map((c) => (
                 <span key={c} data-testid="invite-chip" className={`${chipClass({ size: "S" })} gap-[var(--space-4)] pr-[var(--space-8)]`}>
                   {c}

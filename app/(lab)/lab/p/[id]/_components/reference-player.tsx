@@ -59,7 +59,7 @@ export function ReferencePlayer({
 
   return (
     <div
-      className={`flex flex-col gap-[var(--space-12)] bg-[var(--bg-surface)] ${side ? "h-full p-[var(--space-16)]" : "w-[420px] rounded-[var(--radius-xl)] p-[var(--space-16)] shadow-[var(--pure-shadow-modal)]"}`}
+      className={`flex flex-col gap-[var(--space-12)] bg-[var(--neutral-0)] ${side ? "h-full p-[var(--space-16)]" : "w-[420px] rounded-[var(--radius-xl)] p-[var(--space-16)] shadow-[var(--pure-shadow-modal)]"}`}
       data-testid="reference-player"
     >
       <div className={`overflow-hidden rounded-[var(--radius-md)] bg-[var(--neutral-800)] ${side ? "min-h-0 flex-1" : "aspect-video"}`}>
@@ -79,10 +79,10 @@ export function ReferencePlayer({
           <img src={src} alt="" className="h-full w-full object-contain" />
         )}
       </div>
-      <div className="flex items-center gap-[var(--space-8)] text-[14px] leading-[18px] text-[var(--text-tertiary)]">
+      <div className="flex items-center gap-[var(--space-8)] text-[14px] leading-[18px] text-[var(--home-ink-3)]">
         <span className="min-w-0 truncate">{name}</span>
         {isVideo && Number.isFinite(clock.d) && clock.d > 0 && <span className="shrink-0">{stamp(clock.t, true)} / {stamp(clock.d)}</span>}
-        <button aria-label={SY.close} className="ml-auto shrink-0 px-[var(--space-4)] text-[18px] leading-none hover:text-[var(--text-primary)]" onClick={onClose}>×</button>
+        <button aria-label={SY.close} className="ml-auto shrink-0 px-[var(--space-4)] text-[18px] leading-none hover:text-[var(--home-ink)]" onClick={onClose}>×</button>
       </div>
       <div className="flex flex-wrap items-center gap-[var(--space-8)]">
         <Button onClick={() => onSide(!side)}>{side ? SY.overlay : SY.sideBySide}</Button>

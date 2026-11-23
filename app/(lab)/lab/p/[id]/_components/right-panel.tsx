@@ -112,7 +112,7 @@ function BarField({
   return (
     <div className="flex flex-col gap-[4px]">
       <div
-        className={`${FIELD} has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[var(--sage-400)] ${ticks ? "cursor-pointer" : ""}`}
+        className={`${FIELD} has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[var(--home-ink-3)] ${ticks ? "cursor-pointer" : ""}`}
         onPointerDown={
           ticks
             ? (e) => {
@@ -184,7 +184,7 @@ function SelectField<T extends string>({
 }) {
   const shown = options.find((o) => o.value === value)?.label ?? value;
   return (
-    <div className={`${FIELD} has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[var(--sage-400)]`}>
+    <div className={`${FIELD} has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[var(--home-ink-3)]`}>
       <span className={LABEL}>{label}</span>
       <span className="pointer-events-none absolute right-[33px] top-[14px] whitespace-nowrap text-[16px] font-medium leading-none text-[var(--editor-field-value)]">{shown}</span>
       <span className="pointer-events-none absolute left-[306px] top-[17px] flex flex-col gap-[4px] text-[var(--editor-caret)]" aria-hidden>
@@ -347,7 +347,7 @@ export function JointList({ joints, structure, flagged }: { joints: JointState[]
   return (
     <section className="flex w-[330px] flex-col gap-[13px]">
       <div className="flex items-center gap-[8px]">
-        <span className="flex h-[23px] items-center rounded-[var(--radius-full)] bg-[var(--editor-chip)] px-[10px] text-[13px] font-medium leading-none text-[var(--text-on-inverse)] shadow-[inset_0_0_10px_0_var(--neutral-0)]">
+        <span className="flex h-[23px] items-center rounded-[var(--radius-full)] bg-[var(--editor-chip)] px-[10px] text-[13px] font-medium leading-none text-[var(--neutral-0)] shadow-[inset_0_0_10px_0_var(--neutral-0)]">
           {R.joint.auto}
         </span>
         <h3 className="text-[16px] font-medium leading-none text-[var(--library-section)]">{R.joint.title}</h3>
@@ -384,7 +384,7 @@ export function EditDetailButton({ open, onClick }: { open: boolean; onClick: ()
       type="button"
       aria-pressed={open}
       onClick={onClick}
-      className="h-[50px] w-[328px] shrink-0 rounded-[18px] bg-[var(--editor-cta)] text-[21px] leading-none tracking-[-0.42px] text-[var(--text-on-inverse)]"
+      className="h-[50px] w-[328px] shrink-0 rounded-[18px] bg-[var(--editor-cta)] text-[21px] leading-none tracking-[-0.42px] text-[var(--neutral-0)]"
     >
       {open ? R.closeDetail : R.editDetail}
     </button>
