@@ -247,24 +247,6 @@ export function ImportModel() {
               </button>
             ))}
           </div>
-
-          <div className="flex items-center gap-[var(--space-16)] border-t border-[var(--home-line)] pt-[var(--space-24)]">
-            <span className="flex size-[36px] shrink-0 items-center justify-center rounded-[var(--radius-full)] bg-[var(--home-canvas)] text-[var(--home-ink-2)]">
-              <Icon name="info" size={18} />
-            </span>
-            <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
-              <p className="text-[15px] font-semibold text-[var(--home-ink)]">{S.hint.title}</p>
-              <p className="text-[13px] text-[var(--home-ink-3)]">{S.hint.body}</p>
-            </div>
-            {!replaceId && (
-              <Link
-                href="/lab/new/type"
-                className="flex h-[44px] shrink-0 items-center whitespace-pre rounded-[var(--radius-sm)] bg-[var(--home-canvas)] px-[22px] text-[15px] font-medium text-[var(--home-ink-2)] hover:bg-[var(--home-pill)] hover:text-[var(--home-ink)]"
-              >
-                {S.noFile}
-              </Link>
-            )}
-          </div>
         </div>
       </div>
 

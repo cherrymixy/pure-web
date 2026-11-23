@@ -48,7 +48,6 @@ export const STRINGS = {
   newType: {
     title: "Select type to simulate",
     body: "The type sets joints, limits and which channels PURE can use. Pick the closest one.",
-    note: "Not sure? Pick the closest type. You can adjust joints after upload.",
     jointsLabel: "Joints",
     channelsLabel: "Channels",
     /** Card order and card copy (Figma W02B-1 901:8370). Keys are data/robot-types.ts ids. */
@@ -63,7 +62,6 @@ export const STRINGS = {
     continue: "Continue with Joint Fixed",
     onlyFixed: "Only Joint Fixed is available in this demo.",
     untitled: "Untitled robot",
-    importInstead: "Import a 3D model instead",
   },
   importModel: {
     /** Figma W02B-2 (936:8422) copy */
@@ -72,8 +70,6 @@ export const STRINGS = {
     drop: "Drag & drop your file here",
     or: "or ",
     supports: "Supports .glb, .obj, .stl (max 500 MB)",
-    noFile: "No file yet?  Try PURE's Robot →",
-    hint: { title: "Your file should be a rigged 3D model.", body: "We support common formats and texture files." },
     uploading: "Uploading",
     cancel: "Cancel",
     unsupported: { title: "Unsupported file", body: "Use a .GLB, .OBJ or .STL file up to 500MB." },
@@ -116,7 +112,6 @@ export const STRINGS = {
   structure: {
     title: "Structure",
     body: "Check what PURE found. Limits keep every motion safe for this body.",
-    preview: "PREVIEW",
     jointRange: "{min}° ~ {max}°",
     joints: "Joints",
     channels: "Channels",

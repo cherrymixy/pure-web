@@ -181,14 +181,7 @@ export function TypePicker({ initialSelected = false }: { initialSelected?: bool
           ))}
         </div>
 
-        <div className="flex items-center gap-[var(--space-16)] border-t border-[var(--home-line)] pt-[var(--space-24)]">
-          <span className="flex size-[36px] shrink-0 items-center justify-center rounded-[var(--radius-full)] bg-[var(--home-canvas)] text-[var(--home-ink-2)]">
-            <Icon name="info" size={18} />
-          </span>
-          <p className="min-w-0 flex-1 text-[15px] text-[var(--home-ink-3)]">{S.note}</p>
-          <Link href="/lab/new/import" className="shrink-0 text-[15px] font-medium text-[var(--home-ink-2)] underline underline-offset-4 hover:text-[var(--home-ink)]">
-            {S.importInstead}
-          </Link>
+        <div className="flex justify-end border-t border-[var(--home-line)] pt-[var(--space-24)]">
           <button
             type="button"
             data-tour="type-continue"

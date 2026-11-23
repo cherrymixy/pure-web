@@ -137,3 +137,4 @@ STEP마다 한 줄. `날짜 · STEP · 결정 · 근거`
 | 2026-11-23 | 업로드 중·분석 화면 Lab 무드 | Import 업로드 중 상태를 가운데 정렬(파일 아이콘·이름·진행 막대·조용한 Cancel), 분석 화면(W02B-3)도 배경 사진 제거하고 Import와 같은 1040 흰 시트(제목 44 가운데, 미리보기+진행+단계는 캔버스 회색 판 안), 버튼 Lab 스타일 | 사용자 리뷰 |
 | 2026-11-23 | 구조 화면 Lab 무드·Edit limits 버튼 | Structure(W02C) 패널을 Lab 토큰으로(흰 패널·home-line 테두리, 관절 행·채널 칩·Confirm Lab 스타일, Preview 태그), Edit limits를 텍스트 → 테두리 버튼(설정 아이콘, 편집 중 검정 Done) | 사용자 리뷰 |
 | 2026-11-23 | 구조 화면 정리 | 상단 PREVIEW 태그와 보조 안내문(Preview plays on PURE Desk…) 삭제, 본문은 한 문장만 | 사용자 리뷰 |
+| 2026-11-23 | 타입·Import 하단 안내 삭제, 시그니처 화면 Lab 무드 | 타입 선택 하단 안내문·Import 링크 삭제(Continue만), Import 하단 안내+샘플 로봇 링크 행 삭제, 고를 수 없는 타입 카드 흐리게(40%). Signature(W02C-1~3)를 구조 화면과 같은 Lab 토큰으로(유리 상단 버튼, PREVIEW 삭제, 흰 패널·home-line 테두리, Lab 버튼), 왼쪽 패널 가로 넘침 수정 | 사용자 리뷰 |
