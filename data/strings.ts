@@ -74,7 +74,6 @@ export const STRINGS = {
     supports: "Supports .glb, .obj, .stl (max 500 MB)",
     noFile: "No file yet?  Try PURE's Robot →",
     hint: { title: "Your file should be a rigged 3D model.", body: "We support common formats and texture files." },
-    guide: "View upload guide",
     uploading: "Uploading",
     cancel: "Cancel",
     unsupported: { title: "Unsupported file", body: "Use a .GLB, .OBJ or .STL file up to 500MB." },
