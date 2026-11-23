@@ -106,18 +106,15 @@ export function StructureEditor({ projectId, name, initial }: { projectId: strin
           ))}
       </div>
 
-      {/* Lab UI (user review, same as the import / type / analyzing sheets): glass back link + preview tag, white panel with a
+      {/* Lab UI (user review, same as the import / type / analyzing sheets): glass back link, white panel with a
           thin home-line border, Lab rows and chips, Lab buttons. The sim stage keeps its own colours. */}
-      <div className="absolute left-[var(--space-40)] top-[42px] flex items-center gap-[var(--space-12)]">
-        <Link
-          href="/lab"
-          className="flex h-[44px] items-center gap-[var(--space-8)] rounded-[var(--radius-sm)] bg-[var(--home-glass)] px-[var(--space-20)] text-[15px] font-medium text-[var(--home-ink)] hover:bg-[var(--neutral-0)]"
-        >
-          <span aria-hidden>←</span>
-          {STRINGS.sidebar.lab}
-        </Link>
-        <span className="rounded-[var(--radius-full)] bg-[var(--home-glass)] px-[10px] py-[4px] text-[12px] font-semibold tracking-[0.04em] text-[var(--home-ink-3)]">{S.preview}</span>
-      </div>
+      <Link
+        href="/lab"
+        className="absolute left-[var(--space-40)] top-[42px] flex h-[44px] items-center gap-[var(--space-8)] rounded-[var(--radius-sm)] bg-[var(--home-glass)] px-[var(--space-20)] text-[15px] font-medium text-[var(--home-ink)] hover:bg-[var(--neutral-0)]"
+      >
+        <span aria-hidden>←</span>
+        {STRINGS.sidebar.lab}
+      </Link>
 
       <section
         aria-label={name}
@@ -127,7 +124,6 @@ export function StructureEditor({ projectId, name, initial }: { projectId: strin
           <header className="flex flex-col gap-[var(--space-8)]">
             <h1 className="text-[32px] font-semibold leading-[1.2] text-[var(--home-ink)]">{S.title}</h1>
             <p className="text-[15px] leading-[1.45] text-[var(--home-ink-2)]">{S.body}</p>
-            {structure.source === "import" && <p className="text-[13px] leading-[1.45] text-[var(--home-ink-3)]">{S.previewNote}</p>}
           </header>
 
           <div className="-mr-[var(--space-16)] flex min-h-0 flex-col gap-[var(--space-32)] overflow-y-auto pr-[var(--space-16)]">

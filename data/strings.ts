@@ -126,7 +126,6 @@ export const STRINGS = {
     done: "Done",
     rigRange: "Rig {min}° … {max}°",
     range: "Range",
-    previewNote: "Preview plays on PURE Desk. Imported rigs drive the joint list only.",
     stages: ["Structure", "Signature", "Editor"],
     saved: "Structure saved",
   },
