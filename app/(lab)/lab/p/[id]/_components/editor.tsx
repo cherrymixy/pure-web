@@ -1287,25 +1287,24 @@ export function Editor({
         </div>
       </aside>
 
-      {/* Generating (901:11082 ×2): pill at 665,784 with Stop */}
-      {busy && job && (
-        <div aria-hidden className="anim-pulse pointer-events-none absolute bottom-[222px] left-[calc(50%-139px)] z-10 h-[4px] w-[240px] rounded-[var(--radius-full)] bg-[var(--primary)]" />
-      )}
-      {busy && job && (
-        <div
-          className="anim-rise-in absolute bottom-[244px] left-[calc(50%-295px)] z-10 flex items-center gap-[var(--space-16)] rounded-[var(--radius-full)] bg-[var(--bg-surface)] px-[var(--space-24)] py-[var(--space-16)] shadow-[var(--pure-shadow-modal)]"
-          data-testid="generating"
-          title={`${job.stepLabel} ${job.progress}%`}
-        >
-          <Icon name="spinner" size={20} className="shrink-0 animate-spin text-[var(--text-primary)]" />
-          <span className="text-[16px] font-medium leading-[20px] text-[var(--text-primary)]">{E.generating}</span>
-          <span className="sr-only" aria-live="polite">{job.stepLabel} {job.progress}%</span>
-          <button type="button" onClick={stop} className="text-[16px] font-medium leading-[20px] text-[var(--text-secondary)] hover:text-[var(--text-primary)]">{E.stop}</button>
-        </div>
-      )}
-
       {/* Bottom stack: play bar 20 above the composer, so it rides up when attach chips make the composer taller */}
       <div className="pointer-events-none absolute bottom-[32px] left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-[20px]">
+      {/* Generating (901:11082 ×2): pill with Stop, centred above the play bar (was a fixed Figma offset that no longer lined up) */}
+      {busy && job && (
+        <div className="pointer-events-auto flex flex-col items-center gap-[var(--space-8)]">
+          <div
+            className="anim-rise-in flex items-center gap-[var(--space-16)] rounded-[var(--radius-full)] bg-[var(--bg-surface)] px-[var(--space-24)] py-[var(--space-16)] shadow-[var(--pure-shadow-modal)]"
+            data-testid="generating"
+            title={`${job.stepLabel} ${job.progress}%`}
+          >
+            <Icon name="spinner" size={20} className="shrink-0 animate-spin text-[var(--text-primary)]" />
+            <span className="whitespace-nowrap text-[16px] font-medium leading-[20px] text-[var(--text-primary)]">{E.generating}</span>
+            <span className="sr-only" aria-live="polite">{job.stepLabel} {job.progress}%</span>
+            <button type="button" onClick={stop} className="text-[16px] font-medium leading-[20px] text-[var(--text-secondary)] hover:text-[var(--text-primary)]">{E.stop}</button>
+          </div>
+          <div aria-hidden className="anim-pulse h-[4px] w-[240px] rounded-[var(--radius-full)] bg-[var(--primary)]" />
+        </div>
+      )}
       {/* Play bar (452:2414): white pill 550×68 (pad 10 · 21 right), centred, 20 above the composer (user review; Figma 156) — play 48 (pill grey 20%),
           time Medium 14.986, 331×9 track (#829398 at 20%, fill full strength) with a 21 knob ring, volume 24 (mute).
           W02E-4: hidden under the Timeline Panel while it's open (its transport takes over). Shown at 80% (zoom, user review). */}
