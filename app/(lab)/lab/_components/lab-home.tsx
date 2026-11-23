@@ -272,13 +272,12 @@ function ProjectCard({ project: p, card, author, starred, onStar, onRename }: { 
         >
           <Icon name="star" size={22} />
         </button>
-        {/* ⋮ (user review, as in the list view): Open · Rename · favourite toggle. */}
+        {/* ⋮ (user review): Open · Rename. Favourite is the star right beside it. */}
         <Menu
           label={`${STRINGS.sidebar.more} ${p.name}`}
           items={[
             { label: STRINGS.sidebar.open, onSelect: () => router.push(projectHref(p)) },
             { label: STRINGS.editor.menu.rename, onSelect: onRename },
-            { label: starred ? S.unfavourite : S.favourite, onSelect: onStar },
           ]}
           triggerClassName="flex h-[22px] w-[18px] shrink-0 items-center justify-center rounded-[var(--radius-xs)] text-[var(--home-ink-3)] hover:text-[var(--home-ink)]"
           trigger={<Icon name="more-vertical" size={12} />}
@@ -370,7 +369,18 @@ function ProjectList({
               </span>
             </span>
             <span className="truncate text-[16px] font-medium text-[var(--home-ink)]">{p.name}</span>
-            {stars.has(p.id) && <Icon name="star" size={23.57} label={S.favourite} className="shrink-0 text-[var(--sage-300)]" />}
+            <button
+              aria-label={S.favourite}
+              aria-pressed={stars.has(p.id)}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onStar(p.id);
+              }}
+              className={`shrink-0 ${stars.has(p.id) ? "text-[var(--sage-300)]" : "text-[var(--home-star-off)]"}`}
+            >
+              <Icon name="star" size={23.57} />
+            </button>
           </span>
           <span role="cell" className={`flex items-center ${COLS.joint}`}>
             <span className="rounded-[var(--radius-full)] bg-[var(--home-tag-bg)] px-[10px] py-[4px] text-[13px] font-medium text-[var(--home-tag-ink)]">{card.tag}</span>
@@ -389,7 +399,6 @@ function ProjectList({
               items={[
                 { label: STRINGS.sidebar.open, onSelect: () => onOpen(p) },
                 { label: STRINGS.editor.menu.rename, onSelect: () => onRename(p) },
-                { label: stars.has(p.id) ? S.unfavourite : S.favourite, onSelect: () => onStar(p.id) },
               ]}
               triggerClassName="flex size-[28px] items-center justify-center rounded-[var(--radius-xs)] text-[var(--home-ink-3)] hover:text-[var(--home-ink)]"
               trigger={<Icon name="more-vertical" size={13.5} />}
