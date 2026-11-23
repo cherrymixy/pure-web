@@ -95,7 +95,7 @@ function TypeCard({ type, selected, onSelect }: { type: RobotTypeInfo; selected:
       onClick={onSelect}
       title={type.selectable ? undefined : S.onlyFixed}
       data-testid={`type-card-${type.id}`}
-      className={`group relative flex flex-col overflow-hidden rounded-[20px] border bg-[var(--neutral-0)] p-[10px] text-left transition-[border-color,box-shadow] disabled:cursor-default ${
+      className={`group relative flex flex-col overflow-hidden rounded-[20px] border bg-[var(--neutral-0)] p-[10px] text-left transition-[border-color,box-shadow,opacity] disabled:cursor-default disabled:opacity-40 ${
         selected ? "border-[var(--home-ink)] shadow-[0_0_0_1px_var(--home-ink)]" : "border-[var(--home-line)] enabled:hover:border-[var(--home-ink-3)]"
       }`}
     >
