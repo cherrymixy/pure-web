@@ -6,9 +6,9 @@ const pose = (v: Record<string, number>) => Object.entries(v).map(([id, actual])
 describe("real robot link", () => {
   it("maps sim joints to motors and never leaves the confirmed ranges", () => {
     const a = motorAngles(pose({ base_yaw: 10, shoulder_pitch: -28, elbow_pitch: 10, head_pan: -20, head_tilt: 5 }));
-    expect(a).toEqual({ m4: 10, m3: 5, m2: 40, m1: -20 });
+    expect(a).toEqual({ m4: 10, m3: -10, m2: -10, m1: 20 }); // 1:1 degrees; M2 (+ up) and M1 (+ right) flip the sim
     const far = motorAngles(pose({ base_yaw: 170, shoulder_pitch: 90, elbow_pitch: -135, head_pan: -90 }));
-    expect(far).toEqual({ m4: 45, m3: -60, m2: 80, m1: -45 });
+    expect(far).toEqual({ m4: 45, m3: 35, m2: 20, m1: 45 }); // measured safe ranges (from each motor's zero)
   });
 
   it("builds the pose request", () => {
@@ -69,17 +69,17 @@ describe("showcase motions", () => {
       }
       if (m.id === "sad") {
         expect(m.face.keys?.[1]).toEqual({ t: 4.03, preset: "blink" }); // sad face once (the sob) first
-        expect(Math.max(...paths.m1.map(([a]) => a))).toBe(18); // then glances left…
-        expect(Math.min(...paths.m1.map(([a]) => a))).toBeLessThan(0); // …and right
+        expect(Math.max(...paths.m1.map(([a]) => a))).toBe(18); // then glances around: right (M1 + = right)…
+        expect(Math.min(...paths.m1.map(([a]) => a))).toBeLessThan(0); // …and left
       }
       if (m.id === "curious") {
         expect(Math.max(...clip.tracks.shoulder_pitch.map((k) => k.value))).toBe(16); // leans toward the viewer
-        paths.m1.forEach(([a], i) => expect(Math.sign(a) * Math.sign(paths.m4[i][0])).toBeLessThanOrEqual(0)); // M1 against M4
+        paths.m1.forEach(([a], i) => expect(Math.sign(a) * Math.sign(paths.m4[i][0])).toBeGreaterThanOrEqual(0)); // M1 (+ right) against M4 (+ left): same sign
       }
       if (m.id === "happy") {
         // exact keyframes: M4 turns exactly ±35°, and the robot code has one key per keyframe (no sampled overshoot)
         expect(paths.m4.map(([a]) => a)).toEqual([0, 0, 35, 0, -35, 0, 35, 0, -35, 0, 0]);
-        expect(paths.m1.map(([a]) => a)).toEqual([0, 0, -25, 0, 25, 0, -25, 0, 25, 0, 0]); // head turns against the base
+        expect(paths.m1.map(([a]) => a)).toEqual([0, 0, 25, 0, -25, 0, 25, 0, -25, 0, 0]); // head turns against the base (M1 + = right)
         expect(paths.m4.map(([, ms]) => ms)).toEqual([0, 500, 500, 500, 500, 500, 500, 500, 500, 600, 800]);
       }
     }

@@ -14,13 +14,14 @@
   3. PURE 웹: 노트북을 같은 와이파이에 연결 → npm run dev → 에디터 "Test on robot" → PURE (real robot)
      웹은 /pose?m1=..&m2=..&m3=..&m4=.. 를 초당 ~10번 보냄 (CORS 허용)
 
-  [각도 기준] 모든 모터 공통: 0도 = 서보 중앙
+  [각도 기준] 웹·슬라이더·동작 경로의 각도는 모두 "0점 기준" (0 = 로봇이 똑바로 선 자세).
+            모터로 나갈 때만 0점(Mx_ZERO)을 더함. 0점은 실측값 (2026-11-24).
 
-  [모터 / 안전 범위] (이 범위 밖으로는 어떤 경우에도 명령을 보내지 않음)
-  1번 M4 : PWM,     GPIO 26                    -45 ~ +45
-  2번 M3 : PWM,     GPIO 25                    -60 ~ +5
-  3번 M2 : ST3215,  GPIO 17 → 1kΩ → DATA       +40 ~ +80
-  4번 M1 : HS-5085MG, RP2350 GPIO12 (목 좌우)  -45 ~ +45
+  [모터 / 0점 / 안전 범위 / 방향] (안전 범위 밖으로는 어떤 경우에도 명령을 보내지 않음)
+  1번 M4 : PWM,     GPIO 26                    0점   0   -45 ~ +45   + 왼쪽 / - 오른쪽
+  2번 M3 : PWM,     GPIO 25                    0점 -60   -10 ~ +35   + 앞   / - 뒤
+  3번 M2 : ST3215,  GPIO 17 → 1kΩ → DATA       0점  60   -20 ~ +20   + 위   / - 아래
+  4번 M1 : HS-5085MG, RP2350 GPIO12 (목 좌우)  0점 -50   -45 ~ +45   + 오른쪽 / - 왼쪽
 
   [RP2350 연결] (RP2350 펌웨어: video_player_m1.uf2)
   ESP32 GPIO 32 (TX) → RP2350 GPIO1 (UART0 RX)
@@ -67,26 +68,34 @@ const int LINK_TX = 32;
 const int LINK_RX = 33;
 const long LINK_BAUD = 115200;
 
-// ===== 안전 범위 (절대 넘지 않음) =====
-const float M4_MIN = -45, M4_MAX = 45;
-const float M3_MIN = -60, M3_MAX = 5;
-const float M2_MIN = 40,  M2_MAX = 80;
-const float M1_MIN = -45, M1_MAX = 45;
+// ===== 0점: 모터 각도 = 0점 + 아래 모든 각도 (실측, 2026-11-24) =====
+const float M4_ZERO = 0;
+const float M3_ZERO = -60;
+const float M2_ZERO = 60;
+const float M1_ZERO = -50;
 
-// ===== 시작 각도 (반드시 안전 범위 안) =====
+// ===== 안전 범위, 0점 기준 (절대 넘지 않음) =====
+const float M4_MIN = -45, M4_MAX = 45;   // + 왼쪽
+const float M3_MIN = -10, M3_MAX = 35;   // + 앞
+const float M2_MIN = -20, M2_MAX = 20;   // + 위
+const float M1_MIN = -45, M1_MAX = 45;   // + 오른쪽
+
+// ===== 시작 각도, 0점 기준 (반드시 안전 범위 안) =====
 const float M4_HOME = 0;
 const float M3_HOME = 0;
-const float M2_HOME = 45;
+const float M2_HOME = 0;
 const float M1_HOME = 0;
 
 // ===== 동작 경로: {도착 각도, 이전 지점에서 걸리는 시간 ms} =====
 struct Key { float angle; unsigned long ms; };
 
 const Key PATH_M4[] = { {0, 0}, {45, 1500}, {-45, 3000}, {0, 1500} };
-const Key PATH_M3[] = { {0, 0}, {-60, 3000}, {0, 3000} };
-const Key PATH_M2[] = { {45, 0}, {80, 2000}, {45, 2000} };
+// M3: 앞으로 숙였다가 → 살짝 뒤로 → 0점
+const Key PATH_M3[] = { {0, 0}, {35, 3000}, {-10, 3000}, {0, 1500} };
+// M2: 위 → 아래 → 0점
+const Key PATH_M2[] = { {0, 0}, {20, 2000}, {-20, 3000}, {0, 2000} };
 // M1 목: 왼쪽 보고 잠깐 멈춤 → 오른쪽 보고 잠깐 멈춤 → 정면
-const Key PATH_M1[] = { {0, 0}, {40, 1500}, {40, 800}, {-40, 3000}, {-40, 800}, {0, 1500} };
+const Key PATH_M1[] = { {0, 0}, {-40, 1500}, {-40, 800}, {40, 3000}, {40, 800}, {0, 1500} };
 
 #define LEN(x) (sizeof(x) / sizeof(x[0]))
 
@@ -101,8 +110,9 @@ struct Motor {
   int busId;          // BUS
   int lastPos;        // BUS: 마지막으로 보낸 위치값
   float lastSent;     // REMOTE: 마지막으로 보낸 각도
-  float minA, maxA;
-  float home;
+  float minA, maxA;   // 0점 기준
+  float home;         // 0점 기준
+  float zero;         // 모터 각도 = zero + 0점 기준 각도
   const Key* path;
   int n;
   Key single[1];
@@ -162,9 +172,11 @@ void flushBus() {
 }
 
 // 모든 출력은 여기를 거침 → 안전 범위 밖으로는 절대 명령이 나가지 않음
+// rel = 0점 기준 각도 (cur 에 저장), 모터로는 0점을 더한 각도가 나감
 void writeSafe(Motor& m, float rel) {
   rel = constrain(rel, m.minA, m.maxA);
   m.cur = rel;
+  rel += m.zero;
   switch (m.kind) {
     case KIND_PWM: {
       int us = MIN_US + (rel + 90.0) * (MAX_US - MIN_US) / 180.0;
@@ -426,15 +438,16 @@ void serviceLink(unsigned long now) {
   if (now - lastPing >= 1000) {
     Serial1.print("PING\n");
     // RP2350이 재부팅됐거나 명령을 놓쳤을 때를 대비해 현재 각도를 다시 보냄
-    Serial1.printf("%s %.1f\n", m1.key, m1.cur);
+    Serial1.printf("%s %.1f\n", m1.key, m1.cur + m1.zero);
     lastPing = now;
   }
 }
 
 // ===== 초기화 =====
 void initCommon(Motor& m, const char* name, const char* key, Kind kind,
-                float minA, float maxA, float home) {
+                float minA, float maxA, float home, float zero) {
   m.name = name;
+  m.zero = zero;
   m.key = key;
   m.kind = kind;
   m.minA = minA;
@@ -445,19 +458,19 @@ void initCommon(Motor& m, const char* name, const char* key, Kind kind,
 }
 
 void initPwmMotor(Motor& m, const char* name, const char* key, int pin,
-                  float minA, float maxA, float home) {
-  initCommon(m, name, key, KIND_PWM, minA, maxA, home);
+                  float minA, float maxA, float home, float zero) {
+  initCommon(m, name, key, KIND_PWM, minA, maxA, home, zero);
   m.servo.setPeriodHertz(50);
   m.servo.attach(pin, MIN_US, MAX_US);
   writeSafe(m, m.home);
 }
 
 void initBusMotor(Motor& m, const char* name, const char* key, int id,
-                  float minA, float maxA, float home) {
-  initCommon(m, name, key, KIND_BUS, minA, maxA, home);
+                  float minA, float maxA, float home, float zero) {
+  initCommon(m, name, key, KIND_BUS, minA, maxA, home, zero);
   m.busId = id;
   // 저항 방식은 현재 위치를 읽을 수 없으므로 아주 천천히 시작 각도로 이동
-  m.lastPos = angleToPos(m.home);
+  m.lastPos = angleToPos(m.home + m.zero);
 #if USE_M2
   bus.WritePosEx(id, m.lastPos, 300, 20);
   flushBus();
@@ -465,8 +478,8 @@ void initBusMotor(Motor& m, const char* name, const char* key, int id,
 }
 
 void initRemoteMotor(Motor& m, const char* name, const char* key,
-                     float minA, float maxA, float home) {
-  initCommon(m, name, key, KIND_REMOTE, minA, maxA, home);
+                     float minA, float maxA, float home, float zero) {
+  initCommon(m, name, key, KIND_REMOTE, minA, maxA, home, zero);
   m.lastSent = -999;
   writeSafe(m, m.home);
 }
@@ -485,10 +498,10 @@ void setup() {
 
   ESP32PWM::allocateTimer(0);
   ESP32PWM::allocateTimer(1);
-  initPwmMotor(m4, "1번 M4", "m4", PIN_M4, M4_MIN, M4_MAX, M4_HOME);
-  initPwmMotor(m3, "2번 M3", "m3", PIN_M3, M3_MIN, M3_MAX, M3_HOME);
-  initBusMotor(m2, "3번 M2", "m2", M2_ID, M2_MIN, M2_MAX, M2_HOME);
-  initRemoteMotor(m1, "4번 M1", "m1", M1_MIN, M1_MAX, M1_HOME);
+  initPwmMotor(m4, "1번 M4", "m4", PIN_M4, M4_MIN, M4_MAX, M4_HOME, M4_ZERO);
+  initPwmMotor(m3, "2번 M3", "m3", PIN_M3, M3_MIN, M3_MAX, M3_HOME, M3_ZERO);
+  initBusMotor(m2, "3번 M2", "m2", M2_ID, M2_MIN, M2_MAX, M2_HOME, M2_ZERO);
+  initRemoteMotor(m1, "4번 M1", "m1", M1_MIN, M1_MAX, M1_HOME, M1_ZERO);
   Serial.println("초기화 완료");
 
   WiFi.softAP(AP_SSID, AP_PASS);
