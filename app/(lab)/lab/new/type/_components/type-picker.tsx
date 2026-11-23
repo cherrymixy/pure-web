@@ -85,6 +85,8 @@ function CardArt({ type }: { type: RobotType }) {
 
 function TypeCard({ type, selected, onSelect }: { type: RobotTypeInfo; selected: boolean; onSelect: () => void }) {
   const copy = S.cards[type.id as keyof typeof S.cards];
+  // Lab card style (user review: match the Lab home / import): white, thin home-line border, canvas picture, Lab type scale;
+  // selected = ink outline + check instead of the dark sage fill.
   return (
     <button
       type="button"
@@ -93,45 +95,37 @@ function TypeCard({ type, selected, onSelect }: { type: RobotTypeInfo; selected:
       onClick={onSelect}
       title={type.selectable ? undefined : S.onlyFixed}
       data-testid={`type-card-${type.id}`}
-      className={`relative flex flex-col overflow-hidden rounded-[var(--radius-xl)] text-left transition-shadow disabled:cursor-default ${
-        selected ? "bg-[var(--sage-800)]" : "bg-[var(--bg-surface)] hover:shadow-[var(--pure-shadow-card)]"
+      className={`group relative flex flex-col overflow-hidden rounded-[24px] border bg-[var(--neutral-0)] p-[var(--space-12)] text-left transition-[border-color,box-shadow] disabled:cursor-default ${
+        selected ? "border-[var(--home-ink)] shadow-[0_0_0_1px_var(--home-ink)]" : "border-[var(--home-line)] enabled:hover:border-[var(--home-ink-3)]"
       }`}
     >
-      <div className="relative aspect-square w-full shrink-0 overflow-hidden bg-[var(--sage-50)]">
+      <div className="relative aspect-square w-full shrink-0 overflow-hidden rounded-[16px] bg-[var(--home-canvas)]">
         <CardArt type={type.id} />
       </div>
-      <div className="flex flex-col pb-[23.5px] pl-[28.5px] pr-[var(--space-16)] pt-[23px]">
-        <span className={`whitespace-nowrap text-[28px] font-semibold leading-[36px] ${selected ? "text-[var(--text-on-inverse)]" : "text-[var(--sage-800)]"}`}>
-          {type.name}
-        </span>
-        <span className={`whitespace-nowrap text-[16px] leading-[20px] ${selected ? "text-[var(--text-tertiary)]" : "text-[var(--sage-500)]"}`}>
-          {copy?.summary ?? type.description}
-        </span>
-        <span className="mt-[21px] text-[14px] leading-[18px] text-[var(--text-tertiary)]">{S.jointsLabel}</span>
-        <span className={`mt-[2.4px] whitespace-nowrap text-[18px] font-medium leading-[22px] ${selected ? "text-[var(--text-on-inverse)]" : "text-[var(--sage-800)]"}`}>
-          {copy?.joints ?? type.dof}
-        </span>
-        <span className="mt-[20.85px] text-[14px] leading-[18px] text-[var(--text-tertiary)]">{S.channelsLabel}</span>
-        <span className="mt-[6.5px] flex flex-wrap gap-[var(--space-8)]">
-          {CHANNELS.filter((c) => type.channels.includes(c)).map((c) => (
-            <span
-              key={c}
-              className={`rounded-[var(--radius-sm)] px-[var(--space-12)] py-[var(--space-8)] text-[14px] leading-[18px] ${
-                selected ? "bg-[var(--neutral-700)] text-[var(--text-on-inverse)]" : "bg-[var(--bg-canvas)] text-[var(--text-secondary)]"
-              }`}
-            >
-              {CHANNEL_LABEL[c]}
-            </span>
-          ))}
-        </span>
+      <div className="flex flex-col gap-[var(--space-16)] px-[var(--space-8)] pb-[var(--space-8)] pt-[var(--space-20)]">
+        <div className="flex flex-col gap-[2px]">
+          <span className="whitespace-nowrap text-[22px] font-semibold text-[var(--home-ink)]">{type.name}</span>
+          <span className="whitespace-nowrap text-[13px] text-[var(--home-ink-3)]">{copy?.summary ?? type.description}</span>
+        </div>
+        <div className="flex flex-col gap-[2px] border-t border-dashed border-[var(--home-line)] pt-[var(--space-12)]">
+          <span className="text-[12px] font-medium text-[var(--home-ink-3)]">{S.jointsLabel}</span>
+          <span className="whitespace-nowrap text-[15px] font-medium text-[var(--home-ink)]">{copy?.joints ?? type.dof}</span>
+        </div>
+        <div className="flex flex-col gap-[6px]">
+          <span className="text-[12px] font-medium text-[var(--home-ink-3)]">{S.channelsLabel}</span>
+          <span className="flex flex-wrap gap-[6px]">
+            {CHANNELS.filter((c) => type.channels.includes(c)).map((c) => (
+              <span key={c} className="rounded-[var(--radius-full)] bg-[var(--home-tag-bg)] px-[10px] py-[4px] text-[13px] font-medium text-[var(--home-tag-ink)]">
+                {CHANNEL_LABEL[c]}
+              </span>
+            ))}
+          </span>
+        </div>
       </div>
       {selected && (
-        <>
-          <span className="pointer-events-none absolute inset-0 rounded-[var(--radius-xl)] border-[3px] border-[var(--sage-800)]" />
-          <span className="absolute right-[24.5px] top-[20.4px] flex size-[41px] items-center justify-center rounded-[var(--radius-full)] bg-[var(--sage-800)]">
-            <Icon name="check-badge" size={20.4} className="text-[var(--icon-on-inverse)]" />
-          </span>
-        </>
+        <span className="absolute right-[var(--space-24)] top-[var(--space-24)] flex size-[36px] items-center justify-center rounded-[var(--radius-full)] bg-[var(--home-ink)]">
+          <Icon name="check-badge" size={18} className="text-[var(--neutral-0)]" />
+        </span>
       )}
     </button>
   );
@@ -161,49 +155,53 @@ export function TypePicker({ initialSelected = false }: { initialSelected?: bool
     }
   }
 
+  // Lab UI (user review: same mood as the Lab home and the import sheet): Lab canvas + glow, glass back link, 60 title,
+  // Lab cards, footer with a quiet note, a text link and the Lab dark button.
   return (
-    <div className="flex min-h-[var(--app-vh)] flex-col px-[48px] pt-[var(--space-40)]">
-      <Link
-        href="/lab"
-        className="flex w-fit items-center gap-[var(--space-12)] h-[48px] rounded-[var(--radius-full)] border-2 border-[var(--border-default)] bg-[var(--bg-surface)] px-[var(--space-16)] text-[16px] leading-[20px] font-medium text-[var(--text-link)] hover:bg-[var(--neutral-50)]"
-      >
-        <span aria-hidden>←</span>
-        <span>{STRINGS.sidebar.lab}</span>
-      </Link>
-
-      {/* Figma 1714 = 1920 − 2 × 103: the column keeps that inset on both sides and the five cards share the width. */}
-      <div className="mx-[55px] flex flex-1 flex-col">
-      <header className="mt-[21px] flex flex-col gap-[12px]">
-        <h1 className="text-[52px] font-semibold leading-[66px] text-[var(--sage-800)]">{S.title}</h1>
-        <p className="text-[22px] leading-[28px] text-[var(--sage-500)]">{S.body}</p>
-      </header>
-
-      <div className="mt-[72px] grid grid-cols-5 gap-[20.4px]">
-        {ORDERED.map((t) => (
-          <TypeCard key={t.id} type={t} selected={t.selectable && selected} onSelect={() => t.selectable && setSelected(!selected)} />
-        ))}
-      </div>
-
-      <div className="mt-auto flex items-center justify-between pb-[65px] pt-[var(--space-40)]">
-        <p className="flex items-center gap-[var(--space-8)] text-[18px] leading-[22px] text-[var(--sage-500)]">
-          <Icon name="info-small" size={20} className="text-[var(--sage-500)]" />
-          {S.note}
-        </p>
-        <div className="flex items-center gap-[var(--space-32)]">
-          <Link href="/lab/new/import" className="text-[18px] leading-[22px] text-[var(--text-link)] underline">
-            {S.importInstead}
-          </Link>
-          <button
-            type="button"
-            data-tour="type-continue"
-            disabled={!selected || busy}
-            onClick={start}
-            className="flex h-[56px] items-center gap-[var(--space-12)] rounded-[var(--radius-full)] bg-[var(--neutral-800)] px-[var(--space-24)] py-[var(--space-12)] text-[20px] font-medium leading-[26px] text-[var(--neutral-100)] hover:bg-[var(--neutral-700)] disabled:cursor-not-allowed disabled:bg-[var(--bg-disabled)] disabled:text-[var(--text-disabled)]"
+    <div data-fit-frame className="relative flex min-h-[var(--app-vh)] flex-col overflow-hidden bg-[var(--home-canvas)] px-[var(--space-40)] pb-[var(--space-40)] pt-[42px] leading-normal">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/figma/lab/home/glow.svg" alt="" aria-hidden className="pointer-events-none absolute left-[26px] top-[-360px] h-[680px] w-[1360px] max-w-none" />
+      <div className="relative flex flex-1 flex-col gap-[var(--space-40)]">
+        <div className="flex flex-col gap-[var(--space-20)]">
+          <Link
+            href="/lab"
+            className="flex h-[44px] w-fit items-center gap-[var(--space-8)] rounded-[var(--radius-sm)] bg-[var(--home-glass)] px-[var(--space-20)] text-[15px] font-medium text-[var(--home-ink)] hover:bg-[var(--neutral-0)]"
           >
-            {S.continue}
-          </button>
+            <span aria-hidden>←</span>
+            {STRINGS.sidebar.lab}
+          </Link>
+          <header className="flex flex-col gap-[var(--space-8)]">
+            <h1 className="text-[60px] font-semibold leading-[1.15] text-[var(--home-ink)]">{S.title}</h1>
+            <p className="text-[17px] text-[var(--home-ink-2)]">{S.body}</p>
+          </header>
         </div>
-      </div>
+
+        <div className="grid grid-cols-5 gap-[16.483px]">
+          {ORDERED.map((t) => (
+            <TypeCard key={t.id} type={t} selected={t.selectable && selected} onSelect={() => t.selectable && setSelected(!selected)} />
+          ))}
+        </div>
+
+        <div className="mt-auto flex items-center justify-between">
+          <p className="flex items-center gap-[var(--space-8)] text-[15px] text-[var(--home-ink-3)]">
+            <Icon name="info-small" size={18} />
+            {S.note}
+          </p>
+          <div className="flex items-center gap-[var(--space-24)]">
+            <Link href="/lab/new/import" className="text-[15px] font-medium text-[var(--home-ink-2)] underline underline-offset-4 hover:text-[var(--home-ink)]">
+              {S.importInstead}
+            </Link>
+            <button
+              type="button"
+              data-tour="type-continue"
+              disabled={!selected || busy}
+              onClick={start}
+              className="flex h-[44px] items-center rounded-[var(--radius-sm)] bg-[var(--home-ink)] px-[22px] text-[15px] font-medium text-[var(--neutral-0)] hover:bg-[var(--neutral-800)] disabled:cursor-not-allowed disabled:border disabled:border-[var(--home-line)] disabled:bg-[var(--neutral-0)] disabled:text-[var(--home-ink-3)]"
+            >
+              {S.continue}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
