@@ -32,9 +32,15 @@ function upload(file: File, projectId: string, onProgress: (loaded: number) => v
     xhr.open("PUT", `/api/upload?projectId=${encodeURIComponent(projectId)}&kind=model&name=${encodeURIComponent(file.name)}`);
     xhr.upload.onprogress = (e) => onProgress(e.loaded);
     xhr.onload = () => {
-      const json = JSON.parse(xhr.responseText || "null");
-      if (xhr.status >= 200 && xhr.status < 300) resolve(json as Upload);
-      else reject(Object.assign(new Error(json?.error?.message ?? "Upload failed"), { code: json?.error?.code }));
+      // The host can answer with a plain-text page (Vercel 413 over 4.5 MB): parse defensively so the promise always settles.
+      let json: { error?: { message?: string; code?: string } } | Upload | null = null;
+      try {
+        json = JSON.parse(xhr.responseText || "null");
+      } catch {}
+      if (xhr.status >= 200 && xhr.status < 300 && json) return resolve(json as Upload);
+      if (xhr.status === 413) return reject(Object.assign(new Error("Upload body limit"), { code: "BODY_LIMIT" }));
+      const err = (json as { error?: { message?: string; code?: string } } | null)?.error;
+      reject(Object.assign(new Error(err?.message ?? `Upload failed (${xhr.status})`), { code: err?.code }));
     };
     xhr.onerror = () => reject(new Error("Upload failed"));
     xhr.onabort = () => reject(Object.assign(new Error("canceled"), { code: "CANCELED" }));
@@ -79,7 +85,15 @@ export function ImportModel() {
         projectId = created.current = project.id;
       }
       setPhase({ kind: "uploading", name: file.name, loaded: 0, total: file.size });
-      const saved = await upload(file, projectId, (loaded) => setPhase((p) => (p.kind === "uploading" ? { ...p, loaded } : p)), xhr);
+      // Analysis only uses the browser reading + file name/size; the stored copy is a keepsake. The deployed host caps request
+      // bodies at 4.5 MB (413), so a larger model continues without a server copy instead of failing.
+      // shortcut: no server copy of big models on the deploy; switch to direct Blob uploads if anything ever needs the bytes.
+      const saved = await upload(file, projectId, (loaded) => setPhase((p) => (p.kind === "uploading" ? { ...p, loaded } : p)), xhr).catch(
+        (err: { code?: string }) => {
+          if (err.code === "BODY_LIMIT") return { name: file.name, size: file.size, path: "" };
+          throw err;
+        },
+      );
       xhr.current = null;
       await api(`/api/projects/${projectId}/analyze`, {
         method: "POST",
