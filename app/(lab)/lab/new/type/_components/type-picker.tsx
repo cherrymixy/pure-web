@@ -85,7 +85,7 @@ function CardArt({ type }: { type: RobotType }) {
 
 function TypeCard({ type, selected, onSelect }: { type: RobotTypeInfo; selected: boolean; onSelect: () => void }) {
   const copy = S.cards[type.id as keyof typeof S.cards];
-  // Compact Lab card (five across the 960 content width of the import-style sheet): canvas picture, Lab type scale;
+  // Lab card (five across the 1280 content width of the sheet): canvas picture, Lab type scale;
   // selected = ink outline + check.
   return (
     <button
@@ -95,27 +95,27 @@ function TypeCard({ type, selected, onSelect }: { type: RobotTypeInfo; selected:
       onClick={onSelect}
       title={type.selectable ? undefined : S.onlyFixed}
       data-testid={`type-card-${type.id}`}
-      className={`group relative flex flex-col overflow-hidden rounded-[18px] border bg-[var(--neutral-0)] p-[var(--space-8)] text-left transition-[border-color,box-shadow] disabled:cursor-default ${
+      className={`group relative flex flex-col overflow-hidden rounded-[20px] border bg-[var(--neutral-0)] p-[10px] text-left transition-[border-color,box-shadow] disabled:cursor-default ${
         selected ? "border-[var(--home-ink)] shadow-[0_0_0_1px_var(--home-ink)]" : "border-[var(--home-line)] enabled:hover:border-[var(--home-ink-3)]"
       }`}
     >
-      <div className="relative aspect-square w-full shrink-0 overflow-hidden rounded-[12px] bg-[var(--home-canvas)]">
+      <div className="relative aspect-square w-full shrink-0 overflow-hidden rounded-[14px] bg-[var(--home-canvas)]">
         <CardArt type={type.id} />
       </div>
-      <div className="flex flex-1 flex-col gap-[var(--space-12)] px-[6px] pb-[6px] pt-[var(--space-12)]">
+      <div className="flex flex-1 flex-col gap-[var(--space-16)] px-[var(--space-8)] pb-[var(--space-8)] pt-[var(--space-16)]">
         <div className="flex flex-col gap-[2px]">
-          <span className="whitespace-nowrap text-[15px] font-semibold text-[var(--home-ink)]">{type.name}</span>
-          <span className="text-[12px] leading-[1.35] text-[var(--home-ink-3)]">{copy?.summary ?? type.description}</span>
+          <span className="whitespace-nowrap text-[19px] font-semibold text-[var(--home-ink)]">{type.name}</span>
+          <span className="min-h-[2.8em] text-[14px] leading-[1.4] text-[var(--home-ink-3)]">{copy?.summary ?? type.description}</span>
         </div>
-        <div className="flex flex-col gap-[2px] border-t border-dashed border-[var(--home-line)] pt-[var(--space-8)]">
-          <span className="text-[11px] font-medium text-[var(--home-ink-3)]">{S.jointsLabel}</span>
-          <span className="whitespace-nowrap text-[13px] font-medium text-[var(--home-ink)]">{copy?.joints ?? type.dof}</span>
+        <div className="flex flex-col gap-[2px] border-t border-dashed border-[var(--home-line)] pt-[var(--space-12)]">
+          <span className="text-[12px] font-medium text-[var(--home-ink-3)]">{S.jointsLabel}</span>
+          <span className="whitespace-nowrap text-[16px] font-medium text-[var(--home-ink)]">{copy?.joints ?? type.dof}</span>
         </div>
-        <div className="flex flex-col gap-[4px]">
-          <span className="text-[11px] font-medium text-[var(--home-ink-3)]">{S.channelsLabel}</span>
-          <span className="flex flex-wrap gap-[3px]">
+        <div className="flex flex-col gap-[6px]">
+          <span className="text-[12px] font-medium text-[var(--home-ink-3)]">{S.channelsLabel}</span>
+          <span className="flex flex-wrap gap-[6px]">
             {CHANNELS.filter((c) => type.channels.includes(c)).map((c) => (
-              <span key={c} className="rounded-[var(--radius-full)] bg-[var(--home-tag-bg)] px-[6px] py-[2px] text-[11px] font-medium text-[var(--home-tag-ink)]">
+              <span key={c} className="rounded-[var(--radius-full)] bg-[var(--home-tag-bg)] px-[10px] py-[4px] text-[13px] font-medium text-[var(--home-tag-ink)]">
                 {CHANNEL_LABEL[c]}
               </span>
             ))}
@@ -123,8 +123,8 @@ function TypeCard({ type, selected, onSelect }: { type: RobotTypeInfo; selected:
         </div>
       </div>
       {selected && (
-        <span className="absolute right-[var(--space-16)] top-[var(--space-16)] flex size-[28px] items-center justify-center rounded-[var(--radius-full)] bg-[var(--home-ink)]">
-          <Icon name="check-badge" size={14} className="text-[var(--neutral-0)]" />
+        <span className="absolute right-[var(--space-20)] top-[var(--space-20)] flex size-[32px] items-center justify-center rounded-[var(--radius-full)] bg-[var(--home-ink)]">
+          <Icon name="check-badge" size={16} className="text-[var(--neutral-0)]" />
         </span>
       )}
     </button>
@@ -155,7 +155,7 @@ export function TypePicker({ initialSelected = false }: { initialSelected?: bool
     }
   }
 
-  // Same frame as the import sheet (user review): Lab canvas + glow, glass back link top-left, one 1040 white sheet centred
+  // Import-sheet frame, roomier (user review): Lab canvas + glow, glass back link top-left, one 1360 white sheet centred
   // with a 44 centred title, five compact cards, and a footer row (note · import link · Continue) under a divider.
   return (
     <div data-fit-frame className="relative flex h-[var(--app-vh)] min-h-[760px] flex-col items-center justify-center overflow-hidden bg-[var(--home-canvas)] p-[var(--space-40)] leading-normal">
@@ -169,13 +169,13 @@ export function TypePicker({ initialSelected = false }: { initialSelected?: bool
         {STRINGS.sidebar.lab}
       </Link>
 
-      <div className="relative flex w-[1040px] flex-col gap-[var(--space-28)] rounded-[32px] border border-[var(--home-line)] bg-[var(--neutral-0)] p-[var(--space-40)] shadow-[0_24px_48px_var(--effect-shadow)]">
+      <div className="relative flex w-[1360px] flex-col gap-[var(--space-28)] rounded-[32px] border border-[var(--home-line)] bg-[var(--neutral-0)] p-[var(--space-40)] shadow-[0_24px_48px_var(--effect-shadow)]">
         <header className="mb-[var(--space-16)] flex flex-col items-center gap-[var(--space-8)] text-center">
           <h1 className="text-[44px] font-semibold leading-[1.15] text-[var(--home-ink)]">{S.title}</h1>
           <p className="text-[17px] text-[var(--home-ink-2)]">{S.body}</p>
         </header>
 
-        <div className="grid grid-cols-5 gap-[var(--space-12)]">
+        <div className="grid grid-cols-5 gap-[var(--space-16)]">
           {ORDERED.map((t) => (
             <TypeCard key={t.id} type={t} selected={t.selectable && selected} onSelect={() => t.selectable && setSelected(!selected)} />
           ))}
@@ -185,7 +185,7 @@ export function TypePicker({ initialSelected = false }: { initialSelected?: bool
           <span className="flex size-[36px] shrink-0 items-center justify-center rounded-[var(--radius-full)] bg-[var(--home-canvas)] text-[var(--home-ink-2)]">
             <Icon name="info" size={18} />
           </span>
-          <p className="min-w-0 flex-1 text-[13px] text-[var(--home-ink-3)]">{S.note}</p>
+          <p className="min-w-0 flex-1 text-[15px] text-[var(--home-ink-3)]">{S.note}</p>
           <Link href="/lab/new/import" className="shrink-0 text-[15px] font-medium text-[var(--home-ink-2)] underline underline-offset-4 hover:text-[var(--home-ink)]">
             {S.importInstead}
           </Link>

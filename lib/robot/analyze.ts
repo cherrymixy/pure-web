@@ -1,4 +1,5 @@
 import { ROBOT_TYPES } from "@/data/robot-types";
+import { PURE_DESK_STRUCTURE } from "@/data/pure-desk";
 import type { Channel, RobotType, Structure } from "@/lib/models";
 
 /** What the browser reads from a 3D file (lib/robot/read-model.ts). */
@@ -38,9 +39,12 @@ function jointId(name: string, i: number, used: Set<string>): string {
   return id;
 }
 
-/** Bones → structure. Throws NO_RIG (E2) when the model has no skeleton. */
+/** Bones → structure. A model without a skeleton (every STL, unrigged OBJ/GLB) gets PURE Desk's joint set (user review:
+ *  the exhibition flow must always continue) — the joints the sim and the real robot use, so motions map cleanly. */
 export function structureFromReading(reading: ModelReading, file: Structure["file"]): Structure {
-  if (reading.bones.length === 0) throw Object.assign(new Error("No rig found"), { code: "NO_RIG" });
+  if (reading.bones.length === 0) {
+    return { ...PURE_DESK_STRUCTURE, source: "import", file, channels: [...PURE_DESK_STRUCTURE.channels], joints: PURE_DESK_STRUCTURE.joints.map((j) => ({ ...j })) };
+  }
   const type = estimateType(reading.bones);
   const used = new Set<string>();
   const channels: Channel[] = ROBOT_TYPES.find((t) => t.id === type)?.channels ?? ["motion"];

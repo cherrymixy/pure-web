@@ -13,10 +13,12 @@ describe("model analysis", () => {
     expect(s.joints.every((j) => j.rigMin === -IMPORT_RIG_RANGE && j.max === IMPORT_RIG_RANGE)).toBe(true);
   });
 
-  it("no bones → NO_RIG (E2)", () => {
-    expect(() => structureFromReading({ format: "stl", meshes: 1, vertices: 30, bones: [] }, file)).toThrow(
-      expect.objectContaining({ code: "NO_RIG" }),
-    );
+  it("no bones → PURE Desk's default joints (the import keeps its file and source)", () => {
+    const st = structureFromReading({ format: "stl", meshes: 1, vertices: 30, bones: [] }, file);
+    expect(st.type).toBe("joint-fixed");
+    expect(st.source).toBe("import");
+    expect(st.file).toEqual(file);
+    expect(st.joints.map((j) => j.id)).toEqual(["base_yaw", "shoulder_pitch", "elbow_pitch", "head_pan", "head_tilt"]);
   });
 
   it("estimates a type from bone names", () => {
