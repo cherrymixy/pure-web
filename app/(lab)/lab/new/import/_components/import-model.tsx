@@ -7,7 +7,6 @@ import { STRINGS } from "@/data/strings";
 import type { Project } from "@/lib/models";
 import { estimateType, type ModelReading } from "@/lib/robot/analyze";
 import { api } from "@/lib/ui/api";
-import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icons/icon";
 import { ConfirmModal } from "@/components/ui/modal";
 import { useToast } from "@/components/ui/toast";
@@ -126,6 +125,8 @@ export function ImportModel() {
   const busy = phase.kind === "reading" || phase.kind === "uploading";
   const percent = phase.kind === "uploading" ? Math.round((phase.loaded / Math.max(phase.total, 1)) * 100) : 0;
 
+  /** Lab secondary button (same as PURE's Robot / the analyzing sheet). */
+  const quietBtn = "flex h-[44px] items-center rounded-[var(--radius-sm)] bg-[var(--neutral-0)] px-[22px] text-[15px] font-medium text-[var(--home-ink-2)] hover:bg-[var(--home-pill)] hover:text-[var(--home-ink)]";
   const zoneContent = (
     <>
       {phase.kind === "idle" && (
@@ -152,18 +153,22 @@ export function ImportModel() {
         </div>
       )}
       {phase.kind === "uploading" && (
-        <div className="relative flex w-[520px] max-w-full flex-col gap-[var(--space-24)] text-left">
-          <div className="flex flex-col gap-[4px]">
-            <p className="truncate text-[22px] font-semibold text-[var(--home-ink)]">{phase.name}</p>
+        <div className="relative flex w-[520px] max-w-full flex-col items-center gap-[var(--space-20)] text-center">
+          <span className="flex size-[72px] items-center justify-center rounded-[22px] bg-[var(--neutral-0)] shadow-[0_8px_24px_var(--effect-shadow)]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/figma/import/box.svg" alt="" width={36} height={36} />
+          </span>
+          <div className="flex flex-col gap-[2px]">
+            <p className="max-w-[480px] truncate text-[22px] font-semibold text-[var(--home-ink)]">{phase.name}</p>
             <p className="text-[15px] text-[var(--home-ink-2)]">{S.uploading}</p>
           </div>
-          <div className="flex flex-col gap-[var(--space-12)]">
-            <span className="text-[17px] font-semibold tabular-nums text-[var(--home-ink)]">{percent}%</span>
-            <div className="relative h-[6px] w-full overflow-hidden rounded-[var(--radius-full)] bg-[var(--neutral-0)]">
+          <div className="flex w-full items-center gap-[var(--space-12)]">
+            <div className="relative h-[6px] flex-1 overflow-hidden rounded-[var(--radius-full)] bg-[var(--neutral-0)]">
               <div className="absolute inset-y-0 left-0 rounded-[var(--radius-full)] bg-[var(--home-ink)] transition-[width]" style={{ width: `${percent}%` }} />
             </div>
+            <span className="w-[44px] text-right text-[15px] font-semibold tabular-nums text-[var(--home-ink)]">{percent}%</span>
           </div>
-          <Button className="self-start" onClick={() => setConfirmCancel(true)}>{S.cancel}</Button>
+          <button type="button" onClick={() => setConfirmCancel(true)} className={quietBtn}>{S.cancel}</button>
         </div>
       )}
       {phase.kind === "error" && (
@@ -173,7 +178,7 @@ export function ImportModel() {
           </span>
           <p className="text-[22px] font-semibold text-[var(--text-error)]">{phase.title}</p>
           <p className="text-[15px] text-[var(--home-ink-2)]">{phase.body}</p>
-          <Button className="mt-[var(--space-8)]" onClick={() => { setPhase({ kind: "idle" }); input.current?.click(); }}>{S.tryAnother}</Button>
+          <button type="button" className={`${quietBtn} mt-[var(--space-8)] !bg-[var(--neutral-0)]`} onClick={() => { setPhase({ kind: "idle" }); input.current?.click(); }}>{S.tryAnother}</button>
         </div>
       )}
     </>

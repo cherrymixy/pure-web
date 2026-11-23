@@ -129,38 +129,41 @@ export function Analyzing({ id }: { id: string }) {
     await api(`/api/projects/${id}/analyze`, { method: "POST", body: JSON.stringify(job.input) });
   }
 
+  // Lab buttons (same as the import / type sheets)
   const pillSecondary =
-    "flex h-[48px] items-center rounded-[var(--radius-full)] border-2 border-[var(--border-default)] bg-[var(--bg-surface)] px-[var(--space-24)] text-[16px] font-medium leading-[20px] text-[var(--text-link)] hover:bg-[var(--neutral-50)]";
+    "flex h-[44px] items-center rounded-[var(--radius-sm)] bg-[var(--home-canvas)] px-[22px] text-[15px] font-medium text-[var(--home-ink-2)] hover:bg-[var(--home-pill)] hover:text-[var(--home-ink)]";
   const pillPrimary =
-    "flex h-[48px] items-center rounded-[var(--radius-full)] bg-[var(--neutral-800)] px-[var(--space-24)] text-[16px] font-medium leading-[20px] text-[var(--neutral-100)] hover:bg-[var(--neutral-700)]";
+    "flex h-[44px] items-center rounded-[var(--radius-sm)] bg-[var(--home-ink)] px-[22px] text-[15px] font-medium text-[var(--neutral-0)] hover:bg-[var(--neutral-800)]";
 
   return (
-    <div className="relative flex min-h-[var(--app-vh)] flex-col items-center overflow-hidden">
-      {/* Figma 배경 901:8474: full-frame art at 70% */}
+    // Import-sheet frame (user review): Lab canvas + glow, glass back link, one 1040 white sheet with a centred 44 title;
+    // inside, the preview (scan line) beside the file, progress and steps. The Figma photo background is gone.
+    <div data-fit-frame className="relative flex h-[var(--app-vh)] min-h-[760px] flex-col items-center justify-center overflow-hidden bg-[var(--home-canvas)] p-[var(--space-40)] leading-normal">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/figma/analyzing/bg@2x.png" alt="" aria-hidden className="pointer-events-none absolute inset-0 size-full object-cover opacity-70" />
+      <img src="/figma/lab/home/glow.svg" alt="" aria-hidden className="pointer-events-none absolute left-[26px] top-[-360px] h-[680px] w-[1360px] max-w-none" />
 
       {!done && (
         <Link
           href="/lab"
-          className="absolute left-[48px] top-[var(--space-40)] flex h-[48px] w-fit items-center gap-[var(--space-12)] rounded-[var(--radius-full)] border-2 border-[var(--border-default)] bg-[var(--bg-surface)] px-[var(--space-16)] text-[16px] font-medium leading-[20px] text-[var(--text-link)] hover:bg-[var(--neutral-50)]"
+          className="absolute left-[var(--space-40)] top-[42px] flex h-[44px] items-center gap-[var(--space-8)] rounded-[var(--radius-sm)] bg-[var(--home-glass)] px-[var(--space-20)] text-[15px] font-medium text-[var(--home-ink)] hover:bg-[var(--neutral-0)]"
         >
           <span aria-hidden>←</span>
-          <span>{STRINGS.sidebar.lab}</span>
+          {STRINGS.sidebar.lab}
         </Link>
       )}
-
-      <header className="relative mt-[122px] flex w-[796px] flex-col items-center gap-[var(--space-28)] text-center">
-        <h1 key={done ? "complete" : "analyzing"} className={`text-[52px] font-semibold leading-[66px] text-[var(--sage-800)] ${done ? "anim-pop-in" : ""}`}>{done ? S.complete : S.title}</h1>
-        <p className="whitespace-nowrap text-[22px] leading-[28px] text-[var(--sage-500)]">{done ? S.completeBody : S.body}</p>
-      </header>
 
       <section
         data-tour="analyzing"
         aria-label={project.name}
-        className="relative left-[8px] mt-[196px] flex w-[912px] items-center gap-[var(--space-48)] rounded-[var(--radius-2xl)] border-2 border-[var(--border-default)] bg-[var(--bg-surface)] px-[var(--space-48)] py-[var(--space-40)] shadow-[0_12px_24px_0_var(--effect-shadow)]"
+        className="relative flex w-[1040px] flex-col gap-[var(--space-28)] rounded-[32px] border border-[var(--home-line)] bg-[var(--neutral-0)] p-[var(--space-40)] shadow-[0_24px_48px_var(--effect-shadow)]"
       >
-        <div className="relative size-[264px] shrink-0 overflow-hidden rounded-[var(--radius-xl)] bg-[var(--bg-canvas)]">
+      <header className="mb-[var(--space-16)] flex flex-col items-center gap-[var(--space-8)] text-center">
+        <h1 key={done ? "complete" : "analyzing"} className={`text-[44px] font-semibold leading-[1.15] text-[var(--home-ink)] ${done ? "anim-pop-in" : ""}`}>{done ? S.complete : S.title}</h1>
+        <p className="text-[17px] text-[var(--home-ink-2)]">{done ? S.completeBody : S.body}</p>
+      </header>
+
+      <div className="flex items-center gap-[var(--space-48)] rounded-[24px] bg-[var(--home-canvas)] p-[var(--space-24)]">
+        <div className="relative size-[264px] shrink-0 overflow-hidden rounded-[18px] bg-[var(--neutral-0)]">
           <PreviewArt type={project.structure?.type ?? project.type} />
           {!done && !failed && (
             <>
@@ -177,16 +180,16 @@ export function Analyzing({ id }: { id: string }) {
           )}
         </div>
 
-        <div className="flex w-[500px] shrink-0 flex-col gap-[var(--space-24)]">
-          <div className="flex flex-col gap-[var(--space-8)]">
-            <p className="truncate text-[22px] font-semibold leading-[28px] text-[var(--text-primary)]">{file?.name ?? project.name}</p>
-            <p className="whitespace-pre text-[16px] leading-[20px] text-[var(--text-secondary)]">{meta}</p>
+        <div className="flex min-w-0 flex-1 flex-col gap-[var(--space-24)] pr-[var(--space-24)]">
+          <div className="flex flex-col gap-[4px]">
+            <p className="truncate text-[22px] font-semibold text-[var(--home-ink)]">{file?.name ?? project.name}</p>
+            <p className="whitespace-pre text-[15px] text-[var(--home-ink-3)]">{meta}</p>
           </div>
 
           {noRig ? (
             <div role="alert" className="flex flex-col gap-[var(--space-12)]">
-              <p className="text-[18px] font-semibold leading-[22px] text-[var(--text-error)]">{S.noRig.title}</p>
-              <p className="text-[16px] leading-[20px] text-[var(--text-secondary)]">{S.noRig.body}</p>
+              <p className="text-[17px] font-semibold text-[var(--text-error)]">{S.noRig.title}</p>
+              <p className="text-[15px] text-[var(--home-ink-2)]">{S.noRig.body}</p>
               <div className="mt-[var(--space-4)] flex gap-[var(--space-12)]">
                 <button type="button" className={pillSecondary} onClick={() => router.push(`/lab/new/import?replace=${id}`)}>{S.tryAnother}</button>
                 <button type="button" className={pillPrimary} onClick={() => router.push("/lab/new/type")}>{S.tryRobot}</button>
@@ -194,22 +197,22 @@ export function Analyzing({ id }: { id: string }) {
             </div>
           ) : failed ? (
             <div role="alert" className="flex flex-col gap-[var(--space-12)]">
-              <p className="text-[18px] font-semibold leading-[22px] text-[var(--text-error)]">{S.failed}</p>
+              <p className="text-[17px] font-semibold text-[var(--text-error)]">{S.failed}</p>
               <button type="button" className={`${pillSecondary} self-start`} onClick={retry}>{S.retry}</button>
             </div>
           ) : (
             <div className="flex flex-col gap-[var(--space-12)]">
               <div className="flex items-start justify-between whitespace-nowrap">
-                <span className="text-[18px] font-semibold leading-[22px] text-[var(--text-primary)]" data-testid="analyzing-percent">{`${percent}%`}</span>
-                {status && <span className="text-[16px] leading-[20px] text-[var(--text-secondary)]">{status}</span>}
+                <span className="text-[17px] font-semibold tabular-nums text-[var(--home-ink)]" data-testid="analyzing-percent">{`${percent}%`}</span>
+                {status && <span className="text-[15px] text-[var(--home-ink-3)]">{status}</span>}
               </div>
-              <div className="relative h-[6px] w-full overflow-hidden rounded-[var(--radius-full)] bg-[var(--neutral-150)]">
-                <div className="absolute inset-y-0 left-0 rounded-[var(--radius-full)] bg-[var(--bg-inverse)] transition-[width] duration-500" style={{ width: `${percent}%` }} />
+              <div className="relative h-[6px] w-full overflow-hidden rounded-[var(--radius-full)] bg-[var(--neutral-0)]">
+                <div className="absolute inset-y-0 left-0 rounded-[var(--radius-full)] bg-[var(--home-ink)] transition-[width] duration-500" style={{ width: `${percent}%` }} />
               </div>
             </div>
           )}
 
-          <ol className="flex flex-col gap-[var(--space-16)]">
+          <ol className="flex flex-col gap-[var(--space-12)]">
             {S.steps.map((label, i) => {
               const state: StepState =
                 done || (job && i < job.step) ? "done" : job && i === job.step && running ? "active" : noRig && i === 1 ? "failed" : "todo";
@@ -218,21 +221,22 @@ export function Analyzing({ id }: { id: string }) {
                 <li key={label} className="flex items-center gap-[var(--space-16)] whitespace-nowrap">
                   <StepIcon state={state} />
                   <span
-                    className={`text-[18px] leading-[22px] ${
-                      strong ? "font-medium text-[var(--text-primary)]" : state === "failed" ? "text-[var(--text-error)]" : "text-[var(--text-tertiary)]"
+                    className={`text-[16px] ${
+                      strong ? "font-medium text-[var(--home-ink)]" : state === "failed" ? "text-[var(--text-error)]" : "text-[var(--home-ink-3)]"
                     }`}
                   >
                     {label}
                   </span>
-                  {notes[i] && <span className="text-[16px] leading-[20px] text-[var(--text-secondary)]">{notes[i]}</span>}
+                  {notes[i] && <span className="text-[14px] text-[var(--home-ink-3)]">{notes[i]}</span>}
                 </li>
               );
             })}
           </ol>
         </div>
-      </section>
+      </div>
 
-      {!done && !failed && <p className="relative mt-[22px] text-[16px] leading-[20px] text-[var(--text-secondary)]">{S.leaveNote}</p>}
+      {!done && !failed && <p className="text-center text-[13px] text-[var(--home-ink-3)]">{S.leaveNote}</p>}
+      </section>
     </div>
   );
 }
