@@ -87,15 +87,12 @@ export function Timeline(p: TimelineProps) {
 
   const keyMark = (key: KeyRef, t: number, shape: "diamond" | "dot" | "square") => {
     const selected = p.selectedKey?.track === key.track && p.selectedKey.index === key.index;
+    // Lab monochrome (user review): ink keys, told apart by shape (motion ◆, face ●, sound ■); selected = white with an ink ring.
     const fill = selected
-      ? "bg-[var(--neutral-800)]"
+      ? "bg-[var(--neutral-0)] ring-2 ring-[var(--home-ink)]"
       : atPlayhead(t)
         ? "bg-[var(--neutral-0)]"
-        : shape === "dot"
-          ? "bg-[var(--web-e2a1c1)]"
-          : shape === "square"
-            ? "bg-[var(--web-ecc377)]"
-            : "bg-[var(--web-3f77a1)]";
+        : "bg-[var(--home-ink)]";
     const form = shape === "diamond" ? "size-[9px] rotate-45 rounded-[var(--radius-2xs)]" : shape === "dot" ? "size-[10px] rounded-[var(--radius-full)]" : "size-[9px] rounded-[2px]";
     return (
       <button
@@ -291,12 +288,12 @@ export function Timeline(p: TimelineProps) {
               return (
                 <div
                   key={r.track}
-                  className={`${ROW} relative ${p.selectedTrack === r.track ? "bg-[var(--home-canvas)]" : "bg-[var(--home-canvas)]"}`}
+                  className={`${ROW} relative ${p.selectedTrack === r.track ? "bg-[var(--neutral-0)] shadow-[inset_0_0_0_1px_var(--home-line)]" : "bg-[var(--home-canvas)]"}`}
                   onPointerDown={() => p.onSelectTrack(r.track)}
                 >
                   {times.length > 1 && r.track !== "face" && r.track !== "sound" && (
                     <span
-                      className="absolute top-1/2 h-[19px] -translate-y-1/2 rounded-[var(--radius-xs)] bg-[color-mix(in_srgb,var(--web-75add7)_22%,transparent)]"
+                      className="absolute top-1/2 h-[19px] -translate-y-1/2 rounded-[var(--radius-xs)] bg-[color-mix(in_srgb,var(--home-ink)_8%,transparent)]"
                       style={{ left: pct(lo), width: `calc(${pct(hi)} - ${pct(lo)})` }}
                       aria-hidden
                     />
@@ -305,7 +302,7 @@ export function Timeline(p: TimelineProps) {
                 </div>
               );
             })}
-            {/* Playhead: 2px sage/300 line + head */}
+            {/* Playhead: 2px ink line + head */}
             <div className="pointer-events-none absolute inset-y-0 z-[4] w-[12px] -translate-x-1/2" style={{ left: pct(p.t) }} data-testid="playhead">
               <span className="absolute inset-y-0 left-1/2 w-[2px] -translate-x-1/2 bg-[var(--home-ink)]" />
               <span className="absolute left-1/2 top-0 size-0 -translate-x-1/2 border-x-[5.5px] border-t-[8px] border-x-transparent border-t-[var(--home-ink)]" />

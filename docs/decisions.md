@@ -141,3 +141,4 @@ STEP마다 한 줄. `날짜 · STEP · 결정 · 근거`
 | 2026-11-23 | 시그니처 How it maps 읽기 쉽게 | `calm → tempo 16, speed ×0.81` 코드식 한 줄 → 행마다 특성 이름(Tempo)·쉬운 말(Unhurried/Balanced/Brisk)·0–100 막대·“from “calm” · p.6”, 원래 수치는 hover 툴팁 | 사용자 리뷰 |
 | 2026-11-24 | 서비스 전체 Lab 무드 통일 | Lab·쇼케이스·공유·공통 UI에서 옛 토큰(sage·text-link·bg-surface·border-default 등) → home-* 토큰, 공통 Button·ModalButton 알약(border-2·radius-full·16) → Lab 버튼(h44·radius-sm·15·1px 선), 모달·공유 카드 radius 24, 레이더 sage → 잉크 선+옅은 채움, 타임라인 강조(재생 헤드·활성 칩) 잉크·모션 키 Lab 모션 파랑. 가이드라인 문서 그림·sim·/dev 제외 | 사용자 리뷰 |
 | 2026-11-24 | 타임라인 가독성 | 재생 버튼 primary 회청 → 잉크 원·흰 아이콘, 클립 막대 잉크 테두리+회색 채움 → 테두리 없음·모션 파랑 22% 채움, 모션 키 75add7 → 진한 파랑 3f77a1 | 사용자 리뷰 |
+| 2026-11-24 | 타임라인 무채색 | 파랑 클립·모션 키 제거 → 키 전부 잉크(모양으로 채널 구분 ◆●■), 선택 키 흰색+잉크 링, 클립 막대 잉크 8%, 선택 행 흰 바탕+home-line 선 | 사용자 리뷰 (서비스 색 아님) |
