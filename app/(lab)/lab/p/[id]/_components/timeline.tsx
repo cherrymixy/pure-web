@@ -95,7 +95,7 @@ export function Timeline(p: TimelineProps) {
           ? "bg-[var(--web-e2a1c1)]"
           : shape === "square"
             ? "bg-[var(--web-ecc377)]"
-            : "bg-[var(--web-75add7)]";
+            : "bg-[var(--web-3f77a1)]";
     const form = shape === "diamond" ? "size-[9px] rotate-45 rounded-[var(--radius-2xs)]" : shape === "dot" ? "size-[10px] rounded-[var(--radius-full)]" : "size-[9px] rounded-[2px]";
     return (
       <button
@@ -168,7 +168,7 @@ export function Timeline(p: TimelineProps) {
               onClick={p.onTogglePlay}
               aria-label={p.playing ? STRINGS.editor.pause : STRINGS.editor.play}
               title={p.playing ? STRINGS.editor.pause : STRINGS.editor.play}
-              className="flex size-[28px] items-center justify-center rounded-[var(--radius-full)] bg-[var(--primary)] text-[var(--home-canvas)]"
+              className="flex size-[28px] items-center justify-center rounded-[var(--radius-full)] bg-[var(--home-ink)] text-[var(--neutral-0)] hover:bg-[var(--neutral-800)]"
             >
               {p.playing ? (
                 <span className="flex gap-[3px]" aria-hidden>
@@ -296,7 +296,7 @@ export function Timeline(p: TimelineProps) {
                 >
                   {times.length > 1 && r.track !== "face" && r.track !== "sound" && (
                     <span
-                      className="absolute top-1/2 h-[19px] -translate-y-1/2 rounded-[var(--radius-xs)] border border-[var(--home-ink)] bg-[color-mix(in_srgb,var(--home-ink)_12%,transparent)]"
+                      className="absolute top-1/2 h-[19px] -translate-y-1/2 rounded-[var(--radius-xs)] bg-[color-mix(in_srgb,var(--web-75add7)_22%,transparent)]"
                       style={{ left: pct(lo), width: `calc(${pct(hi)} - ${pct(lo)})` }}
                       aria-hidden
                     />
