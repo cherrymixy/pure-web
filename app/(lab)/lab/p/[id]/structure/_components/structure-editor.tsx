@@ -106,55 +106,61 @@ export function StructureEditor({ projectId, name, initial }: { projectId: strin
           ))}
       </div>
 
-      <Link
-        href="/lab"
-        className="absolute left-[48px] top-[var(--space-40)] flex h-[48px] w-fit items-center gap-[var(--space-12)] rounded-[var(--radius-full)] border-2 border-[var(--border-default)] bg-[var(--bg-surface)] px-[var(--space-16)] text-[16px] font-medium leading-[20px] text-[var(--text-link)] hover:bg-[var(--neutral-50)]"
-      >
-        <span aria-hidden>←</span>
-        <span>{STRINGS.sidebar.lab}</span>
-      </Link>
-      <p className="absolute left-[168px] top-[55px] text-[12px] font-semibold leading-[15px] text-[var(--text-tertiary)]">{S.preview}</p>
+      {/* Lab UI (user review, same as the import / type / analyzing sheets): glass back link + preview tag, white panel with a
+          thin home-line border, Lab rows and chips, Lab buttons. The sim stage keeps its own colours. */}
+      <div className="absolute left-[var(--space-40)] top-[42px] flex items-center gap-[var(--space-12)]">
+        <Link
+          href="/lab"
+          className="flex h-[44px] items-center gap-[var(--space-8)] rounded-[var(--radius-sm)] bg-[var(--home-glass)] px-[var(--space-20)] text-[15px] font-medium text-[var(--home-ink)] hover:bg-[var(--neutral-0)]"
+        >
+          <span aria-hidden>←</span>
+          {STRINGS.sidebar.lab}
+        </Link>
+        <span className="rounded-[var(--radius-full)] bg-[var(--home-glass)] px-[10px] py-[4px] text-[12px] font-semibold tracking-[0.04em] text-[var(--home-ink-3)]">{S.preview}</span>
+      </div>
 
-      {/* Structure panel (Figma 901:8646 ×2): 428×927 at 50,92, padding 32, radius xl. */}
       <section
         aria-label={name}
-        className="absolute bottom-[61px] left-[50px] top-[92px] flex w-[428px] flex-col justify-between gap-[var(--space-32)] overflow-hidden rounded-[var(--radius-xl)] bg-[var(--bg-surface)] p-[var(--space-32)]"
+        className="absolute bottom-[var(--space-40)] left-[var(--space-40)] top-[104px] flex w-[428px] flex-col justify-between gap-[var(--space-24)] overflow-hidden rounded-[24px] border border-[var(--home-line)] bg-[var(--neutral-0)] p-[var(--space-32)] shadow-[0_24px_48px_var(--effect-shadow)]"
       >
-        <div className="flex min-h-0 flex-col gap-[var(--space-40)]">
-          <header className="flex flex-col gap-[var(--space-16)]">
-            <h1 className="text-[30px] font-semibold leading-[38px] text-[var(--sage-800)]">{S.title}</h1>
-            <p className="text-[16px] leading-[20px] text-[var(--sage-500)]">{S.body}</p>
-            {structure.source === "import" && <p className="text-[12px] leading-[15px] text-[var(--text-secondary)]">{S.previewNote}</p>}
+        <div className="flex min-h-0 flex-col gap-[var(--space-32)]">
+          <header className="flex flex-col gap-[var(--space-8)]">
+            <h1 className="text-[32px] font-semibold leading-[1.2] text-[var(--home-ink)]">{S.title}</h1>
+            <p className="text-[15px] leading-[1.45] text-[var(--home-ink-2)]">{S.body}</p>
+            {structure.source === "import" && <p className="text-[13px] leading-[1.45] text-[var(--home-ink-3)]">{S.previewNote}</p>}
           </header>
 
-          <div className="-mr-[var(--space-16)] flex min-h-0 flex-col gap-[var(--space-48)] overflow-y-auto pr-[var(--space-16)]">
-            <section className="flex flex-col gap-[var(--space-16)] text-[16px] leading-[20px]">
-              <h2 className="whitespace-pre font-medium text-[var(--text-link)]">{`${S.joints}  ${structure.joints.length}`}</h2>
-              {editing && <p className="text-[var(--text-secondary)]">{S.narrowOnly}</p>}
-              <ul className="flex flex-col gap-[var(--space-16)]">
+          <div className="-mr-[var(--space-16)] flex min-h-0 flex-col gap-[var(--space-32)] overflow-y-auto pr-[var(--space-16)]">
+            <section className="flex flex-col gap-[var(--space-12)] text-[15px]">
+              <h2 className="flex items-center gap-[var(--space-8)] text-[13px] font-medium text-[var(--home-ink-3)]">
+                {S.joints}
+                <span className="rounded-[var(--radius-full)] bg-[var(--home-canvas)] px-[8px] py-[1px] text-[12px] font-semibold tabular-nums text-[var(--home-ink-2)]">{structure.joints.length}</span>
+              </h2>
+              {editing && <p className="text-[13px] text-[var(--home-ink-2)]">{S.narrowOnly}</p>}
+              <ul className="flex flex-col gap-[var(--space-8)]">
                 {structure.joints.map((j, i) => (
                   <li
                     key={j.id}
-                    className={`flex flex-col gap-[var(--space-12)] rounded-[var(--radius-md)] px-[var(--space-16)] py-[var(--space-12)] ${
-                      selected === j.id ? "bg-[var(--neutral-150)] outline-2 -outline-offset-2 outline-[var(--border-strong)]" : "bg-[var(--bg-canvas)]"
+                    className={`flex flex-col gap-[var(--space-12)] rounded-[12px] border px-[var(--space-16)] py-[var(--space-12)] ${
+                      selected === j.id ? "border-[var(--home-ink)] bg-[var(--neutral-0)]" : "border-transparent bg-[var(--home-canvas)] hover:border-[var(--home-line)]"
                     }`}
                   >
                     <button type="button" className="flex items-start justify-between whitespace-nowrap text-left" onClick={() => select(j.id)} title={j.label}>
-                      <span className="font-medium text-[var(--sage-800)]">{`${i + 1}. ${j.id}`}</span>
-                      <span className="text-[var(--sage-500)]">{fmt(S.jointRange, { min: j.min, max: j.max })}</span>
+                      <span className="font-medium text-[var(--home-ink)]">{`${i + 1}. ${j.id}`}</span>
+                      <span className="text-[14px] tabular-nums text-[var(--home-ink-3)]">{fmt(S.jointRange, { min: j.min, max: j.max })}</span>
                     </button>
                     {editing && (
                       <div className="flex flex-col gap-[var(--space-8)]">
                         {(["min", "max"] as const).map((edge) => (
                           <label key={edge} className="flex items-center gap-[var(--space-8)]">
-                            <span className="w-[32px] text-[12px] leading-[15px] text-[var(--text-secondary)]">{edge}</span>
+                            <span className="w-[32px] text-[12px] text-[var(--home-ink-3)]">{edge}</span>
                             <input
                               type="range"
                               min={j.rigMin}
                               max={j.rigMax}
                               value={j[edge]}
                               onChange={(e) => setJoint(j.id, edge, Number(e.target.value))}
-                              className="min-w-0 flex-1 accent-[var(--sage-800)]"
+                              className="min-w-0 flex-1 accent-[var(--home-ink)]"
                               aria-label={`${j.id} ${edge}`}
                             />
                             <input
@@ -163,11 +169,11 @@ export function StructureEditor({ projectId, name, initial }: { projectId: strin
                               max={j.rigMax}
                               value={j[edge]}
                               onChange={(e) => setJoint(j.id, edge, Number(e.target.value))}
-                              className="w-[72px] rounded-[var(--radius-xs)] border-2 border-[var(--border-default)] bg-[var(--bg-surface)] px-[var(--space-8)] py-[var(--space-4)] text-[16px] leading-[20px] text-[var(--text-primary)]"
+                              className="w-[72px] rounded-[var(--radius-sm)] border border-[var(--home-line)] bg-[var(--neutral-0)] px-[var(--space-8)] py-[var(--space-4)] text-[15px] tabular-nums text-[var(--home-ink)]"
                             />
                           </label>
                         ))}
-                        <span className="text-[12px] leading-[15px] text-[var(--text-tertiary)]">{fmt(S.rigRange, { min: j.rigMin, max: j.rigMax })}</span>
+                        <span className="text-[12px] text-[var(--home-ink-3)]">{fmt(S.rigRange, { min: j.rigMin, max: j.rigMax })}</span>
                       </div>
                     )}
                   </li>
@@ -176,16 +182,16 @@ export function StructureEditor({ projectId, name, initial }: { projectId: strin
             </section>
 
             <div className="flex flex-col gap-[var(--space-24)]">
-              <section className="flex flex-col gap-[var(--space-16)]">
-                <h2 className="text-[16px] font-medium leading-[20px] text-[var(--text-link)]">{S.channels}</h2>
-                <div className="flex gap-[var(--space-12)]">
+              <section className="flex flex-col gap-[var(--space-12)]">
+                <h2 className="text-[13px] font-medium text-[var(--home-ink-3)]">{S.channels}</h2>
+                <div className="flex gap-[var(--space-8)]">
                   {CHANNELS.map((c) => {
                     const on = structure.channels.includes(c);
                     return (
                       <label
                         key={c}
-                        className={`flex cursor-pointer items-start rounded-[var(--radius-md)] px-[var(--space-16)] py-[var(--space-8)] text-[16px] leading-[20px] has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[var(--sage-800)] ${
-                          on ? "bg-[var(--sage-800)] text-[var(--text-on-inverse)]" : "bg-[var(--bg-canvas)] text-[var(--text-secondary)]"
+                        className={`flex cursor-pointer items-center rounded-[var(--radius-full)] px-[var(--space-16)] py-[6px] text-[14px] font-medium has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[var(--home-ink)] ${
+                          on ? "bg-[var(--home-ink)] text-[var(--neutral-0)]" : "bg-[var(--home-canvas)] text-[var(--home-ink-3)] hover:text-[var(--home-ink)]"
                         }`}
                       >
                         <input type="checkbox" className="sr-only" checked={on} onChange={() => toggleChannel(c)} />
@@ -195,11 +201,18 @@ export function StructureEditor({ projectId, name, initial }: { projectId: strin
                   })}
                 </div>
               </section>
+              {/* A clear button (user review): Lab secondary, dark while editing ("Done") */}
               <button
                 type="button"
+                aria-pressed={editing}
                 onClick={() => setEditing(!editing)}
-                className="self-start text-[16px] font-medium leading-[20px] text-[var(--sage-800)] hover:underline"
+                className={`flex h-[44px] w-full items-center justify-center gap-[var(--space-8)] rounded-[var(--radius-sm)] border text-[15px] font-medium ${
+                  editing
+                    ? "border-[var(--home-ink)] bg-[var(--home-ink)] text-[var(--neutral-0)] hover:bg-[var(--neutral-800)]"
+                    : "border-[var(--home-line)] bg-[var(--neutral-0)] text-[var(--home-ink)] hover:border-[var(--home-ink-3)]"
+                }`}
               >
+                <Icon name={editing ? "check" : "settings"} size={18} />
                 {editing ? S.done : S.editLimits}
               </button>
             </div>
@@ -211,10 +224,10 @@ export function StructureEditor({ projectId, name, initial }: { projectId: strin
           data-tour="structure-confirm"
           disabled={saving || editing}
           onClick={confirm}
-          className="flex h-[63px] w-full shrink-0 items-center justify-center gap-[var(--space-12)] rounded-[var(--radius-md)] bg-[var(--sage-800)] px-[var(--space-28)] text-[20px] font-medium leading-[25px] text-[var(--text-on-inverse)] hover:bg-[var(--sage-700)] disabled:bg-[var(--bg-disabled)] disabled:text-[var(--text-disabled)]"
+          className="flex h-[52px] w-full shrink-0 items-center justify-center gap-[var(--space-8)] rounded-[var(--radius-sm)] bg-[var(--home-ink)] px-[var(--space-24)] text-[16px] font-medium text-[var(--neutral-0)] hover:bg-[var(--neutral-800)] disabled:bg-[var(--home-canvas)] disabled:text-[var(--home-ink-3)]"
         >
           <span>{S.confirm}</span>
-          <Icon name="arrow" size={20} />
+          <Icon name="arrow" size={18} />
         </button>
       </section>
 
