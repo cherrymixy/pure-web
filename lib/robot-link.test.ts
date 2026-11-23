@@ -68,8 +68,9 @@ describe("showcase motions", () => {
         for (const [, ms] of shake) expect(ms).toBe(500); // slow head shake, 0.5 s per swing
       }
       if (m.id === "sad") {
-        expect(m.face.keys?.[1]).toEqual({ t: 8.07, preset: "blink" }); // sad face twice (2 × 4.03 s) first
-        expect(Math.max(...paths.m1.map(([a]) => a))).toBe(18); // then peeks to the left
+        expect(m.face.keys?.[1]).toEqual({ t: 4.03, preset: "blink" }); // sad face once (the sob) first
+        expect(Math.max(...paths.m1.map(([a]) => a))).toBe(18); // then glances left…
+        expect(Math.min(...paths.m1.map(([a]) => a))).toBeLessThan(0); // …and right
       }
       if (m.id === "curious") {
         expect(Math.max(...clip.tracks.shoulder_pitch.map((k) => k.value))).toBe(16); // leans toward the viewer

@@ -37,6 +37,8 @@ const SLEEP_UP = { shoulder_pitch: -6, elbow_pitch: -10 };
 const BOW = { shoulder_pitch: 19, elbow_pitch: 7 };
 /** Sad: shoulders sink forward, head low. */
 const SLUMP = { shoulder_pitch: 18, elbow_pitch: 7 };
+/** Sad: a sob hitches the shoulders back up a little. */
+const SOB = { shoulder_pitch: 12, elbow_pitch: 2 };
 /** Curious: lean toward the viewer and look up at them (visitors stand above the robot): shoulder forward, elbow (M2) well back. */
 const LEAN_IN = { shoulder_pitch: 16, elbow_pitch: -24 };
 
@@ -107,25 +109,30 @@ export const SHOWCASE_MOTIONS: ShowcaseMotion[] = [
   {
     id: "sad",
     title: "Sad",
-    summary: "Droops with a sad face, then glances to the left.",
-    // Exact keyframes: sink while the sad face plays twice (2 × 4.03 s), then turn the head (M1) and a little of the base (M4)
-    // to the left and peek, as if checking whether anyone noticed. Left = + (check on the robot).
+    summary: "Sobs once, then glances around to see if anyone noticed.",
+    // Exact keyframes: sink, two quick sobs (shoulder and elbow hitch back, then drop) while the sad face plays once (4.03 s),
+    // then glance left, right and left again with the head (M1) and a little base (M4), as if checking who saw. Left = +.
     keys: [
       { t: 0, pose: {} },
-      { t: 2.2, pose: SLUMP },
-      { t: 8.1, pose: SLUMP },
-      { t: 9.1, pose: { ...SLUMP, head_pan: 18, base_yaw: 6 } },
-      { t: 10.0, pose: { ...SLUMP, head_pan: 18, base_yaw: 6 } },
-      { t: 10.5, pose: { ...SLUMP, head_pan: 10, base_yaw: 6 } },
-      { t: 11.0, pose: { ...SLUMP, head_pan: 18, base_yaw: 6 } },
-      { t: 11.8, pose: { ...SLUMP, head_pan: 18, base_yaw: 6 } },
-      { t: 12.8, pose: SLUMP },
-      { t: 14.0, pose: {} },
-      { t: 14.6, pose: {} },
+      { t: 1.8, pose: SLUMP },
+      { t: 2.3, pose: SOB },
+      { t: 2.6, pose: SLUMP },
+      { t: 2.9, pose: SOB },
+      { t: 3.3, pose: SLUMP },
+      { t: 4.3, pose: SLUMP },
+      { t: 5.0, pose: { ...SLUMP, head_pan: 18, base_yaw: 6 } },
+      { t: 5.8, pose: { ...SLUMP, head_pan: 18, base_yaw: 6 } },
+      { t: 6.6, pose: { ...SLUMP, head_pan: -18, base_yaw: -6 } },
+      { t: 7.4, pose: { ...SLUMP, head_pan: -18, base_yaw: -6 } },
+      { t: 8.0, pose: { ...SLUMP, head_pan: 12, base_yaw: 4 } },
+      { t: 8.6, pose: { ...SLUMP, head_pan: 12, base_yaw: 4 } },
+      { t: 9.4, pose: SLUMP },
+      { t: 10.6, pose: {} },
+      { t: 11.2, pose: {} },
     ],
-    // sad twice, then plain blinking eyes while it peeks
-    face: { preset: "sad", keys: [{ t: 0, preset: "sad" }, { t: 8.07, preset: "blink" }] },
-    sound: { cues: [cueAt("sad-long", 0.9)] },
+    // sad once (the sob), then plain blinking eyes while it glances around
+    face: { preset: "sad", keys: [{ t: 0, preset: "sad" }, { t: 4.03, preset: "blink" }] },
+    sound: { cues: [cueAt("sad", 2.3), cueAt("sad", 2.9)] },
   },
 
   {
