@@ -3,9 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { ROBOT_DEVICE_STRUCTURES } from "@/data/robot-devices";
 import { ROBOT_TYPES } from "@/data/robot-types";
+import { REAL_ROBOT } from "@/data/real-robot";
 import { STRINGS, fmt } from "@/data/strings";
 import type { RobotDevice, RobotType } from "@/lib/models";
 import { api } from "@/lib/ui/api";
+import { motorAngles, poseUrl, robotReachable } from "@/lib/robot-link";
 import { Icon } from "@/components/ui/icons/icon";
 import { Modal, ModalActions, ModalButton, ModalCard } from "@/components/ui/modal";
 
@@ -40,6 +42,7 @@ export function TestModal({
   open,
   projectType,
   t,
+  joints,
   duration = 0,
   playing,
   limitHit,
@@ -51,6 +54,8 @@ export function TestModal({
   open: boolean;
   projectType: RobotType;
   t: number;
+  /** Live sim joint angles — streamed to the real robot while it plays */
+  joints: { id: string; actual: number }[];
   duration?: number;
   playing: boolean;
   limitHit: boolean;
@@ -69,25 +74,48 @@ export function TestModal({
   useEffect(() => {
     if (!open) return;
     setPhase({ kind: "list" });
-    api<RobotDevice[]>("/api/robots").then(
-      (list) => {
-        setRobots(list);
-        setSelected((cur) => cur ?? list.find((r) => r.online)?.id ?? list[0]?.id ?? null);
-      },
-      () => setRobots([]),
-    );
+    let live = true;
+    const real = REAL_ROBOT.device;
+    Promise.all([api<RobotDevice[]>("/api/robots").catch(() => []), robotReachable()]).then(([list, online]) => {
+      if (!live) return;
+      const all = [{ ...real, online }, ...list];
+      setRobots(all);
+      setSelected((cur) => cur ?? all.find((r) => r.online)?.id ?? all[0]?.id ?? null);
+    });
+    return () => {
+      live = false;
+    };
   }, [open]);
 
   useEffect(() => {
     if (phase.kind !== "connecting") return;
-    const timer = setTimeout(() => {
-      if (phase.robot.online) {
-        setPhase({ kind: "playing", robot: phase.robot });
+    let live = true;
+    const robot = phase.robot;
+    const reachable = robot.id === REAL_ROBOT.device.id ? robotReachable() : new Promise<boolean>((r) => setTimeout(() => r(robot.online), CONNECT_MS));
+    reachable.then((online) => {
+      if (!live) return;
+      if (online) {
+        setPhase({ kind: "playing", robot });
         cb.current.onPlay();
-      } else setPhase({ kind: "offline", robot: phase.robot });
-    }, CONNECT_MS);
-    return () => clearTimeout(timer);
+      } else setPhase({ kind: "offline", robot });
+    });
+    return () => {
+      live = false;
+    };
   }, [phase]);
+
+  // Real robot: send each joint-state frame (~10/s) as a pose; skip frames while a request is in flight.
+  const sending = useRef(false);
+  const streaming = open && phase.kind === "playing" && phase.robot.id === REAL_ROBOT.device.id;
+  useEffect(() => {
+    if (!streaming || sending.current || joints.length === 0) return;
+    sending.current = true;
+    fetch(poseUrl(motorAngles(joints)), { cache: "no-store" })
+      .catch(() => {})
+      .finally(() => {
+        sending.current = false;
+      });
+  }, [streaming, joints]);
 
   // Limit stop: hand over to the editor's limit modal.
   useEffect(() => {
