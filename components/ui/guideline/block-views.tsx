@@ -168,7 +168,7 @@ function Steps({ head, rows }: { head: string[]; rows: string[][] }) {
 
 function Chips({ head, rows }: { head: string[]; rows: string[][] }) {
   return (
-    <div className="grid grid-cols-4 gap-[var(--space-12)]" role="table" aria-label={head.join(" · ")}>
+    <div className="grid grid-cols-4 gap-[var(--space-12)]" role="table" aria-label={head.join(", ")}>
       {rows.map(([layer, prefix, example]) => (
         <div key={layer} role="row" className={`${CARD} flex flex-col gap-[6px] p-[var(--space-16)]`}>
           <code role="cell" className="font-mono text-[17px] font-semibold text-[var(--home-ink)]">{prefix}</code>
@@ -243,7 +243,7 @@ function Scale({ head, rows }: { head: string[]; rows: string[][] }) {
           <span className="absolute right-0 top-[14px] font-mono text-[11px] text-[var(--home-ink-3)]">{hi}{unit}</span>
         </div>
       )}
-      <div className="grid gap-[var(--space-12)]" style={{ gridTemplateColumns: `repeat(${rows.length}, minmax(0, 1fr))` }} role="table" aria-label={head.join(" · ")}>
+      <div className="grid gap-[var(--space-12)]" style={{ gridTemplateColumns: `repeat(${rows.length}, minmax(0, 1fr))` }} role="table" aria-label={head.join(", ")}>
         {rows.map(([size, value, use]) => (
           <div key={size} role="row" className={`flex flex-col gap-[6px] rounded-[14px] p-[var(--space-16)] ${size === "max" ? "bg-[var(--red-50)]" : "bg-[var(--home-canvas)]"}`}>
             <code role="cell" className={`w-fit font-mono text-[12px] font-semibold ${size === "max" ? "text-[var(--red-500)]" : "text-[var(--home-ink-3)]"}`}>{size}</code>
@@ -309,7 +309,7 @@ function Evidence({ text }: { text: string }) {
 
 function Matrix({ head, rows }: { head: string[]; rows: string[][] }) {
   return (
-    <div className={`${CARD} p-[var(--space-20)]`} role="table" aria-label={head.join(" · ")}>
+    <div className={`${CARD} p-[var(--space-20)]`} role="table" aria-label={head.join(", ")}>
       <div role="row" className="grid items-center gap-[var(--space-8)] border-b border-[var(--home-line)] pb-[var(--space-12)]" style={{ gridTemplateColumns: `1.4fr repeat(${head.length - 1}, 1fr)` }}>
         {head.map((h, i) => (
           <span key={h} role="columnheader" className={`${LABEL} ${i ? "text-center" : ""}`}>{h}</span>
@@ -350,9 +350,9 @@ const ARROW = <span aria-hidden className="shrink-0 text-[18px] text-[var(--home
 
 function Pattern({ rows }: { rows: string[][] }) {
   const f = Object.fromEntries(rows.map(([k, v]) => [k, v]));
-  // "doze · stretch (drift while waiting)" → chips + a caption; "— (state override …)" → no chips.
+  // "doze, stretch (drift while waiting)" → chips + a caption; "— (state override …)" → no chips.
   const [, list = "", caption] = f.sequence?.match(/^([^(]*)(?:\((.*)\))?/) ?? [];
-  const chips = list.split("·").map((c) => c.replace("…", "").trim()).filter((c) => c && c !== "—");
+  const chips = list.split(",").map((c) => c.replace("…", "").trim()).filter((c) => c && c !== "—");
   const priority = (f.priority ?? "").split(">").map((p) => p.trim());
   return (
     <div className="flex flex-col gap-[var(--space-16)]">
@@ -371,7 +371,6 @@ function Pattern({ rows }: { rows: string[][] }) {
                 const cls = "rounded-[var(--radius-full)] bg-[var(--sage-50)] px-[var(--space-12)] py-[5px] font-mono text-[14px] font-medium text-[var(--sage-500)]";
                 return (
                   <span key={c} className="flex items-center gap-[var(--space-8)]">
-                    {i > 0 && <span aria-hidden className="text-[13px] text-[var(--home-ink-3)]">·</span>}
                     {href ? <Link href={href} className={`${cls} hover:bg-[var(--sage-100)]`}>{c}</Link> : <span className={cls}>{c}</span>}
                   </span>
                 );
@@ -456,7 +455,7 @@ function Node({ name }: { name: string }) {
 function Transitions({ head, rows }: { head: string[]; rows: string[][] }) {
   const groups = rows.reduce<Map<string, string[][]>>((m, r) => m.set(r[0], [...(m.get(r[0]) ?? []), r]), new Map());
   return (
-    <div className={`${CARD} flex flex-col divide-y divide-[var(--home-line)] px-[var(--space-20)]`} role="table" aria-label={head.join(" · ")}>
+    <div className={`${CARD} flex flex-col divide-y divide-[var(--home-line)] px-[var(--space-20)]`} role="table" aria-label={head.join(", ")}>
       {[...groups].map(([from, edges]) => (
         <div key={from} role="row" className="flex items-start gap-[var(--space-16)] py-[14px]">
           <span role="rowheader" className="w-[150px] shrink-0">
@@ -480,7 +479,7 @@ function Transitions({ head, rows }: { head: string[]; rows: string[][] }) {
 
 /* ── roles: what each role runs on — present, stood in for "(attend)", or missing "—" ─── */
 
-const ROLE_WHAT: Record<string, string> = { attend: "Gaze", posture: "Height · tilt", locomote: "Distance", gesture: "Pointing" };
+const ROLE_WHAT: Record<string, string> = { attend: "Gaze", posture: "Height, tilt", locomote: "Distance", gesture: "Pointing" };
 
 /** "—" / "" = missing, "(attend)" = stood in by another role or part, else present. */
 const roleState = (part: string) => (!part.trim() || part.trim() === "—" ? "missing" : /^\(.*\)$/.test(part.trim()) ? "standin" : "present");
@@ -551,7 +550,7 @@ function RoleGrid({ head, rows }: { head: string[]; rows: string[][] }) {
   // head: ID · Form · Also called · Attend · Posture · Locomote · Gesture · Substitute
   const cols = "grid-cols-[1.3fr_repeat(4,1fr)_1.1fr]";
   return (
-    <div className={`${CARD} flex flex-col gap-[var(--space-8)] p-[var(--space-20)]`} role="table" aria-label={head.join(" · ")}>
+    <div className={`${CARD} flex flex-col gap-[var(--space-8)] p-[var(--space-20)]`} role="table" aria-label={head.join(", ")}>
       <div role="row" className={`grid ${cols} items-end gap-[var(--space-8)] px-[2px] pb-[var(--space-4)]`}>
         <span role="columnheader" className={LABEL}>{head[1]}</span>
         {head.slice(3, 7).map((h) => (
@@ -705,19 +704,19 @@ function EvidenceBars({ head, rows }: { head: string[]; rows: string[][] }) {
   // head: Stimulus · Recognition · Main misread · Perceived malfunction · Other
   const cols = "grid-cols-[150px_1fr_1fr_1fr]";
   return (
-    <div className={`${CARD} flex flex-col p-[var(--space-20)]`} role="table" aria-label={head.join(" · ")}>
+    <div className={`${CARD} flex flex-col p-[var(--space-20)]`} role="table" aria-label={head.join(", ")}>
       <div role="row" className={`grid ${cols} gap-[var(--space-16)] border-b border-[var(--home-line)] pb-[var(--space-12)]`}>
         <span role="columnheader" className={LABEL}>{head[0]}</span>
         <span role="columnheader" className={`${LABEL} flex items-center gap-[6px]`}><span className="size-[8px] rounded-[var(--radius-full)] bg-[var(--sage-400)]" />{head[1]} (%, higher is better)</span>
         <span role="columnheader" className={`${LABEL} flex items-center gap-[6px]`}><span className="size-[8px] rounded-[var(--radius-full)] bg-[var(--red-500)]" />{head[3]} (pt, lower is better)</span>
-        <span role="columnheader" className={LABEL}>{head[2]} · {head[4]}</span>
+        <span role="columnheader" className={LABEL}>{head[2]}, {head[4]}</span>
       </div>
       {rows.map(([stim, rec, misread, mal, other]) => (
         <div key={stim} role="row" className={`grid ${cols} items-center gap-[var(--space-16)] border-b border-[var(--home-line)] py-[10px] last:border-b-0`}>
           <span role="rowheader" className="text-[14px] font-semibold text-[var(--home-ink)]">{stim}</span>
           <span role="cell"><Bar value={firstNumber(rec)} label={rec} tone="var(--sage-400)" /></span>
           <span role="cell"><Bar value={firstNumber(mal)} label={mal} tone="var(--red-500)" /></span>
-          <span role="cell" className="text-[13px] leading-[1.45] text-[var(--home-ink-2)]">{[misread, other].filter(Boolean).join(" · ") || "—"}</span>
+          <span role="cell" className="text-[13px] leading-[1.45] text-[var(--home-ink-2)]">{[misread, other].filter(Boolean).join(", ") || "—"}</span>
         </div>
       ))}
     </div>
@@ -728,7 +727,7 @@ function EvidenceBars({ head, rows }: { head: string[]; rows: string[][] }) {
 
 function Pairs({ head, rows }: { head: string[]; rows: string[][] }) {
   return (
-    <div className="grid grid-cols-2 gap-[var(--space-12)]" role="table" aria-label={head.join(" · ")}>
+    <div className="grid grid-cols-2 gap-[var(--space-12)]" role="table" aria-label={head.join(", ")}>
       {rows.map(([pair, cues]) => {
         const [a, b] = pair.split("↔").map((x) => x.trim());
         return (
@@ -741,7 +740,7 @@ function Pairs({ head, rows }: { head: string[]; rows: string[][] }) {
             <span role="cell" className="flex flex-col gap-[6px]">
               <span className={LABEL}>{head[1]}</span>
               <span className="flex flex-wrap gap-[6px]">
-                {cues.split(" · ").map((c) => (
+                {cues.split(", ").map((c) => (
                   <span key={c} className="rounded-[var(--radius-full)] bg-[var(--sage-50)] px-[10px] py-[4px] text-[13px] text-[var(--sage-500)]">{c}</span>
                 ))}
               </span>

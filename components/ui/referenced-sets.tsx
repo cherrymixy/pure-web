@@ -124,7 +124,7 @@ function StripItem({ item, onOpen, active = false }: { item: ReferenceItem; onOp
   const player = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
   const [length, setLength] = useState<number | null>(null);
-  const credit = `${item.title} — ${item.note}\n${fmt(E.referenceSource, { license: item.source.license, author: item.source.author })}`;
+  const credit = `${item.title}. ${item.note}\n${fmt(E.referenceSource, { license: item.source.license, author: item.source.author })}`;
   const onMeta = (e: React.SyntheticEvent<HTMLMediaElement>) => Number.isFinite(e.currentTarget.duration) && setLength(e.currentTarget.duration);
   const media = video ? (
     <video src={item.file} poster={item.poster ?? undefined} muted loop autoPlay playsInline onLoadedMetadata={onMeta} className="size-full object-cover" />

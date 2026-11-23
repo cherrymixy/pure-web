@@ -117,7 +117,7 @@ export function Analyzing({ id }: { id: string }) {
   const estimated = !done && input?.source === "import";
   const meta = [file ? `${Math.max(1, Math.round(file.size / 1024 / 1024))} MB` : null, estimated ? fmt(S.estimated, { type: typeName }) : typeName]
     .filter(Boolean)
-    .join("  ·  ");
+    .join(", ");
   const status = done && job ? fmt(S.doneIn, { t: duration(new Date(job.updatedAt).getTime() - new Date(job.createdAt).getTime()) }) : remaining !== null ? fmt(S.remaining, { s: remaining }) : null;
   const notes: (string | null)[] =
     done && project.structure

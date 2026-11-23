@@ -12,7 +12,7 @@ export const style: GuidelineSection = {
     {
       slug: "signature",
       title: "Signature",
-      summary: "Six axes P1–P6 (0–1) and a strength w set the style.",
+      summary: "Six axes P1 to P6 (0 to 1) and a strength w set the style.",
       body: [
         {
           kind: "table",
@@ -20,9 +20,9 @@ export const style: GuidelineSection = {
           view: "cards",
           head: ["Element", "Content"],
           rows: [
-            ["Signature", "Six axes: P1 Reach · P2 Speed contrast · P3 Stillness · P4 Afterglow · P5 Anticipation · P6 Return (0–1)"],
-            ["Strength w", "How strongly the style applies, set by the user (0–1)"],
-            ["Presets", "Cat · Dog · Drama · Animation (same as the simulator)"],
+            ["Signature", "Six axes: P1 Reach, P2 Speed contrast, P3 Stillness, P4 Afterglow, P5 Anticipation, P6 Return (0 to 1)"],
+            ["Strength w", "How strongly the style applies, set by the user (0 to 1)"],
+            ["Presets", "Cat, Dog, Drama, Animation (same as the simulator)"],
             ["ρ link", "Damped per behavior by its style acceptance"],
           ],
         },
@@ -43,7 +43,7 @@ export const style: GuidelineSection = {
       title: "Presets",
       summary: "Four starting styles. Signature examples (Dog, Butler, Cat) live here rather than on the face and sound principle pages.",
       body: [
-        { kind: "list", title: "Presets", view: "tiles", items: ["style.cat — Cat", "style.dog — Dog", "style.drama — Drama", "style.animation — Animation"] },
+        { kind: "list", title: "Presets", view: "tiles", items: ["style.cat: Cat", "style.dog: Dog", "style.drama: Drama", "style.animation: Animation"] },
       ],
       related: ["signature", "sources"],
       source: `${SRC}-1, §10-3`,
@@ -60,9 +60,9 @@ export const style: GuidelineSection = {
           view: "scale",
           head: ["ρ", "Meaning", "Examples"],
           rows: [
-            ["High 0.8–0.95", "Style makes the personality", "Bow · Doze · Joy · Sad · Curious"],
-            ["Medium 0.5–0.6", "Relationship signal — the shape is kept", "Approach · Keep distance"],
-            ["Low 0.2–0.3", "Agreed signal — too much reads as broken", "Nod · Shake"],
+            ["High 0.8 to 0.95", "Style makes the personality", "Bow, Doze, Joy, Sad, Curious"],
+            ["Medium 0.5 to 0.6", "Relationship signal: the shape is kept", "Approach, Keep distance"],
+            ["Low 0.2 to 0.3", "Agreed signal: too much reads as broken", "Nod, Shake"],
           ],
         },
       ],

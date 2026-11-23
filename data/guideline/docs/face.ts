@@ -21,7 +21,7 @@ export const faceDoc: ComponentDoc = {
         { figure: "none", title: "None", subtitle: "No screen", text: "No face token → Emotion expression omitted" },
         { figure: "light", title: "Lighting", subtitle: "LED", text: "Eye size → Use brightness, blinking → Use flashing" },
         { figure: "eyes", title: "Only eyes", subtitle: "Eyes on the screen", text: "Four eye tokens" },
-        { figure: "all", title: "All", subtitle: "Eyes · Eyebrows · Mouth", text: "Four eye tokens + eyebrows · mouth · nose" },
+        { figure: "all", title: "All", subtitle: "Eyes, Eyebrows, Mouth", text: "Four eye tokens + eyebrows, mouth, nose" },
       ],
     },
     {
@@ -57,9 +57,9 @@ export const faceDoc: ComponentDoc = {
       text: "When entering and leaving, it's quick; when staying, it's slow.\nDuring the stay, the form is fixed, and it moves slightly with a different rhythm for each emotion.",
       kind: "face-rhythm",
       phases: [
-        { title: "When entering", time: "0.2–0.4 s", note: "Fast" },
-        { title: "When staying", time: "1–7 s", note: "The form is fixed, but the rhythm varies with each emotion." },
-        { title: "On the way back", time: "0.2–0.4 s", note: "Fast" },
+        { title: "When entering", time: "0.2 to 0.4 s", note: "Fast" },
+        { title: "When staying", time: "1 to 7 s", note: "The form is fixed, but the rhythm varies with each emotion." },
+        { title: "On the way back", time: "0.2 to 0.4 s", note: "Fast" },
       ],
       loops: [
         { title: "Laughter", text: "Consistent and frequent\nsmall bounces", chips: ["Quick", "Bouncy"] },

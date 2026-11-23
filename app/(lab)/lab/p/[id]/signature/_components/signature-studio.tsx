@@ -462,7 +462,7 @@ export function SignatureStudio({
                         <span className="flex min-w-0 items-start gap-[var(--space-8)] whitespace-nowrap">
                           <span className="w-[72px] shrink-0 truncate font-medium text-[var(--sage-900)]">{kw}</span>
                           <span className="text-[var(--text-secondary)]">→</span>
-                          <span className="truncate font-mono text-[var(--text-link)]">{`${m.axis} ${m.value}${effect ? ` · ${effect}` : ""}`}</span>
+                          <span className="truncate font-mono text-[var(--text-link)]">{`${m.axis} ${m.value}${effect ? `, ${effect}` : ""}`}</span>
                         </span>
                         {m.page && (
                           <button
@@ -524,7 +524,7 @@ export function SignatureStudio({
           </div>
           {compareSig && (
             <p className="mt-[var(--space-8)] text-center font-mono text-[12px] leading-[15px] text-[var(--text-secondary)]" data-testid="compare">
-              v0.{compareSig.version} (dashed) → v0.{current.version}: {AXIS_ORDER.filter((a) => compareSig.axes[a] !== shown.axes[a]).map((a) => `${AXIS_INFO[a].label} ${compareSig.axes[a]}→${shown.axes[a]}`).join(" · ") || "same"}
+              v0.{compareSig.version} (dashed) → v0.{current.version}: {AXIS_ORDER.filter((a) => compareSig.axes[a] !== shown.axes[a]).map((a) => `${AXIS_INFO[a].label} ${compareSig.axes[a]}→${shown.axes[a]}`).join(", ") || "same"}
             </p>
           )}
 
@@ -550,7 +550,7 @@ export function SignatureStudio({
                     <span className="size-[8px] rounded-[var(--radius-full)]" style={{ background: `var(--channel-${ch})` }} />
                     {S.channelLines[ch]}
                   </dt>
-                  <dd className="text-[var(--text-secondary)]">{effects.filter(Boolean).join(" · ")}</dd>
+                  <dd className="text-[var(--text-secondary)]">{effects.filter(Boolean).join(", ")}</dd>
                 </div>
               ))}
             </dl>
@@ -595,7 +595,7 @@ export function SignatureStudio({
       <StageSteps labels={S.steps} current={running && job ? job.step : current ? S.steps.length - 1 : -1} className="absolute bottom-[67px] left-[calc(50%-341px)]" />
 
       <ConfirmModal open={skipOpen} title={S.skipConfirm.title} body={S.skipConfirm.body} confirmLabel={S.skip} onConfirm={skip} onCancel={() => setSkipOpen(false)} />
-      <Modal open={quote !== null} onClose={() => setQuote(null)} title={quote ? `“${quote.keyword}” · ${fmt(S.pageQuote, { page: quote.page })}` : ""}>
+      <Modal open={quote !== null} onClose={() => setQuote(null)} title={quote ? `“${quote.keyword}”, ${fmt(S.pageQuote, { page: quote.page })}` : ""}>
         <blockquote className="border-l-2 border-[var(--border-default)] pl-[var(--space-12)] text-[14px] leading-[18px] text-[var(--text-link)]">{quote?.quote ?? S.noQuote}</blockquote>
         <div className="flex justify-end">
           <Button onClick={() => setQuote(null)}>{STRINGS.common.close}</Button>

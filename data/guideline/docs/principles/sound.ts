@@ -29,10 +29,10 @@ export const soundDoc: ComponentDoc = {
       columns: 4,
       label: "Variation",
       items: [
-        { title: "Excited", figure: { big: "+5 st" }, info: "+5 st · 1.4×" },
-        { title: "Curious", figure: { big: "+2 st" }, info: "+2 st · rising end" },
-        { title: "Worried", figure: { big: "−3 st" }, info: "−3 st · slower" },
-        { title: "Sad", figure: { big: "−6 st" }, info: "−6 st · fades out" },
+        { title: "Excited", figure: { big: "+5 st" }, info: "+5 st, 1.4×" },
+        { title: "Curious", figure: { big: "+2 st" }, info: "+2 st, rising end" },
+        { title: "Worried", figure: { big: "−3 st" }, info: "−3 st, slower" },
+        { title: "Sad", figure: { big: "−6 st" }, info: "−6 st, fades out" },
       ],
     },
     {

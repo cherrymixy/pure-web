@@ -183,7 +183,7 @@ export function LayerMap({ text }: { text: string }) {
 
         <div className="mt-[var(--space-24)] flex items-center gap-[var(--space-12)] border-t border-[var(--home-line)] pt-[var(--space-16)]">
           <span className="min-w-0 flex-1 truncate text-[12px] text-[var(--home-ink-3)]">
-            {cur.group.name} · {cur.group.desc}
+            {cur.group.name}: {cur.group.desc}
           </span>
           {[-1, 1].map((d) => (
             <button

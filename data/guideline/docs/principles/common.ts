@@ -28,10 +28,10 @@ export const commonDoc: ComponentDoc = {
       columns: 4,
       label: "When",
       items: [
-        { title: "Safety", figure: { big: "1" }, info: "Fall risk · strong force — within 0.1 s" },
-        { title: "Call · touch", figure: { big: "2" }, info: "Turns to look within 1 s" },
-        { title: "Conversation", figure: { big: "3" }, info: "Backchannel · answering a question" },
-        { title: "Idle", figure: { big: "4" }, info: "Habits · breathing" },
+        { title: "Safety", figure: { big: "1" }, info: "Fall risk, strong force: within 0.1 s" },
+        { title: "Call, touch", figure: { big: "2" }, info: "Turns to look within 1 s" },
+        { title: "Conversation", figure: { big: "3" }, info: "Backchannel, answering a question" },
+        { title: "Idle", figure: { big: "4" }, info: "Habits, breathing" },
       ],
     },
     {
@@ -46,7 +46,7 @@ export const commonDoc: ComponentDoc = {
         { label: "Another channel", note: "stands in" },
         { label: "Skip", note: "if none can" },
       ],
-      caption: "Never cover it by enlarging motion — the \"no screen → +20%\" rule is retired.",
+      caption: "Never cover it by enlarging motion. The \"no screen → +20%\" rule is retired.",
     },
     {
       id: "states",

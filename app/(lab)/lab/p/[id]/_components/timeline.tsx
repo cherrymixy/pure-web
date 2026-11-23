@@ -191,7 +191,7 @@ export function Timeline(p: TimelineProps) {
             <span className="text-[var(--neutral-500)]">{`/  ${formatTime(duration)}`}</span>
           </span>
           <span className={`${chip} bg-[var(--bg-surface-muted)] tabular-nums text-[var(--text-primary)]`}>
-            {fmt(T.frame, { n: Math.round(p.t * CLIP_FPS) })} · {T.fps}
+            {fmt(T.frame, { n: Math.round(p.t * CLIP_FPS) })}, {T.fps}
           </span>
           {p.fromRecipe && <span className="min-w-0 truncate text-[12px] leading-[15px] text-[var(--text-tertiary)]">{T.recipeNote}</span>}
         </div>
@@ -344,7 +344,7 @@ function Inspector(p: TimelineProps & { jointKey: Key | undefined }) {
   const outOfRange = !!joint && (!Number.isFinite(v) || v < joint.min || v > joint.max);
   return (
     <aside className={box} data-testid="inspector">
-      <h3 className="text-[16px] leading-[20px] text-[var(--text-primary)]">{T.inspector} · {joint?.label ?? (sel.track === "face" ? T.faceTrack : T.soundTrack)}</h3>
+      <h3 className="text-[16px] leading-[20px] text-[var(--text-primary)]">{T.inspector}: {joint?.label ?? (sel.track === "face" ? T.faceTrack : T.soundTrack)}</h3>
       <label className="flex items-center justify-between gap-[var(--space-8)]">
         <span className={label}>{T.time}</span>
         <input type="number" step={1 / CLIP_FPS} min={0} max={p.clip.duration} value={t} onChange={(e) => setT(e.target.value)} className={field} />

@@ -27,7 +27,7 @@ export const semanticDoc: ComponentDoc = {
           title: "Not looking broken comes first",
           subtitle: "Irregular tremor, oversized motion, sudden acceleration. Perceived malfunction × overall rating r = −0.80 (pilot −0.76).",
           figure: { big: "r = −0.80", chips: ["Malfunction × rating"] },
-          info: "No tremor · size limit · repeat twice",
+          info: "No tremor, size limit, repeat twice",
         },
         {
           tag: "sp.3",
@@ -48,7 +48,7 @@ export const semanticDoc: ComponentDoc = {
           title: "Start, stop, return",
           subtitle: "Without a stop at the end it reads as \"still going\". 34% read pointing as \"looking around\".",
           figure: { chips: ["Start", "Stop", "Return"], flow: true },
-          info: "End hold 0.3–0.5 s · repeat twice · return to rest",
+          info: "End hold 0.3 to 0.5 s, repeat twice, return to rest",
         },
       ],
     },
@@ -61,10 +61,10 @@ export const semanticDoc: ComponentDoc = {
       kind: "p-bullets",
       heading: "Principles become checks",
       items: [
-        "Every MUST guardrail (gr.*) names the principle it comes from — SP-1 to SP-5.",
-        "Token combination rules (HARD H1–H7, SOFT S1–S3) add how tokens may be put together.",
+        "Every MUST guardrail (gr.*) names the principle it comes from: SP-1 to SP-5.",
+        "Token combination rules (HARD H1 to H7, SOFT S1 to S3) add how tokens may be put together.",
       ],
-      figure: { chips: ["SP-1–5", "MUST 8", "H1–H7 · S1–S3"], flow: true },
+      figure: { chips: ["SP-1 to 5", "MUST 8", "H1 to H7, S1 to S3"], flow: true },
     },
     {
       id: "dont",
@@ -74,7 +74,7 @@ export const semanticDoc: ComponentDoc = {
       items: [
         { title: "Don't Act Without Context", text: "A behavior without a trigger and a forbid condition is not generated (SP-1).", figure: { chips: ["trigger", "forbid_when"] } },
         { title: "Don't Look Broken", text: "Irregular tremor, oversized motion and sudden acceleration read as a malfunction (SP-2).", figure: { big: "≈≈≈" } },
-        { title: "Don't Show Negative Emotion With the Body Alone", text: "Negative emotion needs face or sound as well; otherwise it is not expressed (SP-4).", figure: { chips: ["body", "face · sound"], flow: true } },
+        { title: "Don't Show Negative Emotion With the Body Alone", text: "Negative emotion needs face or sound as well; otherwise it is not expressed (SP-4).", figure: { chips: ["body", "face, sound"], flow: true } },
       ],
     },
   ],

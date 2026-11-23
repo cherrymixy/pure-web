@@ -99,7 +99,7 @@ export const TOUR_STEPS: TourStep[] = [
     target: '[data-tour="edit-detail"]',
     advance: "click",
     title: "타임라인으로 다듬기",
-    body: "생성된 Motion·Face·Sound를 타임라인에서 시간 단위로 조정할 수 있어요. Edit Detail을 눌러 열어 보세요.",
+    body: "생성된 Motion, Face, Sound를 타임라인에서 시간 단위로 조정할 수 있어요. Edit Detail을 눌러 열어 보세요.",
   },
   {
     path: /^\/lab\/p\/[^/]+$/,

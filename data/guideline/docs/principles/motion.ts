@@ -17,18 +17,18 @@ export const motionDoc: ComponentDoc = {
       items: [
         "A missing role is taken by another part, or the motion is skipped (MUST).",
         "Slow down from ROM 85%. A motion that cannot be followed is scaled down as a whole, never clipped, and the user is told (MUST).",
-        "Gaze first, body 0.1–0.2 s later, both in the same direction (SHOULD).",
+        "Gaze first, body 0.1 to 0.2 s later, both in the same direction (SHOULD).",
       ],
       figure: { chips: ["Gaze", "Body"], flow: true },
     },
     {
       id: "phases",
       title: "Start, stop, return",
-      toc: "Start · stop · return",
-      text: "Every motion has three stages (MUST). While holding it still moves ±0.5° — frozen motion feels like a surveillance camera.",
+      toc: "Start, stop, return",
+      text: "Every motion has three stages (MUST). While holding it still moves ±0.5°. Frozen motion feels like a surveillance camera.",
       kind: "p-phases",
       phases: [
-        { title: "Start", time: "+0.1–0.2 s", note: "Gaze leads, the body follows" },
+        { title: "Start", time: "+0.1 to 0.2 s", note: "Gaze leads, the body follows" },
         { title: "Stop", time: "±0.5°", note: "Hold the end pose with a micro motion" },
         { title: "Return", time: "rest", note: "Back to the original pose" },
       ],
@@ -46,7 +46,7 @@ export const motionDoc: ComponentDoc = {
       items: [
         { title: "Don't Move Joints Apart When Lifted", text: "While carried, joints moving independently read as broken.", figure: { chips: ["Lifted", "Curl up"], flow: true } },
         { title: "Don't Move Fast Near the Limit", text: "Slow down from ROM 85%; scale the whole motion down instead of clipping it.", figure: { big: "85% ROM" } },
-        { title: "Don't Make Up for a Missing Face", text: "No enlarging motion to cover a missing face or sound — use another channel or skip.", figure: { chips: ["No face", "Bigger motion"] } },
+        { title: "Don't Make Up for a Missing Face", text: "No enlarging motion to cover a missing face or sound. Use another channel or skip.", figure: { chips: ["No face", "Bigger motion"] } },
       ],
     },
   ],

@@ -117,7 +117,7 @@ export function ProfileView({ initial }: { initial: Profile }) {
                         </div>
                         <div className="text-[14px] leading-[20px] text-[var(--text-secondary)]">
                           {m.email}
-                          {m.pending && m.expiresAt ? ` · ${fmt(P.pendingUntil, { date: new Date(m.expiresAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }) })}` : ""}
+                          {m.pending && m.expiresAt ? `, ${fmt(P.pendingUntil, { date: new Date(m.expiresAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }) })}` : ""}
                         </div>
                       </div>
                     </div>

@@ -281,7 +281,7 @@ function StepTile({ tile }: { tile: ChannelTile }) {
       }
     }
   }
-  const title = `${label} — ${tile.channels.map((c) => E.tabs[c]).join(" · ")}`;
+  const title = `${label}: ${tile.channels.map((c) => E.tabs[c]).join(", ")}`;
   const gid = useId();
   const body = (
     <>
@@ -353,7 +353,7 @@ function InputCard({
                 <span>{r.kind === "video" ? "▶" : r.kind === "userData" ? "◇" : "▣"}</span>
               )}
               <span className="max-w-[112px] truncate">{fileName(r)}</span>
-              {r.status === "failed" ? <span>· {E.referenceFailed}</span> : reading.includes(r.id) ? <span>· {E.referenceReading}</span> : null}
+              {r.status === "failed" ? <span>{E.referenceFailed}</span> : reading.includes(r.id) ? <span>{E.referenceReading}</span> : null}
             </button>
           ))}
         </div>

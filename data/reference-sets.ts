@@ -28,7 +28,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
       {
         "channel": "face",
         "title": "Relaxed cat, half-lidded eyes",
-        "note": "Soft, half-closed eyelids with a calm gaze — used as the resting eye shape for idle.",
+        "note": "Soft, half-closed eyelids with a calm gaze. Used as the resting eye shape for idle.",
         "file": "/reference-sets/idle/face.jpg",
         "poster": null,
         "source": {
@@ -42,7 +42,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
       {
         "channel": "motion",
         "title": "Fox resting, glancing around",
-        "note": "Body stays still while the head makes small, unhurried turns — used for the occasional idle gaze shift.",
+        "note": "Body stays still while the head makes small, unhurried turns. Used for the occasional idle gaze shift.",
         "file": "/reference-sets/idle/motion.webm",
         "poster": "/reference-sets/idle/motion.jpg",
         "source": {
@@ -50,13 +50,13 @@ export const REFERENCE_SETS: ReferenceSet[] = [
           "page": "https://commons.wikimedia.org/wiki/File:A_Chance_to_Relax.webm",
           "author": "Peter Trimming",
           "license": "CC BY 2.0",
-          "excerpt": "22.0–28.0 s of 63.1 s"
+          "excerpt": "22.0 to 28.0 s of 63.1 s"
         }
       },
       {
         "channel": "sound",
         "title": "Cat purring",
-        "note": "A steady low purr with a slow in-out rhythm — used as the quiet breathing pulse of idle.",
+        "note": "A steady low purr with a slow in-out rhythm. Used as the quiet breathing pulse of idle.",
         "file": "/reference-sets/idle/sound.ogg",
         "poster": null,
         "source": {
@@ -64,7 +64,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
           "page": "https://commons.wikimedia.org/wiki/File:Jupey_purring.wav",
           "author": "Pangea1962",
           "license": "CC BY-SA 4.0",
-          "excerpt": "0.0–8.0 s of 18.5 s"
+          "excerpt": "0.0 to 8.0 s of 18.5 s"
         }
       }
     ]
@@ -75,7 +75,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
       {
         "channel": "face",
         "title": "Very sleepy cat",
-        "note": "Eyes narrowed to slits while still upright — used for the heavy-lidded doze blink.",
+        "note": "Eyes narrowed to slits while still upright. Used for the heavy-lidded doze blink.",
         "file": "/reference-sets/doze/face.jpg",
         "poster": null,
         "source": {
@@ -89,7 +89,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
       {
         "channel": "motion",
         "title": "Meerkat nodding off",
-        "note": "Head sinks toward the ground, snaps back up, then starts drooping again — used for the droop-and-jolt doze loop.",
+        "note": "Head sinks toward the ground, snaps back up, then starts drooping again. Used for the droop-and-jolt doze loop.",
         "file": "/reference-sets/doze/motion.webm",
         "poster": "/reference-sets/doze/motion.jpg",
         "source": {
@@ -97,13 +97,13 @@ export const REFERENCE_SETS: ReferenceSet[] = [
           "page": "https://commons.wikimedia.org/wiki/File:Meerkat_at_Los_Angeles_Zoo.webm",
           "author": "LA Zoo",
           "license": "CC BY 3.0",
-          "excerpt": "3.5–9.5 s of 15.4 s"
+          "excerpt": "3.5 to 9.5 s of 15.4 s"
         }
       },
       {
         "channel": "sound",
         "title": "Gelada yawn",
-        "note": "A short drowsy yawn vocalisation — used as the sleepy cue between droops.",
+        "note": "A short drowsy yawn vocalisation. Used as the sleepy cue between droops.",
         "file": "/reference-sets/doze/sound.ogg",
         "poster": null,
         "source": {
@@ -111,7 +111,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
           "page": "https://commons.wikimedia.org/wiki/File:Yawn_vocalisation_by_a_Gelada.wav",
           "author": "Luca Pedruzzi, Martina Francesconi, Elisabetta Palagi et Alban Lemasson",
           "license": "CC BY 4.0",
-          "excerpt": "0.3–1.1 s of 1.1 s"
+          "excerpt": "0.3 to 1.1 s of 1.1 s"
         }
       }
     ]
@@ -122,7 +122,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
       {
         "channel": "face",
         "title": "Cat asleep, curled up",
-        "note": "Fully closed eyes with the head resting on the body — used for the closed-eye sleep face.",
+        "note": "Fully closed eyes with the head resting on the body. Used for the closed-eye sleep face.",
         "file": "/reference-sets/sleep/face.jpg",
         "poster": null,
         "source": {
@@ -136,7 +136,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
       {
         "channel": "motion",
         "title": "Fox sleeping curled",
-        "note": "Curled into a ball with the head tucked and only slow breathing movement — used for the tucked sleep pose.",
+        "note": "Curled into a ball with the head tucked and only slow breathing movement. Used for the tucked sleep pose.",
         "file": "/reference-sets/sleep/motion.webm",
         "poster": "/reference-sets/sleep/motion.jpg",
         "source": {
@@ -144,13 +144,13 @@ export const REFERENCE_SETS: ReferenceSet[] = [
           "page": "https://commons.wikimedia.org/wiki/File:Mountain_Moment-_Sleepy_Fox.webm",
           "author": "Mount Rainier National Park",
           "license": "CC BY 3.0",
-          "excerpt": "27.0–33.0 s of 36.9 s"
+          "excerpt": "27.0 to 33.0 s of 36.9 s"
         }
       },
       {
         "channel": "sound",
         "title": "Snoring",
-        "note": "Long, slow snore cycles of a few seconds each — used to pace the sleep breathing.",
+        "note": "Long, slow snore cycles of a few seconds each. Used to pace the sleep breathing.",
         "file": "/reference-sets/sleep/sound.ogg",
         "poster": null,
         "source": {
@@ -158,7 +158,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
           "page": "https://commons.wikimedia.org/wiki/File:Young_man_snoring.wav",
           "author": "TONY LU",
           "license": "CC BY-SA 4.0",
-          "excerpt": "0.7–8.7 s of 58.1 s"
+          "excerpt": "0.7 to 8.7 s of 58.1 s"
         }
       }
     ]
@@ -169,7 +169,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
       {
         "channel": "face",
         "title": "Lion yawning",
-        "note": "Eyes squeezed shut with a wide-open mouth — used for the stretch peak of waking.",
+        "note": "Eyes squeezed shut with a wide-open mouth. Used for the stretch peak of waking.",
         "file": "/reference-sets/wake/face.jpg",
         "poster": null,
         "source": {
@@ -183,7 +183,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
       {
         "channel": "motion",
         "title": "Cat yawning in slow motion",
-        "note": "Head lifts, a long yawn opens and closes, then the head settles — used for the wake-up stretch arc.",
+        "note": "Head lifts, a long yawn opens and closes, then the head settles. Used for the wake-up stretch arc.",
         "file": "/reference-sets/wake/motion.webm",
         "poster": "/reference-sets/wake/motion.jpg",
         "source": {
@@ -191,13 +191,13 @@ export const REFERENCE_SETS: ReferenceSet[] = [
           "page": "https://commons.wikimedia.org/wiki/File:Cat_yawning_in_slow_motion.webm",
           "author": "Grendelkhan",
           "license": "CC BY-SA 4.0",
-          "excerpt": "6.0–12.0 s of 19.3 s"
+          "excerpt": "6.0 to 12.0 s of 19.3 s"
         }
       },
       {
         "channel": "sound",
         "title": "Rooster crow",
-        "note": "A bright rising call — used as the wake-up trigger.",
+        "note": "A bright rising call. Used as the wake-up trigger.",
         "file": "/reference-sets/wake/sound.ogg",
         "poster": null,
         "source": {
@@ -205,7 +205,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
           "page": "https://commons.wikimedia.org/wiki/File:Kukuriku.flac",
           "author": "Yosef Ben Melamed",
           "license": "CC BY-SA 4.0",
-          "excerpt": "0.6–3.8 s of 3.8 s"
+          "excerpt": "0.6 to 3.8 s of 3.8 s"
         }
       }
     ]
@@ -216,7 +216,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
       {
         "channel": "face",
         "title": "Gentle smile",
-        "note": "Relaxed eyes with a soft smile — used for the agreeable expression during a nod.",
+        "note": "Relaxed eyes with a soft smile. Used for the agreeable expression during a nod.",
         "file": "/reference-sets/nod/face.jpg",
         "poster": null,
         "source": {
@@ -230,7 +230,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
       {
         "channel": "motion",
         "title": "Water dragon head bob",
-        "note": "A quick down-up dip of the head from a still pose — used for the short vertical nod stroke.",
+        "note": "A quick down-up dip of the head from a still pose. Used for the short vertical nod stroke.",
         "file": "/reference-sets/nod/motion.webm",
         "poster": "/reference-sets/nod/motion.jpg",
         "source": {
@@ -238,13 +238,13 @@ export const REFERENCE_SETS: ReferenceSet[] = [
           "page": "https://commons.wikimedia.org/wiki/File:Australian_Water_Dragon_-_Head_Bobbing_-_edited.webm",
           "author": "Andrew Mercer (www.baldwhiteguy.co.nz)",
           "license": "CC BY-SA 4.0",
-          "excerpt": "24.5–30.5 s of 41.6 s"
+          "excerpt": "24.5 to 30.5 s of 41.6 s"
         }
       },
       {
         "channel": "sound",
         "title": "\"Uh-huh\"",
-        "note": "A short spoken affirmative murmur — used to time the down-up beat of the nod.",
+        "note": "A short spoken affirmative murmur. Used to time the down-up beat of the nod.",
         "file": "/reference-sets/nod/sound.ogg",
         "poster": null,
         "source": {
@@ -263,7 +263,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
       {
         "channel": "face",
         "title": "Grumpy cat",
-        "note": "Downturned mouth and flat, unimpressed eyes — used for the refusal expression.",
+        "note": "Downturned mouth and flat, unimpressed eyes. Used for the refusal expression.",
         "file": "/reference-sets/shake/face.jpg",
         "poster": null,
         "source": {
@@ -277,7 +277,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
       {
         "channel": "motion",
         "title": "Person shaking head",
-        "note": "Repeated side-to-side head turns of small, even amplitude — used for the no-shake yaw swing.",
+        "note": "Repeated side-to-side head turns of small, even amplitude. Used for the no-shake yaw swing.",
         "file": "/reference-sets/shake/motion.webm",
         "poster": "/reference-sets/shake/motion.jpg",
         "source": {
@@ -291,7 +291,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
       {
         "channel": "sound",
         "title": "Error buzzer",
-        "note": "A short flat buzz — used as the negative cue for refusal.",
+        "note": "A short flat buzz. Used as the negative cue for refusal.",
         "file": "/reference-sets/shake/sound.ogg",
         "poster": null,
         "source": {
@@ -310,7 +310,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
       {
         "channel": "face",
         "title": "Meerkat face",
-        "note": "Wide, dark, watchful eyes — used for the open-eyed scanning look.",
+        "note": "Wide, dark, watchful eyes. Used for the open-eyed scanning look.",
         "file": "/reference-sets/look_around/face.jpg",
         "poster": null,
         "source": {
@@ -324,7 +324,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
       {
         "channel": "motion",
         "title": "Barn owl turning its head",
-        "note": "Body stays fixed while the head swivels left and right with pauses — used for the scan-and-hold head turns.",
+        "note": "Body stays fixed while the head swivels left and right with pauses. Used for the scan-and-hold head turns.",
         "file": "/reference-sets/look_around/motion.webm",
         "poster": "/reference-sets/look_around/motion.jpg",
         "source": {
@@ -332,13 +332,13 @@ export const REFERENCE_SETS: ReferenceSet[] = [
           "page": "https://commons.wikimedia.org/wiki/File:Barn_owl.webm",
           "author": "Dennis.insect.filmer",
           "license": "CC BY-SA 4.0",
-          "excerpt": "5.0–11.0 s of 61.3 s"
+          "excerpt": "5.0 to 11.0 s of 61.3 s"
         }
       },
       {
         "channel": "sound",
         "title": "Woodland birdsong",
-        "note": "Bird calls arriving from different directions — used as the prompt to turn toward each sound.",
+        "note": "Bird calls arriving from different directions. Used as the prompt to turn toward each sound.",
         "file": "/reference-sets/look_around/sound.ogg",
         "poster": null,
         "source": {
@@ -346,7 +346,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
           "page": "https://commons.wikimedia.org/wiki/File:Bourne_woods_2020-05-15_0754.mp3",
           "author": "Robert EA Harvey",
           "license": "CC BY-SA 4.0",
-          "excerpt": "3.6–11.6 s of 82.6 s"
+          "excerpt": "3.6 to 11.6 s of 82.6 s"
         }
       }
     ]
@@ -357,7 +357,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
       {
         "channel": "face",
         "title": "Dog tilting its head",
-        "note": "Head canted to one side with ears up — used for the curious head-tilt angle.",
+        "note": "Head canted to one side with ears up. Used for the curious head-tilt angle.",
         "file": "/reference-sets/curious/face.jpg",
         "poster": null,
         "source": {
@@ -371,7 +371,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
       {
         "channel": "motion",
         "title": "Cat watching a fish tank",
-        "note": "Leans in, peeks and follows the moving fish with small head shifts — used for the curious lean and tilt.",
+        "note": "Leans in, peeks and follows the moving fish with small head shifts. Used for the curious lean and tilt.",
         "file": "/reference-sets/curious/motion.webm",
         "poster": "/reference-sets/curious/motion.jpg",
         "source": {
@@ -379,13 +379,13 @@ export const REFERENCE_SETS: ReferenceSet[] = [
           "page": "https://commons.wikimedia.org/wiki/File:Cat_reacting_to_a_fish_tank.webm",
           "author": "Danmation",
           "license": "CC BY 3.0",
-          "excerpt": "20.0–26.0 s of 31.1 s"
+          "excerpt": "20.0 to 26.0 s of 31.1 s"
         }
       },
       {
         "channel": "sound",
         "title": "Questioning meow",
-        "note": "A short rising meow — used as the inquisitive cue.",
+        "note": "A short rising meow. Used as the inquisitive cue.",
         "file": "/reference-sets/curious/sound.ogg",
         "poster": null,
         "source": {
@@ -404,7 +404,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
       {
         "channel": "face",
         "title": "Smiling dog",
-        "note": "Open mouth and bright, wide eyes — used for the joyful face.",
+        "note": "Open mouth and bright, wide eyes. Used for the joyful face.",
         "file": "/reference-sets/happy/face.jpg",
         "poster": null,
         "source": {
@@ -418,7 +418,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
       {
         "channel": "motion",
         "title": "Lambs jumping",
-        "note": "Springy hops and quick bounces off the ground — used for the bouncing rhythm of joy.",
+        "note": "Springy hops and quick bounces off the ground. Used for the bouncing rhythm of joy.",
         "file": "/reference-sets/happy/motion.webm",
         "poster": "/reference-sets/happy/motion.jpg",
         "source": {
@@ -426,13 +426,13 @@ export const REFERENCE_SETS: ReferenceSet[] = [
           "page": "https://commons.wikimedia.org/wiki/File:Playful_Lambs,_Dartmoor.webm",
           "author": "Miles Wolstenholme",
           "license": "CC BY 2.0",
-          "excerpt": "9.0–15.0 s of 27.1 s"
+          "excerpt": "9.0 to 15.0 s of 27.1 s"
         }
       },
       {
         "channel": "sound",
         "title": "Laughter",
-        "note": "Bursts of laughter in quick pulses — used to time the happy bounces.",
+        "note": "Bursts of laughter in quick pulses. Used to time the happy bounces.",
         "file": "/reference-sets/happy/sound.ogg",
         "poster": null,
         "source": {
@@ -440,7 +440,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
           "page": "https://commons.wikimedia.org/wiki/File:72843_lonemonk_approx-800-laughter-only-1.wav",
           "author": "lonemonk on freesound.org",
           "license": "CC BY 3.0",
-          "excerpt": "0.0–8.0 s of 13.8 s"
+          "excerpt": "0.0 to 8.0 s of 13.8 s"
         }
       }
     ]
@@ -451,7 +451,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
       {
         "channel": "face",
         "title": "Dog with sad eyes",
-        "note": "Head lowered to the floor with upturned eyes — used for the downcast sad gaze.",
+        "note": "Head lowered to the floor with upturned eyes. Used for the downcast sad gaze.",
         "file": "/reference-sets/sad/face.jpg",
         "poster": null,
         "source": {
@@ -465,7 +465,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
       {
         "channel": "motion",
         "title": "Donkey standing in the rain",
-        "note": "Head hangs low and barely moves — used for the dropped-head, slumped sad pose.",
+        "note": "Head hangs low and barely moves. Used for the dropped-head, slumped sad pose.",
         "file": "/reference-sets/sad/motion.webm",
         "poster": "/reference-sets/sad/motion.jpg",
         "source": {
@@ -473,13 +473,13 @@ export const REFERENCE_SETS: ReferenceSet[] = [
           "page": "https://commons.wikimedia.org/wiki/File:Sad_donkey_in_the_rain.webm",
           "author": "Matt Zimmerman",
           "license": "CC BY 2.0",
-          "excerpt": "0.0–4.0 s of 33.8 s"
+          "excerpt": "0.0 to 4.0 s of 33.8 s"
         }
       },
       {
         "channel": "sound",
         "title": "Sad trombone",
-        "note": "Four descending notes, the last one drawn out — used for the slow downward sag.",
+        "note": "Four descending notes, the last one drawn out. Used for the slow downward sag.",
         "file": "/reference-sets/sad/sound.ogg",
         "poster": null,
         "source": {
@@ -498,7 +498,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
       {
         "channel": "face",
         "title": "Alert tabby cat",
-        "note": "Ears pricked forward and eyes wide open — used for the alert stare.",
+        "note": "Ears pricked forward and eyes wide open. Used for the alert stare.",
         "file": "/reference-sets/alert/face.jpg",
         "poster": null,
         "source": {
@@ -512,7 +512,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
       {
         "channel": "motion",
         "title": "Roe deer lifting its head",
-        "note": "Grazing head-down, then the head snaps up and freezes — used for the fast alert lift and hold.",
+        "note": "Grazing head-down, then the head snaps up and freezes. Used for the fast alert lift and hold.",
         "file": "/reference-sets/alert/motion.webm",
         "poster": "/reference-sets/alert/motion.jpg",
         "source": {
@@ -520,13 +520,13 @@ export const REFERENCE_SETS: ReferenceSet[] = [
           "page": "https://commons.wikimedia.org/wiki/File:European_roe_deer_(Capreolus_capreolus)_in_Slovakia.webm",
           "author": "Lubo Ondrasko",
           "license": "CC BY 3.0",
-          "excerpt": "17.0–23.0 s of 26.0 s"
+          "excerpt": "17.0 to 23.0 s of 26.0 s"
         }
       },
       {
         "channel": "sound",
         "title": "Blackbird alarm call",
-        "note": "Sharp, repeated alarm chips — used as the startle trigger.",
+        "note": "Sharp, repeated alarm chips. Used as the startle trigger.",
         "file": "/reference-sets/alert/sound.ogg",
         "poster": null,
         "source": {
@@ -545,7 +545,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
       {
         "channel": "face",
         "title": "Thai wai greeting",
-        "note": "Hands pressed together with a lowered, friendly gaze — used for the polite greeting expression.",
+        "note": "Hands pressed together with a lowered, friendly gaze. Used for the polite greeting expression.",
         "file": "/reference-sets/greet/face.jpg",
         "poster": null,
         "source": {
@@ -559,7 +559,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
       {
         "channel": "motion",
         "title": "Dickson Greeting (1891)",
-        "note": "A man tips his hat across his chest with a slight dip of the head — used for the small greeting bow.",
+        "note": "A man tips his hat across his chest with a slight dip of the head. Used for the small greeting bow.",
         "file": "/reference-sets/greet/motion.webm",
         "poster": "/reference-sets/greet/motion.jpg",
         "source": {
@@ -567,13 +567,13 @@ export const REFERENCE_SETS: ReferenceSet[] = [
           "page": "https://commons.wikimedia.org/wiki/File:Dickson_Greeting_(1891).webm",
           "author": "William Kennedy Dickson",
           "license": "Public domain",
-          "excerpt": "0.0–6.0 s of 14.6 s"
+          "excerpt": "0.0 to 6.0 s of 14.6 s"
         }
       },
       {
         "channel": "sound",
         "title": "Doorbell",
-        "note": "A two-tone ding-dong — used as the hello cue.",
+        "note": "A two-tone ding-dong. Used as the hello cue.",
         "file": "/reference-sets/greet/sound.ogg",
         "poster": null,
         "source": {
@@ -592,7 +592,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
       {
         "channel": "face",
         "title": "Great horned owl, eyes wide",
-        "note": "Large, fixed, wide-open eyes — used for the searchlight stare during the sweep.",
+        "note": "Large, fixed, wide-open eyes. Used for the searchlight stare during the sweep.",
         "file": "/reference-sets/sweep/face.jpg",
         "poster": null,
         "source": {
@@ -606,7 +606,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
       {
         "channel": "motion",
         "title": "Rotating lighthouse lens",
-        "note": "A slow, constant-speed rotation around a fixed base — used for the wide base pan.",
+        "note": "A slow, constant-speed rotation around a fixed base. Used for the wide base pan.",
         "file": "/reference-sets/sweep/motion.webm",
         "poster": "/reference-sets/sweep/motion.jpg",
         "source": {
@@ -614,13 +614,13 @@ export const REFERENCE_SETS: ReferenceSet[] = [
           "page": "https://commons.wikimedia.org/wiki/File:Fresnel_lenses_rotating_at_Split_Rock_Lighthouse.webm",
           "author": "Myotus",
           "license": "CC BY-SA 4.0",
-          "excerpt": "4.0–10.0 s of 24.1 s"
+          "excerpt": "4.0 to 10.0 s of 24.1 s"
         }
       },
       {
         "channel": "sound",
         "title": "Bat sonar",
-        "note": "Evenly spaced echolocation pulses — used as the scanning ping rhythm.",
+        "note": "Evenly spaced echolocation pulses. Used as the scanning ping rhythm.",
         "file": "/reference-sets/sweep/sound.ogg",
         "poster": null,
         "source": {
@@ -628,7 +628,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
           "page": "https://commons.wikimedia.org/wiki/File:Eptesicus_nilssonooo_sonar.wav",
           "author": "Rauno Kalda",
           "license": "CC BY-SA 3.0",
-          "excerpt": "0.0–8.0 s of 17.4 s"
+          "excerpt": "0.0 to 8.0 s of 17.4 s"
         }
       }
     ]
@@ -639,7 +639,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
       {
         "channel": "face",
         "title": "Cat staring",
-        "note": "Unblinking, centred eyes locked straight ahead — used for the focused stare.",
+        "note": "Unblinking, centred eyes locked straight ahead. Used for the focused stare.",
         "file": "/reference-sets/focus/face.jpg",
         "poster": null,
         "source": {
@@ -653,7 +653,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
       {
         "channel": "motion",
         "title": "Fox listening for a mouse",
-        "note": "Stops mid-step and holds dead still, facing forward — used for the frozen focus hold.",
+        "note": "Stops mid-step and holds dead still, facing forward. Used for the frozen focus hold.",
         "file": "/reference-sets/focus/motion.webm",
         "poster": "/reference-sets/focus/motion.jpg",
         "source": {
@@ -661,13 +661,13 @@ export const REFERENCE_SETS: ReferenceSet[] = [
           "page": "https://commons.wikimedia.org/wiki/File:Red_fox_(Vulpes_vulpes)_looking_for_a_mouse.webm",
           "author": "Lubo Ondrasko",
           "license": "CC BY 3.0",
-          "excerpt": "34.0–40.0 s of 73.9 s"
+          "excerpt": "34.0 to 40.0 s of 73.9 s"
         }
       },
       {
         "channel": "sound",
         "title": "Metronome at 60 bpm",
-        "note": "Steady one-per-second ticks — used as the calm, even pulse of concentration.",
+        "note": "Steady one-per-second ticks. Used as the calm, even pulse of concentration.",
         "file": "/reference-sets/focus/sound.ogg",
         "poster": null,
         "source": {
@@ -675,7 +675,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
           "page": "https://commons.wikimedia.org/wiki/File:Metronome_60bpm.wav",
           "author": "ざっとの編集所",
           "license": "CC0",
-          "excerpt": "0.0–8.0 s of 61.0 s"
+          "excerpt": "0.0 to 8.0 s of 61.0 s"
         }
       }
     ]
@@ -686,7 +686,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
       {
         "channel": "face",
         "title": "Content cat on a blanket",
-        "note": "Eyes half closed in contentment, settled into the blanket — used for the at-rest face.",
+        "note": "Eyes half closed in contentment, settled into the blanket. Used for the at-rest face.",
         "file": "/reference-sets/home/face.jpg",
         "poster": null,
         "source": {
@@ -700,7 +700,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
       {
         "channel": "motion",
         "title": "Cat curling up on a sofa",
-        "note": "Turns, curls in and settles with motion fading to stillness — used for the return-to-rest settle.",
+        "note": "Turns, curls in and settles with motion fading to stillness. Used for the return-to-rest settle.",
         "file": "/reference-sets/home/motion.webm",
         "poster": "/reference-sets/home/motion.jpg",
         "source": {
@@ -708,13 +708,13 @@ export const REFERENCE_SETS: ReferenceSet[] = [
           "page": "https://commons.wikimedia.org/wiki/File:Cat_relaxing_on_a_sofa.webm",
           "author": "Ivan Kurmanov",
           "license": "CC BY 2.0",
-          "excerpt": "10.5–16.5 s of 17.7 s"
+          "excerpt": "10.5 to 16.5 s of 17.7 s"
         }
       },
       {
         "channel": "sound",
         "title": "Singing bowl strike",
-        "note": "One strike with a long fading ring — used for the settle-down decay.",
+        "note": "One strike with a long fading ring. Used for the settle-down decay.",
         "file": "/reference-sets/home/sound.ogg",
         "poster": null,
         "source": {
@@ -722,7 +722,7 @@ export const REFERENCE_SETS: ReferenceSet[] = [
           "page": "https://commons.wikimedia.org/wiki/File:Tibetan_Singing_Bowl_hit_4.5inch.flac",
           "author": "דג בלי מלח",
           "license": "CC BY-SA 4.0",
-          "excerpt": "0.0–8.0 s of 23.8 s"
+          "excerpt": "0.0 to 8.0 s of 23.8 s"
         }
       }
     ]

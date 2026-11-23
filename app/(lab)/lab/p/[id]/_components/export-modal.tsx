@@ -114,7 +114,7 @@ export function ExportModal({
           <div className="flex flex-col gap-[var(--space-12)]">
             <Row label={X.rows.expression} value={expression.name} />
             <Row label={X.rows.signature} value={fmt(X.signatureValue, { name: sig.name, v: sig.version })} />
-            <Row label={X.rows.channels} value={channels.map((c) => CHANNEL_LABEL[c]).join(" · ")} />
+            <Row label={X.rows.channels} value={channels.map((c) => CHANNEL_LABEL[c]).join(", ")} />
             <Row label={X.rows.specFile} value={fmt(X.specFileValue, { kb: (done.bytes / 1024).toFixed(1) })} />
             {done.library && <Row label={X.rows.savedTo} value={X.library} />}
           </div>

@@ -81,7 +81,7 @@ export function ReferencePlayer({
       </div>
       <div className="flex items-center gap-[var(--space-8)] text-[14px] leading-[18px] text-[var(--text-tertiary)]">
         <span className="min-w-0 truncate">{name}</span>
-        {isVideo && Number.isFinite(clock.d) && clock.d > 0 && <span className="shrink-0">· {stamp(clock.t, true)} / {stamp(clock.d)}</span>}
+        {isVideo && Number.isFinite(clock.d) && clock.d > 0 && <span className="shrink-0">{stamp(clock.t, true)} / {stamp(clock.d)}</span>}
         <button aria-label={SY.close} className="ml-auto shrink-0 px-[var(--space-4)] text-[18px] leading-none hover:text-[var(--text-primary)]" onClick={onClose}>×</button>
       </div>
       <div className="flex flex-wrap items-center gap-[var(--space-8)]">

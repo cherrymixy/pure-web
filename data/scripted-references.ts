@@ -22,7 +22,7 @@ export const SCRIPTED_REFERENCES: ScriptedReference[] = [
     id: "happy",
     // ~/Downloads/시연영상/happy.mp4 (Pexels 6194810 "A Man Celebrating Success", 720p)
     sha256: ["a08a53c790f35a99d3032d236bee184bcdfac6e4aaffcfb65bdfbb6fcfaac8e9"],
-    summary: "A man laughs and pumps his fists, bouncing side to side in celebration — pure joy.",
+    summary: "A man laughs and pumps his fists, bouncing side to side in celebration.",
     components: ["approach", "joy"],
     minMs: 1500,
     expression: {

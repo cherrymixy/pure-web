@@ -1137,7 +1137,7 @@ export function Editor({
         )}
         {resultShown && expression && lastResult?.reasoning && (
           <p className="max-w-[760px] text-center text-[14px] leading-[18px] text-[var(--text-secondary)]">
-            <b className="font-semibold text-[var(--text-primary)]">{E.reasoning}</b> · {lastResult.reasoning}
+            <b className="font-semibold text-[var(--text-primary)]">{E.reasoning}:</b> {lastResult.reasoning}
           </p>
         )}
         {!expression && !busy && (
@@ -1215,11 +1215,11 @@ export function Editor({
         <div
           className="anim-rise-in absolute bottom-[244px] left-[calc(50%-295px)] z-10 flex items-center gap-[var(--space-16)] rounded-[var(--radius-full)] bg-[var(--bg-surface)] px-[var(--space-24)] py-[var(--space-16)] shadow-[var(--pure-shadow-modal)]"
           data-testid="generating"
-          title={`${job.stepLabel} · ${job.progress}%`}
+          title={`${job.stepLabel} ${job.progress}%`}
         >
           <Icon name="spinner" size={20} className="shrink-0 animate-spin text-[var(--text-primary)]" />
           <span className="text-[16px] font-medium leading-[20px] text-[var(--text-primary)]">{E.generating}</span>
-          <span className="sr-only" aria-live="polite">{job.stepLabel} · {job.progress}%</span>
+          <span className="sr-only" aria-live="polite">{job.stepLabel} {job.progress}%</span>
           <button type="button" onClick={stop} className="text-[16px] font-medium leading-[20px] text-[var(--text-secondary)] hover:text-[var(--text-primary)]">{E.stop}</button>
         </div>
       )}
@@ -1323,7 +1323,7 @@ export function Editor({
               ))}
               {pending.map((p) => (
                 <span key={p.id} className="max-w-[200px] truncate rounded-[var(--radius-full)] border border-dashed border-[var(--border-default)] px-[var(--space-12)] py-[var(--space-4)] text-[var(--text-tertiary)]">
-                  {p.name} · {E.referenceUploading}
+                  {p.name}, {E.referenceUploading}
                 </span>
               ))}
             </div>
@@ -1344,7 +1344,7 @@ export function Editor({
                 type="button"
                 aria-label={E.attachMedia}
                 disabled={busy || context.references.length + pending.length >= MAX_REFERENCES}
-                title={`${E.attachMedia} — ${E.referenceRules}`}
+                title={`${E.attachMedia}. ${E.referenceRules}`}
                 onClick={() => mediaInput.current?.click()}
                 className={tool}
               >

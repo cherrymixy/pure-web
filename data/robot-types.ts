@@ -15,7 +15,7 @@ export const ROBOT_TYPES: RobotTypeInfo[] = [
   {
     id: "full-body",
     name: "Full-body",
-    dof: "23–43 DoF",
+    dof: "23 to 43 DoF",
     description: "Humanoid robots with arms, legs and a head. Expression spreads across the whole body.",
     channels: ["motion", "face", "sound"],
     selectable: false,
@@ -23,7 +23,7 @@ export const ROBOT_TYPES: RobotTypeInfo[] = [
   {
     id: "joint-walking",
     name: "Joint Walking",
-    dof: "10–14 DoF",
+    dof: "10 to 14 DoF",
     description: "Legged robots such as quadrupeds. Gait, posture and head carry the expression.",
     channels: ["motion", "sound"],
     selectable: false,
@@ -31,7 +31,7 @@ export const ROBOT_TYPES: RobotTypeInfo[] = [
   {
     id: "joint-driving",
     name: "Joint Driving",
-    dof: "2–6 DoF + wheels",
+    dof: "2 to 6 DoF + wheels",
     description: "Wheeled bases with a jointed neck or arm. Driving paths plus upper-body gestures.",
     channels: ["motion", "face", "sound"],
     selectable: false,
@@ -39,7 +39,7 @@ export const ROBOT_TYPES: RobotTypeInfo[] = [
   {
     id: "jointless-driving",
     name: "Jointless Driving",
-    dof: "0 DoF · wheels",
+    dof: "0 DoF, wheels",
     description: "Wheeled robots without joints. Movement paths, light and sound do the talking.",
     channels: ["motion", "face", "sound"],
     selectable: false,
@@ -47,7 +47,7 @@ export const ROBOT_TYPES: RobotTypeInfo[] = [
   {
     id: "joint-fixed",
     name: "Joint Fixed",
-    dof: "5–9 DoF",
+    dof: "5 to 9 DoF",
     description: "Stationary robots with a jointed arm and head, like PURE Desk. Motion, face and sound.",
     channels: ["motion", "face", "sound"],
     selectable: true,

@@ -28,15 +28,15 @@ export const faceToFaceDoc: ComponentDoc = {
       widths: [120, 480, null],
       cols: ["name", "body", "body"],
       rows: [
-        ["1", "Curious · notice", "0 – 0.6 s"],
-        ["2", "Approach · owner", "0.6 – 2.4 s"],
-        ["3", "Nod · hello", "2.4 – 3.0 s"],
-        ["4", "Idle with drift", "3.0 s – loop"],
+        ["1", "Curious, notice", "0 to 0.6 s"],
+        ["2", "Approach, owner", "0.6 to 2.4 s"],
+        ["3", "Nod, hello", "2.4 to 3.0 s"],
+        ["4", "Idle with drift", "3.0 s, then loop"],
       ],
     },
     rules("motion", "Motion", "Layout and spacing.", [
       ["Layout", "Face the person, head at eye level"],
-      ["Spacing", "Stop 40–60 cm away, never closer than 30 cm"],
+      ["Spacing", "Stop 40 to 60 cm away, never closer than 30 cm"],
     ]),
     rules("face", "Face", "Transition and state.", [
       ["Transition", "Eyes widen 100 ms before the body moves"],
@@ -54,7 +54,7 @@ export const faceToFaceDoc: ComponentDoc = {
       plain: true,
       items: [
         { state: "Sync", effect: "all channels start on the same beat" },
-        { state: "Fallback", effect: "no face: motion +20% · no speaker: face carries the feedback" },
+        { state: "Fallback", effect: "no face: motion +20%, no speaker: face carries the feedback" },
       ],
     },
   ],
