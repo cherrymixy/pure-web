@@ -145,33 +145,45 @@ export function StructureEditor({ projectId, name, initial }: { projectId: strin
                       <span className="font-medium text-[var(--home-ink)]">{`${i + 1}. ${j.id}`}</span>
                       <span className="text-[14px] tabular-nums text-[var(--home-ink-3)]">{fmt(S.jointRange, { min: j.min, max: j.max })}</span>
                     </button>
-                    {editing && (
-                      <div className="flex flex-col gap-[var(--space-8)]">
-                        {(["min", "max"] as const).map((edge) => (
-                          <label key={edge} className="flex items-center gap-[var(--space-8)]">
-                            <span className="w-[32px] text-[12px] text-[var(--home-ink-3)]">{edge}</span>
-                            <input
-                              type="range"
-                              min={j.rigMin}
-                              max={j.rigMax}
-                              value={j[edge]}
-                              onChange={(e) => setJoint(j.id, edge, Number(e.target.value))}
-                              className="min-w-0 flex-1 accent-[var(--home-ink)]"
-                              aria-label={`${j.id} ${edge}`}
+                    {editing && (() => {
+                      // One bar per joint (user review): the rig range as the track, the allowed min–max highlighted, a handle at
+                      // each end (two overlaid range inputs, thumbs only take the pointer), numbers under the ends.
+                      const span = Math.max(j.rigMax - j.rigMin, 1);
+                      const at = (v: number) => ((v - j.rigMin) / span) * 100;
+                      const thumb =
+                        "pointer-events-none absolute inset-0 h-full w-full appearance-none bg-transparent [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:size-[18px] [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-[var(--home-ink)] [&::-moz-range-thumb]:bg-[var(--neutral-0)] [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:size-[18px] [&::-webkit-slider-thumb]:cursor-grab [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-[var(--home-ink)] [&::-webkit-slider-thumb]:bg-[var(--neutral-0)] [&::-webkit-slider-thumb]:shadow-[0_1px_3px_var(--effect-shadow)]";
+                      const num =
+                        "h-[30px] w-[64px] rounded-[var(--radius-xs)] border border-[var(--home-line)] bg-[var(--neutral-0)] text-center text-[14px] tabular-nums text-[var(--home-ink)] focus:border-[var(--home-ink)] focus:outline-none";
+                      return (
+                        <div className="flex flex-col gap-[var(--space-8)]">
+                          <div className="relative h-[20px]">
+                            <span aria-hidden className="absolute inset-x-0 top-1/2 h-[4px] -translate-y-1/2 rounded-[var(--radius-full)] bg-[var(--home-line)]" />
+                            <span
+                              aria-hidden
+                              className="absolute top-1/2 h-[4px] -translate-y-1/2 rounded-[var(--radius-full)] bg-[var(--home-ink)]"
+                              style={{ left: `${at(j.min)}%`, width: `${at(j.max) - at(j.min)}%` }}
                             />
-                            <input
-                              type="number"
-                              min={j.rigMin}
-                              max={j.rigMax}
-                              value={j[edge]}
-                              onChange={(e) => setJoint(j.id, edge, Number(e.target.value))}
-                              className="w-[72px] rounded-[var(--radius-sm)] border border-[var(--home-line)] bg-[var(--neutral-0)] px-[var(--space-8)] py-[var(--space-4)] text-[15px] tabular-nums text-[var(--home-ink)]"
-                            />
-                          </label>
-                        ))}
-                        <span className="text-[12px] text-[var(--home-ink-3)]">{fmt(S.rigRange, { min: j.rigMin, max: j.rigMax })}</span>
-                      </div>
-                    )}
+                            {(["min", "max"] as const).map((edge) => (
+                              <input
+                                key={edge}
+                                type="range"
+                                min={j.rigMin}
+                                max={j.rigMax}
+                                value={j[edge]}
+                                onChange={(e) => setJoint(j.id, edge, Number(e.target.value))}
+                                className={thumb}
+                                aria-label={`${j.id} ${edge}`}
+                              />
+                            ))}
+                          </div>
+                          <div className="flex items-center justify-between gap-[var(--space-8)]">
+                            <input type="number" min={j.rigMin} max={j.rigMax} value={j.min} onChange={(e) => setJoint(j.id, "min", Number(e.target.value))} className={num} aria-label={`${j.id} min value`} />
+                            <span className="truncate text-[12px] text-[var(--home-ink-3)]">{fmt(S.rigRange, { min: j.rigMin, max: j.rigMax })}</span>
+                            <input type="number" min={j.rigMin} max={j.rigMax} value={j.max} onChange={(e) => setJoint(j.id, "max", Number(e.target.value))} className={num} aria-label={`${j.id} max value`} />
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </li>
                 ))}
               </ul>
