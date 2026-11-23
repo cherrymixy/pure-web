@@ -1482,6 +1482,7 @@ export function Editor({
         open={testOpen}
         projectType={project.type}
         t={time.t}
+        joints={joints}
         duration={time.duration}
         playing={!paused}
         limitHit={limit !== null}
