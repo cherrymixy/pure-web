@@ -85,8 +85,8 @@ function CardArt({ type }: { type: RobotType }) {
 
 function TypeCard({ type, selected, onSelect }: { type: RobotTypeInfo; selected: boolean; onSelect: () => void }) {
   const copy = S.cards[type.id as keyof typeof S.cards];
-  // Lab card style (user review: match the Lab home / import): white, thin home-line border, canvas picture, Lab type scale;
-  // selected = ink outline + check instead of the dark sage fill.
+  // Compact Lab card (five across the 960 content width of the import-style sheet): canvas picture, Lab type scale;
+  // selected = ink outline + check.
   return (
     <button
       type="button"
@@ -95,27 +95,27 @@ function TypeCard({ type, selected, onSelect }: { type: RobotTypeInfo; selected:
       onClick={onSelect}
       title={type.selectable ? undefined : S.onlyFixed}
       data-testid={`type-card-${type.id}`}
-      className={`group relative flex flex-col overflow-hidden rounded-[24px] border bg-[var(--neutral-0)] p-[var(--space-12)] text-left transition-[border-color,box-shadow] disabled:cursor-default ${
+      className={`group relative flex flex-col overflow-hidden rounded-[18px] border bg-[var(--neutral-0)] p-[var(--space-8)] text-left transition-[border-color,box-shadow] disabled:cursor-default ${
         selected ? "border-[var(--home-ink)] shadow-[0_0_0_1px_var(--home-ink)]" : "border-[var(--home-line)] enabled:hover:border-[var(--home-ink-3)]"
       }`}
     >
-      <div className="relative aspect-square w-full shrink-0 overflow-hidden rounded-[16px] bg-[var(--home-canvas)]">
+      <div className="relative aspect-square w-full shrink-0 overflow-hidden rounded-[12px] bg-[var(--home-canvas)]">
         <CardArt type={type.id} />
       </div>
-      <div className="flex flex-col gap-[var(--space-16)] px-[var(--space-8)] pb-[var(--space-8)] pt-[var(--space-20)]">
+      <div className="flex flex-1 flex-col gap-[var(--space-12)] px-[6px] pb-[6px] pt-[var(--space-12)]">
         <div className="flex flex-col gap-[2px]">
-          <span className="whitespace-nowrap text-[22px] font-semibold text-[var(--home-ink)]">{type.name}</span>
-          <span className="whitespace-nowrap text-[13px] text-[var(--home-ink-3)]">{copy?.summary ?? type.description}</span>
+          <span className="whitespace-nowrap text-[15px] font-semibold text-[var(--home-ink)]">{type.name}</span>
+          <span className="text-[12px] leading-[1.35] text-[var(--home-ink-3)]">{copy?.summary ?? type.description}</span>
         </div>
-        <div className="flex flex-col gap-[2px] border-t border-dashed border-[var(--home-line)] pt-[var(--space-12)]">
-          <span className="text-[12px] font-medium text-[var(--home-ink-3)]">{S.jointsLabel}</span>
-          <span className="whitespace-nowrap text-[15px] font-medium text-[var(--home-ink)]">{copy?.joints ?? type.dof}</span>
+        <div className="flex flex-col gap-[2px] border-t border-dashed border-[var(--home-line)] pt-[var(--space-8)]">
+          <span className="text-[11px] font-medium text-[var(--home-ink-3)]">{S.jointsLabel}</span>
+          <span className="whitespace-nowrap text-[13px] font-medium text-[var(--home-ink)]">{copy?.joints ?? type.dof}</span>
         </div>
-        <div className="flex flex-col gap-[6px]">
-          <span className="text-[12px] font-medium text-[var(--home-ink-3)]">{S.channelsLabel}</span>
-          <span className="flex flex-wrap gap-[6px]">
+        <div className="flex flex-col gap-[4px]">
+          <span className="text-[11px] font-medium text-[var(--home-ink-3)]">{S.channelsLabel}</span>
+          <span className="flex flex-wrap gap-[3px]">
             {CHANNELS.filter((c) => type.channels.includes(c)).map((c) => (
-              <span key={c} className="rounded-[var(--radius-full)] bg-[var(--home-tag-bg)] px-[10px] py-[4px] text-[13px] font-medium text-[var(--home-tag-ink)]">
+              <span key={c} className="rounded-[var(--radius-full)] bg-[var(--home-tag-bg)] px-[6px] py-[2px] text-[11px] font-medium text-[var(--home-tag-ink)]">
                 {CHANNEL_LABEL[c]}
               </span>
             ))}
@@ -123,8 +123,8 @@ function TypeCard({ type, selected, onSelect }: { type: RobotTypeInfo; selected:
         </div>
       </div>
       {selected && (
-        <span className="absolute right-[var(--space-24)] top-[var(--space-24)] flex size-[36px] items-center justify-center rounded-[var(--radius-full)] bg-[var(--home-ink)]">
-          <Icon name="check-badge" size={18} className="text-[var(--neutral-0)]" />
+        <span className="absolute right-[var(--space-16)] top-[var(--space-16)] flex size-[28px] items-center justify-center rounded-[var(--radius-full)] bg-[var(--home-ink)]">
+          <Icon name="check-badge" size={14} className="text-[var(--neutral-0)]" />
         </span>
       )}
     </button>
@@ -155,52 +155,49 @@ export function TypePicker({ initialSelected = false }: { initialSelected?: bool
     }
   }
 
-  // Lab UI (user review: same mood as the Lab home and the import sheet): Lab canvas + glow, glass back link, 60 title,
-  // Lab cards, footer with a quiet note, a text link and the Lab dark button.
+  // Same frame as the import sheet (user review): Lab canvas + glow, glass back link top-left, one 1040 white sheet centred
+  // with a 44 centred title, five compact cards, and a footer row (note · import link · Continue) under a divider.
   return (
-    <div data-fit-frame className="relative flex min-h-[var(--app-vh)] flex-col overflow-hidden bg-[var(--home-canvas)] px-[var(--space-40)] pb-[var(--space-40)] pt-[42px] leading-normal">
+    <div data-fit-frame className="relative flex h-[var(--app-vh)] min-h-[760px] flex-col items-center justify-center overflow-hidden bg-[var(--home-canvas)] p-[var(--space-40)] leading-normal">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/figma/lab/home/glow.svg" alt="" aria-hidden className="pointer-events-none absolute left-[26px] top-[-360px] h-[680px] w-[1360px] max-w-none" />
-      <div className="relative flex flex-1 flex-col gap-[var(--space-40)]">
-        <div className="flex flex-col gap-[var(--space-20)]">
-          <Link
-            href="/lab"
-            className="flex h-[44px] w-fit items-center gap-[var(--space-8)] rounded-[var(--radius-sm)] bg-[var(--home-glass)] px-[var(--space-20)] text-[15px] font-medium text-[var(--home-ink)] hover:bg-[var(--neutral-0)]"
-          >
-            <span aria-hidden>←</span>
-            {STRINGS.sidebar.lab}
-          </Link>
-          <header className="flex flex-col gap-[var(--space-8)]">
-            <h1 className="text-[60px] font-semibold leading-[1.15] text-[var(--home-ink)]">{S.title}</h1>
-            <p className="text-[17px] text-[var(--home-ink-2)]">{S.body}</p>
-          </header>
-        </div>
+      <Link
+        href="/lab"
+        className="absolute left-[var(--space-40)] top-[42px] flex h-[44px] items-center gap-[var(--space-8)] rounded-[var(--radius-sm)] bg-[var(--home-glass)] px-[var(--space-20)] text-[15px] font-medium text-[var(--home-ink)] hover:bg-[var(--neutral-0)]"
+      >
+        <span aria-hidden>←</span>
+        {STRINGS.sidebar.lab}
+      </Link>
 
-        <div className="grid grid-cols-5 gap-[16.483px]">
+      <div className="relative flex w-[1040px] flex-col gap-[var(--space-28)] rounded-[32px] border border-[var(--home-line)] bg-[var(--neutral-0)] p-[var(--space-40)] shadow-[0_24px_48px_var(--effect-shadow)]">
+        <header className="mb-[var(--space-16)] flex flex-col items-center gap-[var(--space-8)] text-center">
+          <h1 className="text-[44px] font-semibold leading-[1.15] text-[var(--home-ink)]">{S.title}</h1>
+          <p className="text-[17px] text-[var(--home-ink-2)]">{S.body}</p>
+        </header>
+
+        <div className="grid grid-cols-5 gap-[var(--space-12)]">
           {ORDERED.map((t) => (
             <TypeCard key={t.id} type={t} selected={t.selectable && selected} onSelect={() => t.selectable && setSelected(!selected)} />
           ))}
         </div>
 
-        <div className="mt-auto flex items-center justify-between">
-          <p className="flex items-center gap-[var(--space-8)] text-[15px] text-[var(--home-ink-3)]">
-            <Icon name="info-small" size={18} />
-            {S.note}
-          </p>
-          <div className="flex items-center gap-[var(--space-24)]">
-            <Link href="/lab/new/import" className="text-[15px] font-medium text-[var(--home-ink-2)] underline underline-offset-4 hover:text-[var(--home-ink)]">
-              {S.importInstead}
-            </Link>
-            <button
-              type="button"
-              data-tour="type-continue"
-              disabled={!selected || busy}
-              onClick={start}
-              className="flex h-[44px] items-center rounded-[var(--radius-sm)] bg-[var(--home-ink)] px-[22px] text-[15px] font-medium text-[var(--neutral-0)] hover:bg-[var(--neutral-800)] disabled:cursor-not-allowed disabled:border disabled:border-[var(--home-line)] disabled:bg-[var(--neutral-0)] disabled:text-[var(--home-ink-3)]"
-            >
-              {S.continue}
-            </button>
-          </div>
+        <div className="flex items-center gap-[var(--space-16)] border-t border-[var(--home-line)] pt-[var(--space-24)]">
+          <span className="flex size-[36px] shrink-0 items-center justify-center rounded-[var(--radius-full)] bg-[var(--home-canvas)] text-[var(--home-ink-2)]">
+            <Icon name="info" size={18} />
+          </span>
+          <p className="min-w-0 flex-1 text-[13px] text-[var(--home-ink-3)]">{S.note}</p>
+          <Link href="/lab/new/import" className="shrink-0 text-[15px] font-medium text-[var(--home-ink-2)] underline underline-offset-4 hover:text-[var(--home-ink)]">
+            {S.importInstead}
+          </Link>
+          <button
+            type="button"
+            data-tour="type-continue"
+            disabled={!selected || busy}
+            onClick={start}
+            className="flex h-[44px] shrink-0 items-center rounded-[var(--radius-sm)] bg-[var(--home-ink)] px-[22px] text-[15px] font-medium text-[var(--neutral-0)] hover:bg-[var(--neutral-800)] disabled:cursor-not-allowed disabled:bg-[var(--home-canvas)] disabled:text-[var(--home-ink-3)]"
+          >
+            {S.continue}
+          </button>
         </div>
       </div>
     </div>
