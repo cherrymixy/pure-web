@@ -145,6 +145,7 @@ export const overview: GuidelineSection = {
           kind: "table",
           title: "Steps",
           view: "steps",
+          figures: ["recognize", "measure", "retarget", "style", "guardrail"],
           head: ["Step", "Question", "Reads"],
           rows: [
             ["1 Meaning recognition", "Which behavior is this movement?", "Component.recognize"],
@@ -169,6 +170,17 @@ export const overview: GuidelineSection = {
             "  ρ       the behavior's style acceptance (a Component property)",
             "  clamp   MUST guardrails + the robot class's joint and speed limits",
           ].join("\n"),
+        },
+        {
+          kind: "table",
+          title: "Try it",
+          view: "blend",
+          head: ["Behavior", "ρ"],
+          rows: [
+            ["Joy", "0.9"],
+            ["Approach", "0.55"],
+            ["Shake", "0.25"],
+          ],
         },
         {
           kind: "p",

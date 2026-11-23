@@ -350,6 +350,71 @@ const FIGURES: Record<string, ReactNode> = {
       </g>
     </>
   ),
+  // pipeline 1: the dog clip is read as one behaviour out of the candidates
+  recognize: (
+    <>
+      <rect x="10" y="34" width="64" height="52" rx="9" className={`${BG} ${INK}`} {...F} />
+      <Dog x={46} y={66} />
+      <path d="M18 79 H66" className={SUB} {...L} />
+      <path d="M18 79 H38" className={ACC} {...L} />
+      <Arrow d="M80 60 H94" x={96} y={60} />
+      <rect x="104" y="22" width="118" height="76" rx="10" className={`${WHITE} ${SUB}`} {...F} />
+      {[38, 60, 82].map((y) => (
+        <g key={y}>
+          <circle cx="118" cy={y} r="4" className={`${y === 60 ? SOLID : BG} ${INK}`} {...F} />
+          <path d={`M130 ${y} H${y === 60 ? 186 : 170}`} className={y === 60 ? INK : SUB} {...L} strokeWidth={y === 60 ? 2.2 : 1.5} />
+        </g>
+      ))}
+      <rect x="109" y="50" width="108" height="20" rx="7" className={ACC} {...L} />
+      <Check x={204} y={60} />
+    </>
+  ),
+  // pipeline 2: keypoints → six measured signature values (P1 to P6)
+  measure: (
+    <>
+      <Skeleton x={62} y={68} />
+      <Ground x1={24} x2={96} y={84} />
+      <Arrow d="M100 60 H112" x={114} y={60} />
+      <path d="M122 98 H220" className={SUB} {...L} />
+      {[44, 30, 56, 22, 40, 50].map((h, i) => (
+        <rect
+          key={i}
+          x={126 + i * 15.5}
+          y={96 - h}
+          width={10}
+          height={h}
+          rx={4}
+          className={`fig-grow ${i % 2 ? BG : WHITE} ${INK}`}
+          {...F}
+          style={{ ...pivot(131 + i * 15.5, 96), animationDelay: `${-i * 0.3}s` }}
+        />
+      ))}
+      <path d="M126 30 C150 22 170 40 216 24" className={ACC} {...L} strokeDasharray="1 5" />
+    </>
+  ),
+  // pipeline 3: source parts map onto this robot's roles
+  retarget: (
+    <>
+      <Skeleton x={60} y={64} />
+      <Ground x1={20} x2={92} y={80} />
+      <Arrow d="M78 42 C110 26 150 30 176 40" x={178} y={41} deg={14} />
+      <Arrow d="M38 56 C80 98 120 100 152 96" x={154} y={96} deg={-4} />
+      <Ground x1={148} x2={226} />
+      <g transform="translate(150 0) scale(0.9) translate(0 11)">
+        <Desk x={20} nod />
+      </g>
+    </>
+  ),
+  // pipeline 5: an irregular source is clamped back inside the allowed band
+  guardrail: (
+    <>
+      <path d="M14 34 H226 M14 86 H226" className={SUB} {...L} strokeDasharray="1 5" />
+      <path d="M14 30 V38 M14 82 V90 M226 30 V38 M226 82 V90" className={INK} {...L} />
+      <path d="M18 60 L30 42 L38 70 L48 18 L58 76 L70 30 L80 100 L92 44 L104 72 L116 22 L128 64 L140 98 L152 50 L164 70 L176 24 L188 84 L200 60" className={SUB} {...L} />
+      <path d="M18 60 C38 60 38 36 58 36 C78 36 78 84 98 84 C118 84 118 36 138 36 C158 36 158 84 178 84 C194 84 194 60 206 60" pathLength={100} className={`fig-draw ${ACC}`} {...L} strokeWidth={2} />
+      <Check x={214} y={60} />
+    </>
+  ),
   // face size as a ratio of screen height
   "face-ratio": (
     <>
@@ -393,14 +458,15 @@ function Strength({ n }: { n: number }) {
   );
 }
 
-export function Figure({ name }: { name?: string }) {
+/** fit: scale the art to the card width (narrow cards, e.g. the five pipeline steps) instead of a fixed 300 px. */
+export function Figure({ name, fit }: { name?: string; fit?: boolean }) {
   if (!name) return null;
   const strength = name.match(/^strength-(\d)$/);
   const art = strength ? <Strength n={Number(strength[1])} /> : FIGURES[name];
   if (!art) return null;
   return (
-    <div aria-hidden className="flex h-[148px] items-center justify-center overflow-hidden rounded-[14px] bg-[var(--home-sidebar)]">
-      <svg viewBox="0 0 240 120" width={300} height={150}>{art}</svg>
+    <div aria-hidden className={`flex items-center justify-center overflow-hidden rounded-[14px] bg-[var(--home-sidebar)] ${fit ? "aspect-[2/1] p-[var(--space-8)]" : "h-[148px]"}`}>
+      <svg viewBox="0 0 240 120" {...(fit ? { className: "h-full w-full" } : { width: 300, height: 150 })}>{art}</svg>
     </div>
   );
 }

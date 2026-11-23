@@ -3,6 +3,7 @@ import { GUIDELINE } from "@/data/guideline";
 import type { GuidelineBlock } from "@/data/guideline/types";
 import { Icon } from "../icons/icon";
 import { Figure } from "./figures";
+import { BlendDemo } from "./blend-demo";
 import { LayerMap } from "./layer-map";
 import { parseSize } from "./parse-size";
 
@@ -17,7 +18,8 @@ export function BlockView({ b }: { b: GuidelineBlock }) {
   if (b.kind === "code" && b.view === "formula") return <Formula text={b.text} />;
   if (b.kind === "table" && b.view === "cards") return <TableCards head={b.head} rows={b.rows} figures={b.figures} />;
   if (b.kind === "table" && b.view === "levels") return <Levels head={b.head} rows={b.rows} />;
-  if (b.kind === "table" && b.view === "steps") return <Steps head={b.head} rows={b.rows} />;
+  if (b.kind === "table" && b.view === "steps") return <Steps head={b.head} rows={b.rows} figures={b.figures} />;
+  if (b.kind === "table" && b.view === "blend") return <BlendDemo head={b.head} rows={b.rows} />;
   if (b.kind === "table" && b.view === "chips") return <Chips head={b.head} rows={b.rows} />;
   if (b.kind === "list" && b.view === "checklist") return <Checklist items={b.items} />;
   if (b.kind === "p" && b.view === "note") return <Note text={b.text} />;
@@ -138,7 +140,7 @@ function RangeBar({ level, ink }: { level: string; ink: string }) {
 
 /* ── steps: a left-to-right flow ("1 Title" in the first column) ─────────────────────── */
 
-function Steps({ head, rows }: { head: string[]; rows: string[][] }) {
+function Steps({ head, rows, figures }: { head: string[]; rows: string[][]; figures?: string[] }) {
   return (
     <ol className="grid gap-[var(--space-8)]" style={{ gridTemplateColumns: `repeat(${rows.length}, minmax(0, 1fr))` }}>
       {rows.map(([step, question, reads], i) => {
@@ -146,6 +148,7 @@ function Steps({ head, rows }: { head: string[]; rows: string[][] }) {
         const [n, title] = m ? [m[1], m[2]] : [String(i + 1), step];
         return (
           <li key={step} className={`${CARD} relative flex flex-col gap-[var(--space-12)] p-[var(--space-16)]`}>
+            <Figure name={figures?.[i]} fit />
             <span className="flex items-center gap-[var(--space-8)]">
               <span className="flex size-[26px] shrink-0 items-center justify-center rounded-[var(--radius-full)] border border-[var(--home-line)] text-[13px] font-semibold text-[var(--home-ink)]">{n}</span>
               {i < rows.length - 1 && <span aria-hidden className="h-px flex-1 bg-[var(--home-line)]" />}
