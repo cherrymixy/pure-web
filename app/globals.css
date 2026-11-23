@@ -47,6 +47,44 @@ body {
 .anim-pulse { animation: pulse-soft 1.4s var(--ease-standard) infinite; }
 .anim-float { animation: float 3s var(--ease-standard) infinite; }
 
+/* Guideline card figures (components/ui/guideline/figures.tsx): small looping motion, sage = motion. */
+.fig-blink, .fig-bob, .fig-roll, .fig-hop, .fig-pulse, .fig-pop, .fig-grow { transform-box: fill-box; }
+.fig-blink { transform-origin: 50% 50%; animation: fig-blink 3.8s infinite; }
+@keyframes fig-blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
+.fig-sway { animation: fig-sway 2.6s ease-in-out infinite; }
+@keyframes fig-sway { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+.fig-nod { animation: fig-nod 2.4s ease-in-out infinite; }
+@keyframes fig-nod { 0%, 30%, 100% { transform: rotate(0); } 12% { transform: rotate(9deg); } 22% { transform: rotate(-2deg); } }
+.fig-roll { animation: fig-roll 3s ease-in-out infinite; }
+@keyframes fig-roll { 0%, 100% { transform: translateX(-3px); } 50% { transform: translateX(3px); } }
+.fig-bob { transform-origin: 50% 100%; animation: fig-bob 2.6s ease-in-out infinite; }
+@keyframes fig-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+.fig-hop { animation: fig-hop 1.4s cubic-bezier(0.3, 0, 0.3, 1) infinite; }
+@keyframes fig-hop { 0%, 100% { transform: translateY(0) scale(1, 1); } 12% { transform: scale(1.08, 0.9); } 45% { transform: translateY(-12px) rotate(-7deg) scale(0.96, 1.05); } 70% { transform: translateY(0) scale(1.06, 0.94); } }
+.fig-flow { stroke-dasharray: 2 5; animation: fig-flow 0.9s linear infinite; }
+@keyframes fig-flow { to { stroke-dashoffset: -14; } }
+.fig-draw { stroke-dasharray: 100; animation: fig-draw 3.4s ease-in-out infinite; }
+@keyframes fig-draw { 0% { stroke-dashoffset: 100; } 55%, 100% { stroke-dashoffset: 0; } }
+.fig-ride { animation: fig-ride 3.4s ease-in-out infinite; }
+@keyframes fig-ride { 0% { offset-distance: 0%; } 55%, 100% { offset-distance: 100%; } }
+.fig-pulse { transform-origin: 50% 50%; animation: fig-pulse 2s ease-in-out infinite; }
+@keyframes fig-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.18); } }
+.fig-pop { transform-origin: 50% 50%; animation: fig-pop 3.4s ease-out infinite; }
+@keyframes fig-pop { 0%, 40% { transform: scale(0); opacity: 0; } 52% { transform: scale(1.15); opacity: 1; } 60%, 100% { transform: scale(1); opacity: 1; } }
+.fig-slide { animation: fig-slide 3s ease-in-out infinite; }
+@keyframes fig-slide { 0%, 100% { transform: translateX(-30px); } 50% { transform: translateX(30px); } }
+.fig-tick { animation: fig-tick 4s steps(16) infinite; }
+@keyframes fig-tick { to { transform: rotate(360deg); } }
+.fig-tilt { animation: fig-tilt 2.8s ease-in-out infinite; }
+@keyframes fig-tilt { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-10deg); } }
+.fig-tap { animation: fig-tap 1.6s ease-in-out infinite; }
+@keyframes fig-tap { 0%, 100% { transform: translate(0, 0); } 40% { transform: translate(-2px, -2px); } }
+.fig-grow { transform-origin: 50% 100%; animation: fig-grow 3s ease-out infinite; }
+@keyframes fig-grow { 0% { transform: scaleY(0.2); } 30%, 100% { transform: scaleY(1); } }
+
 @media (prefers-reduced-motion: reduce) {
   .anim-fade-in, .anim-rise-in, .anim-pop-in, .anim-check-pop, .anim-pulse, .anim-float, .scan-line { animation: none; }
+  [class*="fig-"] { animation: none !important; }
+  .fig-draw { stroke-dashoffset: 0; }
+  .fig-ride { offset-distance: 100%; }
 }
