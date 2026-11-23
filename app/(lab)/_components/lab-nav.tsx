@@ -8,7 +8,7 @@ import { GuidelineTree } from "@/components/ui/guideline/guideline-tree";
 import { Icon, type IconName } from "@/components/ui/icons/icon";
 import { RobotArtLayers } from "@/components/ui/robot-art";
 import { useFavourites } from "./favourites-context";
-import type { RobotArt } from "@/data/lab-showcase";
+import { LAB_OPEN, type RobotArt } from "@/data/lab-showcase";
 
 const ITEMS: { href: string; label: string; icon: IconName }[] = [
   { href: "/lab", label: STRINGS.sidebar.lab, icon: "nav-lab" },
@@ -70,7 +70,11 @@ export function Favourites({ items }: { items: FavouriteItem[] }) {
       <ul className="flex flex-col gap-[6px]">
         {shown.map((f) => (
           <li key={f.id}>
-            <Link href={`/lab/p/${f.id}`} className="flex items-center gap-[var(--space-12)] rounded-[10px] px-[var(--space-12)] py-[var(--space-8)] hover:bg-[var(--home-nav-on)]">
+            <Link
+              href={`/lab/p/${f.id}`}
+              // Locked like the Lab cards: only LAB_OPEN projects open (dimmed, no clicks, out of the tab order)
+              {...(LAB_OPEN.has(f.id) ? {} : { "aria-disabled": true, tabIndex: -1, style: { opacity: 0.4, pointerEvents: "none" as const } })}
+              className="flex items-center gap-[var(--space-12)] rounded-[10px] px-[var(--space-12)] py-[var(--space-8)] hover:bg-[var(--home-nav-on)]">
               <span className="relative size-[30px] shrink-0 overflow-clip rounded-[var(--radius-xs)] bg-[var(--home-nav-on)]">
                 <RobotArtLayers art={f.art} />
               </span>

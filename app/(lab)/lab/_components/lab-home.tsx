@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { CHANNEL_LABEL } from "@/components/ui/channel-badges";
 import { Icon } from "@/components/ui/icons/icon";
 import { Menu } from "@/components/ui/menu";
+import { PromptModal } from "@/components/ui/modal";
 import { RobotArtLayers } from "@/components/ui/robot-art";
 import { EmptyState, Loading } from "@/components/ui/states";
 import { useToast } from "@/components/ui/toast";
@@ -39,6 +40,21 @@ export function LabHome({ author }: { author: string }) {
   const [view, setView] = useState<"grid" | "list">("grid");
   // Stars are shared with the sidebar Favourites (no favourites API yet); seeded from data/lab-showcase.ts.
   const { stars, toggle: toggleStar } = useFavourites();
+  const [renaming, setRenaming] = useState<Project | null>(null);
+
+  async function rename(next: string) {
+    const p = renaming;
+    setRenaming(null);
+    if (!p || next === p.name) return;
+    try {
+      await api(`/api/projects/${p.id}`, { method: "PATCH", body: JSON.stringify({ name: next }) });
+    } catch {
+      return toast(S.toast.failed);
+    }
+    setProjects((list) => list?.map((x) => (x.id === p.id ? { ...x, name: next } : x)) ?? null);
+    toast(fmt(S.toast.renamed, { name: next }));
+    router.refresh(); // sidebar favourites read the names on the server
+  }
 
   const load = useCallback(async () => {
     try {
@@ -170,15 +186,25 @@ export function LabHome({ author }: { author: string }) {
           <Button onClick={clear}>{S.clearFilter}</Button>
         </EmptyState>
       ) : view === "list" ? (
-        <ProjectList rows={shown} stars={stars} onStar={toggleStar} onOpen={(p) => router.push(projectHref(p))} />
+        <ProjectList rows={shown} stars={stars} onStar={toggleStar} onOpen={(p) => router.push(projectHref(p))} onRename={setRenaming} />
       ) : (
         // Columns stretch so the last card ends where the toolbar ends.
         <div className="relative grid grid-cols-[repeat(auto-fill,minmax(357.638px,1fr))] gap-x-[16.483px] gap-y-[22px]">
           {shown.map(({ project: p, card }) => (
-            <ProjectCard key={p.id} project={p} card={card} author={author} starred={stars.has(p.id)} onStar={() => toggleStar(p.id)} />
+            <ProjectCard key={p.id} project={p} card={card} author={author} starred={stars.has(p.id)} onStar={() => toggleStar(p.id)} onRename={() => setRenaming(p)} />
           ))}
         </div>
       )}
+      <PromptModal
+        open={renaming !== null}
+        title={S.rename.title}
+        label={S.rename.label}
+        initial={renaming?.name ?? ""}
+        maxLength={60}
+        submitLabel={S.rename.save}
+        onSubmit={rename}
+        onCancel={() => setRenaming(null)}
+      />
     </div>
   );
 }
@@ -216,7 +242,7 @@ function lockProps(id: string) {
   return LAB_OPEN.has(id) ? {} : { "aria-disabled": true, tabIndex: -1, style: { opacity: 0.4, pointerEvents: "none" as const } };
 }
 
-function ProjectCard({ project: p, card, author, starred, onStar }: { project: Project; card: ShowcaseCard; author: string; starred: boolean; onStar: () => void }) {
+function ProjectCard({ project: p, card, author, starred, onStar, onRename }: { project: Project; card: ShowcaseCard; author: string; starred: boolean; onStar: () => void; onRename: () => void }) {
   const router = useRouter();
   return (
     <Link
@@ -246,11 +272,12 @@ function ProjectCard({ project: p, card, author, starred, onStar }: { project: P
         >
           <Icon name="star" size={22} />
         </button>
-        {/* ⋮ (user review, as in the list view): Open · favourite toggle. */}
+        {/* ⋮ (user review, as in the list view): Open · Rename · favourite toggle. */}
         <Menu
           label={`${STRINGS.sidebar.more} ${p.name}`}
           items={[
             { label: STRINGS.sidebar.open, onSelect: () => router.push(projectHref(p)) },
+            { label: STRINGS.editor.menu.rename, onSelect: onRename },
             { label: starred ? S.unfavourite : S.favourite, onSelect: onStar },
           ]}
           triggerClassName="flex h-[22px] w-[18px] shrink-0 items-center justify-center rounded-[var(--radius-xs)] text-[var(--home-ink-3)] hover:text-[var(--home-ink)]"
@@ -309,11 +336,13 @@ function ProjectList({
   stars,
   onStar,
   onOpen,
+  onRename,
 }: {
   rows: { project: Project; card: ShowcaseCard }[];
   stars: Set<string>;
   onStar: (id: string) => void;
   onOpen: (p: Project) => void;
+  onRename: (p: Project) => void;
 }) {
   const head = "text-[13px] font-medium text-[var(--home-ink-3)]";
   return (
@@ -359,6 +388,7 @@ function ProjectList({
               label={`${STRINGS.sidebar.more} ${p.name}`}
               items={[
                 { label: STRINGS.sidebar.open, onSelect: () => onOpen(p) },
+                { label: STRINGS.editor.menu.rename, onSelect: () => onRename(p) },
                 { label: stars.has(p.id) ? S.unfavourite : S.favourite, onSelect: () => onStar(p.id) },
               ]}
               triggerClassName="flex size-[28px] items-center justify-center rounded-[var(--radius-xs)] text-[var(--home-ink-3)] hover:text-[var(--home-ink)]"
