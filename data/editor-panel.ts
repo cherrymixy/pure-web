@@ -38,3 +38,14 @@ export const EDITOR_PANEL = {
   editDetail: "Edit Detail",
   closeDetail: "Close Detail",
 } as const;
+
+/** Robot body colours (editor stage, top-left swatches): repaint robot.xml material ROBOT_BODY_MATERIAL; hex null = the model's own white. */
+export const ROBOT_COLORS: { label: string; hex: string | null }[] = [
+  { label: "Original", hex: null },
+  { label: "Red", hex: "#E47878" },
+  { label: "Green", hex: "#54A56E" },
+  { label: "PURE", hex: "#A9C2C7" },
+  { label: "Charcoal", hex: "#43494A" },
+];
+export const ROBOT_BODY_MATERIAL = "shell";
+export const ROBOT_COLOR_LABEL = "Robot colour";

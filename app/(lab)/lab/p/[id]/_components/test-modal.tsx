@@ -6,13 +6,11 @@ import { ROBOT_TYPES } from "@/data/robot-types";
 import { REAL_ROBOT } from "@/data/real-robot";
 import { STRINGS, fmt } from "@/data/strings";
 import type { RobotDevice, RobotType } from "@/lib/models";
-import { api } from "@/lib/ui/api";
 import { motorAngles, poseUrl, robotReachable } from "@/lib/robot-link";
 import { Icon } from "@/components/ui/icons/icon";
 import { Modal, ModalActions, ModalButton, ModalCard } from "@/components/ui/modal";
 
 const TS = STRINGS.test;
-const CONNECT_MS = 1200;
 
 type Phase = { kind: "list" } | { kind: "connecting"; robot: RobotDevice } | { kind: "offline"; robot: RobotDevice } | { kind: "playing"; robot: RobotDevice };
 
@@ -76,11 +74,11 @@ export function TestModal({
     setPhase({ kind: "list" });
     let live = true;
     const real = REAL_ROBOT.device;
-    Promise.all([api<RobotDevice[]>("/api/robots").catch(() => []), robotReachable()]).then(([list, online]) => {
+    // Only the physical robot is listed (the seeded demo robots were mock-ups).
+    robotReachable().then((online) => {
       if (!live) return;
-      const all = [{ ...real, online }, ...list];
-      setRobots(all);
-      setSelected((cur) => cur ?? all.find((r) => r.online)?.id ?? all[0]?.id ?? null);
+      setRobots([{ ...real, online }]);
+      setSelected(real.id);
     });
     return () => {
       live = false;
@@ -91,8 +89,7 @@ export function TestModal({
     if (phase.kind !== "connecting") return;
     let live = true;
     const robot = phase.robot;
-    const reachable = robot.id === REAL_ROBOT.device.id ? robotReachable() : new Promise<boolean>((r) => setTimeout(() => r(robot.online), CONNECT_MS));
-    reachable.then((online) => {
+    robotReachable().then((online) => {
       if (!live) return;
       if (online) {
         setPhase({ kind: "playing", robot });

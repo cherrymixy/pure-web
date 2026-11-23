@@ -120,3 +120,7 @@ STEP마다 한 줄. `날짜 · STEP · 결정 · 근거`
 | 2026-11-23 | UI 문구 정리 | 화면 문구의 가운뎃점·대시 제거: · → 쉼표/콜론, — → 마침표/쉼표/콜론, 숫자 범위 – → to. 가이드라인 칩·단서 분리 기준 · → 쉼표, parseSize가 'to' 범위도 읽음. 표의 빈 값 —, 화살표 →, /dev는 유지 | 사용자 리뷰 |
 | 2026-11-23 | 가이드라인 일러스트 교체 | 코드 SVG 아이콘(160×72) → 라인아트(240×120, 칸 96 → 148px): 선 1.5 하나, 겹침은 배경색 채움으로 가림, 검정=물체·회색=바닥/기준선·세이지=움직임만, PURE 로봇 3종 형태. 움직임 fig-*는 globals.css, 동작 줄이기에서 정지. 시안 4종(렌더·플랫·라인·캐릭터) 비교 후 선택 | 사용자 리뷰 |
 | 2026-11-23 | 생성 파이프라인 시각화 | Steps 카드 5개에 라인아트(recognize·measure·retarget·style·guardrail, Figure fit), Formula 아래 Try it 블렌드 데모(behavior ρ 선택 + w 슬라이더, clamp 구간 표시; 곡선은 예시용) | 사용자 요청 |
+| 2026-11-23 | 실제 로봇 테스트·코드 | Test on robot 목록에서 시드 목업 로봇(Purebot Desk·Studio arm) 제거, 실제 로봇만. 에디터 우상단 Test on robot·Robot code 버튼. Robot code = 펌웨어 템플릿(hardware/esp32_servo_wifi)의 PATH_M1~M4를 모션으로 채운 .ino, 부팅 시 반복 재생 | 사용자 요청 |
+| 2026-11-23 | 전시 쇼케이스 /showcase | Happy·Politely·Sleep·Sad·Curious 5모션(data/showcase.ts). 실제 로봇 시연용으로 정확한 키프레임(관절별 타이밍 가능, ease_in_out = 펌웨어 cosine)만 사용, 반동 없음. 실시간 로봇 재생·모션별 .ino. 얼굴 blink(neutral에서 곁눈질 구간 제외) 추가 | 사용자 요청 |
+| 2026-11-23 | sim 변경(승인) | 로봇 색 변경 setMaterialColor(재질 shell), 로봇 이동 시 카메라 따라가기 제거, 줌아웃 안개 제거, 바닥(base) 재질 shell. 에디터 좌상단 색 스와치 5개(세션 한정) | 사용자 요청 |
+| 2026-11-23 | 재생 종료 후 재생바 유지 | 모션 끝나면 sim은 idle로 가지만 재생바는 끝난 모션에 머묾. 재생·스크럽 시 같은 모션 재큐(cue). 다음 생성 전까지 유지 | 사용자 요청 |

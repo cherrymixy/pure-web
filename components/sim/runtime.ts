@@ -93,6 +93,8 @@ export class SimRuntime {
   /** Placed 3D assets (null = plain scene) */
   props: PropScene | null = null;
   private faceSource: FaceSource = { kind: 'video' };
+  /** Material colours set before the model loaded (applied once the viewer exists). */
+  private materialColors: Record<string, string | null> = {};
   private faces: FaceManifest | null = null;
   private limits: LimitMonitor | null = null;
   private pendingLimits: JointLimits | null = null;
@@ -142,6 +144,7 @@ export class SimRuntime {
       this.limits = new LimitMonitor(this.robot, lamp.limits);
       if (this.pendingLimits) this.limits.setLimits(this.pendingLimits);
       this.viewer = new LampViewer(this.canvas, lamp, this.options.viewer);
+      for (const [name, hex] of Object.entries(this.materialColors)) this.viewer.setMaterialColor(name, hex);
       if (lamp.props.length) {
         this.props = new PropScene(lamp);
         this.viewer.attachProps(this.props);
@@ -513,6 +516,12 @@ export class SimRuntime {
 
   highlightJoint(id: string | null): void {
     this.viewer?.highlightJoint(id ? engineJoint(this.robot, id) : null);
+  }
+
+  /** Repaint the parts drawn with robot.xml material `name`; null restores the model's colour. */
+  setMaterialColor(name: string, hex: string | null): void {
+    this.materialColors[name] = hex;
+    this.viewer?.setMaterialColor(name, hex);
   }
 
   /** Editor picking + rotation ring (events jointPick / jointRotate). */

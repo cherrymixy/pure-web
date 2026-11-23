@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LIBRARY } from "@/data/library";
 import { componentForSim } from "@/data/components";
 import { appliedPatterns } from "@/data/patterns";
-import { EDITOR_PANEL } from "@/data/editor-panel";
+import { EDITOR_PANEL, ROBOT_BODY_MATERIAL, ROBOT_COLORS, ROBOT_COLOR_LABEL } from "@/data/editor-panel";
 import { SIMREADY_ASSETS } from "@/data/simready-assets";
 import { STRINGS, fmt } from "@/data/strings";
 import { addFaceKey, addKey, applyBehavior, autoAdjust, delayFace, delaySound, isNeutralBehavior, NEUTRAL_BEHAVIOR, deleteFaceKey, deleteKey, formatTime, limitCheck, matchTiming, moveFaceKey, paramsToProps, propsToParams, recipeToClip, snapTime, channelTiles, updateKey } from "@/lib/expression";
@@ -25,6 +25,8 @@ import { ROBOT_KEY, type JointState, type SimController } from "@/components/sim
 import { Viewport, type ViewportEvent } from "@/components/sim/Viewport";
 import type { LimitEvent } from "@/components/sim/limits";
 import { Icon } from "@/components/ui/icons/icon";
+import { downloadText, slug } from "@/lib/ui/download";
+import { fillFirmware, firmwarePaths } from "@/lib/robot-firmware";
 import { Menu } from "@/components/ui/menu";
 import { ConfirmModal, Modal, ModalActions, ModalButton, PromptModal } from "@/components/ui/modal";
 import { useToast } from "@/components/ui/toast";
@@ -177,6 +179,7 @@ export function Editor({
   const router = useRouter();
   const toast = useToast();
   const ctrl = useRef<SimController | null>(null);
+  const [robotColor, setRobotColor] = useState(0);
   const [sound] = useState(createSoundEngine);
   const axes = signature.axes as Record<keyof Signature["axes"], number>;
   const signatureProps = useMemo(() => paramsToProps(signatureToParams(axes).playback), [axes]);
@@ -235,6 +238,15 @@ export function Editor({
   const [autoPlay, setAutoPlay] = useState(false);
   /** Bumped when the motion itself changes (generate, auto-adjust); prop edits don't re-cue playback. */
   const [cue, setCue] = useState(0);
+  /** The motion played to its end: the robot idles, but the play bar keeps this motion (full) until it is replayed or replaced. */
+  const motionDone = useRef(false);
+  /** Seek to apply once a re-cued motion is loaded (scrubbing after the end). */
+  const pendingSeek = useRef<number | null>(null);
+  /** Load the current motion again (after its end the sim has moved on to idle): from the start, playing or cued. */
+  const recue = (play: boolean) => {
+    setAutoPlay(play);
+    setCue((c) => c + 1);
+  };
   const [context, setContext] = useState<EditorContext>(() => ({
     components: initialExpression?.components ?? [],
     pattern: initialExpression?.pattern ?? "",
@@ -395,6 +407,21 @@ export function Editor({
     [expression?.id, expression?.version, clip, params, structure],
   );
   const timelineClip = clip ?? previewClip;
+
+  /** ESP32 sketch (hardware/esp32_servo_wifi) with this motion baked in; the robot loops it from boot. */
+  const downloadRobotCode = async () => {
+    if (!expression || !timelineClip) return toast(STRINGS.export.noExpression);
+    try {
+      const res = await fetch("/api/firmware");
+      if (!res.ok) throw new Error(String(res.status));
+      const paths = firmwarePaths(timelineClip, structure.joints.map((j) => j.id), params.speed ?? 1);
+      const file = `${slug(name) || "pure"}_robot.ino`;
+      downloadText(file, fillFirmware(await res.text(), paths, name), "text/plain");
+      toast(fmt(E.robotCodeDone, { file }));
+    } catch {
+      toast(E.robotCodeFailed);
+    }
+  };
   const jointLabel = (id: string) => structure.joints.find((j) => j.id === id)?.label ?? id;
   const isJoint = (track: Track) => track !== "face" && track !== "sound";
 
@@ -564,6 +591,12 @@ export function Editor({
   }
 
   function seekTo(t: number) {
+    if (motionDone.current) {
+      pendingSeek.current = t;
+      recue(false);
+      setPaused(true);
+      return;
+    }
     ctrl.current?.pause();
     ctrl.current?.seek(t);
     setPaused(true);
@@ -900,17 +933,25 @@ export function Editor({
   function onEvent(e: ViewportEvent) {
     switch (e.type) {
       case "tick":
-        setTime({ t: e.t, duration: e.duration });
+        // after the end the sim ticks the idle; the play bar stays on the finished motion
+        if (!motionDone.current) setTime({ t: e.t, duration: e.duration });
         break;
       case "playing":
-        setPaused(false);
+        motionDone.current = false;
+        if (pendingSeek.current !== null) {
+          ctrl.current?.seek(pendingSeek.current);
+          pendingSeek.current = null;
+        }
+        setPaused(ctrl.current?.isPaused() ?? false);
         break;
       case "ended":
+        motionDone.current = true;
+        setTime((tm) => ({ t: tm.duration, duration: tm.duration }));
         setPaused(true);
         break;
       case "jointState":
         setJoints(e.joints);
-        setPaused(ctrl.current?.isPaused() ?? true);
+        setPaused(motionDone.current || (ctrl.current?.isPaused() ?? true));
         break;
       case "limitExceeded":
         setLimit(e);
@@ -994,6 +1035,7 @@ export function Editor({
   function togglePlay() {
     const c = ctrl.current;
     if (!c || !expression) return;
+    if (motionDone.current) return recue(true);
     const ended = time.duration > 0 && time.t >= time.duration - 0.01;
     if (ended) {
       c.seek(0);
@@ -1103,6 +1145,44 @@ export function Editor({
           ))}
         </div>
       )}
+
+      {/* Robot colour swatches (no Figma equivalent): repaint the robot body; session only */}
+      <div role="radiogroup" aria-label={ROBOT_COLOR_LABEL} className="absolute left-[494px] top-[32px] z-10 flex items-center gap-[var(--space-12)] rounded-[var(--radius-full)] bg-[var(--bg-surface)] p-[9px] shadow-[var(--pure-shadow-chip)]">
+        {ROBOT_COLORS.map((c, i) => (
+          <button
+            key={c.label}
+            type="button"
+            role="radio"
+            aria-checked={i === robotColor}
+            aria-label={c.label}
+            title={c.label}
+            onClick={() => {
+              setRobotColor(i);
+              ctrl.current?.setMaterialColor(ROBOT_BODY_MATERIAL, c.hex);
+            }}
+            className={`size-[42px] rounded-[var(--radius-full)] border border-[var(--border-default)] outline-offset-[3px] ${i === robotColor ? "outline outline-2 outline-[var(--text-primary)]" : ""}`}
+            style={{ background: c.hex ?? "var(--neutral-0)" }}
+          />
+        ))}
+      </div>
+
+      {/* Real-robot shortcuts: live test (same as the project menu item) and the ESP32 sketch with this motion (no Figma equivalent) */}
+      <div className="absolute right-[512px] top-[32px] z-10 flex items-center gap-[var(--space-8)]">
+        {([
+          ["bluetooth", E.menu.test, () => (expression ? setTestOpen(true) : toast(STRINGS.export.noExpression))],
+          ["download-minimalistic", E.menu.robotCode, () => void downloadRobotCode()],
+        ] as const).map(([icon, label, onClick]) => (
+          <button
+            key={label}
+            type="button"
+            onClick={onClick}
+            className="flex items-center gap-[var(--space-8)] rounded-[var(--radius-full)] bg-[var(--bg-surface)] px-[var(--space-16)] py-[10px] text-[15px] font-medium text-[var(--text-primary)] shadow-[var(--pure-shadow-chip)]"
+          >
+            <Icon name={icon} size={18} />
+            {label}
+          </button>
+        ))}
+      </div>
 
       {/* Top of the stage (no Figma equivalent): signature, result badges, reasoning, empty hint */}
       <div className="pointer-events-none absolute left-[494px] right-[512px] top-[32px] z-10 flex flex-col items-center gap-[var(--space-12)]">

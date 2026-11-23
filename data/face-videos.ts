@@ -5,6 +5,7 @@ export const FACE_DIR = "/pure-desk/faces/";
 
 export const FACE_VIDEOS = {
   neutral: { file: "neutral.mp4", label: "Neutral", hint: "calm open eyes, the default face" },
+  blink: { file: "blink.mp4", label: "Blink", hint: "centred open eyes that only blink, no side glances" },
   smile: { file: "smile.mp4", label: "Smile", hint: "smiling eyes, friendly and pleased" },
   heart: { file: "heart.mp4", label: "Heart", hint: "heart eyes, delight and affection" },
   surprise: { file: "surprise.mp4", label: "Surprise", hint: "wide eyes, surprised or alert" },

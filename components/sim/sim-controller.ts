@@ -386,6 +386,11 @@ export class SimController {
     this.runtime.highlightJoint(id);
   }
 
+  /** Robot colour: repaint the parts drawn with robot.xml material `name` (PURE Desk body = "shell"); null = the model's colour. */
+  setMaterialColor(name: string, hex: string | null): void {
+    this.runtime.setMaterialColor(name, hex);
+  }
+
   /** Editor: click a part to pick its joint, drag the ring to turn it (events jointPick / jointRotate). */
   enableJointGizmo(on: boolean): void {
     this.gizmo.on = on;

@@ -140,7 +140,6 @@ export class LampViewer {
   private readonly propHelper = new THREE.Box3Helper(this.propBox, new THREE.Color('#789ba2'));
   private propPickOff: (() => void) | null = null;
   /** 카메라가 마지막으로 맞춘 로봇 받침 위치 — 옮겨진 만큼 카메라를 따라 옮긴다 */
-  private mountAt: [number, number, number] = [0, 0, 0];
 
   constructor(canvas: HTMLCanvasElement, lamp: LampSim, options: ViewerOptions = {}) {
     this.lamp = lamp;
@@ -156,7 +155,7 @@ export class LampViewer {
 
     if (!transparent) {
       this.scene.background = new THREE.Color(this.options.stage);
-      this.scene.fog = new THREE.Fog(this.options.stage, 2.2, 6);
+      // No fog: zooming out keeps the robot and props sharp (fog used to fade them into the stage from 2.2 m).
     }
 
     this.camera = new THREE.PerspectiveCamera(38, 1, 0.01, 50);
@@ -526,20 +525,12 @@ export class LampViewer {
         this.propBox.setFromObject(selected);
       }
     }
-    // 로봇 받침이 옮겨진 만큼 카메라도 따라간다 (MuJoCo x, y, z → Three x, z, -y)
-    const m = this.lamp.mount;
-    const d = toWorld(m[0] - this.mountAt[0], m[1] - this.mountAt[1], m[2] - this.mountAt[2]);
-    if (d.lengthSq() > 1e-12) {
-      this.camera.position.add(d);
-      this.controls.target.add(d);
-      this.mountAt = [m[0], m[1], m[2]];
-    }
+    // The camera stays put when the robot is moved, like any other prop (it used to follow the robot base).
   }
 
   /** 소품 씬을 붙이고 에셋 GLB 를 불러온다 (에셋당 한 번, 슬롯마다 복제). */
   attachProps(scene: PropScene): void {
     this.propScene = scene;
-    this.mountAt = this.lamp.mount;
     this.scene.add(this.propHelper);
     this.propHelper.visible = false;
     const loader = new GLTFLoader();
@@ -640,6 +631,19 @@ export class LampViewer {
       const on = body >= 0 && model.geom_bodyid[geomId] === body;
       material.emissive.copy(on ? tint : new THREE.Color(0x000000));
       material.emissiveIntensity = on ? 0.6 : 0;
+    }
+  }
+
+  /** Repaint every part drawn with robot.xml material `name` (e.g. "shell"); null restores the model's colour. */
+  setMaterialColor(name: string, hex: string | null): void {
+    const { mj, model } = this.lamp;
+    const matId = mj.mj_name2id(model, mj.mjtObj.mjOBJ_MATERIAL.value, name);
+    if (matId < 0) return;
+    for (const { geomId, node } of this.geomNodes) {
+      if (model.geom_matid[geomId] !== matId) continue;
+      const material = (node as THREE.Mesh).material as THREE.MeshStandardMaterial;
+      if (hex) material.color.set(hex);
+      else material.color.copy(this.geomColor(geomId));
     }
   }
 
@@ -813,10 +817,9 @@ export class LampViewer {
     const fy = Math.cos(el) * Math.sin(az);
     const fz = Math.sin(el);
     // Views are written at the model's own size and around its home spot: scale by RobotSpec.scale and
-    // follow the robot base wherever it was moved (props scene) — syncProps then tracks it from here.
+    // frame the robot base wherever it was moved (props scene); moving it afterwards leaves the camera where it is.
     const k = this.lamp.robot.scale ?? 1;
     const m = this.lamp.mount;
-    this.mountAt = [m[0], m[1], m[2]];
     const lx = view.lookAt[0] * k + m[0];
     const ly = view.lookAt[1] * k + m[1];
     const lz = view.lookAt[2] * k + m[2];
