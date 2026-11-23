@@ -181,7 +181,7 @@ export function ImportModel() {
         </Link>
 
         <div className="relative flex w-[1040px] flex-col gap-[var(--space-28)] rounded-[32px] border border-[var(--home-line)] bg-[var(--neutral-0)] p-[var(--space-40)] shadow-[0_24px_48px_var(--effect-shadow)]">
-          <header className="flex flex-col items-center gap-[var(--space-8)] text-center">
+          <header className="mb-[var(--space-16)] flex flex-col items-center gap-[var(--space-8)] text-center">
             <h1 className="text-[44px] font-semibold leading-[1.15] text-[var(--home-ink)]">{replaceId ? S.replaceTitle : S.title}</h1>
             <p className="text-[17px] text-[var(--home-ink-2)]">{S.subtitle}</p>
           </header>
@@ -240,7 +240,7 @@ export function ImportModel() {
             {!replaceId && (
               <Link
                 href="/lab/new/type"
-                className="flex h-[44px] shrink-0 items-center whitespace-pre rounded-[var(--radius-sm)] bg-[var(--home-ink)] px-[22px] text-[15px] font-medium text-[var(--neutral-0)] hover:bg-[var(--neutral-800)]"
+                className="flex h-[44px] shrink-0 items-center whitespace-pre rounded-[var(--radius-sm)] bg-[var(--home-canvas)] px-[22px] text-[15px] font-medium text-[var(--home-ink-2)] hover:bg-[var(--home-pill)] hover:text-[var(--home-ink)]"
               >
                 {S.noFile}
               </Link>
