@@ -452,29 +452,44 @@ export function SignatureStudio({
                 </div>
               </section>
 
-              {/* How it maps (Figma 901:9300): keyword → axis value · effect, p.N → quote. */}
+              {/* How it maps (user review: readable, not engine values): per row the trait, its plain-word reading and a
+                  0–100 bar, then which brand word set it and the page it came from. Raw values stay in the hover title. */}
               <section className="flex flex-col gap-[var(--space-12)]">
-                <h2 className={label}>{S.howItMaps}</h2>
+                <header className="flex flex-col gap-[2px]">
+                  <h2 className={label}>{S.howItMaps}</h2>
+                  <p className="text-[13px] text-[var(--home-ink-2)]">{S.howItMapsBody}</p>
+                </header>
                 <ul className="flex flex-col gap-[var(--space-8)]">
                   {shown.mapping.map((m) => {
                     const kw = m.reason.match(/“([^”]+)”/)?.[1] ?? "";
+                    const info = AXIS_INFO[m.axis];
+                    const word = m.value < 40 ? info.low : m.value > 60 ? info.high : S.balanced;
                     const effect = paramEffect(m.axis, m.value);
                     return (
-                      <li key={m.axis} className="flex items-center justify-between gap-[var(--space-8)] text-[14px] leading-[18px]" title={m.reason}>
-                        <span className="flex min-w-0 items-start gap-[var(--space-8)] whitespace-nowrap">
-                          <span className="w-[72px] shrink-0 truncate font-medium text-[var(--home-ink)]">{kw}</span>
-                          <span className="text-[var(--home-ink-3)]">→</span>
-                          <span className="truncate font-mono text-[var(--home-ink-2)]">{`${m.axis} ${m.value}${effect ? `, ${effect}` : ""}`}</span>
-                        </span>
-                        {m.page && (
-                          <button
-                            type="button"
-                            className="flex h-[22px] shrink-0 items-center rounded-[var(--radius-full)] bg-[var(--home-canvas)] px-[var(--space-16)] font-mono text-[12px] leading-[15px] text-[var(--home-ink-3)] hover:text-[var(--home-ink-2)]"
-                            onClick={() => setQuote({ keyword: kw, page: m.page!, quote: evidence.get(kw)?.quote })}
-                          >
-                            {fmt(S.pageQuote, { page: m.page })}
-                          </button>
-                        )}
+                      <li
+                        key={m.axis}
+                        className="flex flex-col gap-[var(--space-8)] rounded-[12px] bg-[var(--home-canvas)] px-[var(--space-16)] py-[var(--space-12)]"
+                        title={`${info.description} ${m.axis} ${m.value}${effect ? ` · ${effect}` : ""}`}
+                      >
+                        <div className="flex items-baseline justify-between gap-[var(--space-8)] text-[15px]">
+                          <span className="font-medium text-[var(--home-ink)]">{info.label}</span>
+                          <span className="font-medium text-[var(--home-ink-2)]">{word}</span>
+                        </div>
+                        <div className="h-[4px] overflow-hidden rounded-[var(--radius-full)] bg-[var(--home-line)]" aria-hidden>
+                          <div className="h-full rounded-[var(--radius-full)] bg-[var(--home-ink)]" style={{ width: `${m.value}%` }} />
+                        </div>
+                        <div className="flex items-center justify-between gap-[var(--space-8)] text-[13px] text-[var(--home-ink-3)]">
+                          <span className="truncate">{kw && fmt(S.fromWord, { word: kw })}</span>
+                          {m.page && (
+                            <button
+                              type="button"
+                              className="shrink-0 underline underline-offset-4 hover:text-[var(--home-ink)]"
+                              onClick={() => setQuote({ keyword: kw, page: m.page!, quote: evidence.get(kw)?.quote })}
+                            >
+                              {fmt(S.pageQuote, { page: m.page })}
+                            </button>
+                          )}
+                        </div>
                       </li>
                     );
                   })}

@@ -138,3 +138,4 @@ STEP마다 한 줄. `날짜 · STEP · 결정 · 근거`
 | 2026-11-23 | 구조 화면 Lab 무드·Edit limits 버튼 | Structure(W02C) 패널을 Lab 토큰으로(흰 패널·home-line 테두리, 관절 행·채널 칩·Confirm Lab 스타일, Preview 태그), Edit limits를 텍스트 → 테두리 버튼(설정 아이콘, 편집 중 검정 Done) | 사용자 리뷰 |
 | 2026-11-23 | 구조 화면 정리 | 상단 PREVIEW 태그와 보조 안내문(Preview plays on PURE Desk…) 삭제, 본문은 한 문장만 | 사용자 리뷰 |
 | 2026-11-23 | 타입·Import 하단 안내 삭제, 시그니처 화면 Lab 무드 | 타입 선택 하단 안내문·Import 링크 삭제(Continue만), Import 하단 안내+샘플 로봇 링크 행 삭제, 고를 수 없는 타입 카드 흐리게(40%). Signature(W02C-1~3)를 구조 화면과 같은 Lab 토큰으로(유리 상단 버튼, PREVIEW 삭제, 흰 패널·home-line 테두리, Lab 버튼), 왼쪽 패널 가로 넘침 수정 | 사용자 리뷰 |
+| 2026-11-23 | 시그니처 How it maps 읽기 쉽게 | `calm → tempo 16, speed ×0.81` 코드식 한 줄 → 행마다 특성 이름(Tempo)·쉬운 말(Unhurried/Balanced/Brisk)·0–100 막대·“from “calm” · p.6”, 원래 수치는 hover 툴팁 | 사용자 리뷰 |
