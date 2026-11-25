@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { GUIDELINE_NAV, type GuidelineNavItem } from "@/data/guideline/nav";
-import { saveTokens } from "./download-tokens";
 
 /** Guideline tree in the Lab sidebar, nav-row style (1095:6568): hairline-indented groups 15, pages 14, selected = #eef1f4 + ink medium.
  *  Structure from Figma 808:1594 / 886:1706 "Side nav": groups, and the open group's pages (open on the group's own page too). Items without a page are plain text. */
@@ -14,7 +13,7 @@ export function GuidelineTree({ base, current: at }: { base: string; current: st
         const open = href(g) === current || g.children?.some((c) => href(c) === current);
         return (
           <div key={g.label} className="contents">
-            <Item label={g.label} href={href(g)} onClick={g.download ? saveTokens : undefined} on={href(g) === current && !g.children?.some((c) => href(c) === current)} cls="px-[var(--space-12)] text-[var(--home-ink-2)]" />
+            <Item label={g.label} href={href(g)} on={href(g) === current && !g.children?.some((c) => href(c) === current)} cls="px-[var(--space-12)] text-[var(--home-ink-2)]" />
             {open &&
               g.children &&
               g.children!.map((c) =>
@@ -31,14 +30,8 @@ export function GuidelineTree({ base, current: at }: { base: string; current: st
   );
 }
 
-function Item({ label, href, on, cls, onClick }: { label: string; href?: string; on: boolean; cls: string; onClick?: () => void }) {
+function Item({ label, href, on, cls }: { label: string; href?: string; on: boolean; cls: string }) {
   const c = `rounded-[10px] py-[7px] ${cls} ${on ? "bg-[var(--home-nav-on)] font-medium !text-[var(--home-ink)]" : ""}`;
-  if (onClick)
-    return (
-      <button type="button" onClick={onClick} className={`${c} text-left hover:bg-[var(--home-nav-on)]`}>
-        {label}
-      </button>
-    );
   return href ? (
     <Link href={href} aria-current={on ? "page" : undefined} className={`${c} ${on ? "" : "hover:bg-[var(--home-nav-on)]"}`}>
       {label}
