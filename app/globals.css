@@ -82,9 +82,25 @@ body {
 .fig-grow { transform-origin: 50% 100%; animation: fig-grow 3s ease-out infinite; }
 @keyframes fig-grow { 0% { transform: scaleY(0.2); } 30%, 100% { transform: scaleY(1); } }
 
+/* Primitive token examples (components/ui/guideline/token-demo.tsx): --t = the token's end pose, --a = swing angle, --w = sweep width. */
+.tok-to, .tok-swing, .tok-blink, .tok-blink2, .tok-sweep { transform-box: view-box; }
+.tok-to { animation: tok-to 3.2s var(--ease-standard) infinite; }
+@keyframes tok-to { 0%, 12%, 100% { transform: none; } 42%, 78% { transform: var(--t); } }
+.tok-swing { animation: tok-swing 3s ease-in-out infinite; }
+@keyframes tok-swing { 0%, 100% { transform: rotate(calc(var(--a) * -1)); } 50% { transform: rotate(var(--a)); } }
+.tok-blink { animation: tok-blink 3s infinite; }
+@keyframes tok-blink { 0%, 70%, 80%, 100% { transform: none; } 75% { transform: scaleY(0.3); } }
+.tok-blink2 { animation: tok-blink2 3s infinite; }
+@keyframes tok-blink2 { 0%, 60%, 68%, 76%, 100% { transform: none; } 64%, 72% { transform: scaleY(0.3); } }
+.tok-sweep { animation: tok-sweep 2.8s linear infinite; }
+@keyframes tok-sweep { from { transform: none; } to { transform: translateX(var(--w)); } }
+
 @media (prefers-reduced-motion: reduce) {
   .anim-fade-in, .anim-rise-in, .anim-pop-in, .anim-check-pop, .anim-pulse, .anim-float, .scan-line { animation: none; }
   [class*="fig-"] { animation: none !important; }
   .fig-draw { stroke-dashoffset: 0; }
   .fig-ride { offset-distance: 100%; }
+  [class*="tok-"] { animation: none !important; }
+  .tok-to { transform: var(--t); }
+  .tok-sweep { display: none; }
 }

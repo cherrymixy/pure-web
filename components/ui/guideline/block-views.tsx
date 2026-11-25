@@ -6,6 +6,7 @@ import { Figure } from "./figures";
 import { BlendDemo } from "./blend-demo";
 import { LayerMap } from "./layer-map";
 import { parseSize } from "./parse-size";
+import { TokenDemo, hasTokenDemo } from "./token-demo";
 
 // Lab-style presentations of guideline body blocks (block.view). Same content as the plain table / code / list —
 // only the shape changes. Type scale shared with Lab: 22 / 17 / 15 / 14 / 13 / 12. White cards on the canvas, no border or shadow.
@@ -23,7 +24,7 @@ export function BlockView({ b }: { b: GuidelineBlock }) {
   if (b.kind === "table" && b.view === "chips") return <Chips head={b.head} rows={b.rows} />;
   if (b.kind === "list" && b.view === "checklist") return <Checklist items={b.items} />;
   if (b.kind === "p" && b.view === "note") return <Note text={b.text} />;
-  if (b.kind === "table" && b.view === "scale") return <Scale head={b.head} rows={b.rows} />;
+  if (b.kind === "table" && b.view === "scale") return <Scale head={b.head} rows={b.rows} demo={b.figures?.[0]} />;
   if (b.kind === "table" && b.view === "matrix") return <Matrix head={b.head} rows={b.rows} />;
   if (b.kind === "list" && b.view === "rules") return <Rules items={b.items} />;
   if (b.kind === "p" && b.view === "evidence") return <Evidence text={b.text} />;
@@ -212,7 +213,9 @@ function Note({ text }: { text: string }) {
 
 /* ── scale: token sizes placed on one value axis, then a card per size ───────────────── */
 
-function Scale({ head, rows }: { head: string[]; rows: string[][] }) {
+/** demo: token slug → one example picture per size (token-demo.tsx) instead of the value axis. */
+function Scale({ head, rows, demo }: { head: string[]; rows: string[][]; demo?: string }) {
+  const pictures = hasTokenDemo(demo);
   const parsed = rows.map((r) => parseSize(r[1]));
   // Only sizes in the most common unit share the axis (e.g. rotate's "35% vmax" speed stays off the degree axis).
   const units = parsed.flatMap((p) => (p ? [p[2]] : []));
@@ -223,7 +226,7 @@ function Scale({ head, rows }: { head: string[]; rows: string[][] }) {
   const x = (v: number) => (hi === lo ? 50 : ((v - lo) / (hi - lo)) * 100);
   return (
     <div className={`${CARD} flex flex-col gap-[var(--space-24)] p-[var(--space-24)]`}>
-      {onAxis.length >= 2 && (
+      {!pictures && onAxis.length >= 2 && (
         <div aria-hidden className="relative mx-[var(--space-24)] mb-[var(--space-8)] mt-[30px] h-[8px] rounded-[var(--radius-full)] bg-[var(--home-pill)]">
           {lo < 0 && <span className="absolute -top-[6px] h-[20px] w-px bg-[var(--home-line)]" style={{ left: `${x(0)}%` }} />}
           {onAxis.map((p) => {
@@ -247,8 +250,13 @@ function Scale({ head, rows }: { head: string[]; rows: string[][] }) {
         </div>
       )}
       <div className="grid gap-[var(--space-12)]" style={{ gridTemplateColumns: `repeat(${rows.length}, minmax(0, 1fr))` }} role="table" aria-label={head.join(", ")}>
-        {rows.map(([size, value, use]) => (
+        {rows.map(([size, value, use], i) => (
           <div key={size} role="row" className={`flex flex-col gap-[6px] rounded-[14px] p-[var(--space-16)] ${size === "max" ? "bg-[var(--red-50)]" : "bg-[var(--home-canvas)]"}`}>
+            {pictures && (
+              <div className="-mx-[var(--space-8)] -mt-[var(--space-8)] mb-[var(--space-8)] rounded-[10px] bg-[var(--neutral-0)] py-[var(--space-8)]">
+                <TokenDemo slug={demo!} value={value} i={i} max={size === "max"} />
+              </div>
+            )}
             <code role="cell" className={`w-fit font-mono text-[12px] font-semibold ${size === "max" ? "text-[var(--red-500)]" : "text-[var(--home-ink-3)]"}`}>{size}</code>
             <span role="cell" className="text-[17px] font-semibold leading-[1.3] text-[var(--home-ink)]">{value}</span>
             <span role="cell" className="text-[13px] leading-[1.45] text-[var(--home-ink-2)]">{use}</span>

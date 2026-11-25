@@ -25,7 +25,7 @@ const token = (t: TokenSpec): GuidelineEntry => ({
   title: t.title,
   summary: t.summary,
   body: [
-    { kind: "table", title: "Sizes", view: "scale", head: ["Size", "Value", "Use"], rows: t.sizes },
+    { kind: "table", title: "Sizes", view: "scale", figures: [t.slug], head: ["Size", "Value", "Use"], rows: t.sizes },
     { kind: "list", title: "Rules", view: "rules", items: t.rules },
     { kind: "p", title: "Evidence", view: "evidence", text: t.evidence },
   ],

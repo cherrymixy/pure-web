@@ -18,7 +18,7 @@ export type GuidelineBlockView = "tree" | "formula" | "cards" | "levels" | "step
 export type GuidelineBlock = {
   title?: string;
   view?: GuidelineBlockView;
-  /** view "cards" / "steps": one small illustration key per row (components/ui/guideline/figures.tsx) */
+  /** view "cards" / "steps": one small illustration key per row (components/ui/guideline/figures.tsx); view "scale": [token slug] for the size examples (token-demo.tsx) */
   figures?: string[];
 } & (
   | { kind: "p"; text: string }
