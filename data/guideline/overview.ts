@@ -39,7 +39,6 @@ export const overview: GuidelineSection = {
             "│  ├─ Pattern ──── 7 situations (+4 proposed) = trigger → behavior sequence → exit + transitions, priority",
             "│  └─ Template ─── 5 form-factor profiles (role → real joints) × 4 face classes",
             "│                  + source profiles (human, dog, cat, character parts → roles)",
-            "│                  + robot instances (PURE pet robot, PURE Desk …)",
             "├─ Style ──────────────── differs per user and brand",
             "│     Signature = 6 axes P1 to P6 + strength w; presets: Cat, Dog, Drama, Animation",
             "│     Only inside SHOULD ranges, never past MUST, damped per behavior by ρ",

@@ -159,3 +159,4 @@ STEP마다 한 줄. `날짜 · STEP · 결정 · 근거`
 | 2026-11-25 | Style 실험대 | Style 4페이지 맨 위 Try it(style-lab.tsx): Signature 축·프리셋·w 슬라이더 → 레이더·로봇 실시간, Presets 4종 레이더+로봇(Cat·Dog·Drama는 데모용 예시 값, data/guideline/style.ts에 표시), ρ 행동·w 선택 → 공식 계산·원본/최종 로봇, Rules tilt 예시로 SHOULD 범위 클램프. 세부 페이지 상단 특수 섹션은 feature 슬롯 하나로 통합 | 사용자 리뷰 |
 | 2026-11-25 | Templates 몸 그림 | 블록형 몸 → Figma 폼팩터 아이콘(icon-human·quad·wheel-arm·wheel·arm) 라인 드로잉을 키워 그림(흰 채움·잉크 3px 선·관절 점), 선택 부위는 세이지 선·옅은 채움 | 사용자 리뷰 |
 | 2026-11-25 | 가이드라인 사이드바 | 맨 아래 Download(토큰 JSON) 항목 제거 — Foundations·Primitive 인덱스의 다운로드 버튼은 유지 | 사용자 요청 |
+| 2026-11-25 | Templates 정리 | PURE pet robot·PURE Desk 페이지 제거(각각 5개 폼팩터 중 하나라 별도 항목 아님), 관련 링크는 joint-fixed로 | 사용자 요청 |

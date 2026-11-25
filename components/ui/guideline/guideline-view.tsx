@@ -25,8 +25,8 @@ export function GuidelineView({ base, slug = [] }: { base: string; slug?: string
     const c = cmp?.entries.find((e) => e.slug === slug);
     return c ? [{ slug, title: c.title }] : [];
   });
-  // Templates: form-factor pages (and the robot instances built on one) show the body with its roles
-  const ffSlug = section.id === "templates" ? ({ "pure-pet": "joint-walking", "pure-desk": "joint-fixed" } as Record<string, string>)[entry?.slug ?? ""] ?? entry?.slug : undefined;
+  // Templates: form-factor pages show the body with its roles
+  const ffSlug = section.id === "templates" ? entry?.slug : undefined;
   const ff = ffSlug && FORM_FACTORS.includes(ffSlug) ? section.entries.find((e) => e.slug === ffSlug) : undefined;
   const rolesTable = ff?.body.find((b) => b.kind === "table" && b.view === "roles");
   const rows = rolesTable?.kind === "table" ? Object.fromEntries(rolesTable.rows) : undefined;

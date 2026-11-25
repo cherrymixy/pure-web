@@ -122,7 +122,7 @@ export const principles: GuidelineSection = {
         },
         { kind: "p", text: "Loop rules: arousal → period (high 0.25 to 0.4 s ↔ low 1.2 to 1.8 s); valence → pattern (positive = continuous, negative = burst-rest). Measured in the FaceUI v2 analysis." },
       ],
-      related: ["eye-shape", "blink", "pure-desk"],
+      related: ["eye-shape", "blink", "joint-fixed"],
       source: `${SRC} §5-2; Figma W03-2L 808:1649`,
       doc: faceDoc,
     },

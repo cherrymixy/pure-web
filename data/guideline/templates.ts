@@ -1,6 +1,7 @@
 import type { GuidelineEntry, GuidelineSection } from "./types";
 
-// Source: PURE guideline final structure v3 (2026-10-19) §9 Template — form factors, sources, robots.
+// Source: PURE guideline final structure v3 (2026-10-19) §9 Template — form factors and sources. Robot instances (PURE pet, PURE Desk) are
+// not separate pages: each is one of the five form factors.
 // Form-factor slugs = data/robot-types.ts ids (same order).
 
 const SRC = "PURE guideline final structure v3 (2026-10-19) §9";
@@ -47,7 +48,7 @@ export const templates: GuidelineSection = {
   id: "templates",
   title: "Templates",
   summary:
-    "Which body runs a Component: five form-factor profiles (roles → real joints) × four face classes, source profiles for analysis, and robot instances.",
+    "Which body runs a Component: five form-factor profiles (roles → real joints) × four face classes and source profiles for analysis.",
   entries: [
     {
       slug: "form-factors",
@@ -112,59 +113,11 @@ export const templates: GuidelineSection = {
       source: `${SRC}-2`,
     },
     {
-      slug: "pure-pet",
-      ref: "robot.pure_pet",
-      title: "PURE pet robot",
-      summary: "A robot designed by the user: Joint Walking × eyes.",
-      body: [
-        {
-          kind: "table",
-          title: "Spec",
-          view: "cards",
-          head: ["Field", "Value"],
-          rows: [
-            ["form factor × face", "ff.legged × eyes"],
-            ["expressive parts", "Screen eyes + legs. Ears are fixed."],
-            ["SECOND channels", "Blink, breathing, weight shift on the legs"],
-          ],
-        },
-      ],
-      related: ["joint-walking", "pure-desk"],
-      source: `${SRC}-3`,
-    },
-    {
-      slug: "pure-desk",
-      ref: "robot.pure_desk",
-      title: "PURE Desk",
-      summary: "The desk robot (film scenario): Joint Fixed × eyes, 5 joints + a face screen.",
-      proposed: true,
-      body: [
-        {
-          kind: "table",
-          title: "Spec",
-          view: "cards",
-          head: ["Field", "Value"],
-          rows: [
-            ["form factor × face", "ff.fixed_jointed × eyes"],
-            ["joints", "5 axes + a face screen (about 115 × 69 mm, 5:3)"],
-            ["face spec", "FaceUI v2: canvas 480 × 320, 30 fps, two colors, safe area, file rules, faces.json mapping"],
-          ],
-        },
-        {
-          kind: "p",
-          view: "note",
-          text: "FaceUI v2 is the production spec of one robot's screen, so it sits here as the robot instance's face implementation spec, not in the Foundation (proposed).",
-        },
-      ],
-      related: ["joint-fixed", "face"],
-      source: `${SRC}-3`,
-    },
-    {
       slug: "export",
       title: "Export",
       summary: "PDF report, pure.json, CSV, dataset: class + channels + signature + patterns, bundled for the robot and the team.",
       body: [{ kind: "list", title: "Formats", view: "tiles", items: ["PDF report", "pure.json", "CSV", "Dataset"] }],
-      related: ["pure-desk"],
+      related: ["form-factors"],
       source: `${SRC}-4`,
     },
   ],
