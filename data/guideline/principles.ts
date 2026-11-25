@@ -79,7 +79,7 @@ export const principles: GuidelineSection = {
       slug: "face",
       group: "channel",
       ref: "ch.face",
-      title: "Face",
+      title: "Face UI",
       summary: "An expression is a change of values on one base face. Eye shape carries valence.",
       body: [
         {
@@ -131,7 +131,7 @@ export const principles: GuidelineSection = {
       doc: soundDoc,
       group: "channel",
       ref: "ch.sound",
-      title: "Sound",
+      title: "Sound Effect",
       summary: "One source sound per behavior; emotion is pitch and tempo; timbre stays fixed.",
       body: [
         {
@@ -168,7 +168,7 @@ export const principles: GuidelineSection = {
       doc: motionDoc,
       group: "channel",
       ref: "ch.body",
-      title: "Motion",
+      title: "Physical AI",
       summary: "Write motion for roles, slow down near limits, gaze before body, and always start, stop and return.",
       body: [
         {

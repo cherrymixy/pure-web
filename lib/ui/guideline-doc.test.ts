@@ -32,9 +32,9 @@ describe("guideline doc template", () => {
       }
     }
   });
-  it("channel principles follow the sidebar order: Face · Sound · Motion · Common", () => {
-    expect(entryDoc(section("principles"), entry("principles", "face")).pages?.map((p) => p.label)).toEqual(["Face", "Sound", "Motion", "Common"]);
-    expect(entryDoc(section("principles"), entry("principles", "sound")).pages?.map((p) => p.label)).toEqual(["Face", "Sound", "Motion", "Common"]);
+  it("channel principles follow the sidebar order: Face UI · Sound Effect · Physical AI · Common", () => {
+    expect(entryDoc(section("principles"), entry("principles", "face")).pages?.map((p) => p.label)).toEqual(["Face UI", "Sound Effect", "Physical AI", "Common"]);
+    expect(entryDoc(section("principles"), entry("principles", "sound")).pages?.map((p) => p.label)).toEqual(["Face UI", "Sound Effect", "Physical AI", "Common"]);
   });
   it("tokens list only their own channel", () => {
     const labels = entryDoc(section("primitive-tokens"), entry("primitive-tokens", "tilt")).pages!.map((p) => p.label);

@@ -147,3 +147,4 @@ STEP마다 한 줄. `날짜 · STEP · 결정 · 근거`
 | 2026-11-25 | 모달 포털·팀원 교체 | Modal을 document.body 포털로(사이드바 sticky 안에서 열면 칩 셀렉트가 위로 뚫림), 팀원 Minjun/Jiwoo/Hana → Seonggeun Choi(Admin)/Taerim Bang(Editor)/Hyeonji Jo(Viewer) | 사용자 리뷰 |
 | 2026-11-25 | 내 이메일 | SeungA@purebot.com → lavumeplz@gmail.com (시드 + 로드 시 프로필 email을 시드로 맞춤) | 사용자 요청 |
 | 2026-11-25 | Principles 카드 순서 | Semantic·Guardrails·Combination·Animation·Common·Motion·Face·Sound → 사이드바 순서 Animation·Face·Sound·Motion(Physical AI)·Common·Semantic·Guardrails·Combination rules (채널 탭 순서도 같이) | 사용자 리뷰 |
+| 2026-11-25 | Principles 카드 이름 | Face·Sound·Motion → 사이드바 기준 Face UI·Sound Effect·Physical AI | 사용자 요청 |
