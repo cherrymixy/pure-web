@@ -9,11 +9,11 @@ import { PURE_DEFAULT_SIGNATURE } from "./signature";
 
 export const SEED_PROFILE: Profile = {
   name: "SeungA Jeon",
-  email: "SeungA@purebot.com",
+  email: "lavumeplz@gmail.com",
   company: "Purebot Co.",
   signedInWith: "Google",
   team: [
-    { name: "SeungA Jeon", email: "SeungA@purebot.com", role: "Owner" },
+    { name: "SeungA Jeon", email: "lavumeplz@gmail.com", role: "Owner" },
     { name: "Seonggeun Choi", email: "wmit14232@naver.com", role: "Admin" },
     { name: "Taerim Bang", email: "qkd232071@gmail.com", role: "Editor" },
     { name: "Hyeonji Jo", email: "hyji6715@g.hongik.ac.kr", role: "Viewer" },

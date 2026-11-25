@@ -145,3 +145,4 @@ STEP마다 한 줄. `날짜 · STEP · 결정 · 근거`
 | 2026-11-24 | 실제 로봇 0점·방향 실측 반영 | 펌웨어에 모터별 0점(M1 -50, M2 60, M3 -60, M4 0)을 두고 웹·슬라이더·경로는 0점 기준 각도, 안전 범위 M1 ±45(+오른쪽)·M2 ±20(+위)·M3 -10~35(+앞)·M4 ±45(+왼쪽). 웹 매핑은 시뮬 각도 1:1, M1·M2 부호 반전 | 사용자 실측 |
 | 2026-11-25 | 프로필·계정 조작 잠금 | 유저 메뉴 Library 제거, Log out·Edit profile·Invite·역할 변경·Make owner·Remove·Delete account는 "시뮬레이션 사이트라 변경 불가" 안내 모달(NoticeModal)만 띄움. 프로필 화면 max-w 1200 제거·카드 패딩 32→24·간격 24→16 | 사용자 리뷰 |
 | 2026-11-25 | 모달 포털·팀원 교체 | Modal을 document.body 포털로(사이드바 sticky 안에서 열면 칩 셀렉트가 위로 뚫림), 팀원 Minjun/Jiwoo/Hana → Seonggeun Choi(Admin)/Taerim Bang(Editor)/Hyeonji Jo(Viewer) | 사용자 리뷰 |
+| 2026-11-25 | 내 이메일 | SeungA@purebot.com → lavumeplz@gmail.com (시드 + 로드 시 프로필 email을 시드로 맞춤) | 사용자 요청 |

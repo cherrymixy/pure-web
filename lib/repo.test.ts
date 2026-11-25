@@ -157,7 +157,7 @@ describe("LowRepo", () => {
     expect(invited.pending).toBe(true);
     expect(new Date(invited.expiresAt!).getTime() - new Date("2026-10-16T12:00:00.000Z").getTime()).toBe(7 * DAY);
     expect(await code(t.repo.profile.invite(["new@purebot.com"], "Viewer"))).toBe("CONFLICT");
-    expect(await code(t.repo.profile.setRole("SeungA@purebot.com", "Viewer"))).toBe("CONFLICT");
+    expect(await code(t.repo.profile.setRole("lavumeplz@gmail.com", "Viewer"))).toBe("CONFLICT");
   });
 
   it("user data tabs and search", async () => {
@@ -207,7 +207,7 @@ describe("library ↔ user data, ownership", () => {
     const t = setup();
     const p = await t.repo.profile.setRole("wmit14232@naver.com", "Owner");
     expect(p.team.find((m) => m.email === "wmit14232@naver.com")?.role).toBe("Owner");
-    expect(p.team.find((m) => m.email === "SeungA@purebot.com")?.role).toBe("Admin");
+    expect(p.team.find((m) => m.email === "lavumeplz@gmail.com")?.role).toBe("Admin");
   });
 });
 

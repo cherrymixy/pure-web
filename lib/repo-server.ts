@@ -32,7 +32,9 @@ export function getRepo(): Repo {
       migrateDbContext(db);
       addMissingSeedMotions(db);
       addMissingSeedProjects(db);
-      db.profile.team = structuredClone(SEED_PROFILE.team); // team is read-only in the UI (simulation site)
+      // Profile email and team are read-only in the UI (simulation site): always the seed values.
+      db.profile.email = SEED_PROFILE.email;
+      db.profile.team = structuredClone(SEED_PROFILE.team);
     },
     removeUploads: (projectId) => fs.rm(path.join(UPLOADS_DIR, projectId), { recursive: true, force: true }),
     clearUploads: async () => {
