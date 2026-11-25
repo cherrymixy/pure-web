@@ -3,7 +3,7 @@ import { mkdirSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { JSONFile } from "lowdb/node";
-import { addMissingSeedMotions, addMissingSeedProjects, seedDb } from "@/data/seed";
+import { SEED_PROFILE, addMissingSeedMotions, addMissingSeedProjects, seedDb } from "@/data/seed";
 import type { Db } from "./models";
 import { DATA_DIR, UPLOADS_DIR, DB_FILE } from "./paths";
 import type { Repo } from "./repo";
@@ -32,6 +32,7 @@ export function getRepo(): Repo {
       migrateDbContext(db);
       addMissingSeedMotions(db);
       addMissingSeedProjects(db);
+      db.profile.team = structuredClone(SEED_PROFILE.team); // team is read-only in the UI (simulation site)
     },
     removeUploads: (projectId) => fs.rm(path.join(UPLOADS_DIR, projectId), { recursive: true, force: true }),
     clearUploads: async () => {
