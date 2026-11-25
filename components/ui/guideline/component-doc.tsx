@@ -173,7 +173,7 @@ function SectionBody({ s, base }: { s: ComponentDocSection; base: string }) {
       return (
         <div className="flex gap-[var(--space-16)]">
           {s.levels.map((l) => (
-            <div key={l.title} className="flex min-w-0 flex-1 flex-col gap-[var(--space-12)] rounded-[14.985px] border-[0.749px] border-[var(--home-line)] bg-[var(--neutral-0)] p-[var(--space-20)]">
+            <div key={l.title} className="flex min-w-0 flex-1 flex-col gap-[var(--space-12)] rounded-[14.985px] bg-[var(--neutral-0)] p-[var(--space-20)]">
               {/* Illustration 808:1372 in a 136.57-wide preview, x as % so it spans any card width: ghost = start, dot = reach, bar = target */}
               <div aria-hidden className="relative h-[119px] overflow-hidden rounded-[var(--radius-sm)] bg-[var(--sage-50)]">
                 <img src={`${A}/int-ghost.png`} alt="" width={59.47} height={59.47} className="absolute left-[16.45%] top-[29.74px] opacity-30" />
@@ -187,7 +187,7 @@ function SectionBody({ s, base }: { s: ComponentDocSection; base: string }) {
                     <span key={c} className="rounded-[var(--radius-xs)] bg-[var(--bg-canvas)] px-[var(--space-16)] py-[var(--space-8)] text-[12px] text-[var(--text-link)]">{c}</span>
                   ))}
                 </div>
-                <code className="flex h-[48px] items-center rounded-[var(--radius-xs)] border-2 border-[var(--neutral-50)] p-[var(--space-12)] font-mono text-[12px] font-medium text-[var(--neutral-600)]">{l.token}</code>
+                <code className="flex h-[48px] items-center rounded-[var(--radius-xs)] bg-[var(--home-pill)] p-[var(--space-12)] font-mono text-[12px] font-medium text-[var(--neutral-600)]">{l.token}</code>
               </div>
             </div>
           ))}
@@ -207,7 +207,7 @@ function SectionBody({ s, base }: { s: ComponentDocSection; base: string }) {
                   <img src={`${I}/tl-${t.channel}.svg`} alt="" width={29.74} height={29.74} />
                   {t.label}
                 </span>
-                <div className="relative h-[59.47px] min-w-0 flex-1 rounded-[var(--radius-sm)] bg-[var(--bg-canvas)]">
+                <div className="relative h-[59.47px] min-w-0 flex-1 rounded-[var(--radius-sm)] bg-[var(--neutral-0)]">
                   {t.clips.map((c, i) => (
                     <span
                       key={i}
@@ -327,7 +327,7 @@ function RobotStage({ notes }: { notes: [string, string] }) {
   const bubble = "absolute flex h-[15.364px] items-center justify-center overflow-hidden rounded-[var(--radius-full)] bg-[var(--bg-inverse)] px-[4px] text-[6px] whitespace-nowrap text-[var(--neutral-100)]";
   const dot = "absolute flex size-[19.824px] items-center justify-center overflow-hidden rounded-[var(--radius-full)] bg-[var(--bg-inverse)]";
   return (
-    <div aria-hidden className="relative flex h-[380px] min-w-[753px] flex-1 justify-center overflow-hidden rounded-[var(--radius-xl)] bg-[var(--bg-canvas)]">
+    <div aria-hidden className="relative flex h-[380px] min-w-[753px] flex-1 justify-center overflow-hidden rounded-[var(--radius-xl)] bg-[var(--neutral-0)]">
       <div className="relative h-[189.819px] w-[376.665px] shrink-0 leading-normal" style={{ zoom: 2 }}>
         <div className="absolute left-[188.33px] top-[79.79px] flex h-[110.026px] w-[57.987px] items-center justify-center">
           <div className="flex-none rotate-180 -scale-y-100">

@@ -149,3 +149,4 @@ STEP마다 한 줄. `날짜 · STEP · 결정 · 근거`
 | 2026-11-25 | Principles 카드 순서 | Semantic·Guardrails·Combination·Animation·Common·Motion·Face·Sound → 사이드바 순서 Animation·Face·Sound·Motion(Physical AI)·Common·Semantic·Guardrails·Combination rules (채널 탭 순서도 같이) | 사용자 리뷰 |
 | 2026-11-25 | Principles 카드 이름 | Face·Sound·Motion → 사이드바 기준 Face UI·Sound Effect·Physical AI | 사용자 요청 |
 | 2026-11-25 | Principles 디자인 | p-cards·flow·bullets·phases·compare·donts를 Foundation 톤으로: 흰 카드·테두리 없음, 본문 12px secondary → 14px ink-2, 제목 15/17 semibold, 칩·Proposed·화살표 버튼 외곽선 → 채움(home-pill), 루프 카드 칩은 아래 pill로 | 사용자 리뷰 |
+| 2026-11-25 | 가이드라인 컬러 패널 | 페이지 바탕(home-canvas) 위 sage-50·bg-canvas 패널 → 흰색(Face 그림·리듬·루프 카드·밸런스, 타임라인 트랙, 로봇 스테이지), 안쪽 흰 칩 → home-pill, 줌 글자 5px → 6~6.5px(=12~13px), 카드 외곽선 제거·본문 14px | 사용자 리뷰 |

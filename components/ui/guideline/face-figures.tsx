@@ -18,19 +18,19 @@ export function FaceTypes({ s }: { s: Of<"face-types"> }) {
   return (
     <div className={`${COL} flex gap-[var(--space-20)]`}>
       {s.items.map((it) => (
-        <div key={it.title} className="flex min-w-0 flex-1 flex-col gap-[var(--space-16)] rounded-[var(--radius-lg)] border-[0.85px] border-[var(--border-default)] bg-[var(--bg-surface)] p-[var(--space-16)]">
+        <div key={it.title} className="flex min-w-0 flex-1 flex-col gap-[var(--space-16)] rounded-[var(--radius-lg)] bg-[var(--bg-surface)] p-[var(--space-16)]">
           <div aria-hidden className="relative h-[127.16px] w-[194.98px] shrink-0 overflow-hidden rounded-[var(--radius-sm)] bg-[var(--bg-canvas)]">
             <div className="absolute left-0 top-0 h-[63.582px] w-[97.492px] overflow-hidden" style={Z}>
               <TypeFigure figure={it.figure} />
             </div>
           </div>
           <div className="flex flex-col gap-[var(--space-8)]">
-            <span className="text-[16px] font-bold text-[var(--text-primary)]">{it.title}</span>
-            <span className="text-[12px] text-[var(--text-secondary)]">{it.subtitle}</span>
+            <span className="text-[15px] font-semibold text-[var(--home-ink)]">{it.title}</span>
+            <span className="text-[14px] leading-[1.55] text-[var(--home-ink-2)]">{it.subtitle}</span>
           </div>
           <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-xs)] bg-[var(--bg-canvas)] px-[var(--space-12)] py-[var(--space-8)]">
-            <span className="text-[12px] font-bold text-[var(--web-3f77a1)]">{s.label}</span>
-            <span className="text-[12px] text-[var(--text-link)]">{it.text}</span>
+            <span className="text-[12px] font-medium text-[var(--home-ink-3)]">{s.label}</span>
+            <span className="text-[14px] leading-[1.5] text-[var(--home-ink-2)]">{it.text}</span>
           </div>
         </div>
       ))}
@@ -65,7 +65,7 @@ export function FaceChange({ s }: { s: Of<"face-change"> }) {
   const v = s.variants;
   return (
     <div className={`${COL} flex flex-col gap-[59.47px]`}>
-      <div className="relative h-[254.74px] overflow-hidden rounded-[var(--radius-xl)] bg-[var(--sage-50)]">
+      <div className="relative h-[254.74px] overflow-hidden rounded-[var(--radius-xl)] bg-[var(--neutral-0)]">
         <div className="absolute left-0 top-0 h-[127.372px] w-[490.16px] leading-normal" style={Z}>
           <div className={`${BLACK} left-[31.64px] top-[36.18px] h-[53.985px] w-[82.42px] rounded-[20px]`} />
           <div className={`${WHITE} left-[77.62px] top-[53.39px] h-[19.639px] w-[11.783px] rounded-[4px]`} />
@@ -112,12 +112,12 @@ export function FaceChange({ s }: { s: Of<"face-change"> }) {
                     </span>
                   </span>
                 </span>
-                <span className="text-[14px] text-[var(--text-secondary)]" style={{ width: [377.66, 428.21][i] }}>{b}</span>
+                <span className="text-[15px] leading-[1.55] text-[var(--home-ink-2)]" style={{ width: [377.66, 428.21][i] }}>{b}</span>
               </li>
             ))}
           </ul>
         </div>
-        <div aria-hidden className="relative h-[222.03px] w-[457.95px] shrink-0 overflow-hidden rounded-[var(--radius-xl)] bg-[var(--sage-50)]">
+        <div aria-hidden className="relative h-[222.03px] w-[457.95px] shrink-0 overflow-hidden rounded-[var(--radius-xl)] bg-[var(--neutral-0)]">
           <div className="absolute left-0 top-0 h-[111.017px] w-[228.973px] leading-normal" style={Z}>
             <img alt="" src={`${F}/valence-smile.svg`} className="absolute left-[37.17px] top-[13.38px] block h-[37.666px] w-[57.491px] max-w-none" />
             <div className={`${BLACK} left-[134.81px] top-[13.38px] h-[37.666px] w-[57.491px] rounded-[14px]`} />
@@ -132,7 +132,7 @@ export function FaceChange({ s }: { s: Of<"face-change"> }) {
                 <div key={o} className="flex items-center">
                   <span
                     className={`flex items-center whitespace-nowrap rounded-full px-[8px] py-[4px] text-[7px] text-[var(--text-primary)] ${
-                      i ? "h-[18px] border-[0.496px] border-[var(--sage-200)] bg-[var(--sage-100)]" : "h-[16px] bg-[var(--sage-200)]"
+                      i ? "h-[16px] bg-[var(--home-pill)]" : "h-[16px] bg-[var(--home-ink)] !text-[var(--neutral-0)]"
                     }`}
                   >
                     {o}
@@ -162,9 +162,9 @@ export function FaceChange({ s }: { s: Of<"face-change"> }) {
 /** Rhythm of changing expressions 808:1808 — enter · stay · return curve + hold-loop cards */
 export function FaceRhythm({ s }: { s: Of<"face-rhythm"> }) {
   const [enter, stay, back] = s.phases;
-  const chip = "flex h-[20px] items-center justify-center rounded-[6px] bg-[var(--bg-surface)] p-[6px] text-[5px] font-bold text-[var(--text-primary)] whitespace-nowrap";
+  const chip = "flex h-[20px] items-center justify-center rounded-[6px] bg-[var(--home-pill)] p-[6px] text-[6px] font-semibold text-[var(--home-ink)] whitespace-nowrap";
   const head = "text-[7px] font-bold text-[var(--text-primary)] whitespace-nowrap";
-  const note = "text-[5px] text-[var(--text-secondary)]";
+  const note = "text-[6.5px] text-[var(--home-ink-2)]";
   const guide = (left: number) => (
     <div className="absolute top-[51.54px] flex h-[60.96px] w-0 items-center justify-center" style={{ left }}>
       <div className="relative h-0 w-[60.96px] flex-none rotate-90">
@@ -174,7 +174,7 @@ export function FaceRhythm({ s }: { s: Of<"face-rhythm"> }) {
   );
   return (
     <div className={`${COL} flex flex-col gap-[var(--space-20)]`}>
-      <div aria-hidden className="relative h-[329.09px] overflow-hidden rounded-[var(--radius-xl)] bg-[var(--bg-canvas)]">
+      <div aria-hidden className="relative h-[329.09px] overflow-hidden rounded-[var(--radius-xl)] bg-[var(--neutral-0)]">
         <div className="absolute left-0 top-0 h-[164.543px] w-[490.16px] leading-normal" style={Z}>
           <div className="absolute inset-[31.33%_23.86%_31.63%_20.63%] bg-gradient-to-b from-[color-mix(in_srgb,var(--web-c5d1d4)_0%,transparent)] to-[color-mix(in_srgb,var(--web-c5d1d4)_44%,transparent)]" />
           <img alt="" src={`${F}/rhythm-base.svg`} className="absolute left-[25.28px] top-[112.08px] block h-[0.848px] w-[439.112px] max-w-none" />
@@ -206,16 +206,16 @@ export function FaceRhythm({ s }: { s: Of<"face-rhythm"> }) {
       </div>
       <div className="flex gap-[var(--space-20)]">
         {s.loops.map((l, i) => (
-          <div key={l.title} className="relative h-[104.08px] min-w-0 flex-1 overflow-hidden rounded-[var(--radius-lg)] bg-[var(--sage-50)]">
+          <div key={l.title} className="relative h-[104.08px] min-w-0 flex-1 overflow-hidden rounded-[var(--radius-lg)] bg-[var(--neutral-0)]">
             <div className="absolute left-0 top-0 h-[52.039px] w-[240.372px] leading-normal" style={Z}>
               <img alt="" src={`${F}/loop-${i ? "sad" : "laugh"}.svg`} className="absolute left-[95.16px] top-[8.41px] block h-[10.408px] max-w-none" style={{ width: i ? 130.842 : 131.833 }} />
-              <span className="absolute left-[9.68px] top-[9.42px] whitespace-nowrap text-[7px] font-bold text-[var(--text-primary)]">{l.title}</span>
+              <span className="absolute left-[9.68px] top-[9.42px] whitespace-nowrap text-[7.5px] font-semibold text-[var(--home-ink)]">{l.title}</span>
               <div className="absolute top-[26.76px] flex items-center gap-[4px]" style={{ left: i ? 95.16 : 94.66 }}>
                 {l.chips.map((c) => (
-                  <span key={c} className="flex h-[18.438px] items-center justify-center whitespace-nowrap rounded-[4px] bg-[var(--bg-surface)] p-[6px] text-[5px] font-bold text-[var(--web-7e7f7f)]">{c}</span>
+                  <span key={c} className="flex h-[18.438px] items-center justify-center whitespace-nowrap rounded-[4px] bg-[var(--home-pill)] p-[6px] text-[6px] font-semibold text-[var(--home-ink)]">{c}</span>
                 ))}
               </div>
-              <span className="absolute left-[9.91px] top-[26.27px] whitespace-pre text-[5px] text-[var(--text-secondary)]">{l.text}</span>
+              <span className="absolute left-[9.91px] top-[26.27px] whitespace-pre text-[6.5px] leading-[1.45] text-[var(--home-ink-2)]">{l.text}</span>
             </div>
           </div>
         ))}
@@ -229,14 +229,14 @@ export function FaceTransitions({ s }: { s: Of<"face-transitions"> }) {
   return (
     <div className={`${COL} flex gap-[var(--space-20)]`}>
       {s.items.map((it, i) => (
-        <div key={it.title} className="flex min-w-0 flex-1 flex-col items-center gap-[var(--space-12)] rounded-[var(--radius-lg)] border-[0.85px] border-[var(--neutral-150)] bg-[var(--bg-surface)] p-[var(--space-16)]">
+        <div key={it.title} className="flex min-w-0 flex-1 flex-col items-center gap-[var(--space-12)] rounded-[var(--radius-lg)] bg-[var(--bg-surface)] p-[var(--space-16)]">
           <div className="relative h-[118.95px] w-[436.14px] shrink-0 overflow-hidden rounded-[var(--radius-sm)] bg-[var(--neutral-300)]">
             <img alt="" src={`${F}/${i ? "swap" : "tween"}.svg`} className="absolute left-0 top-0 block h-[118.95px] w-[436.14px] max-w-none" />
             <span className="absolute top-[85.28px] -translate-x-1/2 whitespace-nowrap text-center text-[14px] font-medium text-[var(--text-on-inverse)]" style={{ left: i ? 226.92 : 225.66 }}>{it.caption}</span>
           </div>
           <div className="flex w-[435.15px] flex-col gap-[var(--space-4)]">
-            <span className="text-[16px] font-bold text-[var(--text-primary)]">{it.title}</span>
-            <span className="text-[12px] text-[var(--text-secondary)]">{it.text}</span>
+            <span className="text-[15px] font-semibold text-[var(--home-ink)]">{it.title}</span>
+            <span className="text-[14px] leading-[1.55] text-[var(--home-ink-2)]">{it.text}</span>
           </div>
         </div>
       ))}
@@ -249,7 +249,7 @@ export function FaceDonts({ s }: { s: Of<"face-donts"> }) {
   return (
     <div className={`${COL} flex gap-[var(--space-20)]`}>
       {s.items.map((it, i) => (
-        <div key={it.title} className="flex min-w-0 flex-1 flex-col gap-[var(--space-12)] rounded-[var(--radius-lg)] border-[0.86px] border-[var(--neutral-150)] bg-[var(--bg-surface)] p-[var(--space-20)]">
+        <div key={it.title} className="flex min-w-0 flex-1 flex-col gap-[var(--space-12)] rounded-[var(--radius-lg)] bg-[var(--bg-surface)] p-[var(--space-20)]">
           <div aria-hidden className={`relative h-[128.6px] w-[279.49px] shrink-0 overflow-hidden rounded-[var(--radius-sm)] ${i ? "bg-[var(--neutral-150)]" : "bg-[var(--neutral-400)]"}`}>
             <div className="absolute left-0 top-0 h-[64.299px] w-[139.743px] leading-normal" style={Z}>
               {i === 0 && <DontMix />}
@@ -257,8 +257,8 @@ export function FaceDonts({ s }: { s: Of<"face-donts"> }) {
               {i === 2 && <DontBlink labels={s.blinkLabels} />}
             </div>
           </div>
-          <span className="text-[16px] font-bold text-[var(--red-500)]">{it.title}</span>
-          <span className="text-[12px] text-[var(--text-secondary)]">{it.text}</span>
+          <span className="text-[15px] font-semibold text-[var(--red-500)]">{it.title}</span>
+          <span className="text-[14px] leading-[1.55] text-[var(--home-ink-2)]">{it.text}</span>
         </div>
       ))}
     </div>
