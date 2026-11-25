@@ -166,3 +166,4 @@ STEP마다 한 줄. `날짜 · STEP · 결정 · 근거`
 | 2026-11-25 | 결정 대기 문구 정리 | "(pending decision)", "(pending)", "await a decision" 표기를 확정 문장으로(track 옛 이름, pause/hold 구분, ANTIC 길이, REACT 두 종류) | 사용자 요청 |
 | 2026-11-25 | 사이드바 로고 | PURE 로고 클릭 → Lab 홈(/lab) | 사용자 요청 |
 | 2026-11-25 | 에디터 뒤로가기 | 프로젝트 메뉴 안 "← Lab home" → 메뉴 왼쪽 독립 뒤로가기 버튼(back 아이콘, Lab 홈) | 사용자 요청 |
+| 2026-11-26 | 에디터 History·@동작 수정 | 왼쪽 탭 Context·History·Library, History = 요청 1회당 1항목(슬라이더 수정은 묶음) + 요약 카드, 고르면 로봇에 불러옴. 채팅창 @동작 칩(기본=현재 동작, 그 동작을 고침 / 지우면 새 동작), "@" 목록·"/new" "/undo". 서버 baseVersion → AI에 기준 동작 전달·요청한 것만 변경, AI 없으면 크게/작게/빠르게/느리게/한 번 더(한·영)로 기준 동작과 Amplitude·Speed 다이얼 조절. 표현에 요청 문장(prompt) 저장 | 사용자 요청 |

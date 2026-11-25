@@ -28,6 +28,7 @@ import { Icon } from "@/components/ui/icons/icon";
 import { downloadText, slug } from "@/lib/ui/download";
 import { fillFirmware, firmwarePaths } from "@/lib/robot-firmware";
 import { Menu } from "@/components/ui/menu";
+import { HistoryPanel, historyEntries, mentionOf, type HistoryEntry } from "./history-panel";
 import { ConfirmModal, Modal, ModalActions, ModalButton, PromptModal } from "@/components/ui/modal";
 import { useToast } from "@/components/ui/toast";
 import { FacePanel, SoundPanel } from "./channel-panels";
@@ -218,7 +219,9 @@ export function Editor({
   const [time, setTime] = useState({ t: 0, duration: 0 });
   const [paused, setPaused] = useState(true);
   const [tab, setTab] = useState<Tab>("motion");
-  const [leftTab, setLeftTab] = useState<"context" | "library">("context");
+  const [leftTab, setLeftTab] = useState<"context" | "history" | "library">("context");
+  /** The motion the next request edits ("@tired" chip); "current" follows the version on the robot. null = a new motion. */
+  const [mention, setMention] = useState<{ version: number | "current"; title: string } | null>(initialExpression ? { version: "current", title: initialExpression.name } : null);
   /** Library L3: the placed 3D asset being moved (slot key "<assetId>#n") */
   const [selectedProp, setSelectedProp] = useState<string | null>(null);
   const [robotMount, setRobotMount] = useState<string | null>(project.scene?.mount ?? null);
@@ -663,6 +666,7 @@ export function Editor({
         setLastResult(result);
         setExpression(e);
         resetTo(e);
+        setMention({ version: "current", title: e.name });
         setAutoPlay(true);
         setCue((c) => c + 1);
         if (result.source === "demo" && !settings.demoMode) setFailure(result.fallbackReason ?? "");
@@ -723,6 +727,7 @@ export function Editor({
             pattern: ctx.pattern || undefined,
             references: attachments,
             expressionId: expression?.id,
+            baseVersion: mention && expression ? (mention.version === "current" ? expression.version : mention.version) : undefined,
           }),
         }),
       );
@@ -734,6 +739,53 @@ export function Editor({
       setPrompt(p);
       setFailure(err instanceof ApiError ? err.message : String(err));
     }
+  }
+
+  // ------------------------------------------------------------ history · @motion · /commands
+
+  const entries = useMemo(() => historyEntries(expression), [expression]);
+  const mentionVersion = mention && expression ? (mention.version === "current" ? expression.version : mention.version) : null;
+
+  /** History pick: an older motion is loaded back onto the robot (saved as the newest version) and becomes the @ target. */
+  async function pickHistory(e: HistoryEntry) {
+    if (e.current || !expression) return setMention({ version: "current", title: e.title });
+    const v = e.version_;
+    const next = await patchExpression({ name: v.name, currentStatus: v.currentStatus, prompt: v.prompt, motion: v.motion, face: v.face, sound: v.sound }).catch(() => null);
+    if (!next) return toast(STRINGS.lab.toast.failed);
+    resetTo(next);
+    setMention({ version: "current", title: next.name });
+    recue(true);
+  }
+
+  /** "/new", "/undo": run and clear the prompt. Returns false when the text is not a command. */
+  function runCommand(text: string): boolean {
+    const cmd = text.trim().toLowerCase();
+    if (cmd === "/new") {
+      setMention(null);
+    } else if (cmd === "/undo") {
+      const prev = entries[1];
+      if (prev) void pickHistory(prev);
+    } else return false;
+    setPrompt("");
+    return true;
+  }
+
+  /** Popover under the prompt: "/…" lists commands, "@…" lists motions. */
+  const popover = useMemo(() => {
+    if (prompt.startsWith("/")) {
+      const q = prompt.slice(1).toLowerCase();
+      const items = E.mention.commandList.filter((c) => c.id.slice(1).startsWith(q));
+      return items.length ? { kind: "command" as const, items } : null;
+    }
+    const m = prompt.match(/(?:^|\s)@([^\s]*)$/);
+    if (!m) return null;
+    const items = entries.filter((e) => mentionOf(e.title).startsWith(m[1].toLowerCase()));
+    return items.length ? { kind: "motion" as const, items, query: m[0] } : null;
+  }, [prompt, entries]);
+
+  function pickMotion(e: HistoryEntry) {
+    setMention({ version: e.current ? "current" : e.version, title: e.title });
+    setPrompt((p) => p.replace(/(?:^|\s)@[^\s]*$/, "").trimStart());
   }
 
   // ------------------------------------------------------------ references
@@ -1253,7 +1305,7 @@ export function Editor({
         </div>
         {/* Tabs (452:2272): at 13,60 · p 10 · gap 15; selected SemiBold 20 #2c3030 underlined, other Regular 20 #3d4452 */}
         <div className="ml-[13px] mt-[14px] flex gap-[15px]" role="tablist">
-          {(["context", "library"] as const).map((t) => (
+          {(["context", "history", "library"] as const).map((t) => (
             <button
               key={t}
               role="tab"
@@ -1261,7 +1313,7 @@ export function Editor({
               onClick={() => setLeftTab(t)}
               className={`p-[10px] text-[20px] leading-[25px] ${leftTab === t ? "font-semibold text-[var(--context-title)] underline decoration-from-font underline-offset-auto" : "text-[var(--context-tab)]"}`}
             >
-              {t === "context" ? E.context : E.library}
+              {t === "context" ? E.context : t === "history" ? E.history.tab : E.library}
             </button>
           ))}
         </div>
@@ -1279,6 +1331,8 @@ export function Editor({
               activeReference={activeRef?.id ?? null}
               reading={reading}
             />
+          ) : leftTab === "history" ? (
+            <HistoryPanel entries={entries} selected={mentionVersion} duration={Number.isFinite(time.duration) ? time.duration : undefined} busy={busy} onPick={(e) => void pickHistory(e)} />
           ) : (
             <LibraryPanel
               attached={context.references.filter((r) => r.kind === "userData").map((r) => r.path)}
@@ -1389,7 +1443,12 @@ export function Editor({
         data-tour="composer"
         hidden={timelineOpen}
         className="pointer-events-auto flex w-[646px] flex-col items-center gap-[var(--space-12)] [zoom:1.2]"
-        onSubmit={(e) => { e.preventDefault(); void generate(); }}
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (popover?.kind === "command") return void runCommand(popover.items[0].id);
+          if (popover?.kind === "motion") return pickMotion(popover.items[0]);
+          if (!runCommand(prompt)) void generate();
+        }}
       >
         <div className="flex min-h-[106px] w-full flex-col justify-between gap-[var(--space-12)] rounded-[20px] border border-[var(--composer-border)] bg-[var(--neutral-0)] px-[16px] pb-[12px] pt-[16px] shadow-[var(--composer-shadow)]">
           {(context.references.length > 0 || pending.length > 0) && (
@@ -1410,16 +1469,47 @@ export function Editor({
               ))}
             </div>
           )}
-          <input
-            type="text"
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            disabled={busy}
-            placeholder={E.promptPlaceholder}
-            aria-label={E.promptPlaceholder}
-            maxLength={500}
-            className="w-full bg-transparent text-[16px] leading-none tracking-[-0.32px] text-[var(--home-ink)] outline-none placeholder:text-[var(--composer-placeholder)] disabled:opacity-60"
-          />
+          <div className="relative flex w-full items-center gap-[var(--space-8)]">
+            {mention && (
+              <span className="flex shrink-0 items-center gap-[2px] rounded-[var(--radius-full)] bg-[var(--home-ink)] py-[3px] pl-[10px] pr-[4px] text-[14px] font-medium leading-[18px] text-[var(--neutral-0)]" data-testid="mention-chip">
+                @{mentionOf(mention.title)}
+                <button type="button" aria-label={fmt(E.mention.remove, { mention: mentionOf(mention.title) })} title={fmt(E.mention.remove, { mention: mentionOf(mention.title) })} onClick={() => setMention(null)} className="flex size-[18px] items-center justify-center rounded-[var(--radius-full)] opacity-70 hover:opacity-100">
+                  ×
+                </button>
+              </span>
+            )}
+            <input
+              type="text"
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Backspace" && !prompt && mention) setMention(null);
+              }}
+              disabled={busy}
+              placeholder={mention ? E.mention.placeholder : E.promptPlaceholder}
+              aria-label={E.promptPlaceholder}
+              maxLength={500}
+              className="min-w-0 flex-1 bg-transparent text-[16px] leading-none tracking-[-0.32px] text-[var(--home-ink)] outline-none placeholder:text-[var(--composer-placeholder)] disabled:opacity-60"
+            />
+            {popover && (
+              <div role="listbox" aria-label={popover.kind === "command" ? E.mention.commands : E.mention.motions} className="absolute bottom-[calc(100%+12px)] left-0 z-20 flex w-[320px] flex-col gap-[2px] rounded-[14px] bg-[var(--neutral-0)] p-[6px] shadow-[var(--pure-shadow-modal)]">
+                <span className="px-[10px] pb-[2px] pt-[4px] text-[11px] font-medium text-[var(--home-ink-3)]">{popover.kind === "command" ? E.mention.commands : E.mention.motions}</span>
+                {popover.kind === "command"
+                  ? popover.items.map((c, i) => (
+                      <button key={c.id} type="button" role="option" aria-selected={i === 0} onClick={() => runCommand(c.id)} className={`flex items-baseline gap-[var(--space-8)] rounded-[10px] px-[10px] py-[6px] text-left hover:bg-[var(--home-canvas)] ${i === 0 ? "bg-[var(--home-canvas)]" : ""}`}>
+                        <code className="font-mono text-[13px] font-semibold text-[var(--home-ink)]">{c.id}</code>
+                        <span className="text-[12px] text-[var(--home-ink-2)]">{c.hint}</span>
+                      </button>
+                    ))
+                  : popover.items.map((m, i) => (
+                      <button key={m.version} type="button" role="option" aria-selected={i === 0} onClick={() => pickMotion(m)} className={`flex flex-col items-start rounded-[10px] px-[10px] py-[6px] text-left hover:bg-[var(--home-canvas)] ${i === 0 ? "bg-[var(--home-canvas)]" : ""}`}>
+                        <span className="text-[13px] font-semibold text-[var(--home-ink)]">@{mentionOf(m.title)}</span>
+                        <span className="line-clamp-1 text-[12px] text-[var(--home-ink-2)]">{m.request}</span>
+                      </button>
+                    ))}
+              </div>
+            )}
+          </div>
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-[5px]">
               <button

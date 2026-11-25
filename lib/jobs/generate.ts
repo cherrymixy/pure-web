@@ -8,6 +8,7 @@ import { LlmError } from "../llm/client";
 import type { Issue } from "../expression/validate";
 import { demoToOutput, type GenerationClient, type GenerationOutput } from "../llm/generation";
 import { propsToParams } from "../expression/props";
+import { baseOutput, baseText, refineByWords, refineProps } from "../expression/refine";
 import { sampleRecipe } from "../expression/sample";
 import type { Clip, MotionProps, Reference } from "../models";
 import { UPLOADS_DIR, resolveUpload } from "../paths";
@@ -23,6 +24,8 @@ export interface GenerateInput {
   references?: Reference[];
   /** Regenerate into this expression (previous version kept in history) */
   expressionId?: string;
+  /** "@motion" edit: version of expressionId (current or in its history) to change instead of starting over */
+  baseVersion?: number;
   props?: MotionProps;
 }
 
@@ -79,7 +82,9 @@ export async function runGeneration(opts: {
 
   await report(1, 15);
   const refs = input.references ?? [];
-  const scripted = await matchScripted(refs, opts.root);
+  const based = await baseOf(repo, input);
+  const base = based?.output ?? null;
+  const scripted = base ? null : await matchScripted(refs, opts.root);
   if (scripted) {
     // Exhibition script (data/scripted-references.ts): this video always gives the same expression.
     const started = Date.now();
@@ -130,6 +135,7 @@ export async function runGeneration(opts: {
     images: images.length ? images : undefined,
     // No images to describe: cached summaries and User Data motions go in as text.
     referenceSummary: images.length ? undefined : textRefs,
+    base: base ? baseText(base) : undefined,
   };
 
   // Tier 2 (flag): the vision model writes keyframes + recipe in one answer; unusable keyframes → its recipe.
@@ -151,9 +157,14 @@ export async function runGeneration(opts: {
       direct = { used: false, reason: err instanceof Error ? err.message : String(err), ms: Date.now() - started, issues: 0 };
     }
   }
-  const result = output
+  const generated = output
     ? { output, source: "ollama" as const, fallbackReason: undefined, referenceSummary: undefined, ms: direct?.ms ?? 0 }
     : await client.generate(request, { signal });
+  // No AI for an "@motion" edit: change the base by the request's words, not an unrelated demo.
+  const fallback = base && generated.source === "demo";
+  const result = fallback ? { ...generated, output: refineByWords(base, input.prompt) } : generated;
+  // An edit keeps the base's dials (not the signature defaults); without AI the words move them too.
+  const props = input.props ?? (based ? (fallback ? refineProps(based.props, input.prompt) : based.props) : undefined);
 
   await report(3, 85);
   const built = buildExpression(result.output, {
@@ -162,7 +173,7 @@ export async function runGeneration(opts: {
     components: input.components,
     pattern: input.pattern,
     references: input.references,
-    props: input.props,
+    props,
   });
   const { issues } = built;
   const expression: BuiltExpression = clip ? { ...built.expression, motion: { ...built.expression.motion, mode: "clip", clip } } : built.expression;
@@ -193,7 +204,17 @@ export async function userDataSummary(repo: Repo, refs: Reference[]): Promise<st
   return lines.length ? lines.join("; ") : undefined;
 }
 
-async function save(repo: Repo, input: GenerateInput, expression: BuiltExpression) {
+/** The version an "@motion" edit starts from (the current one or one in its history), as generator output. */
+async function baseOf(repo: Repo, input: GenerateInput) {
+  if (!input.expressionId || input.baseVersion == null) return null;
+  const e = await repo.expressions.get(input.expressionId).catch(() => null);
+  if (!e || e.projectId !== input.projectId) return null;
+  const v = e.version === input.baseVersion ? e : e.history.find((h) => h.version === input.baseVersion);
+  return v ? { output: baseOutput(v), props: v.motion.props } : null;
+}
+
+async function save(repo: Repo, input: GenerateInput, built: BuiltExpression) {
+  const expression = { ...built, prompt: input.prompt };
   if (input.expressionId) {
     const existing = await repo.expressions.get(input.expressionId).catch(() => null);
     if (existing && existing.projectId === input.projectId) return repo.expressions.update(input.expressionId, expression);

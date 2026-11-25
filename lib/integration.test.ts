@@ -173,3 +173,32 @@ describe("v0.1-logic: full loop", () => {
     expect(e.motion.props).toEqual(paramsToProps(signatureToParams(sig!.axes).playback));
   });
 });
+
+describe("@motion edit (editor History)", () => {
+  it("keeps the request on the version; an edit sends the base to the AI and, without AI, scales the base by its words", async () => {
+    const { repo } = setup();
+    const first = await runGeneration({ repo, client: new OllamaGeneration(new FakeClient([JSON.stringify(OUTPUT)])), input: { projectId: "p-test-01", prompt: "I'm tired", props: { amplitude: 40, duration: 50, smoothness: 50, speed: 50, frequency: 50 } } });
+    const e1 = await repo.expressions.get(first.expressionId);
+    expect(e1.prompt).toBe("I'm tired");
+
+    // AI answers: the prompt carries the base motion and the change request.
+    const ai = new FakeClient([JSON.stringify({ ...OUTPUT, reasoning: "Deeper." })]);
+    await runGeneration({ repo, client: new OllamaGeneration(ai), input: { projectId: "p-test-01", prompt: "bow a bit deeper", expressionId: e1.id, baseVersion: e1.version } });
+    const sent = JSON.stringify(ai.calls);
+    expect(sent).toContain("Change this existing motion");
+    expect(sent).toContain("Sleepy nod");
+
+    // No AI: the same base, bigger, same name — not an unrelated demo.
+    // In-memory repo returns live objects: copy before the next update changes it.
+    const e2 = structuredClone(await repo.expressions.get(e1.id));
+    const off = await runGeneration({ repo, client: new OllamaGeneration(new FakeClient([new LlmError("network", "down")])), input: { projectId: "p-test-01", prompt: "좀 더 크게", expressionId: e1.id, baseVersion: e2.version } });
+    const e3 = await repo.expressions.get(off.expressionId);
+    expect(off.source).toBe("demo");
+    expect(e3.name).toBe(e2.name);
+    expect(e3.motion.recipe.steps.map((x) => x.behavior)).toEqual(e2.motion.recipe.steps.map((x) => x.behavior));
+    // The edit starts from the base's dials (not the signature default); without AI "bigger" raises Amplitude (guardrails still clamp at the joint limits).
+    expect(e2.motion.props.amplitude).toBe(40);
+    expect(e3.motion.props.amplitude).toBe(55);
+    expect(e3.history.map((h) => h.prompt)).toEqual(["I'm tired", "bow a bit deeper"]);
+  });
+});

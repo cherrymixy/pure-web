@@ -65,10 +65,18 @@ export interface GenerationPromptInput {
   structure?: Structure;
   signature?: Signature;
   referenceSummary?: string;
+  /** Editor "@motion" edit: the chosen version in one line (lib/expression/refine.ts baseText) */
+  base?: string;
 }
 
 export function generationUser(input: GenerationPromptInput): string {
-  const parts = [`Moment: ${input.prompt}`];
+  const parts = input.base
+    ? [
+        `Change this existing motion: ${input.base}`,
+        `Change request: ${input.prompt}`,
+        "Change only what the request asks (size, speed, count, face or sound). Keep the other steps, the face, the sound and the name.",
+      ]
+    : [`Moment: ${input.prompt}`];
   if (input.currentStatus) parts.push(`Current status given by the designer: ${input.currentStatus}`);
   if (input.components?.length) parts.push(`Preferred components: ${input.components.map(componentText).join(", ")}`);
   const pattern = SITUATION_PATTERNS.find((p) => p.id === input.pattern);

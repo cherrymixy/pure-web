@@ -217,6 +217,8 @@ const ExpressionBase = z.object({
   projectId: z.string(),
   name: z.string(),
   currentStatus: z.string(),
+  /** The designer's request that made this version (editor History) */
+  prompt: z.string().optional(),
   components: z.array(z.string()),
   pattern: z.string(),
   references: z.array(ReferenceSchema),

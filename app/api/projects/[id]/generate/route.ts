@@ -11,6 +11,7 @@ const InputSchema = z.object({
   pattern: z.string().optional(),
   references: z.array(ReferenceSchema).max(4).optional(),
   expressionId: z.string().optional(),
+  baseVersion: z.number().int().min(1).optional(),
   props: MotionPropsSchema.optional(),
 });
 
