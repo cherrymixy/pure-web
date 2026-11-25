@@ -392,7 +392,7 @@ export const STRINGS = {
     placeholder: "This entry still needs source content.",
     proposed: "Proposed",
     proposedNote: "Proposed, not confirmed yet.",
-    player: { play: "Play", pause: "Stop", playing: "Playing", hint: "Press play to see it move", face: "Face", motion: "Motion", selected: "On stage" },
+    player: { play: "Play", pause: "Stop", playing: "Playing", hint: "Press play to see it move", face: "Face", motion: "Motion", selected: "On stage", scene: "Scene", sceneText: "Play the situation: what starts it, the components the robot runs in order, and how it ends.", trigger: "Trigger", exit: "Exit", step: "Step {n} of {total}" },
     do: "Do",
     dont: "Don't",
     related: "Related",

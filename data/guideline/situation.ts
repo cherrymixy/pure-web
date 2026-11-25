@@ -15,6 +15,8 @@ interface Pat {
   note?: string;
   proposed?: true;
   related?: string[];
+  /** Component slugs played in order on the Scene player; omitted when no behavior plays (state override, gaze only) */
+  scene?: string[];
 }
 
 const pat = (p: Pat): GuidelineEntry => ({
@@ -39,6 +41,7 @@ const pat = (p: Pat): GuidelineEntry => ({
     { kind: "p", title: "Structure", view: "machine", text: "A pattern is a state machine: trigger → behavior sequence → exit, plus transitions to other situations. Its sequence uses Component IDs only." },
   ],
   related: p.related,
+  scene: p.scene,
   source: SRC,
   ...(p.proposed ? { proposed: true as const } : {}),
 });
@@ -50,19 +53,15 @@ export const situation: GuidelineSection = {
     "Situations as state machines: trigger → behavior sequence → exit, with transitions and a shared priority. Seven existing patterns and four proposed ones.",
   entries: [
     {
-      ...pat({ slug: "face-to-face", title: "Face to Face", summary: "Facing each other and focused on the interaction.", principle: "Keep the gaze, but keep it alive.", uses: "nod, curious, joy …", related: ["conversation", "calling"] }),
+      ...pat({ slug: "face-to-face", title: "Face to Face", summary: "Facing each other and focused on the interaction.", principle: "Keep the gaze, but keep it alive.", uses: "nod, curious, joy …", related: ["conversation", "calling"], scene: ["curious", "approach", "nod"] }),
       doc: faceToFaceDoc,
     },
-    pat({ slug: "touching", title: "Touching", summary: "The person touches the body or a joint directly.", principle: "React softly to every touch.", uses: "rub, joy", related: ["rub", "face-to-face"] }),
-    pat({ slug: "calling", title: "Calling", summary: "A voice or signal asks for attention right away.", principle: "Within 1 s, with a lively turn.", uses: "approach, bow", related: ["face-to-face", "behavior/approach"] }),
+    pat({ slug: "touching", title: "Touching", summary: "The person touches the body or a joint directly.", principle: "React softly to every touch.", uses: "rub, joy", related: ["rub", "face-to-face"], scene: ["rub", "joy"] }),
+    pat({ slug: "calling", title: "Calling", summary: "A voice or signal asks for attention right away.", principle: "Within 1 s, with a lively turn.", uses: "approach, bow", related: ["face-to-face", "behavior/approach"], scene: ["approach", "bow"] }),
     pat({ slug: "carried", title: "Carried", summary: "The robot is lifted or moved.", principle: "Curl up and keep the head level.", uses: "— (state override: other behaviors are skipped)", note: "Renamed Moving → Carried.", related: ["common"] }),
     pat({ slug: "pass-by", title: "Pass By", summary: "Someone walks past without intent.", principle: "Notice, but do not stare.", uses: "track (late delay)", note: "Renamed Pass Away → Pass By (avoids the meaning \"to die\").", related: ["by-your-side", "primitive-tokens/track"] }),
-    pat({ slug: "leave", title: "Leave", summary: "The person leaves the space and the interaction ends.", principle: "See them off, then let go slowly.", uses: "bow, close", related: ["close", "by-your-side"] }),
-    pat({ slug: "by-your-side", title: "By your side", summary: "In the same space without conversation.", principle: "Stay close without drawing attention.", uses: "doze, stretch (drift while waiting)", note: "Idle intensity is a hypothesis (test variable).", related: ["doze", "stretch"] }),
-    pat({ slug: "conversation", title: "Conversation", summary: "Yes / no or unclear moments during a conversation.", principle: "Answer with the agreed signals.", uses: "nod, shake, curious", proposed: true, related: ["nod", "shake", "curious"] }),
-    pat({ slug: "feedback", title: "Feedback", summary: "Reacting to the result after finishing a task.", principle: "Show how it went.", uses: "joy, sad, laugh", proposed: true, related: ["joy", "sad"] }),
-    pat({ slug: "guiding", title: "Guiding", summary: "Showing a direction or a location.", principle: "Gaze first, then a clear stop at the target.", uses: "point", proposed: true, related: ["point"] }),
-    pat({ slug: "sudden", title: "Sudden", summary: "An unexpected sound or movement.", principle: "Once, short, then back.", uses: "surprise", proposed: true, related: ["surprise", "fear"] }),
+    pat({ slug: "leave", title: "Leave", summary: "The person leaves the space and the interaction ends.", principle: "See them off, then let go slowly.", uses: "bow, close", related: ["close", "by-your-side"], scene: ["bow", "close"] }),
+    pat({ slug: "by-your-side", title: "By your side", summary: "In the same space without conversation.", principle: "Stay close without drawing attention.", uses: "doze, stretch (drift while waiting)", note: "Idle intensity is a hypothesis (test variable).", related: ["doze", "stretch"], scene: ["doze", "stretch"] }),
     {
       slug: "pattern-spec",
       title: "Pattern spec and transitions",
@@ -111,5 +110,9 @@ export const situation: GuidelineSection = {
       related: ["face-to-face", "common"],
       source: `${SRC}-2, §8-3`,
     },
+    pat({ slug: "conversation", title: "Conversation", summary: "Yes / no or unclear moments during a conversation.", principle: "Answer with the agreed signals.", uses: "nod, shake, curious", proposed: true, related: ["nod", "shake", "curious"], scene: ["nod", "shake", "curious"] }),
+    pat({ slug: "feedback", title: "Feedback", summary: "Reacting to the result after finishing a task.", principle: "Show how it went.", uses: "joy, sad, laugh", proposed: true, related: ["joy", "sad"], scene: ["joy", "sad", "laugh"] }),
+    pat({ slug: "guiding", title: "Guiding", summary: "Showing a direction or a location.", principle: "Gaze first, then a clear stop at the target.", uses: "point", proposed: true, related: ["point"], scene: ["point"] }),
+    pat({ slug: "sudden", title: "Sudden", summary: "An unexpected sound or movement.", principle: "Once, short, then back.", uses: "surprise", proposed: true, related: ["surprise", "fear"], scene: ["surprise"] }),
   ],
 };

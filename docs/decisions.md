@@ -154,3 +154,4 @@ STEP마다 한 줄. `날짜 · STEP · 결정 · 근거`
 | 2026-11-25 | Components 인덱스 | 사이드바 Overview·REJECTED/Emphasis 제거(그룹 클릭 = 카드 인덱스, Foundations처럼), 카드·이전/다음 순서 사이드바와 같은 알파벳순, 카드 헤더에 동작별 미니 로봇(behavior-demo.tsx, 정지 시 핵심 자세·호버 시 재생), Emphasis 엔트리 삭제 | 사용자 리뷰 |
 | 2026-11-25 | Components 사이드바 | Component spec을 사이드바 맨 끝에 추가(인덱스 카드 순서와 동일) | 사용자 요청 |
 | 2026-11-25 | Components 세부 페이지 | Figma 정지 로봇·강도 그림 → 동작별 로봇 플레이어(behavior-player.tsx): Robot 재생/정지, Intensity 카드 선택 = 동작 크기(--amp), Time Line 플레이헤드 동기·무채색 클립, 표·상태 칩 외곽선 제거(줄무늬 행). 목록 카드 미니 로봇은 되돌림 | 사용자 리뷰 |
+| 2026-11-25 | 그림자·Patterns | 로봇 그림자가 몸통 이동을 따라가고 점프 때 작아짐. Patterns: 사이드바 Overview 제거(그룹 클릭=인덱스), Pattern spec을 확정 패턴 뒤·PROPOSED 앞으로(데이터 순서와 동일), 세부 페이지 맨 위 Scene 플레이어(pattern-scene.tsx: 트리거 → 컴포넌트 순서 재생 → Exit, 단계 칩 클릭 이동). Carried·Pass By는 재생할 컴포넌트가 없어 제외 | 사용자 리뷰 |

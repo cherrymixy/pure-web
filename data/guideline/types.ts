@@ -39,6 +39,8 @@ export interface GuidelineEntry {
   donts?: string[];
   /** slugs of related entries (any section) */
   related?: string[];
+  /** Pattern entries: Component slugs the robot acts out in order on the Scene player (trigger → these → exit) */
+  scene?: string[];
   /** Behavior entries: the simulator behavior that demonstrates it (one of the 15 in lib/sim/behaviors.ts) */
   simBehavior?: string;
   /** Where the content came from, e.g. "guideline-content.ts:nod" or "PURE_Knowledge/05_Behavior_Patterns/Greeting.md" */

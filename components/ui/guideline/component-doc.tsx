@@ -5,6 +5,7 @@ import { STRINGS } from "@/data/strings";
 import { BlockView } from "./block-views";
 import { hasBehaviorDemo } from "./behavior-demo";
 import { BehaviorIntensity, BehaviorPlayer, BehaviorStage, BehaviorTimeline } from "./behavior-player";
+import { PatternScene } from "./pattern-scene";
 import { DocToc, type TocItem } from "./doc-toc";
 import { GuideCard } from "./guide-card";
 import { FaceChange, FaceDonts, FaceRhythm, FaceTransitions, FaceTypes } from "./face-figures";
@@ -28,6 +29,7 @@ export function ComponentDocPage({
   base,
   actions,
   behavior,
+  scene,
 }: {
   title: string;
   proposed?: boolean;
@@ -37,9 +39,11 @@ export function ComponentDocPage({
   actions?: React.ReactNode;
   /** Components entry slug: Robot · Intensity · Time Line become one player acting out this behavior */
   behavior?: string;
+  /** Patterns entry: trigger + Component steps for the Scene player at the top of the page */
+  scene?: { trigger: string; steps: { slug: string; title: string }[] };
 }) {
   const sections = doc.rows.flatMap((r) => (Array.isArray(r) ? r : [r]));
-  const toc: TocItem[] = [...(doc.topToc ? [{ id: "top", label: doc.topToc }] : []), ...sections.map((s) => ({ id: s.id, label: s.toc ?? s.title }))];
+  const toc: TocItem[] = [...(doc.topToc ? [{ id: "top", label: doc.topToc }] : []), ...(scene ? [{ id: "scene", label: G.player.scene }] : []), ...sections.map((s) => ({ id: s.id, label: s.toc ?? s.title }))];
   const stickyTop = "top-[42px]";
   const scrollMt = "scroll-mt-[42px]";
 
@@ -71,6 +75,15 @@ export function ComponentDocPage({
 
           {/* Without resource pills the first section sits 55 px under the lead (Face 808:1652 → 808:1667) */}
           <div className="mt-[var(--space-40)] flex flex-col gap-[80px]">
+            {scene && (
+              <section id="scene" aria-labelledby="scene-h" className={`flex flex-col gap-[28px] ${scrollMt}`}>
+                <div className="flex flex-col gap-[var(--space-8)]">
+                  <h2 id="scene-h" className="text-[22px] font-semibold text-[var(--home-ink)]">{G.player.scene}</h2>
+                  <p className="text-[15px] leading-[1.6] text-[var(--home-ink-2)]">{G.player.sceneText}</p>
+                </div>
+                <PatternScene trigger={scene.trigger} steps={scene.steps} />
+              </section>
+            )}
             {doc.rows.map((r, i) =>
               Array.isArray(r) ? (
                 <div key={i} className="flex items-start gap-[var(--space-48)]">

@@ -2,23 +2,23 @@
 // It rests on the behavior's key pose and plays inside a hovered .group or a playing [data-playing="true"] stage.
 
 /** behavior slug → which part moves (head / body / eyes) and its keyframes; several parts may move. */
-const MOVES: Record<string, Partial<Record<"head" | "body" | "eyes", string>>> = {
-  approach: { body: "bhv-approach" },
+const MOVES: Record<string, Partial<Record<"head" | "body" | "eyes" | "shadow", string>>> = {
+  approach: { body: "bhv-approach", shadow: "bhv-approach" },
   bow: { head: "bhv-bow" },
   close: { head: "bhv-sink", eyes: "bhv-close" },
   curious: { head: "bhv-tilt" },
   doze: { head: "bhv-doze", eyes: "bhv-close" },
-  fear: { body: "bhv-fear" },
-  joy: { body: "bhv-hop" },
-  "keep-distance": { body: "bhv-back" },
-  laugh: { body: "bhv-laugh", eyes: "bhv-squint" },
+  fear: { body: "bhv-fear", shadow: "bhv-fear-shadow" },
+  joy: { body: "bhv-hop", shadow: "bhv-hop-shadow" },
+  "keep-distance": { body: "bhv-back", shadow: "bhv-back" },
+  laugh: { body: "bhv-laugh", eyes: "bhv-squint", shadow: "bhv-laugh-shadow" },
   nod: { head: "bhv-nod" },
   point: { head: "bhv-point" },
-  rub: { body: "bhv-rub" },
+  rub: { body: "bhv-rub", shadow: "bhv-rub-shadow" },
   sad: { head: "bhv-sink", eyes: "bhv-squint" },
   shake: { head: "bhv-shake" },
   stretch: { body: "bhv-stretch" },
-  surprise: { body: "bhv-jump", eyes: "bhv-wide" },
+  surprise: { body: "bhv-jump", eyes: "bhv-wide", shadow: "bhv-jump-shadow" },
 };
 
 export const hasBehaviorDemo = (slug?: string) => Boolean(slug && slug in MOVES);
@@ -28,7 +28,10 @@ export function BehaviorDemo({ slug, className = "block h-full w-full" }: { slug
   if (!m) return null;
   return (
     <svg aria-hidden viewBox="0 0 200 96" className={className}>
-      <ellipse cx={100} cy={88} rx={34} ry={4} fill="var(--home-ink)" opacity={0.08} />
+      {/* the shadow stays on the floor: it slides with the body and shrinks while the body is in the air */}
+      <g className={m.shadow ? `bhv ${m.shadow}` : undefined} style={{ transformOrigin: "100px 88px" }}>
+        <ellipse cx={100} cy={88} rx={34} ry={4} fill="var(--home-ink)" opacity={0.08} />
+      </g>
       <g className={m.body ? `bhv ${m.body}` : undefined} style={{ transformOrigin: "100px 88px" }}>
         <rect x={80} y={78} width={40} height={9} rx={4.5} fill="var(--home-ink)" opacity={0.85} />
         <line x1={100} y1={78} x2={100} y2={66} stroke="var(--home-ink)" strokeWidth={4} strokeLinecap="round" />

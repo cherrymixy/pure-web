@@ -71,9 +71,8 @@ export const GUIDELINE_NAV: GuidelineNavGroup[] = [
   {
     label: "Patterns",
     path: "situation",
+    // Same order as the data (index cards, prev / next); the group link opens the card index, like Foundations.
     children: [
-      { label: "Overview", path: "situation" },
-      { label: "Pattern spec", path: "situation/pattern-spec" },
       { label: "Face to Face", path: "situation/face-to-face" },
       { label: "Touching", path: "situation/touching" },
       { label: "Calling", path: "situation/calling" },
@@ -81,6 +80,7 @@ export const GUIDELINE_NAV: GuidelineNavGroup[] = [
       { label: "Pass By", path: "situation/pass-by" },
       { label: "Leave", path: "situation/leave" },
       { label: "By your side", path: "situation/by-your-side" },
+      { label: "Pattern spec", path: "situation/pattern-spec" },
       { label: "PROPOSED", tag: true },
       { label: "Conversation", path: "situation/conversation" },
       { label: "Feedback", path: "situation/feedback" },
