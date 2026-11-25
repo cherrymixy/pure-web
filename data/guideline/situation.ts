@@ -2,7 +2,7 @@ import type { GuidelineEntry, GuidelineSection } from "./types";
 import { faceToFaceDoc } from "./docs/face-to-face";
 
 // Source: PURE guideline final structure v3 (2026-10-19) §8 Pattern — situations.
-// Slugs = editor situation ids (data/patterns.ts). The last four are proposed.
+// Slugs = editor situation ids (data/patterns.ts). Former proposed ones (conversation … sudden) are listed as regular patterns.
 
 const SRC = "PURE guideline final structure v3 (2026-10-19) §8";
 
@@ -50,7 +50,7 @@ export const situation: GuidelineSection = {
   id: "situation",
   title: "Patterns",
   summary:
-    "Situations as state machines: trigger → behavior sequence → exit, with transitions and a shared priority. Seven existing patterns and four proposed ones.",
+    "Situations as state machines: trigger → behavior sequence → exit, with transitions and a shared priority. Eleven patterns.",
   entries: [
     {
       ...pat({ slug: "face-to-face", title: "Face to Face", summary: "Facing each other and focused on the interaction.", principle: "Keep the gaze, but keep it alive.", uses: "nod, curious, joy …", related: ["conversation", "calling"], scene: ["curious", "approach", "nod"] }),
@@ -62,6 +62,10 @@ export const situation: GuidelineSection = {
     pat({ slug: "pass-by", title: "Pass By", summary: "Someone walks past without intent.", principle: "Notice, but do not stare.", uses: "track (late delay)", note: "Renamed Pass Away → Pass By (avoids the meaning \"to die\").", related: ["by-your-side", "primitive-tokens/track"] }),
     pat({ slug: "leave", title: "Leave", summary: "The person leaves the space and the interaction ends.", principle: "See them off, then let go slowly.", uses: "bow, close", related: ["close", "by-your-side"], scene: ["bow", "close"] }),
     pat({ slug: "by-your-side", title: "By your side", summary: "In the same space without conversation.", principle: "Stay close without drawing attention.", uses: "doze, stretch (drift while waiting)", note: "Idle intensity is a hypothesis (test variable).", related: ["doze", "stretch"], scene: ["doze", "stretch"] }),
+    pat({ slug: "conversation", title: "Conversation", summary: "Yes / no or unclear moments during a conversation.", principle: "Answer with the agreed signals.", uses: "nod, shake, curious", related: ["nod", "shake", "curious"], scene: ["nod", "shake", "curious"] }),
+    pat({ slug: "feedback", title: "Feedback", summary: "Reacting to the result after finishing a task.", principle: "Show how it went.", uses: "joy, sad, laugh", related: ["joy", "sad"], scene: ["joy", "sad", "laugh"] }),
+    pat({ slug: "guiding", title: "Guiding", summary: "Showing a direction or a location.", principle: "Gaze first, then a clear stop at the target.", uses: "point", related: ["point"], scene: ["point"] }),
+    pat({ slug: "sudden", title: "Sudden", summary: "An unexpected sound or movement.", principle: "Once, short, then back.", uses: "surprise", related: ["surprise", "fear"], scene: ["surprise"] }),
     {
       slug: "pattern-spec",
       title: "Pattern spec and transitions",
@@ -110,9 +114,5 @@ export const situation: GuidelineSection = {
       related: ["face-to-face", "common"],
       source: `${SRC}-2, §8-3`,
     },
-    pat({ slug: "conversation", title: "Conversation", summary: "Yes / no or unclear moments during a conversation.", principle: "Answer with the agreed signals.", uses: "nod, shake, curious", proposed: true, related: ["nod", "shake", "curious"], scene: ["nod", "shake", "curious"] }),
-    pat({ slug: "feedback", title: "Feedback", summary: "Reacting to the result after finishing a task.", principle: "Show how it went.", uses: "joy, sad, laugh", proposed: true, related: ["joy", "sad"], scene: ["joy", "sad", "laugh"] }),
-    pat({ slug: "guiding", title: "Guiding", summary: "Showing a direction or a location.", principle: "Gaze first, then a clear stop at the target.", uses: "point", proposed: true, related: ["point"], scene: ["point"] }),
-    pat({ slug: "sudden", title: "Sudden", summary: "An unexpected sound or movement.", principle: "Once, short, then back.", uses: "surprise", proposed: true, related: ["surprise", "fear"], scene: ["surprise"] }),
   ],
 };

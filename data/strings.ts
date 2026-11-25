@@ -392,6 +392,7 @@ export const STRINGS = {
     placeholder: "This entry still needs source content.",
     proposed: "Proposed",
     proposedNote: "Proposed, not confirmed yet.",
+    body: { title: "Body", text: "Pick a role to see which part plays it and how it moves. A missing role is played by another part, or skipped.", has: "Has the part", standIn: "Stood in by another part", skipped: "Skipped", substitute: "Substitute" },
     player: { play: "Play", pause: "Stop", playing: "Playing", hint: "Press play to see it move", face: "Face", motion: "Motion", selected: "On stage", scene: "Scene", sceneText: "Play the situation: what starts it, the components the robot runs in order, and how it ends.", trigger: "Trigger", exit: "Exit", step: "Step {n} of {total}" },
     do: "Do",
     dont: "Don't",
