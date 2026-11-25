@@ -93,7 +93,6 @@ export const templates: GuidelineSection = {
       ref: "src.*",
       title: "Source profiles",
       summary: "Maps the parts in a source video onto robot roles. Used in the analysis steps of the pipeline (1, 2).",
-      proposed: true,
       body: [
         {
           kind: "table",

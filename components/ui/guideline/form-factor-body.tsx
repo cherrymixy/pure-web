@@ -111,7 +111,6 @@ export function FormFactorBody({ slug, roles, substitute }: { slug: string; role
     <div className="flex gap-[var(--space-16)] rounded-[var(--radius-lg)] bg-[var(--neutral-0)] p-[var(--space-24)]">
       <div className="relative h-[320px] min-w-0 flex-1 rounded-[14px] bg-[var(--home-canvas)]">
         <svg aria-hidden viewBox="0 0 240 150" className="absolute inset-0 m-auto block h-[280px] w-full">
-          <ellipse cx={120} cy={142} rx={70} ry={4} fill={INK} opacity={0.08} />
           <Drawing key={role} slug={slug} lit={lit} role={role} />
         </svg>
         <span className="absolute bottom-[var(--space-16)] left-[var(--space-16)] rounded-[var(--radius-full)] bg-[var(--neutral-0)] px-[var(--space-12)] py-[4px] text-[12px] font-medium text-[var(--home-ink-2)]">
