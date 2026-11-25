@@ -14,9 +14,9 @@ export const SEED_PROFILE: Profile = {
   signedInWith: "Google",
   team: [
     { name: "SeungA Jeon", email: "SeungA@purebot.com", role: "Owner" },
-    { name: "Minjun Park", email: "minjun@purebot.com", role: "Admin" },
-    { name: "Jiwoo Kim", email: "jiwoo@purebot.com", role: "Editor" },
-    { name: "Hana Choi", email: "hana@purebot.com", role: "Viewer" },
+    { name: "Seonggeun Choi", email: "wmit14232@naver.com", role: "Admin" },
+    { name: "Taerim Bang", email: "qkd232071@gmail.com", role: "Editor" },
+    { name: "Hyeonji Jo", email: "hyji6715@g.hongik.ac.kr", role: "Viewer" },
   ],
 };
 

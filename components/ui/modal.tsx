@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ButtonHTMLAttributes } from "react";
+import { createPortal } from "react-dom";
 import { STRINGS } from "@/data/strings";
 
 // WC modals: base dialog, confirm (WC-5), text prompt with unsaved-changes guard.
@@ -54,12 +55,14 @@ export function Modal({ open, onClose, title, description, children }: { open: b
   }, [open, onClose]);
 
   if (!open) return null;
-  return (
+  // Portal: a modal opened inside the sticky sidebar would otherwise sit under positioned page content.
+  return createPortal(
     <div className="anim-fade-in fixed inset-0 z-40 flex items-center justify-center bg-[var(--bg-overlay)]" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <ModalCard role="dialog" aria-modal="true" aria-label={title} title={title} description={description} className="anim-pop-in max-h-[calc(var(--app-vh)-48px)] w-[600px] overflow-y-auto">
         {children}
       </ModalCard>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

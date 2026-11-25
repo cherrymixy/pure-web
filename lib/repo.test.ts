@@ -205,8 +205,8 @@ describe("library ↔ user data, ownership", () => {
 
   it("transferring ownership demotes the old owner to Admin", async () => {
     const t = setup();
-    const p = await t.repo.profile.setRole("minjun@purebot.com", "Owner");
-    expect(p.team.find((m) => m.email === "minjun@purebot.com")?.role).toBe("Owner");
+    const p = await t.repo.profile.setRole("wmit14232@naver.com", "Owner");
+    expect(p.team.find((m) => m.email === "wmit14232@naver.com")?.role).toBe("Owner");
     expect(p.team.find((m) => m.email === "SeungA@purebot.com")?.role).toBe("Admin");
   });
 });
