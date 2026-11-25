@@ -4,7 +4,6 @@ import { searchIndex } from "@/data/guideline";
 import type { ComponentDoc } from "@/data/guideline/types";
 import { STRINGS } from "@/data/strings";
 import { DownloadTokens } from "./download-tokens";
-import { BehaviorDemo, hasBehaviorDemo } from "./behavior-demo";
 import { GuideCard } from "./guide-card";
 import { IndexNav } from "./index-nav";
 
@@ -37,12 +36,9 @@ export function GuidelineIndexPage({ title, doc, base, download }: { title: stri
           {section && (
             <section id={section.id} aria-label={section.title} className="flex flex-col">
               <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-[var(--space-20)]">
-                {items.map((it, i) => {
-                  const slug = it.path.startsWith("behavior/") ? it.path.slice("behavior/".length) : "";
-                  return (
-                    <GuideCard key={it.path} href={`${base}/${it.path}`} index={i} title={it.title} summary={it.summary} refId={it.ref} proposed={it.proposed} figure={hasBehaviorDemo(slug) ? <BehaviorDemo slug={slug} /> : undefined} />
-                  );
-                })}
+                {items.map((it, i) => (
+                  <GuideCard key={it.path} href={`${base}/${it.path}`} index={i} title={it.title} summary={it.summary} refId={it.ref} proposed={it.proposed} />
+                ))}
               </div>
             </section>
           )}

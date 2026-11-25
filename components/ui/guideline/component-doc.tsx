@@ -3,6 +3,8 @@ import { searchIndex } from "@/data/guideline";
 import type { ComponentDoc, ComponentDocSection, DocChannel, GuidelineBlock } from "@/data/guideline/types";
 import { STRINGS } from "@/data/strings";
 import { BlockView } from "./block-views";
+import { hasBehaviorDemo } from "./behavior-demo";
+import { BehaviorIntensity, BehaviorPlayer, BehaviorStage, BehaviorTimeline } from "./behavior-player";
 import { DocToc, type TocItem } from "./doc-toc";
 import { GuideCard } from "./guide-card";
 import { FaceChange, FaceDonts, FaceRhythm, FaceTransitions, FaceTypes } from "./face-figures";
@@ -25,6 +27,7 @@ export function ComponentDocPage({
   doc,
   base,
   actions,
+  behavior,
 }: {
   title: string;
   proposed?: boolean;
@@ -32,13 +35,17 @@ export function ComponentDocPage({
   base: string;
   /** extra controls under the lead (Download pure tokens JSON) */
   actions?: React.ReactNode;
+  /** Components entry slug: Robot · Intensity · Time Line become one player acting out this behavior */
+  behavior?: string;
 }) {
   const sections = doc.rows.flatMap((r) => (Array.isArray(r) ? r : [r]));
   const toc: TocItem[] = [...(doc.topToc ? [{ id: "top", label: doc.topToc }] : []), ...sections.map((s) => ({ id: s.id, label: s.toc ?? s.title }))];
   const stickyTop = "top-[42px]";
   const scrollMt = "scroll-mt-[42px]";
 
-  return (
+  const player = hasBehaviorDemo(behavior) ? behavior : undefined;
+  const timeline = sections.find((s) => s.kind === "timeline");
+  const page = (
     <div data-fit-frame className="relative px-[var(--space-40)] py-[42px]">
       <img src="/figma/lab/home/glow.svg" alt="" aria-hidden className="pointer-events-none absolute left-[26px] top-[-360px] h-[680px] w-[1360px] max-w-none" />
 
@@ -67,11 +74,11 @@ export function ComponentDocPage({
             {doc.rows.map((r, i) =>
               Array.isArray(r) ? (
                 <div key={i} className="flex items-start gap-[var(--space-48)]">
-                  <Section s={r[0]} base={base} scrollMt={scrollMt} className="min-w-0 flex-1" />
-                  <Section s={r[1]} base={base} scrollMt={scrollMt} className="w-[355px] shrink-0" />
+                  <Section s={r[0]} base={base} player={!!player} scrollMt={scrollMt} className="min-w-0 flex-1" />
+                  <Section s={r[1]} base={base} player={!!player} scrollMt={scrollMt} className="w-[355px] shrink-0" />
                 </div>
               ) : (
-                <Section key={i} s={r} base={base} scrollMt={scrollMt} />
+                <Section key={i} s={r} base={base} player={!!player} scrollMt={scrollMt} />
               ),
             )}
           </div>
@@ -98,6 +105,11 @@ export function ComponentDocPage({
       </div>
     </div>
   );
+  return player ? (
+    <BehaviorPlayer slug={player} duration={timeline?.kind === "timeline" ? timeline.duration : 2.4}>{page}</BehaviorPlayer>
+  ) : (
+    page
+  );
 }
 
 const PILL = "flex h-[36px] items-center rounded-[10px] bg-[var(--home-glass)] px-[14px] text-[14px] font-medium text-[var(--home-ink)]";
@@ -106,7 +118,7 @@ const PILL = "flex h-[36px] items-center rounded-[10px] bg-[var(--home-glass)] p
 /** Derived sections (blocks · cards · links) sit 28 px under their heading, like Face "What is changing?" (808:1734) */
 const DERIVED = new Set<ComponentDocSection["kind"]>(["blocks", "cards", "links"]);
 
-function Section({ s, base, scrollMt, className = "" }: { s: ComponentDocSection; base: string; scrollMt: string; className?: string }) {
+function Section({ s, base, player, scrollMt, className = "" }: { s: ComponentDocSection; base: string; player: boolean; scrollMt: string; className?: string }) {
   return (
     <section id={s.id} aria-labelledby={`${s.id}-h`} className={`flex flex-col ${scrollMt} ${className}`} style={{ gap: s.gap ?? (DERIVED.has(s.kind) ? 28 : 40) }}>
       <div className="flex flex-col gap-[var(--space-8)]">
@@ -117,12 +129,14 @@ function Section({ s, base, scrollMt, className = "" }: { s: ComponentDocSection
           </p>
         )}
       </div>
-      <SectionBody s={s} base={base} />
+      <SectionBody s={s} base={base} player={player} />
     </section>
   );
 }
 
-function SectionBody({ s, base }: { s: ComponentDocSection; base: string }) {
+function SectionBody({ s, base, player }: { s: ComponentDocSection; base: string; player: boolean }) {
+  if (player && s.kind === "intensity") return <BehaviorIntensity s={s} />;
+  if (player && s.kind === "timeline") return <BehaviorTimeline s={s} />;
   switch (s.kind) {
     case "blocks":
       return (
@@ -166,7 +180,7 @@ function SectionBody({ s, base }: { s: ComponentDocSection; base: string }) {
               );
             })}
           </ul>
-          <RobotStage notes={s.notes} />
+          {player ? <BehaviorStage notes={s.notes} /> : <RobotStage notes={s.notes} />}
         </div>
       );
     case "intensity":
@@ -229,12 +243,12 @@ function SectionBody({ s, base }: { s: ComponentDocSection; base: string }) {
       const col = (j: number) => (s.widths[j] == null ? "min-w-0 flex-1" : "shrink-0");
       const w = (j: number) => (s.widths[j] == null ? undefined : { width: s.widths[j]! });
       return (
-        <div role="table" className="flex flex-col overflow-hidden rounded-[var(--radius-sm)] border border-[var(--home-line)] bg-[var(--neutral-0)] text-[14px]">
-          <div role="row" className="flex items-center gap-[var(--space-16)] bg-[var(--home-pill)] px-[var(--space-16)] py-[10px] text-[13px] font-medium text-[var(--home-ink-2)]">
+        <div role="table" className="flex flex-col overflow-hidden rounded-[var(--radius-lg)] bg-[var(--neutral-0)] px-[var(--space-8)] pb-[var(--space-8)] text-[14px]">
+          <div role="row" className="flex items-center gap-[var(--space-16)] px-[var(--space-16)] pb-[8px] pt-[14px] text-[12px] font-medium text-[var(--home-ink-3)]">
             {s.head.map((h, j) => <span role="columnheader" key={j} className={col(j)} style={w(j)}>{h}</span>)}
           </div>
           {s.rows.map((r, i) => (
-            <div role="row" key={i} className={`flex items-center gap-[var(--space-16)] px-[var(--space-16)] py-[var(--space-12)] ${i ? "border-t border-[var(--home-line)]" : ""}`}>
+            <div role="row" key={i} className={`flex items-center gap-[var(--space-16)] px-[var(--space-16)] py-[var(--space-12)] ${i % 2 ? "" : "rounded-[10px] bg-[var(--home-canvas)]"}`}>
               {r.map((c, j) => (
                 <span role="cell" key={j} className={`${col(j)} ${CELL[s.cols[j]]}`} style={w(j)}>
                   {s.cols[j] === "track" && isChannel(c) ? (
@@ -278,7 +292,7 @@ function SectionBody({ s, base }: { s: ComponentDocSection; base: string }) {
       return (
         <ul className="flex flex-col items-start gap-[var(--space-8)] text-[15px]">
           {s.items.map((it) => (
-            <li key={it.state} className="flex gap-[var(--space-8)] whitespace-nowrap rounded-[10px] border border-[var(--home-line)] bg-[var(--neutral-0)] px-[var(--space-16)] py-[var(--space-8)]">
+            <li key={it.state} className="flex gap-[var(--space-8)] whitespace-nowrap rounded-[10px] bg-[var(--neutral-0)] px-[var(--space-16)] py-[var(--space-8)]">
               <span className="font-medium text-[var(--text-primary)]">{it.state}</span>
               <span className={`text-[var(--text-secondary)] ${s.plain ? "" : "ms-[var(--space-24)] list-item list-disc"}`}>{it.effect}</span>
             </li>
@@ -289,7 +303,7 @@ function SectionBody({ s, base }: { s: ComponentDocSection; base: string }) {
 }
 
 const CLIP: Record<DocChannel, string> = { sound: "bg-[var(--web-e0c99f)]", face: "bg-[var(--web-e2a1c1)]", motion: "bg-[var(--sage-200)]" };
-const TRACK_TEXT: Record<DocChannel, string> = { motion: "text-[var(--web-75add7)]", face: "text-[var(--web-e2a1c1)]", sound: "text-[var(--web-f2a65a)]" };
+const TRACK_TEXT: Record<DocChannel, string> = { motion: "text-[var(--home-ink)]", face: "text-[var(--home-ink-2)]", sound: "text-[var(--home-ink-3)]" };
 const CELL = {
   key: "font-semibold text-[var(--text-primary)]",
   label: "font-medium text-[var(--text-secondary)]",
@@ -419,12 +433,12 @@ function Block({ b }: { b: GuidelineBlock }) {
       return <pre className="overflow-x-auto rounded-[var(--radius-sm)] bg-[var(--bg-inverse)] px-[var(--space-24)] py-[var(--space-20)] font-mono text-[13px] leading-[1.6] text-[var(--neutral-100)]">{b.text}</pre>;
     case "table":
       return (
-        <div role="table" className="flex flex-col overflow-hidden rounded-[var(--radius-sm)] border border-[var(--home-line)] bg-[var(--neutral-0)] text-[14px]">
-          <div role="row" className="flex gap-[var(--space-16)] bg-[var(--home-pill)] px-[var(--space-16)] py-[10px] text-[13px] font-medium text-[var(--home-ink-2)]">
+        <div role="table" className="flex flex-col overflow-hidden rounded-[var(--radius-lg)] bg-[var(--neutral-0)] px-[var(--space-8)] pb-[var(--space-8)] text-[14px]">
+          <div role="row" className="flex gap-[var(--space-16)] px-[var(--space-16)] pb-[8px] pt-[14px] text-[12px] font-medium text-[var(--home-ink-3)]">
             {b.head.map((h, j) => <span role="columnheader" key={j} className={j ? "min-w-0 flex-[2]" : "min-w-0 flex-1"}>{h}</span>)}
           </div>
           {b.rows.map((r, i) => (
-            <div role="row" key={i} className="flex gap-[var(--space-16)] border-t border-[var(--home-line)] px-[var(--space-16)] py-[var(--space-12)]">
+            <div role="row" key={i} className={`flex gap-[var(--space-16)] px-[var(--space-16)] py-[var(--space-12)] ${i % 2 ? "" : "rounded-[10px] bg-[var(--home-canvas)]"}`}>
               {r.map((c, j) => <span role="cell" key={j} className={`min-w-0 break-words ${j ? `flex-[2] ${CELL.body}` : `flex-1 ${CELL.name}`}`}>{c}</span>)}
             </div>
           ))}

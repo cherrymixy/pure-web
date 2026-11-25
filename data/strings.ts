@@ -392,6 +392,7 @@ export const STRINGS = {
     placeholder: "This entry still needs source content.",
     proposed: "Proposed",
     proposedNote: "Proposed, not confirmed yet.",
+    player: { play: "Play", pause: "Stop", playing: "Playing", hint: "Press play to see it move", face: "Face", motion: "Motion", selected: "On stage" },
     do: "Do",
     dont: "Don't",
     related: "Related",

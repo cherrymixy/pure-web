@@ -95,52 +95,57 @@ body {
 .tok-sweep { animation: tok-sweep 2.8s linear infinite; }
 @keyframes tok-sweep { from { transform: none; } to { transform: translateX(var(--w)); } }
 
-/* Components index cards (components/ui/guideline/behavior-demo.tsx): paused on the key pose (negative delay) until the card is hovered or focused. */
+/* Components behaviors (components/ui/guideline/behavior-demo.tsx): rest on the key pose (negative delay), play inside a hovered
+   .group or a playing stage ([data-playing="true"], restarted from 0 and timed to the timeline). --amp = Intensity level. */
 .bhv { transform-box: view-box; animation-duration: 2.4s; animation-iteration-count: infinite; animation-timing-function: var(--ease-standard); animation-play-state: paused; animation-delay: -0.8s; }
 .group:hover .bhv, .group:focus-visible .bhv { animation-play-state: running; }
+[data-playing="true"] [data-bhv-stage] .bhv { animation-play-state: running; animation-delay: 0s; animation-duration: var(--bhv-dur, 2.4s); }
+.bhv-playhead { left: 0; animation: bhv-playhead var(--bhv-dur, 2.4s) linear infinite; }
+[data-playing="false"] .bhv-playhead { animation-play-state: paused; }
+@keyframes bhv-playhead { from { left: 0; } to { left: 100%; } }
 .bhv-nod { animation-name: bhv-nod; }
-@keyframes bhv-nod { 0%, 50%, 100% { transform: none; } 12%, 32% { transform: translateY(5px) scaleY(0.94); } 22% { transform: none; } }
+@keyframes bhv-nod { 0%, 50%, 100% { transform: none; } 12%, 32% { transform: translateY(calc(5px * var(--amp, 1))) scaleY(calc(1 - 0.06 * var(--amp, 1))); } 22% { transform: none; } }
 .bhv-shake { animation-name: bhv-shake; }
-@keyframes bhv-shake { 0%, 60%, 100% { transform: none; } 12%, 36% { transform: translateX(-7px); } 24%, 48% { transform: translateX(7px); } }
+@keyframes bhv-shake { 0%, 60%, 100% { transform: none; } 12%, 36% { transform: translateX(calc(-7px * var(--amp, 1))); } 24%, 48% { transform: translateX(calc(7px * var(--amp, 1))); } }
 .bhv-bow { animation-name: bhv-bow; }
-@keyframes bhv-bow { 0%, 100% { transform: none; } 30%, 60% { transform: translateY(6px) scale(0.94); } }
+@keyframes bhv-bow { 0%, 100% { transform: none; } 30%, 60% { transform: translateY(calc(6px * var(--amp, 1))) scale(calc(1 - 0.06 * var(--amp, 1))); } }
 .bhv-tilt { animation-name: bhv-tilt; }
-@keyframes bhv-tilt { 0%, 100% { transform: none; } 25%, 75% { transform: rotate(14deg); } }
+@keyframes bhv-tilt { 0%, 100% { transform: none; } 25%, 75% { transform: rotate(calc(14deg * var(--amp, 1))); } }
 .bhv-point { animation-name: bhv-point; }
-@keyframes bhv-point { 0%, 100% { transform: none; } 20%, 70% { transform: translateX(14px) rotate(-6deg); } }
+@keyframes bhv-point { 0%, 100% { transform: none; } 20%, 70% { transform: translateX(calc(14px * var(--amp, 1))) rotate(calc(-6deg * var(--amp, 1))); } }
 .bhv-sink { animation-name: bhv-sink; animation-duration: 3.2s; }
-@keyframes bhv-sink { 0%, 100% { transform: none; } 40%, 80% { transform: translateY(9px) rotate(4deg); } }
+@keyframes bhv-sink { 0%, 100% { transform: none; } 40%, 80% { transform: translateY(calc(9px * var(--amp, 1))) rotate(calc(4deg * var(--amp, 1))); } }
 .bhv-doze { animation-name: bhv-doze; animation-duration: 3.2s; }
-@keyframes bhv-doze { 0%, 100% { transform: none; } 30% { transform: translateY(6px) rotate(8deg); } 40% { transform: translateY(2px) rotate(3deg); } 70% { transform: translateY(9px) rotate(12deg); } }
+@keyframes bhv-doze { 0%, 100% { transform: none; } 30% { transform: translateY(calc(6px * var(--amp, 1))) rotate(calc(8deg * var(--amp, 1))); } 40% { transform: translateY(calc(2px * var(--amp, 1))) rotate(calc(3deg * var(--amp, 1))); } 70% { transform: translateY(calc(9px * var(--amp, 1))) rotate(calc(12deg * var(--amp, 1))); } }
 .bhv-close { animation-name: bhv-close; animation-duration: 3.2s; }
 @keyframes bhv-close { 0%, 100% { transform: none; } 35%, 85% { transform: scaleY(0.2); } }
 .bhv-squint { animation-name: bhv-squint; }
 @keyframes bhv-squint { 0%, 100% { transform: none; } 20%, 80% { transform: scaleY(0.45); } }
 .bhv-wide { animation-name: bhv-wide; }
-@keyframes bhv-wide { 0%, 45%, 100% { transform: none; } 10%, 25% { transform: scale(1.25); } }
+@keyframes bhv-wide { 0%, 45%, 100% { transform: none; } 10%, 25% { transform: scale(calc(1 + 0.25 * var(--amp, 1))); } }
 .bhv-hop { animation-name: bhv-hop; }
-@keyframes bhv-hop { 0%, 55%, 100% { transform: none; } 12%, 36% { transform: translateY(-8px); } 24% { transform: none; } }
+@keyframes bhv-hop { 0%, 55%, 100% { transform: none; } 12%, 36% { transform: translateY(calc(-8px * var(--amp, 1))); } 24% { transform: none; } }
 .bhv-laugh { animation-name: bhv-laugh; }
-@keyframes bhv-laugh { 0%, 70%, 100% { transform: none; } 10%, 30%, 50% { transform: translateY(-10px); } 20%, 40%, 60% { transform: none; } }
+@keyframes bhv-laugh { 0%, 70%, 100% { transform: none; } 10%, 30%, 50% { transform: translateY(calc(-10px * var(--amp, 1))); } 20%, 40%, 60% { transform: none; } }
 .bhv-jump { animation-name: bhv-jump; }
-@keyframes bhv-jump { 0%, 40%, 100% { transform: none; } 8%, 20% { transform: translateY(-9px) scaleY(1.05); } }
+@keyframes bhv-jump { 0%, 40%, 100% { transform: none; } 8%, 20% { transform: translateY(calc(-9px * var(--amp, 1))) scaleY(1.05); } }
 .bhv-fear { animation-name: bhv-fear; animation-duration: 3s; }
-@keyframes bhv-fear { 0%, 100% { transform: none; } 25%, 80% { transform: translateX(-26px) scaleY(0.88); } }
+@keyframes bhv-fear { 0%, 100% { transform: none; } 25%, 80% { transform: translateX(calc(-26px * var(--amp, 1))) scaleY(calc(1 - 0.12 * var(--amp, 1))); } }
 .bhv-back { animation-name: bhv-back; animation-duration: 3s; }
-@keyframes bhv-back { 0%, 100% { transform: none; } 30%, 80% { transform: translateX(-30px); } }
+@keyframes bhv-back { 0%, 100% { transform: none; } 30%, 80% { transform: translateX(calc(-30px * var(--amp, 1))); } }
 .bhv-approach { animation-name: bhv-approach; animation-duration: 3s; }
-@keyframes bhv-approach { 0%, 100% { transform: none; } 35%, 80% { transform: translateX(30px); } }
+@keyframes bhv-approach { 0%, 100% { transform: none; } 35%, 80% { transform: translateX(calc(30px * var(--amp, 1))); } }
 .bhv-stretch { animation-name: bhv-stretch; animation-duration: 3s; }
-@keyframes bhv-stretch { 0%, 100% { transform: none; } 35%, 65% { transform: scaleY(1.14); } }
+@keyframes bhv-stretch { 0%, 100% { transform: none; } 35%, 65% { transform: scaleY(calc(1 + 0.14 * var(--amp, 1))); } }
 .bhv-rub { animation-name: bhv-rub; animation-duration: 1.6s; }
-@keyframes bhv-rub { 0%, 100% { transform: none; } 25% { transform: translateX(5px) rotate(4deg); } 75% { transform: translateX(-5px) rotate(-4deg); } }
+@keyframes bhv-rub { 0%, 100% { transform: none; } 25% { transform: translateX(calc(5px * var(--amp, 1))) rotate(calc(4deg * var(--amp, 1))); } 75% { transform: translateX(calc(-5px * var(--amp, 1))) rotate(calc(-4deg * var(--amp, 1))); } }
 
 @media (prefers-reduced-motion: reduce) {
   .anim-fade-in, .anim-rise-in, .anim-pop-in, .anim-check-pop, .anim-pulse, .anim-float, .scan-line { animation: none; }
   [class*="fig-"] { animation: none !important; }
   .fig-draw { stroke-dashoffset: 0; }
   .fig-ride { offset-distance: 100%; }
-  [class*="tok-"], .bhv { animation: none !important; }
+  [class*="tok-"], .bhv, .bhv-playhead { animation: none !important; }
   .tok-to { transform: var(--t); }
   .tok-sweep { display: none; }
 }

@@ -13,7 +13,7 @@ export function GuidelineView({ base, slug = [] }: { base: string; slug?: string
   if (!section || rest.length || (entrySlug && !entry)) notFound();
 
   if (entry)
-    return <ComponentDocPage title={entry.title} proposed={entry.proposed} doc={entryDoc(section, entry)} base={base} />;
+    return <ComponentDocPage title={entry.title} proposed={entry.proposed} doc={entryDoc(section, entry)} base={base} behavior={section.id === "behavior" ? entry.slug : undefined} />;
   const download = section.id === "overview" || section.id === "primitive-tokens";
   // Section pages (Overview, Principles, …) are on the Lab home v2 style; entry pages still use the doc template.
   if (base === "/lab/guideline") return <GuidelineIndexPage title={section.title} doc={sectionDoc(section)} base={base} download={download} />;

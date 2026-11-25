@@ -9,8 +9,7 @@ const ACCENTS = ["var(--sage-300)", "var(--web-75add7)", "var(--web-e2a1c1)", "v
 
 /** Guideline entry card (after the user's reference boards): soft glow header, title + summary,
  *  ref / proposed chips, dashed rule, footer "Read →". No border or shadow; hover lifts, deepens the glow, nudges the arrow. */
-/** figure: an optional picture drawn over the glow (Components: the behavior acted out on hover). */
-export function GuideCard({ href, index, title, summary, refId, proposed, figure }: { href: string; index: number; title: string; summary: string; refId?: string; proposed?: boolean; figure?: React.ReactNode }) {
+export function GuideCard({ href, index, title, summary, refId, proposed }: { href: string; index: number; title: string; summary: string; refId?: string; proposed?: boolean }) {
   const accent = ACCENTS[index % ACCENTS.length];
   const glow = (a: number) =>
     [
@@ -23,10 +22,9 @@ export function GuideCard({ href, index, title, summary, refId, proposed, figure
       href={href}
       className="group relative flex flex-col overflow-hidden rounded-[var(--radius-lg)] bg-[var(--neutral-0)] transition-transform duration-[var(--motion-slow)] ease-[var(--ease-standard)] hover:-translate-y-[3px] motion-reduce:transition-none motion-reduce:hover:translate-y-0"
     >
-      <div aria-hidden className={`relative shrink-0 ${figure ? "h-[132px]" : "h-[72px]"}`}>
+      <div aria-hidden className="relative h-[72px] shrink-0">
         <div className="absolute inset-0" style={{ backgroundImage: glow(60) }} />
         <div className="absolute inset-0 opacity-0 transition-opacity duration-[var(--motion-slow)] group-hover:opacity-100" style={{ backgroundImage: glow(95) }} />
-        {figure && <div className="absolute inset-x-0 bottom-0 top-[var(--space-12)]">{figure}</div>}
       </div>
 
       <div className="flex flex-1 flex-col gap-[var(--space-8)] px-[var(--space-20)] pb-[var(--space-16)] pt-[var(--space-16)]">
