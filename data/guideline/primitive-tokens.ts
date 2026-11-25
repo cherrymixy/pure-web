@@ -141,7 +141,7 @@ export const primitiveTokens: GuidelineSection = {
       rules: [
         "Keep level while carried.",
         "No instant precise tracking (feels like surveillance); do not stare at a passer-by until they are gone.",
-        "Old name follow: renamed because it overlapped the FOLLOW principle (pending decision).",
+        "Formerly called follow; renamed so it is not confused with the FOLLOW principle.",
       ],
       evidence: "heuristic.",
       section: "§6-3",
@@ -186,7 +186,7 @@ export const primitiveTokens: GuidelineSection = {
         ["m", "0.3 s", "Default"],
         ["l", "0.5 s", "Emphasis"],
       ],
-      rules: ["No reaction for over 1 s = malfunction.", "pause = between, hold = end point (pending decision); both have a 0.5 s value, so the definition tells them apart."],
+      rules: ["No reaction for over 1 s = malfunction.", "pause = between motions, hold = at the end point; both can be 0.5 s, so the position tells them apart."],
       evidence: "empirical (SP-5).",
       section: "§6-4",
       related: ["hold"],

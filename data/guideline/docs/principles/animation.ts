@@ -20,7 +20,7 @@ export const animationDoc: ComponentDoc = {
         { tag: "op.arc", title: "Arc", subtitle: "Lift slightly and come down in a curve while turning.", figure: { big: "fixed", chips: ["4 to 8°"] }, info: "Tilt 4 to 8° during a turn, peak at 50%. Gaze first, body 0.1 to 0.2 s later." },
         { tag: "op.second", title: "Secondary action", subtitle: "A small supporting move after a big one (blink, breath …).", figure: { big: "P1", chips: ["≤ 30%"] }, info: "≤ 30% of the main motion, 0.15 s later, one at a time. No other axis during a promised signal." },
         { tag: "op.follow", title: "Follow-through", subtitle: "The tip settles late when stopping.", figure: { big: "P4", chips: ["1 wobble"] }, info: "Tip delay 0.06 to 0.12 s, one wobble. More than one = tremor = broken." },
-        { tag: "op.react", title: "Reaction", subtitle: "① to a result, after the task (back slot) ② to a touch, right away.", figure: { big: "fixed", chips: ["≤ 0.3 s"] }, info: "Touch reaction within 0.3 s. The two sub-definitions await a decision." },
+        { tag: "op.react", title: "Reaction", subtitle: "① to a result, after the task (back slot) ② to a touch, right away.", figure: { big: "fixed", chips: ["≤ 0.3 s"] }, info: "Touch reaction within 0.3 s; result reactions only in the back slot after the task." },
         { tag: "op.amp", title: "Amplitude", subtitle: "The upper bound of motion size, sized to the situation, not the emotion.", figure: { big: "P1", chips: ["40% ROM"] }, info: "ROM 40%, max 70%. Each repeat 30% smaller." },
         { tag: "op.over", title: "Overshoot", subtitle: "Pass the target slightly and come back.", figure: { big: "P6", chips: ["3 to 8%"] }, info: "3 to 8%, once, max 10%. Never on rest poses or precision tasks." },
       ],
