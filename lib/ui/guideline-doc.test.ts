@@ -32,9 +32,9 @@ describe("guideline doc template", () => {
       }
     }
   });
-  it("channel principles list Common · Motion · Face · Sound like Figma 808:1657", () => {
-    expect(entryDoc(section("principles"), entry("principles", "face")).pages?.map((p) => p.label)).toEqual(["Common", "Motion", "Face", "Sound"]);
-    expect(entryDoc(section("principles"), entry("principles", "sound")).pages?.map((p) => p.label)).toEqual(["Common", "Motion", "Face", "Sound"]);
+  it("channel principles follow the sidebar order: Face · Sound · Motion · Common", () => {
+    expect(entryDoc(section("principles"), entry("principles", "face")).pages?.map((p) => p.label)).toEqual(["Face", "Sound", "Motion", "Common"]);
+    expect(entryDoc(section("principles"), entry("principles", "sound")).pages?.map((p) => p.label)).toEqual(["Face", "Sound", "Motion", "Common"]);
   });
   it("tokens list only their own channel", () => {
     const labels = entryDoc(section("primitive-tokens"), entry("primitive-tokens", "tilt")).pages!.map((p) => p.label);

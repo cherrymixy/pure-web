@@ -136,7 +136,7 @@ describe("guideline", () => {
     expect(GUIDELINE.map((s) => s.id)).toEqual(["overview", "principles", "primitive-tokens", "behavior", "situation", "templates", "style", "validation"]);
     expect(refs("principles", "sp.").length + refs("principles", "gr.").length + refs("principles", "cmb.").length).toBe(3);
     expect(refs("principles", "op.")).toHaveLength(1);
-    expect(refs("principles", "ch.").map((e) => e.ref)).toEqual(["ch.common", "ch.body", "ch.face", "ch.sound"]); // Figma 808:1657… order: Common · Motion · Face · Sound
+    expect(refs("principles", "ch.").map((e) => e.ref)).toEqual(["ch.face", "ch.sound", "ch.body", "ch.common"]); // same order as the sidebar Principle list
     expect(refs("primitive-tokens", "tok.")).toHaveLength(18);
     expect(refs("behavior", "cmp.").filter((e) => e.slug !== "emphasis")).toHaveLength(16);
     expect(refs("templates", "ff.")).toHaveLength(5);
