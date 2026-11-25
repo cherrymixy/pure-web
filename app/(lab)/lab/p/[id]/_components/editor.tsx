@@ -1232,13 +1232,16 @@ export function Editor({
       <aside className={`absolute left-[32px] top-[32px] z-10 flex ${timelineOpen ? "bottom-[397px]" : "bottom-[32px]"} w-[430px] flex-col overflow-hidden rounded-[var(--radius-xl)] bg-[var(--neutral-0)]`}>
         {/* Header (452:2269 / 2270): list icon 24 at 21,21, title Regular 20 #2c3030 at 66 */}
         <div data-tour="project-menu" className="flex items-center gap-[21px] pl-[21px] pt-[21px]">
+          {/* Back to the Lab home, out of the menu so it is one click */}
+          <button type="button" onClick={() => router.push("/lab")} aria-label={E.menu.home} title={E.menu.home} className="-mr-[9px] flex size-[24px] items-center justify-center rounded-[6px] text-[var(--neutral-800)] hover:bg-[var(--home-nav-on)]">
+            <Icon name="back" size={24} />
+          </button>
           <Menu
             label="Project menu"
             align="left"
             trigger={<Icon name="menu" size={24} />}
             triggerClassName="flex size-[24px] items-center justify-center text-[var(--neutral-800)]"
             items={[
-              { label: `← ${E.menu.home}`, onSelect: () => router.push("/lab") },
               { label: E.menu.rename, onSelect: () => setRenaming(true) },
               { label: E.menu.changeSignature, onSelect: () => router.push(`/lab/p/${project.id}/signature`) },
               { label: E.menu.test, onSelect: () => (expression ? setTestOpen(true) : toast(STRINGS.export.noExpression)) },

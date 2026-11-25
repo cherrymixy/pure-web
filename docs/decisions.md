@@ -165,3 +165,4 @@ STEP마다 한 줄. `날짜 · STEP · 결정 · 근거`
 | 2026-11-25 | Proposed 표기 제거 | 가이드라인 전체 proposed 플래그·배지·"(proposed)" 문구·ρ TBD 표기 제거(ρ는 값만 표시) | 사용자 요청 |
 | 2026-11-25 | 결정 대기 문구 정리 | "(pending decision)", "(pending)", "await a decision" 표기를 확정 문장으로(track 옛 이름, pause/hold 구분, ANTIC 길이, REACT 두 종류) | 사용자 요청 |
 | 2026-11-25 | 사이드바 로고 | PURE 로고 클릭 → Lab 홈(/lab) | 사용자 요청 |
+| 2026-11-25 | 에디터 뒤로가기 | 프로젝트 메뉴 안 "← Lab home" → 메뉴 왼쪽 독립 뒤로가기 버튼(back 아이콘, Lab 홈) | 사용자 요청 |
