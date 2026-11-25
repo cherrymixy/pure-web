@@ -34,7 +34,7 @@ export function GuideCard({ href, index, title, summary, refId, proposed }: { hr
           <span className="mt-[var(--space-4)] flex flex-wrap gap-[6px]">
             {refId && <code className="rounded-[var(--radius-xs)] bg-[var(--home-pill)] px-[var(--space-8)] py-[3px] font-mono text-[12px] text-[var(--home-ink-2)]">{refId}</code>}
             {proposed && (
-              <span className="rounded-[var(--radius-xs)] border border-dashed border-[var(--home-ink-3)] px-[var(--space-8)] py-[2px] text-[12px] font-medium text-[var(--home-ink-2)]">{G.proposed}</span>
+              <span className="rounded-[var(--radius-xs)] bg-[var(--home-pill)] px-[var(--space-8)] py-[2px] text-[12px] font-medium text-[var(--home-ink-2)]">{G.proposed}</span>
             )}
           </span>
         )}
@@ -42,7 +42,7 @@ export function GuideCard({ href, index, title, summary, refId, proposed }: { hr
         <span className="mt-[var(--space-8)] flex items-center border-t border-dashed border-[var(--home-line)] pt-[var(--space-12)]">
           <span className="text-[13px] font-medium text-[var(--home-ink-2)]">{G.read}</span>
           <span className="flex-1" />
-          <span className="flex size-[30px] items-center justify-center rounded-[var(--radius-full)] border border-[var(--home-line)] text-[var(--home-ink-2)] transition-[transform,background-color,color] duration-[var(--motion-slow)] group-hover:translate-x-[2px] group-hover:bg-[var(--home-ink)] group-hover:text-[var(--neutral-0)] motion-reduce:transition-none">
+          <span className="flex size-[30px] items-center justify-center rounded-[var(--radius-full)] bg-[var(--home-pill)] text-[var(--home-ink-2)] transition-[transform,background-color,color] duration-[var(--motion-slow)] group-hover:translate-x-[2px] group-hover:bg-[var(--home-ink)] group-hover:text-[var(--neutral-0)] motion-reduce:transition-none">
             <Icon name="arrow-right" size={16} />
           </span>
         </span>

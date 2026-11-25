@@ -100,7 +100,7 @@ export function ComponentDocPage({
   );
 }
 
-const PILL = "flex h-[36px] items-center rounded-[10px] border border-[var(--home-line)] bg-[var(--home-glass)] px-[14px] text-[14px] font-medium text-[var(--home-ink)]";
+const PILL = "flex h-[36px] items-center rounded-[10px] bg-[var(--home-glass)] px-[14px] text-[14px] font-medium text-[var(--home-ink)]";
 
 /** Text sections span the content column like the section pages; Figma illustrations keep their own 981.31 px column (face / principle figures). */
 /** Derived sections (blocks · cards · links) sit 28 px under their heading, like Face "What is changing?" (808:1734) */
@@ -433,10 +433,10 @@ function Block({ b }: { b: GuidelineBlock }) {
   }
 }
 
-/** Small outlined tag for pages that are proposed or awaiting a decision. */
+/** Small filled tag for pages that are proposed or awaiting a decision. */
 function ProposedBadge({ label = G.proposed }: { label?: string }) {
   return (
-    <span className="inline-flex shrink-0 items-center rounded-[var(--radius-full)] border border-dashed border-[var(--neutral-400)] px-[var(--space-8)] py-[2px] text-[12px] font-medium leading-[16px] text-[var(--text-secondary)]">
+    <span className="inline-flex shrink-0 items-center rounded-[var(--radius-full)] bg-[var(--home-pill)] px-[var(--space-8)] py-[2px] text-[12px] font-medium leading-[16px] text-[var(--home-ink-2)]">
       {label}
     </span>
   );
