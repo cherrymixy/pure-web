@@ -160,3 +160,4 @@ STEP마다 한 줄. `날짜 · STEP · 결정 · 근거`
 | 2026-11-25 | Templates 몸 그림 | 블록형 몸 → Figma 폼팩터 아이콘(icon-human·quad·wheel-arm·wheel·arm) 라인 드로잉을 키워 그림(흰 채움·잉크 3px 선·관절 점), 선택 부위는 세이지 선·옅은 채움 | 사용자 리뷰 |
 | 2026-11-25 | 가이드라인 사이드바 | 맨 아래 Download(토큰 JSON) 항목 제거 — Foundations·Primitive 인덱스의 다운로드 버튼은 유지 | 사용자 요청 |
 | 2026-11-25 | Templates 정리 | PURE pet robot·PURE Desk 페이지 제거(각각 5개 폼팩터 중 하나라 별도 항목 아님), 관련 링크는 joint-fixed로 | 사용자 요청 |
+| 2026-11-25 | 가이드라인 내용 점검 | Foundations에 Research basis(HRI·LMA·비언어·로봇 성격·감성 컴퓨팅·캐릭터 애니메이션·소셜 로보틱스 출처와 근거 위치). 모순 수정: Approach 강도 cm·토큰 역순 → 0.15/0.3/0.5 BH s/m/l, eye 0.30 → eye.size.l, Fear·Worried 소리 느리고 낮게 → +3 st 1.2× (Juslin & Laukka 2003), Tempo s 용례 Fear → Sad, Face to Face 거리 40–60 cm → 45–75 cm (Hall 1966), 축 이름 통일(Reach·Afterglow), 패턴 수 11. Style에 스튜디오 8축 ↔ P축, Laban Effort 대응표. 토큰 Evidence에 literature 근거·배지 | 사용자 요청 |

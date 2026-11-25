@@ -4,7 +4,7 @@ import type { ComponentDoc } from "../../types";
 
 export const animationDoc: ComponentDoc = {
   breadcrumb: "Principle",
-  lead: ["How to move. Six Disney principles with robotics evidence, used by AI as generation operators.", "Each has a default, an allowed range and a style axis."],
+  lead: ["How to move. Six of the twelve Disney animation principles (Thomas & Johnston 1981) that robotics studies have tested, used by AI as generation operators.", "Each has a default, an allowed range and a style axis."],
   rows: [
     {
       id: "operators",
@@ -35,10 +35,10 @@ export const animationDoc: ComponentDoc = {
       columns: 3,
       label: "Guardrail",
       items: [
-        { tag: "P1", title: "Engagement range", subtitle: "AMP per joint group, SECOND channel count", figure: { chips: ["AMP", "SECOND"] }, info: "Amplitude cap, joint limits" },
+        { tag: "P1", title: "Reach", subtitle: "AMP per joint group, SECOND channel count", figure: { chips: ["AMP", "SECOND"] }, info: "Amplitude cap, joint limits" },
         { tag: "P2", title: "Speed contrast", subtitle: "EASE curve and timing", figure: { chips: ["EASE"] }, info: "Servo max speed" },
         { tag: "P3", title: "Stillness", subtitle: "Time tokens pause, hold", figure: { chips: ["pause", "hold"] }, info: "The end hold of pointing and closing never goes to 0 (SP-5)" },
-        { tag: "P4", title: "Lingering", subtitle: "FOLLOW wobble and damping", figure: { chips: ["FOLLOW"] }, info: "One wobble, no irregular tremor" },
+        { tag: "P4", title: "Afterglow", subtitle: "FOLLOW wobble and damping", figure: { chips: ["FOLLOW"] }, info: "One wobble, no irregular tremor" },
         { tag: "P5", title: "Anticipation", subtitle: "ANTIC size and length", figure: { chips: ["ANTIC"] }, info: "Never on promised signals, skipped on repeats" },
         { tag: "P6", title: "Return", subtitle: "Residual on return, OVER", figure: { chips: ["OVER"] }, info: "Repeated motions return fully" },
       ],

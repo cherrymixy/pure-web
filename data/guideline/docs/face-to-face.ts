@@ -36,7 +36,7 @@ export const faceToFaceDoc: ComponentDoc = {
     },
     rules("motion", "Motion", "Layout and spacing.", [
       ["Layout", "Face the person, head at eye level"],
-      ["Spacing", "Stop 40 to 60 cm away, never closer than 30 cm"],
+      ["Spacing", "Stop 45 to 75 cm away (close personal distance); never enter the intimate zone under 45 cm unless the person reaches in (Hall 1966)"],
     ]),
     rules("face", "Face", "Transition and state.", [
       ["Transition", "Eyes widen 100 ms before the body moves"],

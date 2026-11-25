@@ -297,10 +297,11 @@ const EVIDENCE: Record<string, { ink: string; bg: string }> = {
   empirical: { ink: "var(--sage-500)", bg: "var(--sage-50)" },
   heuristic: { ink: "var(--web-ae7d24)", bg: "var(--home-mod-sound)" },
   hypothesis: { ink: "var(--home-ink-2)", bg: "var(--home-pill)" },
+  literature: { ink: "var(--web-3f77a1)", bg: "color-mix(in srgb, var(--web-75add7) 18%, transparent)" },
 };
 
 function Evidence({ text }: { text: string }) {
-  const m = text.match(/^(empirical|heuristic|hypothesis)[\s;.]*(?:\((.*)\)\.?|(.*))$/i);
+  const m = text.match(/^(empirical|heuristic|hypothesis|literature)[\s;.]*(?:\((.*)\)\.?|(.*))$/i);
   const kind = m?.[1].toLowerCase();
   const tone = kind ? EVIDENCE[kind] : undefined;
   const detail = (m ? (m[2] ?? m[3]) : text)?.trim();

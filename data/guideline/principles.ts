@@ -154,11 +154,11 @@ export const principles: GuidelineSection = {
           rows: [
             ["Excited", "+5 st, 1.4×"],
             ["Curious", "+2 st, rising end"],
-            ["Worried", "−3 st, slower"],
+            ["Worried", "+3 st, 1.2×, quiet (fear and anxiety rise in pitch and speed up)"],
             ["Sad", "−6 st, fades out"],
           ],
         },
-        { kind: "p", text: "Evidence: heuristic." },
+        { kind: "p", text: "Evidence: literature for the direction (Juslin & Laukka 2003: joy and fear high and fast, sadness low and slow); the sizes are heuristic." },
       ],
       related: ["pitch", "tempo", "common"],
       source: `${SRC} §5-3`,

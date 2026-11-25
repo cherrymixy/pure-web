@@ -4,7 +4,7 @@ import type { ComponentDoc } from "../../types";
 
 export const soundDoc: ComponentDoc = {
   breadcrumb: "Principle",
-  lead: ["These are the rules for the robot's sound: one source sound per behavior.", "Emotion is pitch and tempo; timbre is the robot's character. Evidence: heuristic."],
+  lead: ["These are the rules for the robot's sound: one source sound per behavior.", "Emotion is pitch and tempo; timbre is the robot's character. Evidence: literature (vocal emotion cues) + heuristic values."],
   rows: [
     {
       id: "source",
@@ -15,7 +15,7 @@ export const soundDoc: ComponentDoc = {
       kind: "p-bullets",
       heading: "Emotion = pitch + tempo",
       items: [
-        "Up = positive or question, down = negative or closing. Fast = energy, slow = weight.",
+        "Pitch and tempo follow arousal: up and fast = joy, a question or alarm; down and slow = sadness or closing (Juslin & Laukka 2003).",
         "Timbre is the robot's character. It never changes per emotion and is never mixed.",
       ],
       figure: { chips: ["Source", "± pitch", "× tempo"], flow: true },
@@ -31,7 +31,7 @@ export const soundDoc: ComponentDoc = {
       items: [
         { title: "Excited", figure: { big: "+5 st" }, info: "+5 st, 1.4×" },
         { title: "Curious", figure: { big: "+2 st" }, info: "+2 st, rising end" },
-        { title: "Worried", figure: { big: "−3 st" }, info: "−3 st, slower" },
+        { title: "Worried", figure: { big: "+3 st" }, info: "+3 st, 1.2×, quiet" },
         { title: "Sad", figure: { big: "−6 st" }, info: "−6 st, fades out" },
       ],
     },

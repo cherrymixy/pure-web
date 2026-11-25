@@ -29,7 +29,7 @@ export const approachDoc: ComponentDoc = {
         { label: "Full-body", icon: "human" },
       ],
       selected: 2,
-      notes: ["eye-size 0.30, blink ×1", "approach.m, pause.m, tilt.s"],
+      notes: ["eye.size.l, blink ×1", "approach.m, pause.m, tilt.s"],
     },
     {
       id: "intensity",
@@ -37,9 +37,9 @@ export const approachDoc: ComponentDoc = {
       text: "It depends on how close I should get. I choose based on who the other person is and how long we've been apart.",
       kind: "intensity",
       levels: [
-        { title: "Light", chips: ["3 cm", "Interest"], token: "approach.l", reach: 1 },
-        { title: "Normal", chips: ["6 cm", "Meeting"], token: "approach.n", reach: 2 },
-        { title: "Strong", chips: ["10 cm", "Owner"], token: "approach.s", reach: 3 },
+        { title: "Light", chips: ["0.15 BH", "Interest"], token: "approach.s", reach: 1 },
+        { title: "Normal", chips: ["0.3 BH", "Meeting"], token: "approach.m", reach: 2 },
+        { title: "Strong", chips: ["0.5 BH", "Owner"], token: "approach.l", reach: 3 },
       ],
     },
     {

@@ -440,7 +440,7 @@ export const COMPONENT_DOCS: Record<string, ComponentDoc> = {
       { title: "Normal", chips: ["0.25 BH", "Afraid"], token: "retreat.m" },
       { title: "Strong", chips: ["0.40 BH", "Scared"], token: "retreat.l" },
     ],
-    sound: { label: "0.7×", length: 0.8 },
+    sound: { label: "1.2×", length: 0.4 },
     face: "Worried",
     motion: [
       { label: "Back off", length: 0.8 },
@@ -458,7 +458,7 @@ export const COMPONENT_DOCS: Record<string, ComponentDoc> = {
       ["enabled", "motion", "hold", "0.5 s after backing off"],
       ["enabled", "face", "eye.angle", "−12° (worried)"],
       ["enabled", "face", "eye.size.s", "0.18"],
-      ["enabled", "sound", "sound.tempo", "0.7×, −3 st, slower"],
+      ["enabled", "sound", "sound.tempo", "1.2×, +3 st, short and quiet"],
     ],
   }),
 
