@@ -65,6 +65,7 @@ export const GUIDELINE_NAV: GuidelineNavGroup[] = [
       { label: "Shake", path: "behavior/shake" },
       { label: "Stretch", path: "behavior/stretch" },
       { label: "Surprise", path: "behavior/surprise" },
+      { label: "Component spec", path: "behavior/component-spec" },
     ],
   },
   {

@@ -152,3 +152,4 @@ STEP마다 한 줄. `날짜 · STEP · 결정 · 근거`
 | 2026-11-25 | 가이드라인 컬러 패널 | 페이지 바탕(home-canvas) 위 sage-50·bg-canvas 패널 → 흰색(Face 그림·리듬·루프 카드·밸런스, 타임라인 트랙, 로봇 스테이지), 안쪽 흰 칩 → home-pill, 줌 글자 5px → 6~6.5px(=12~13px), 카드 외곽선 제거·본문 14px | 사용자 리뷰 |
 | 2026-11-25 | Primitive 토큰 예시 그림 | 토큰 18개 Sizes 카드마다 값대로 그린 예시(token-demo.tsx): tilt·rotate·track 머리/시선, approach·retreat 이동, pause·hold·delay·pulse·drift 시간축 곡선, eye size·angle·shape·blink 화면 눈, pitch·tempo·timbre·length 파형. 값 축 막대는 예시 있을 때 숨김. CSS 루프(tok-*), reduced motion이면 끝 포즈 | 사용자 리뷰 |
 | 2026-11-25 | Components 인덱스 | 사이드바 Overview·REJECTED/Emphasis 제거(그룹 클릭 = 카드 인덱스, Foundations처럼), 카드·이전/다음 순서 사이드바와 같은 알파벳순, 카드 헤더에 동작별 미니 로봇(behavior-demo.tsx, 정지 시 핵심 자세·호버 시 재생), Emphasis 엔트리 삭제 | 사용자 리뷰 |
+| 2026-11-25 | Components 사이드바 | Component spec을 사이드바 맨 끝에 추가(인덱스 카드 순서와 동일) | 사용자 요청 |
