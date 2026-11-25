@@ -164,3 +164,4 @@ STEP마다 한 줄. `날짜 · STEP · 결정 · 근거`
 | 2026-11-25 | 그림자·배지 | 가이드라인 로봇 그림(Components·Patterns·Style 로봇, Templates 몸)의 바닥 그림자 전부 제거, Source profiles Proposed 배지 제거 | 사용자 요청 |
 | 2026-11-25 | Proposed 표기 제거 | 가이드라인 전체 proposed 플래그·배지·"(proposed)" 문구·ρ TBD 표기 제거(ρ는 값만 표시) | 사용자 요청 |
 | 2026-11-25 | 결정 대기 문구 정리 | "(pending decision)", "(pending)", "await a decision" 표기를 확정 문장으로(track 옛 이름, pause/hold 구분, ANTIC 길이, REACT 두 종류) | 사용자 요청 |
+| 2026-11-25 | 사이드바 로고 | PURE 로고 클릭 → Lab 홈(/lab) | 사용자 요청 |

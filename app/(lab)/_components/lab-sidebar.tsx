@@ -1,6 +1,7 @@
 "use client";
 
 /* eslint-disable @next/next/no-img-element */
+import Link from "next/link";
 import { useState } from "react";
 import { STRINGS } from "@/data/strings";
 import { Icon } from "@/components/ui/icons/icon";
@@ -20,7 +21,9 @@ export function LabSidebar({ docPaths, favourites, name, email }: { docPaths: st
         <div className={`flex w-full shrink-0 items-center gap-[10px] py-[var(--space-4)] ${collapsed ? "justify-center" : ""}`}>
           {!collapsed && (
             <>
-              <img src="/figma/lab/home/logo.svg" alt={STRINGS.brand.name} width={83.791} height={19.106} className="h-[19.106px] w-[83.791px]" />
+              <Link href="/lab" aria-label={STRINGS.sidebar.lab} className="flex rounded-[6px]">
+                <img src="/figma/lab/home/logo.svg" alt={STRINGS.brand.name} width={83.791} height={19.106} className="h-[19.106px] w-[83.791px]" />
+              </Link>
               <span className="flex-1" />
             </>
           )}
