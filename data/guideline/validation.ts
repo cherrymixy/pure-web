@@ -85,7 +85,6 @@ export const validation: GuidelineSection = {
       ],
       related: ["measures", "semantic"],
       source: `${SRC}-3`,
-      proposed: true,
     },
   ],
 };

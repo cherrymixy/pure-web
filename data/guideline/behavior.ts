@@ -14,8 +14,7 @@ interface Cmp {
   title: string;
   type: string;
   summary: string;
-  /** confirmed ρ, or a proposed one (shown as TBD) */
-  rho: keyof typeof RHO | { proposed: keyof typeof RHO };
+  rho: keyof typeof RHO;
   evidence: string;
   confusable?: string;
   simBehavior: string;
@@ -34,8 +33,7 @@ const PAIRS: Record<string, string> = {
 };
 
 const cmp = (c: Cmp): GuidelineEntry => {
-  const proposed = typeof c.rho === "object";
-  const rho = typeof c.rho === "object" ? `TBD (proposed: ${RHO[c.rho.proposed].toLowerCase()})` : RHO[c.rho];
+  const rho = RHO[c.rho];
   const pair = PAIRS[c.slug];
   return {
     slug: c.slug,
@@ -63,7 +61,6 @@ const cmp = (c: Cmp): GuidelineEntry => {
     related: c.related,
     simBehavior: c.simBehavior,
     source: SRC,
-    ...(proposed ? { proposed: true as const } : {}),
   };
 };
 
@@ -72,18 +69,18 @@ const COMPONENTS: Cmp[] = [
   { slug: "shake", title: "Shake", type: "S1 Symbolic", summary: "The agreed signal for \"no\", kept as it is.", rho: "low", evidence: "Recognition 91% (highest of 17)", simBehavior: "shake", related: ["behavior/nod", "conversation"] },
   { slug: "bow", title: "Bow", type: "S1 Symbolic", summary: "Only when arriving or leaving. Starts from a slight bow; never bows deeply.", rho: "high", evidence: "Perceived malfunction 44.7 pt (2nd of 17)", simBehavior: "greet", related: ["nod", "leave"] },
   { slug: "doze", title: "Doze", type: "S1 Symbolic (state behavior)", summary: "After a long time without input, slowly loses strength.", rho: "high", evidence: "—", simBehavior: "doze", related: ["close", "by-your-side"] },
-  { slug: "point", title: "Point", type: "S2 Illustrator", summary: "Gaze first, body later, and a clear stop at the target.", rho: { proposed: "low" }, evidence: "Recognition 45%, 34% misread as \"looking around\"", simBehavior: "sweep", related: ["guiding"] },
+  { slug: "point", title: "Point", type: "S2 Illustrator", summary: "Gaze first, body later, and a clear stop at the target.", rho: "low", evidence: "Recognition 45%, 34% misread as \"looking around\"", simBehavior: "sweep", related: ["guiding"] },
   { slug: "joy", title: "Joy", type: "S3 Expressive", summary: "An even rhythm twice + a smiling face + a bright sound.", rho: "high", evidence: "Recognition 77% (the only emotion at 75% or above)", simBehavior: "happy", related: ["laugh", "feedback"] },
-  { slug: "laugh", title: "Laugh", type: "S3 Expressive", summary: "The same rhythm as Joy, larger. Never used without a face.", rho: { proposed: "high" }, evidence: "Gesture-only recognition 55%, perceived malfunction 37.6 pt", simBehavior: "happy", related: ["joy", "feedback"] },
+  { slug: "laugh", title: "Laugh", type: "S3 Expressive", summary: "The same rhythm as Joy, larger. Never used without a face.", rho: "high", evidence: "Gesture-only recognition 55%, perceived malfunction 37.6 pt", simBehavior: "happy", related: ["joy", "feedback"] },
   { slug: "sad", title: "Sad", type: "S3 Expressive", summary: "Loses strength, sinks and stays there. No repeats.", rho: "high", evidence: "Sad → laughing misread 32%", simBehavior: "sad", related: ["feedback"] },
-  { slug: "surprise", title: "Surprise", type: "S3 Expressive", summary: "Once, short, then straight back to rest.", rho: { proposed: "mid" }, evidence: "A large startled retreat: perceived malfunction 38.7 pt", simBehavior: "alert", related: ["sudden"] },
-  { slug: "fear", title: "Fear", type: "S3 Expressive", summary: "Back off, lower and hold. A change of posture, not trembling.", rho: { proposed: "mid" }, evidence: "Trembling fear perceived malfunction 52.8 pt (highest of 17)", simBehavior: "alert", related: ["keep-distance", "sudden"] },
+  { slug: "surprise", title: "Surprise", type: "S3 Expressive", summary: "Once, short, then straight back to rest.", rho: "mid", evidence: "A large startled retreat: perceived malfunction 38.7 pt", simBehavior: "alert", related: ["sudden"] },
+  { slug: "fear", title: "Fear", type: "S3 Expressive", summary: "Back off, lower and hold. A change of posture, not trembling.", rho: "mid", evidence: "Trembling fear perceived malfunction 52.8 pt (highest of 17)", simBehavior: "alert", related: ["keep-distance", "sudden"] },
   { slug: "curious", title: "Curious", type: "S3 Expressive", summary: "When the input is unclear, tilt + hold.", rho: "high", evidence: "Perceived malfunction 24.1 pt (lowest of the 6 emotions)", simBehavior: "curious", related: ["primitive-tokens/tilt", "conversation"] },
   { slug: "approach", title: "Approach", type: "S4 Regulator", summary: "Approach, stop, and match eye height.", rho: "mid", evidence: "Without a stop, 36% read it as \"just noticed\"", simBehavior: "focus", related: ["keep-distance", "calling"] },
   { slug: "keep-distance", title: "Keep distance", type: "S4 Regulator", summary: "Back off and hold. Reads as personality, like a shy cat.", rho: "mid", evidence: "Recognition 79%, liking 67.7 pt (1st of 7)", simBehavior: "home", related: ["behavior/approach", "primitive-tokens/retreat"] },
-  { slug: "close", title: "Close", type: "S4 Regulator", summary: "Watch like seeing someone off, hold, lower the sound and settle into rest.", rho: { proposed: "mid" }, evidence: "Recognition 36%, 30% misread as \"waiting, resting\"", simBehavior: "home", related: ["doze", "leave"] },
-  { slug: "stretch", title: "Stretch", type: "S5 Adaptor", summary: "Now and then after a long wait. No meaning, just a sign of being alive.", rho: { proposed: "high" }, evidence: "—", simBehavior: "wake", related: ["by-your-side"] },
-  { slug: "rub", title: "Rub", type: "S5 Adaptor", summary: "Rub the body against a hand or object. Shows affection.", rho: { proposed: "high" }, evidence: "Recognition 85%, liveliness 86.2 pt, perceived malfunction 10.6 pt (lowest)", simBehavior: "happy", related: ["touching"] },
+  { slug: "close", title: "Close", type: "S4 Regulator", summary: "Watch like seeing someone off, hold, lower the sound and settle into rest.", rho: "mid", evidence: "Recognition 36%, 30% misread as \"waiting, resting\"", simBehavior: "home", related: ["doze", "leave"] },
+  { slug: "stretch", title: "Stretch", type: "S5 Adaptor", summary: "Now and then after a long wait. No meaning, just a sign of being alive.", rho: "high", evidence: "—", simBehavior: "wake", related: ["by-your-side"] },
+  { slug: "rub", title: "Rub", type: "S5 Adaptor", summary: "Rub the body against a hand or object. Shows affection.", rho: "high", evidence: "Recognition 85%, liveliness 86.2 pt, perceived malfunction 10.6 pt (lowest)", simBehavior: "happy", related: ["touching"] },
 ];
 
 export const BEHAVIOR_SLUGS = COMPONENTS.map((c) => c.slug);

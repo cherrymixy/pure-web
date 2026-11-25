@@ -106,7 +106,6 @@ export const templates: GuidelineSection = {
             ["src.character", "Animated character: the closest human or animal profile; exaggeration is split off into Style", "—"],
           ],
         },
-        { kind: "p", view: "note", text: "The need is confirmed; the content is proposed." },
       ],
       related: ["pipeline", "presets"],
       source: `${SRC}-2`,

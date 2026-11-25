@@ -145,7 +145,6 @@ export const primitiveTokens: GuidelineSection = {
       ],
       evidence: "heuristic.",
       section: "§6-3",
-      proposed: true,
     }),
     token({
       slug: "approach",

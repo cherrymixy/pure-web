@@ -255,7 +255,6 @@ export const principles: GuidelineSection = {
       ref: "gr.*",
       title: "Guardrails",
       summary: "Eight rules nobody can change. A violation is corrected automatically and the user is told.",
-      proposed: true,
       body: [
         {
           kind: "table",
@@ -272,7 +271,7 @@ export const principles: GuidelineSection = {
             ["gr.response_time", "No silence over 1 s; safety within 0.1 s", "idle_gap_ms <= 1000, safety_latency_ms <= 100", "Small reaction inserted", "SP-2 (heuristic)"],
           ],
         },
-        { kind: "p", text: "The IDs and check expressions are proposed. Actual thresholds (e.g. cv 0.1) are set in the simulator." },
+        { kind: "p", text: "Actual thresholds (e.g. cv 0.1) are set in the simulator." },
       ],
       related: ["semantic", "combination-rules", "auto-checks"],
       source: `${SRC} §3-2`,
