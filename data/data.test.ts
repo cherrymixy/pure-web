@@ -138,7 +138,7 @@ describe("guideline", () => {
     expect(refs("principles", "op.")).toHaveLength(1);
     expect(refs("principles", "ch.").map((e) => e.ref)).toEqual(["ch.face", "ch.sound", "ch.body", "ch.common"]); // same order as the sidebar Principle list
     expect(refs("primitive-tokens", "tok.")).toHaveLength(18);
-    expect(refs("behavior", "cmp.").filter((e) => e.slug !== "emphasis")).toHaveLength(16);
+    expect(refs("behavior", "cmp.")).toHaveLength(16);
     expect(refs("templates", "ff.")).toHaveLength(5);
     for (const id of ["overview", "style", "validation"]) expect(section(id).entries.length).toBeGreaterThan(0);
   });

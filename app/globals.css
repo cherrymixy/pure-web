@@ -95,12 +95,52 @@ body {
 .tok-sweep { animation: tok-sweep 2.8s linear infinite; }
 @keyframes tok-sweep { from { transform: none; } to { transform: translateX(var(--w)); } }
 
+/* Components index cards (components/ui/guideline/behavior-demo.tsx): paused on the key pose (negative delay) until the card is hovered or focused. */
+.bhv { transform-box: view-box; animation-duration: 2.4s; animation-iteration-count: infinite; animation-timing-function: var(--ease-standard); animation-play-state: paused; animation-delay: -0.8s; }
+.group:hover .bhv, .group:focus-visible .bhv { animation-play-state: running; }
+.bhv-nod { animation-name: bhv-nod; }
+@keyframes bhv-nod { 0%, 50%, 100% { transform: none; } 12%, 32% { transform: translateY(5px) scaleY(0.94); } 22% { transform: none; } }
+.bhv-shake { animation-name: bhv-shake; }
+@keyframes bhv-shake { 0%, 60%, 100% { transform: none; } 12%, 36% { transform: translateX(-7px); } 24%, 48% { transform: translateX(7px); } }
+.bhv-bow { animation-name: bhv-bow; }
+@keyframes bhv-bow { 0%, 100% { transform: none; } 30%, 60% { transform: translateY(6px) scale(0.94); } }
+.bhv-tilt { animation-name: bhv-tilt; }
+@keyframes bhv-tilt { 0%, 100% { transform: none; } 25%, 75% { transform: rotate(14deg); } }
+.bhv-point { animation-name: bhv-point; }
+@keyframes bhv-point { 0%, 100% { transform: none; } 20%, 70% { transform: translateX(14px) rotate(-6deg); } }
+.bhv-sink { animation-name: bhv-sink; animation-duration: 3.2s; }
+@keyframes bhv-sink { 0%, 100% { transform: none; } 40%, 80% { transform: translateY(9px) rotate(4deg); } }
+.bhv-doze { animation-name: bhv-doze; animation-duration: 3.2s; }
+@keyframes bhv-doze { 0%, 100% { transform: none; } 30% { transform: translateY(6px) rotate(8deg); } 40% { transform: translateY(2px) rotate(3deg); } 70% { transform: translateY(9px) rotate(12deg); } }
+.bhv-close { animation-name: bhv-close; animation-duration: 3.2s; }
+@keyframes bhv-close { 0%, 100% { transform: none; } 35%, 85% { transform: scaleY(0.2); } }
+.bhv-squint { animation-name: bhv-squint; }
+@keyframes bhv-squint { 0%, 100% { transform: none; } 20%, 80% { transform: scaleY(0.45); } }
+.bhv-wide { animation-name: bhv-wide; }
+@keyframes bhv-wide { 0%, 45%, 100% { transform: none; } 10%, 25% { transform: scale(1.25); } }
+.bhv-hop { animation-name: bhv-hop; }
+@keyframes bhv-hop { 0%, 55%, 100% { transform: none; } 12%, 36% { transform: translateY(-8px); } 24% { transform: none; } }
+.bhv-laugh { animation-name: bhv-laugh; }
+@keyframes bhv-laugh { 0%, 70%, 100% { transform: none; } 10%, 30%, 50% { transform: translateY(-10px); } 20%, 40%, 60% { transform: none; } }
+.bhv-jump { animation-name: bhv-jump; }
+@keyframes bhv-jump { 0%, 40%, 100% { transform: none; } 8%, 20% { transform: translateY(-9px) scaleY(1.05); } }
+.bhv-fear { animation-name: bhv-fear; animation-duration: 3s; }
+@keyframes bhv-fear { 0%, 100% { transform: none; } 25%, 80% { transform: translateX(-26px) scaleY(0.88); } }
+.bhv-back { animation-name: bhv-back; animation-duration: 3s; }
+@keyframes bhv-back { 0%, 100% { transform: none; } 30%, 80% { transform: translateX(-30px); } }
+.bhv-approach { animation-name: bhv-approach; animation-duration: 3s; }
+@keyframes bhv-approach { 0%, 100% { transform: none; } 35%, 80% { transform: translateX(30px); } }
+.bhv-stretch { animation-name: bhv-stretch; animation-duration: 3s; }
+@keyframes bhv-stretch { 0%, 100% { transform: none; } 35%, 65% { transform: scaleY(1.14); } }
+.bhv-rub { animation-name: bhv-rub; animation-duration: 1.6s; }
+@keyframes bhv-rub { 0%, 100% { transform: none; } 25% { transform: translateX(5px) rotate(4deg); } 75% { transform: translateX(-5px) rotate(-4deg); } }
+
 @media (prefers-reduced-motion: reduce) {
   .anim-fade-in, .anim-rise-in, .anim-pop-in, .anim-check-pop, .anim-pulse, .anim-float, .scan-line { animation: none; }
   [class*="fig-"] { animation: none !important; }
   .fig-draw { stroke-dashoffset: 0; }
   .fig-ride { offset-distance: 100%; }
-  [class*="tok-"] { animation: none !important; }
+  [class*="tok-"], .bhv { animation: none !important; }
   .tok-to { transform: var(--t); }
   .tok-sweep { display: none; }
 }

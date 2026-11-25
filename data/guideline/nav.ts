@@ -47,9 +47,8 @@ export const GUIDELINE_NAV: GuidelineNavGroup[] = [
   {
     label: "Components",
     path: "behavior",
-    // Figma 808:1594: Overview, then alphabetical; Rejected last
+    // Figma 808:1594 order (alphabetical). The group link opens the card index, like Foundations; rejected Emphasis removed.
     children: [
-      { label: "Overview", path: "behavior" },
       { label: "Approach", path: "behavior/approach" },
       { label: "Bow", path: "behavior/bow" },
       { label: "Close", path: "behavior/close" },
@@ -66,8 +65,6 @@ export const GUIDELINE_NAV: GuidelineNavGroup[] = [
       { label: "Shake", path: "behavior/shake" },
       { label: "Stretch", path: "behavior/stretch" },
       { label: "Surprise", path: "behavior/surprise" },
-      { label: "REJECTED", tag: true },
-      { label: "Emphasis", path: "behavior/emphasis" },
     ],
   },
   {

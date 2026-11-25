@@ -92,10 +92,11 @@ export const behavior: GuidelineSection = {
   id: "behavior",
   title: "Components",
   summary:
-    "16 behaviors, each a bundle of body, face and sound tracks with trigger and forbid conditions, a style acceptance ρ and recognition features. Main-study stimuli 17 − 1 rejected (Emphasis) = 16.",
+    "16 behaviors, each a bundle of body, face and sound tracks with trigger and forbid conditions, a style acceptance ρ and recognition features.",
   entries: [
     // Every behavior renders on the Approach template (Figma 808:1254); Approach itself is the Figma page as drawn
-    ...COMPONENTS.map((c) => ({ ...cmp(c), doc: c.slug === "approach" ? approachDoc : COMPONENT_DOCS[c.slug] })),
+    // Sidebar order (alphabetical), so the index cards and prev / next follow it
+    ...[...COMPONENTS].sort((a, b) => a.title.localeCompare(b.title)).map((c) => ({ ...cmp(c), doc: c.slug === "approach" ? approachDoc : COMPONENT_DOCS[c.slug] })),
     {
       slug: "component-spec",
       title: "Component spec",
@@ -178,20 +179,8 @@ export const behavior: GuidelineSection = {
 }`,
         },
       ],
-      related: ["curious", "emphasis"],
+      related: ["curious"],
       source: `${SRC}-2, §7-3`,
-    },
-    {
-      slug: "emphasis",
-      ref: "cmp.emphasis",
-      title: "Emphasis (rejected)",
-      summary: "Rejected: pilot recognition 0%. Everyone read it as \"urgent, annoyed\". Absorbed into \"point once more\".",
-      body: [
-        { kind: "p", view: "note", text: "Kept on record as REJECTED + Migration: uses of Emphasis move to Point repeated once." },
-        { kind: "table", title: "Pilot result", view: "cards", head: ["Measure", "Value"], rows: [["Pilot recognition", "0%"], ["Main misread", "Urgent, annoyed"], ["Perceived malfunction", "41.5 pt"]] },
-      ],
-      related: ["point"],
-      source: SRC,
     },
   ],
 };
