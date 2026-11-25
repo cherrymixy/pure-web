@@ -5,8 +5,6 @@ import { STRINGS } from "@/data/strings";
 import { BlockView } from "./block-views";
 import { hasBehaviorDemo } from "./behavior-demo";
 import { BehaviorIntensity, BehaviorPlayer, BehaviorStage, BehaviorTimeline } from "./behavior-player";
-import { PatternScene } from "./pattern-scene";
-import { FormFactorBody, type Role } from "./form-factor-body";
 import { DocToc, type TocItem } from "./doc-toc";
 import { GuideCard } from "./guide-card";
 import { FaceChange, FaceDonts, FaceRhythm, FaceTransitions, FaceTypes } from "./face-figures";
@@ -30,8 +28,7 @@ export function ComponentDocPage({
   base,
   actions,
   behavior,
-  scene,
-  body,
+  feature,
 }: {
   title: string;
   proposed?: boolean;
@@ -41,13 +38,11 @@ export function ComponentDocPage({
   actions?: React.ReactNode;
   /** Components entry slug: Robot · Intensity · Time Line become one player acting out this behavior */
   behavior?: string;
-  /** Patterns entry: trigger + Component steps for the Scene player at the top of the page */
-  scene?: { trigger: string; steps: { slug: string; title: string }[] };
-  /** Templates entry: the form factor body with its roles, at the top of the page */
-  body?: { slug: string; roles: Record<Role, string>; substitute: string };
+  /** A hands-on section at the top of the page (Patterns scene, Templates body, Style labs) */
+  feature?: { id: string; title: string; text: string; node: React.ReactNode };
 }) {
   const sections = doc.rows.flatMap((r) => (Array.isArray(r) ? r : [r]));
-  const toc: TocItem[] = [...(doc.topToc ? [{ id: "top", label: doc.topToc }] : []), ...(scene ? [{ id: "scene", label: G.player.scene }] : []), ...(body ? [{ id: "body", label: G.body.title }] : []), ...sections.map((s) => ({ id: s.id, label: s.toc ?? s.title }))];
+  const toc: TocItem[] = [...(doc.topToc ? [{ id: "top", label: doc.topToc }] : []), ...(feature ? [{ id: feature.id, label: feature.title }] : []), ...sections.map((s) => ({ id: s.id, label: s.toc ?? s.title }))];
   const stickyTop = "top-[42px]";
   const scrollMt = "scroll-mt-[42px]";
 
@@ -79,22 +74,13 @@ export function ComponentDocPage({
 
           {/* Without resource pills the first section sits 55 px under the lead (Face 808:1652 → 808:1667) */}
           <div className="mt-[var(--space-40)] flex flex-col gap-[80px]">
-            {body && (
-              <section id="body" aria-labelledby="body-h" className={`flex flex-col gap-[28px] ${scrollMt}`}>
+            {feature && (
+              <section id={feature.id} aria-labelledby={`${feature.id}-h`} className={`flex flex-col gap-[28px] ${scrollMt}`}>
                 <div className="flex flex-col gap-[var(--space-8)]">
-                  <h2 id="body-h" className="text-[22px] font-semibold text-[var(--home-ink)]">{G.body.title}</h2>
-                  <p className="text-[15px] leading-[1.6] text-[var(--home-ink-2)]">{G.body.text}</p>
+                  <h2 id={`${feature.id}-h`} className="text-[22px] font-semibold text-[var(--home-ink)]">{feature.title}</h2>
+                  <p className="text-[15px] leading-[1.6] text-[var(--home-ink-2)]">{feature.text}</p>
                 </div>
-                <FormFactorBody slug={body.slug} roles={body.roles} substitute={body.substitute} />
-              </section>
-            )}
-            {scene && (
-              <section id="scene" aria-labelledby="scene-h" className={`flex flex-col gap-[28px] ${scrollMt}`}>
-                <div className="flex flex-col gap-[var(--space-8)]">
-                  <h2 id="scene-h" className="text-[22px] font-semibold text-[var(--home-ink)]">{G.player.scene}</h2>
-                  <p className="text-[15px] leading-[1.6] text-[var(--home-ink-2)]">{G.player.sceneText}</p>
-                </div>
-                <PatternScene trigger={scene.trigger} steps={scene.steps} />
+                {feature.node}
               </section>
             )}
             {doc.rows.map((r, i) =>

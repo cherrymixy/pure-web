@@ -99,6 +99,7 @@ body {
    .group or a playing stage ([data-playing="true"], restarted from 0 and timed to the timeline). --amp = Intensity level. */
 .bhv { transform-box: view-box; animation-duration: 2.4s; animation-iteration-count: infinite; animation-timing-function: var(--ease-standard); animation-play-state: paused; animation-delay: -0.8s; }
 .group:hover .bhv, .group:focus-visible .bhv { animation-play-state: running; }
+.group:hover [data-bhv-stage] .bhv { animation-duration: var(--bhv-dur, 2.4s); }
 [data-playing="true"] [data-bhv-stage] .bhv { animation-play-state: running; animation-delay: 0s; animation-duration: var(--bhv-dur, 2.4s); }
 .bhv-playhead { left: 0; animation: bhv-playhead var(--bhv-dur, 2.4s) linear infinite; }
 [data-playing="false"] .bhv-playhead { animation-play-state: paused; }

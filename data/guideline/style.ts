@@ -4,6 +4,26 @@ import type { GuidelineSection } from "./types";
 
 const SRC = "PURE guideline final structure v3 (2026-10-19) §10";
 
+export const STYLE_AXES = ["P1", "P2", "P3", "P4", "P5", "P6"] as const;
+export const STYLE_AXIS_LABELS: Record<(typeof STYLE_AXES)[number], string> = {
+  P1: "Reach", P2: "Speed contrast", P3: "Stillness", P4: "Afterglow", P5: "Anticipation", P6: "Return",
+};
+/** Style lab presets. Animation is the source example (§10-1); Cat, Dog and Drama are example values for the demo, not from the source. */
+export const STYLE_PRESETS: { id: string; label: string; axes: Record<(typeof STYLE_AXES)[number], number>; example?: true }[] = [
+  { id: "style.cat", label: "Cat", axes: { P1: 0.4, P2: 0.7, P3: 0.85, P4: 0.6, P5: 0.3, P6: 0.7 }, example: true },
+  { id: "style.dog", label: "Dog", axes: { P1: 0.85, P2: 0.5, P3: 0.2, P4: 0.4, P5: 0.6, P6: 0.5 }, example: true },
+  { id: "style.drama", label: "Drama", axes: { P1: 0.9, P2: 0.9, P3: 0.5, P4: 0.85, P5: 0.8, P6: 0.3 }, example: true },
+  { id: "style.animation", label: "Animation", axes: { P1: 0.8, P2: 0.95, P3: 0.6, P4: 0.9, P5: 0.9, P6: 0.1 } },
+];
+/** ρ lab: one behavior per band (values inside the §7-1 ranges) */
+export const RHO_EXAMPLES = [
+  { slug: "joy", title: "Joy", band: "High", rho: 0.9 },
+  { slug: "approach", title: "Approach", band: "Medium", rho: 0.55 },
+  { slug: "nod", title: "Nod", band: "Low", rho: 0.25 },
+];
+/** Rules lab: tilt as the worked example (Primitive tilt: m 12°, SHOULD 6 to 20°, MUST max 30°) */
+export const RANGE_EXAMPLE = { token: "tilt", unit: "°", source: 12, should: [6, 20] as [number, number], must: 30, max: 40 };
+
 export const style: GuidelineSection = {
   id: "style",
   title: "Style",
