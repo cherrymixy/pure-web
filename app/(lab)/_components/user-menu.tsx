@@ -4,13 +4,15 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { STRINGS } from "@/data/strings";
 import { Menu } from "@/components/ui/menu";
-import { ConfirmModal } from "@/components/ui/modal";
+import { NoticeModal } from "@/components/ui/modal";
 
-// Sidebar user card (Figma 1095:6630: initial avatar, plan pill, name) → Library / Profile & team / Log out (confirm → Lab home).
+const L = STRINGS.profile.locked;
+
+// Sidebar user card (Figma 1095:6630: initial avatar, plan pill, name) → Profile & team / Log out (simulation notice).
 /** compact: avatar only (collapsed sidebar). */
 export function UserMenu({ name, email, compact = false }: { name: string; email: string; compact?: boolean }) {
   const router = useRouter();
-  const [logOut, setLogOut] = useState(false);
+  const [locked, setLocked] = useState(false);
 
   return (
     <>
@@ -35,19 +37,11 @@ export function UserMenu({ name, email, compact = false }: { name: string; email
           </>
         }
         items={[
-          { label: STRINGS.sidebar.library, onSelect: () => router.push("/lab/community") },
           { label: STRINGS.sidebar.profile, onSelect: () => router.push("/lab/profile") },
-          { label: STRINGS.sidebar.logOut, onSelect: () => setLogOut(true) },
+          { label: STRINGS.sidebar.logOut, onSelect: () => setLocked(true) },
         ]}
       />
-      <ConfirmModal
-        open={logOut}
-        title={STRINGS.profile.logOutConfirm.title}
-        body={STRINGS.profile.logOutConfirm.body}
-        confirmLabel={STRINGS.sidebar.logOut}
-        onConfirm={() => router.push("/lab")}
-        onCancel={() => setLogOut(false)}
-      />
+      <NoticeModal open={locked} title={L.title} body={L.body} okLabel={L.ok} onClose={() => setLocked(false)} />
     </>
   );
 }

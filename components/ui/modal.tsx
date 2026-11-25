@@ -90,6 +90,17 @@ export function ConfirmModal({
   );
 }
 
+/** Info only: one button closes it. */
+export function NoticeModal({ open, title, body, okLabel, onClose }: { open: boolean; title: string; body: string; okLabel: string; onClose: () => void }) {
+  return (
+    <Modal open={open} onClose={onClose} title={title} description={body}>
+      <ModalActions>
+        <ModalButton variant="primary" onClick={onClose} autoFocus>{okLabel}</ModalButton>
+      </ModalActions>
+    </Modal>
+  );
+}
+
 /** Single text field. Cancelling with edits asks before discarding (WC unsaved changes). */
 export function PromptModal({
   open,
