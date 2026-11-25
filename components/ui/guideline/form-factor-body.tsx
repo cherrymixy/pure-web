@@ -23,59 +23,79 @@ const MAPS: Record<string, Map> = {
 };
 
 const INK = "var(--home-ink)";
-/** Each body drawn from four parts (head · torso · legs · arms), origins for the role motion. */
+/** Line drawings traced from the Figma form-factor icons (public/figma/guideline/icons/icon-*.svg), scaled up:
+ *  white fills, ink 3 px round strokes, joint dots. Coordinates are the icon's, mapped by (ox, oy, s). */
+const FIGS: Record<string, { s: number; ox: number; oy: number }> = {
+  "full-body": { s: 11, ox: 79, oy: 10 },
+  "joint-walking": { s: 12, ox: 64, oy: 22 },
+  "joint-driving": { s: 12, ox: 71, oy: 20 },
+  "jointless-driving": { s: 11.5, ox: 80, oy: 14 },
+  "joint-fixed": { s: 11.5, ox: 68, oy: 12 },
+};
+
 function Drawing({ slug, lit, role }: { slug: string; lit?: Part; role: Role }) {
-  const part = (name: Part, origin: string, children: React.ReactNode) => (
-    <g className={lit === name ? `ff-lit ff-${role}` : undefined} style={{ transformOrigin: origin, transformBox: "view-box" }}>
+  const f = FIGS[slug];
+  if (!f) return null;
+  const X = (x: number) => f.ox + x * f.s;
+  const Y = (y: number) => f.oy + y * f.s;
+  const line = { stroke: INK, strokeWidth: 3, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
+  const box = (x1: number, y1: number, x2: number, y2: number, r: number) => (
+    <rect x={X(x1)} y={Y(y1)} width={(x2 - x1) * f.s} height={(y2 - y1) * f.s} rx={r * f.s} fill="var(--neutral-0)" {...line} />
+  );
+  const seg = (x1: number, y1: number, x2: number, y2: number) => <line x1={X(x1)} y1={Y(y1)} x2={X(x2)} y2={Y(y2)} {...line} />;
+  const dot = (x: number, y: number, r: number) => <circle cx={X(x)} cy={Y(y)} r={r * f.s} fill="var(--neutral-0)" {...line} />;
+  /** two eyes centred at (x, y) in icon units */
+  const eyes = (x: number, y: number, k = 1) => (
+    <>
+      <rect className="ff-eye" x={X(x) - 9 * k} y={Y(y) - 5 * k} width={5 * k} height={10 * k} rx={2.5 * k} fill={INK} />
+      <rect className="ff-eye" x={X(x) + 4 * k} y={Y(y) - 5 * k} width={5 * k} height={10 * k} rx={2.5 * k} fill={INK} />
+    </>
+  );
+  const part = (name: Part, ox: number, oy: number, children: React.ReactNode) => (
+    <g className={lit === name ? `ff-lit ff-${role}` : undefined} style={{ transformOrigin: `${X(ox)}px ${Y(oy)}px`, transformBox: "view-box" }}>
       {children}
     </g>
-  );
-  const eyes = (x: number, y: number) => (
-    <>
-      <rect className="ff-eye" x={x - 9} y={y} width={6} height={10} rx={2.5} fill="var(--neutral-0)" />
-      <rect className="ff-eye" x={x + 3} y={y} width={6} height={10} rx={2.5} fill="var(--neutral-0)" />
-    </>
   );
   switch (slug) {
     case "full-body":
       return (
         <>
-          {part("legs", "120px 120px", <><rect x={104} y={102} width={12} height={36} rx={6} fill={INK} /><rect x={124} y={102} width={12} height={36} rx={6} fill={INK} /></>)}
-          {part("arms", "120px 66px", <><rect x={82} y={62} width={11} height={38} rx={5.5} fill={INK} /><rect x={147} y={62} width={11} height={38} rx={5.5} fill={INK} /></>)}
-          {part("torso", "120px 104px", <rect x={96} y={58} width={48} height={48} rx={14} fill={INK} />)}
-          {part("head", "120px 54px", <><rect x={100} y={18} width={40} height={34} rx={12} fill={INK} />{eyes(120, 30)}</>)}
+          {part("legs", 3.72, 7.29, <>{seg(2.93, 7.29, 2.73, 10.86)}{seg(4.51, 7.29, 4.71, 10.86)}</>)}
+          {part("arms", 3.72, 4.12, <>{seg(1.74, 4.12, 0.35, 6.89)}{seg(5.7, 4.12, 7.09, 6.89)}</>)}
+          {part("torso", 3.72, 7.29, box(1.74, 3.32, 5.7, 7.29, 1))}
+          {part("head", 3.72, 3.3, <>{seg(3.72, 2.73, 3.72, 3.32)}{box(2.33, 0.35, 5.11, 2.73, 1)}{eyes(3.72, 1.54, 0.8)}</>)}
         </>
       );
     case "joint-walking":
       return (
         <>
-          {part("legs", "120px 124px", <>{[78, 96, 140, 158].map((x) => <rect key={x} x={x} y={92} width={10} height={40} rx={5} fill={INK} />)}</>)}
-          {part("torso", "120px 96px", <rect x={70} y={62} width={104} height={40} rx={18} fill={INK} />)}
-          {part("head", "168px 70px", <><rect x={150} y={30} width={46} height={40} rx={14} fill={INK} />{eyes(173, 44)}</>)}
+          {part("legs", 3.5, 5.9, <>{seg(1.54, 5.9, 1.14, 8.68)}{seg(2.92, 5.9, 3.12, 8.68)}{seg(4.51, 5.9, 4.11, 8.68)}{seg(5.9, 5.9, 6.29, 8.68)}</>)}
+          {part("torso", 3.5, 5.9, <>{seg(0.35, 4, -0.5, 2.9)}{box(0.35, 2.93, 6.69, 5.9, 1.49)}</>)}
+          {part("head", 6.2, 3.6, <>{box(5.5, 0.95, 9.07, 3.73, 1)}{eyes(7.3, 2.34, 0.8)}</>)}
         </>
       );
     case "joint-driving":
       return (
         <>
-          {part("legs", "120px 126px", <><rect x={82} y={108} width={76} height={18} rx={9} fill={INK} /><circle cx={96} cy={130} r={9} fill={INK} /><circle cx={144} cy={130} r={9} fill={INK} /></>)}
-          {part("torso", "120px 108px", <rect x={114} y={66} width={12} height={44} rx={6} fill={INK} />)}
-          {part("arms", "150px 88px", <rect x={124} y={82} width={36} height={9} rx={4.5} fill={INK} />)}
-          {part("head", "120px 66px", <><rect x={96} y={30} width={48} height={38} rx={13} fill={INK} />{eyes(120, 43)}</>)}
+          {part("legs", 4.11, 8.1, <>{box(0.35, 6.1, 7.88, 8.08, 0.79)}{dot(1.93, 8.78, 0.69)}{dot(6.3, 8.78, 0.69)}</>)}
+          {part("torso", 4.11, 6.1, <>{seg(4.11, 6.1, 4.11, 3.52)}{dot(4.11, 4.81, 0.4)}</>)}
+          {part("arms", 4.11, 4.81, <>{seg(4.5, 4.81, 6.6, 4.3)}{dot(6.75, 4.26, 0.3)}</>)}
+          {part("head", 4.11, 3.52, <>{box(1.93, 0.35, 6.3, 3.52, 1)}{eyes(4.11, 1.94, 0.9)}</>)}
         </>
       );
     case "jointless-driving":
       return (
         <>
-          {part("legs", "120px 128px", <><circle cx={100} cy={130} r={9} fill={INK} /><circle cx={140} cy={130} r={9} fill={INK} /></>)}
-          {part("torso", "120px 124px", <><rect x={88} y={30} width={64} height={98} rx={30} fill={INK} />{eyes(120, 52)}</>)}
+          {part("legs", 3.52, 9.2, <>{dot(1.94, 9.17, 0.89)}{dot(5.11, 9.17, 0.89)}</>)}
+          {part("torso", 3.52, 8.28, <>{box(0.35, 0.35, 6.69, 8.28, 3.17)}{box(1.74, 2.33, 5.3, 3.91, 0.79)}{eyes(3.52, 3.12, 0.6)}</>)}
         </>
       );
     case "joint-fixed":
       return (
         <>
-          <rect x={92} y={124} width={56} height={12} rx={6} fill={INK} opacity={0.85} />
-          {part("torso", "120px 124px", <><rect x={114} y={84} width={12} height={42} rx={6} fill={INK} /><rect x={114} y={58} width={12} height={32} rx={6} fill={INK} transform="rotate(-18 120 86)" /></>)}
-          {part("head", "128px 60px", <><rect x={104} y={22} width={50} height={38} rx={13} fill={INK} />{eyes(129, 35)}</>)}
+          {box(0.35, 9.27, 6.3, 10.06, 0.4)}
+          {part("torso", 3.32, 9.27, <>{seg(3.32, 9.27, 2.33, 5.7)}{seg(2.33, 5.7, 5.11, 3.13)}{dot(2.33, 5.7, 0.5)}{dot(5.11, 3.13, 0.5)}</>)}
+          {part("head", 5.11, 3.13, <>{box(4.91, 0.35, 8.68, 2.93, 0.9)}{eyes(6.8, 1.64, 0.8)}</>)}
         </>
       );
   }

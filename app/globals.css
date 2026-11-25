@@ -153,8 +153,10 @@ body {
 .bhv-rub { animation-name: bhv-rub; animation-duration: 1.6s; }
 @keyframes bhv-rub { 0%, 100% { transform: none; } 25% { transform: translateX(calc(5px * var(--amp, 1))) rotate(calc(4deg * var(--amp, 1))); } 75% { transform: translateX(calc(-5px * var(--amp, 1))) rotate(calc(-4deg * var(--amp, 1))); } }
 
-/* Templates body (components/ui/guideline/form-factor-body.tsx): the lit part takes the sage colour and moves like its role. */
-.ff-lit :is(rect, circle):not(.ff-eye) { fill: var(--sage-500); transition: fill var(--motion-base); }
+/* Templates body (components/ui/guideline/form-factor-body.tsx): line drawings; the lit part turns sage and moves like its role. */
+.ff-lit :is(rect, circle, line):not(.ff-eye) { stroke: var(--sage-500); transition: stroke var(--motion-base), fill var(--motion-base); }
+.ff-lit :is(rect, circle):not(.ff-eye) { fill: color-mix(in srgb, var(--sage-400) 24%, var(--neutral-0)); }
+.ff-lit .ff-eye { fill: var(--sage-500); }
 .ff-attend { animation: ff-attend 2.4s var(--ease-standard) infinite; }
 @keyframes ff-attend { 0%, 100% { transform: none; } 25%, 45% { transform: rotate(-10deg); } 65%, 85% { transform: rotate(10deg); } }
 .ff-posture { animation: ff-posture 2.4s var(--ease-standard) infinite; }

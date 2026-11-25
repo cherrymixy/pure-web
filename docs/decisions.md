@@ -157,3 +157,4 @@ STEP마다 한 줄. `날짜 · STEP · 결정 · 근거`
 | 2026-11-25 | 그림자·Patterns | 로봇 그림자가 몸통 이동을 따라가고 점프 때 작아짐. Patterns: 사이드바 Overview 제거(그룹 클릭=인덱스), Pattern spec을 확정 패턴 뒤·PROPOSED 앞으로(데이터 순서와 동일), 세부 페이지 맨 위 Scene 플레이어(pattern-scene.tsx: 트리거 → 컴포넌트 순서 재생 → Exit, 단계 칩 클릭 이동). Carried·Pass By는 재생할 컴포넌트가 없어 제외 | 사용자 리뷰 |
 | 2026-11-25 | Templates 몸 그림·Patterns 정리 | Templates 폼팩터 5종 + PURE pet·Desk 페이지 맨 위 Body(form-factor-body.tsx): role 선택 시 맡는 부위 강조·역할 모션, 없는 역할은 대신 맡는 부위/Skipped. Patterns PROPOSED 4개를 일반 패턴으로(태그·배지 제거), Pattern spec은 맨 끝 | 사용자 리뷰 |
 | 2026-11-25 | Style 실험대 | Style 4페이지 맨 위 Try it(style-lab.tsx): Signature 축·프리셋·w 슬라이더 → 레이더·로봇 실시간, Presets 4종 레이더+로봇(Cat·Dog·Drama는 데모용 예시 값, data/guideline/style.ts에 표시), ρ 행동·w 선택 → 공식 계산·원본/최종 로봇, Rules tilt 예시로 SHOULD 범위 클램프. 세부 페이지 상단 특수 섹션은 feature 슬롯 하나로 통합 | 사용자 리뷰 |
+| 2026-11-25 | Templates 몸 그림 | 블록형 몸 → Figma 폼팩터 아이콘(icon-human·quad·wheel-arm·wheel·arm) 라인 드로잉을 키워 그림(흰 채움·잉크 3px 선·관절 점), 선택 부위는 세이지 선·옅은 채움 | 사용자 리뷰 |
