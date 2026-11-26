@@ -14,16 +14,23 @@ function useFrameZoom(pathname: string) {
   useLayoutEffect(() => {
     const root = document.documentElement;
     const fit = () => {
-      const frame = Math.min(1, window.innerWidth / FRAME_W);
+      // clientWidth/Height leave out an always-on scrollbar (macOS with a mouse); innerWidth counted it and pushed the frame 15px wide.
+      const frame = Math.min(1, root.clientWidth / FRAME_W);
       root.style.setProperty("--frame-zoom", String(frame));
       root.style.setProperty("--sidebar-zoom", String(frame / APP_ZOOM));
+      // The window height in px: zoom scales px the same in every browser, unlike vh (Safari doesn't zoom vh, so 100vh / zoom overflowed).
+      root.style.setProperty("--win-h", `${root.clientHeight}px`);
     };
     fit();
     window.addEventListener("resize", fit);
+    const ro = new ResizeObserver(fit); // a scrollbar appearing changes the viewport without a resize event
+    ro.observe(root);
     return () => {
       window.removeEventListener("resize", fit);
+      ro.disconnect();
       root.style.removeProperty("--frame-zoom");
       root.style.removeProperty("--sidebar-zoom");
+      root.style.removeProperty("--win-h");
     };
   }, [pathname]);
 }

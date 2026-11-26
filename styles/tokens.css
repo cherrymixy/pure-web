@@ -130,7 +130,7 @@
   /* App scale: the 1920 build reads right at 67% (user review, STEP 23). Root zoom + a viewport-height unit
      that undoes it (CSS zoom scales vh too). Use var(--app-vh) instead of 100vh / h-screen. */
   --app-zoom: 0.67;
-  --app-vh: calc(100vh / var(--app-zoom));
+  --app-vh: calc(var(--win-h, 100vh) / var(--app-zoom)); /* --win-h: window height in px, set by LabShell */
   /* Lab home v2 + its sidebar (Figma 1095:6556) are drawn at 1× for a 1920 window: they fit that frame to the window width.
      LabShell sets the live value (min(1, width / 1920)); this is the pre-hydration fallback. */
   --frame-zoom: 0.67;
