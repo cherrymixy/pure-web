@@ -25,8 +25,6 @@ import { ROBOT_KEY, type JointState, type SimController } from "@/components/sim
 import { Viewport, type ViewportEvent } from "@/components/sim/Viewport";
 import type { LimitEvent } from "@/components/sim/limits";
 import { Icon } from "@/components/ui/icons/icon";
-import { downloadText, slug } from "@/lib/ui/download";
-import { fillFirmware, firmwarePaths } from "@/lib/robot-firmware";
 import { Menu } from "@/components/ui/menu";
 import { HistoryPanel, historyEntries, mentionOf, type HistoryEntry } from "./history-panel";
 import { ConfirmModal, Modal, ModalActions, ModalButton, PromptModal } from "@/components/ui/modal";
@@ -411,20 +409,6 @@ export function Editor({
   );
   const timelineClip = clip ?? previewClip;
 
-  /** ESP32 sketch (hardware/esp32_servo_wifi) with this motion baked in; the robot loops it from boot. */
-  const downloadRobotCode = async () => {
-    if (!expression || !timelineClip) return toast(STRINGS.export.noExpression);
-    try {
-      const res = await fetch("/api/firmware");
-      if (!res.ok) throw new Error(String(res.status));
-      const paths = firmwarePaths(timelineClip, structure.joints.map((j) => j.id), params.speed ?? 1);
-      const file = `${slug(name) || "pure"}_robot.ino`;
-      downloadText(file, fillFirmware(await res.text(), paths, name), "text/plain");
-      toast(fmt(E.robotCodeDone, { file }));
-    } catch {
-      toast(E.robotCodeFailed);
-    }
-  };
   const jointLabel = (id: string) => structure.joints.find((j) => j.id === id)?.label ?? id;
   const isJoint = (track: Track) => track !== "face" && track !== "sound";
 
@@ -1215,24 +1199,6 @@ export function Editor({
             className={`size-[42px] rounded-[var(--radius-full)] border border-[var(--home-line)] outline-offset-[3px] ${i === robotColor ? "outline outline-2 outline-[var(--home-ink)]" : ""}`}
             style={{ background: c.hex ?? "var(--neutral-0)" }}
           />
-        ))}
-      </div>
-
-      {/* Real-robot shortcuts: live test (same as the project menu item) and the ESP32 sketch with this motion (no Figma equivalent) */}
-      <div className="absolute right-[512px] top-[32px] z-10 flex items-center gap-[var(--space-8)]">
-        {([
-          ["bluetooth", E.menu.test, () => (expression ? setTestOpen(true) : toast(STRINGS.export.noExpression))],
-          ["download-minimalistic", E.menu.robotCode, () => void downloadRobotCode()],
-        ] as const).map(([icon, label, onClick]) => (
-          <button
-            key={label}
-            type="button"
-            onClick={onClick}
-            className="flex items-center gap-[var(--space-8)] rounded-[var(--radius-full)] bg-[var(--neutral-0)] px-[var(--space-16)] py-[10px] text-[15px] font-medium text-[var(--home-ink)] shadow-[var(--pure-shadow-chip)]"
-          >
-            <Icon name={icon} size={18} />
-            {label}
-          </button>
         ))}
       </div>
 
