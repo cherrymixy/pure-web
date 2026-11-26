@@ -169,3 +169,4 @@ STEP마다 한 줄. `날짜 · STEP · 결정 · 근거`
 | 2026-11-26 | 에디터 History·@동작 수정 | 왼쪽 탭 Context·History·Library, History = 요청 1회당 1항목(슬라이더 수정은 묶음) + 요약 카드, 고르면 로봇에 불러옴. 채팅창 @동작 칩(기본=현재 동작, 그 동작을 고침 / 지우면 새 동작), "@" 목록·"/new" "/undo". 서버 baseVersion → AI에 기준 동작 전달·요청한 것만 변경, AI 없으면 크게/작게/빠르게/느리게/한 번 더(한·영)로 기준 동작과 Amplitude·Speed 다이얼 조절. 표현에 요청 문장(prompt) 저장 | 사용자 요청 |
 - 2026-11-26 Lab 화면 맞춤: 프레임 폭은 clientWidth(스크롤바 제외), --app-vh는 JS가 넣는 px 창 높이 기준(Safari vh·zoom 차이) → Mac 전시에서 스크롤 제거
 - 2026-11-27 에디터 스테이지 위 Test on robot / Robot code 버튼 제거 (메뉴의 Test on robot은 유지)
+- 2026-11-27 에디터 History 탭 디자인 정리: 회색 박스·검정 선택 제거, Library식 섹션 제목, 정보는 작은 타일, 선택은 연한 하이라이트
