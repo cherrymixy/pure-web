@@ -171,3 +171,4 @@ STEP마다 한 줄. `날짜 · STEP · 결정 · 근거`
 - 2026-11-27 에디터 스테이지 위 Test on robot / Robot code 버튼 제거 (메뉴의 Test on robot은 유지)
 - 2026-11-27 에디터 History 탭 디자인 정리: 회색 박스·검정 선택 제거, Library식 섹션 제목, 정보는 작은 타일, 선택은 연한 하이라이트
 - 2026-11-27 [sim 승인] Safari 전용: 픽셀비 1·PCF 그림자·그림자맵 1024, 얼굴 영상 자동재생 막히면 첫 클릭/키에 재생
+- 2026-11-27 에디터 Situation Pattern 카드: 일러스트 → 패턴별 라인 아이콘(pt-*), Current Status의 show history 제거

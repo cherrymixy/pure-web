@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useId } from "react";
+import { useId } from "react";
 import { componentForSim, guidelineSlugFor } from "@/data/components";
 import { simBehaviorLabel } from "@/data/sim-behaviors";
 import type { appliedPatterns } from "@/data/patterns";
@@ -14,7 +14,6 @@ import { fileUrl } from "@/lib/ui/upload";
 import { ReferencedSets } from "@/components/ui/referenced-sets";
 import type { ReferenceItem } from "@/data/reference-sets";
 import { Icon, type IconName } from "@/components/ui/icons/icon";
-import { ConfirmModal } from "@/components/ui/modal";
 
 const E = STRINGS.editor;
 
@@ -38,7 +37,7 @@ export type PendingReference = { id: string; name: string };
 const fileName = (r: Reference) =>
   r.kind === "userData" ? fmt(STRINGS.community.referenceLabel, { name: r.path }) : r.path.split("/").pop()?.replace(/^[0-9a-f]{8}-/, "") ?? "";
 
-// Context tab (Figma 452:2268, content x 19): Current Status (latest input, "show history" opens the log + Clear),
+// Context tab (Figma 452:2268, content x 19): Current Status (latest input),
 // Reference = what the AI referenced, Component = channels per recipe step, Situation Pattern = the situations it fits.
 // Sections 40 apart; headers = icon 16 · 5 · Medium 16 #6f6d6e with a 50% "go to guideline" link on the right.
 export function ContextPanel({
@@ -68,45 +67,20 @@ export function ContextPanel({
   /** Face / motion item of the referenced set → reference player */
   onOpenSetItem?: (item: ReferenceItem) => void;
 }) {
-  const [history, setHistory] = useState(false);
-  const [confirmClear, setConfirmClear] = useState(false);
-  const { latest, shown } = splitLog(context.inputs, true);
+  const { latest } = splitLog(context.inputs, true);
   const used = usedChannels(steps);
 
   return (
     <div className="flex w-[394px] flex-col gap-[40px]">
-      {/* Current Status (452:2277): Regular 18 · show history; card #f0f0f0, 1px #ececec, r 10, 12/18 · 14 */}
+      {/* Current Status (452:2277): Regular 18; card #f0f0f0, 1px #ececec, r 10, 12/18 · 14 */}
       <section className="flex w-[388px] flex-col gap-[16px]">
         <div className="flex h-[23px] items-start justify-between whitespace-nowrap">
           <h3 className="text-[18px] leading-[23px] text-[var(--context-title)]">{E.currentStatus}</h3>
-          {latest && (
-            <button type="button" aria-expanded={history} onClick={() => setHistory(!history)} className={`${LINK} mt-[3px]`}>
-              {history ? E.hideHistory : E.showHistory}
-            </button>
-          )}
         </div>
         {latest ? (
           <InputCard entry={latest} strong reading={reading} activeReference={activeReference} onOpen={onOpenReference} />
         ) : (
           <p className={`${STATUS} text-[var(--home-ink-3)]`}>{E.statusEmpty}</p>
-        )}
-        {latest && history && (
-          <div className="flex flex-col gap-[var(--space-8)]" data-testid="input-log">
-            <span className="text-[14px] leading-[18px] text-[var(--home-ink-3)]">{E.inputLog}</span>
-            {shown.length === 0 && <span className="text-[14px] leading-[18px] text-[var(--home-ink-3)]">{E.noHistory}</span>}
-            {shown.map((entry) => (
-              <InputCard key={entry.id} entry={entry} reading={reading} activeReference={activeReference} onOpen={onOpenReference} />
-            ))}
-            {/* Clear lives at the end of the history: empties Current Status and the log */}
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => setConfirmClear(true)}
-              className="self-end text-[14px] leading-[18px] text-[var(--home-ink-2)] underline disabled:opacity-40"
-            >
-              {E.clearStatus}
-            </button>
-          </div>
         )}
       </section>
 
@@ -158,7 +132,6 @@ export function ContextPanel({
         ) : (
           <div className="-mr-[17px] flex gap-[8px] overflow-x-auto pr-[17px] [scrollbar-width:none]" data-testid="applied-patterns">
             {patterns.map((p) => {
-              const art = "art" in p ? p.art : undefined;
               return (
                 <Link
                   key={p.id}
@@ -166,12 +139,7 @@ export function ContextPanel({
                   title={p.hint}
                   className="relative h-[112px] w-[125px] shrink-0 overflow-hidden rounded-[10px] bg-[var(--context-card)] shadow-[inset_0_0_20px_0_rgb(255_255_255/0.66)]"
                 >
-                  {art ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={art} alt="" className="absolute left-1/2 top-[11px] h-[62px] max-w-none -translate-x-1/2" />
-                  ) : (
-                    <Icon name="round-graph" size={40} className="absolute left-1/2 top-[22px] -translate-x-1/2 text-[var(--editor-field-label)]" />
-                  )}
+                  <Icon name={`pt-${p.id}` as IconName} size={36} className="absolute left-1/2 top-[24px] -translate-x-1/2 text-[var(--context-strong)] opacity-80" />
                   <span className="absolute inset-x-0 top-[81px] truncate px-[var(--space-8)] text-center text-[14px] font-medium leading-[19px] text-[var(--context-strong)] opacity-80">
                     {p.label}
                   </span>
@@ -182,19 +150,6 @@ export function ContextPanel({
         )}
       </section>
 
-      <ConfirmModal
-        open={confirmClear}
-        title={E.clearStatusConfirm.title}
-        body={E.clearStatusConfirm.body}
-        confirmLabel={E.clearStatus}
-        danger
-        onConfirm={() => {
-          setConfirmClear(false);
-          setHistory(false);
-          onChange({ inputs: [] });
-        }}
-        onCancel={() => setConfirmClear(false)}
-      />
     </div>
   );
 }

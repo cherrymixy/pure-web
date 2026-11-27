@@ -325,6 +325,72 @@ export const ICONS = {
     "height": 24,
     "body": "<path d=\"M6.92773 6.82001V17.18C6.92773 17.97 7.79773 18.45 8.46773 18.02L16.6077 12.84C17.2277 12.45 17.2277 11.55 16.6077 11.15L8.46773 5.98001C7.79773 5.55001 6.92773 6.03001 6.92773 6.82001Z\" fill=\"currentColor\"/>"
   },
+  "pt-by-your-side": {
+    "viewBox": "0 0 24 24",
+    "width": 24,
+    "height": 24,
+    "body": "<g stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"8\" cy=\"7\" r=\"2.5\"/><circle cx=\"16\" cy=\"7\" r=\"2.5\"/><path d=\"M4 20v-3.5A3.5 3.5 0 0 1 7.5 13h1A3.5 3.5 0 0 1 12 16.5V20\"/><path d=\"M12 20v-3.5a3.5 3.5 0 0 1 3.5-3.5h1a3.5 3.5 0 0 1 3.5 3.5V20\"/></g>"
+  },
+  "pt-calling": {
+    "viewBox": "0 0 24 24",
+    "width": 24,
+    "height": 24,
+    "body": "<g stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"5.5\" cy=\"12\" r=\"2\"/><path d=\"M10 8.5a5 5 0 0 1 0 7\"/><path d=\"M13.5 6a8.5 8.5 0 0 1 0 12\"/><path d=\"M17 3.5a12 12 0 0 1 0 17\"/></g>"
+  },
+  "pt-carried": {
+    "viewBox": "0 0 24 24",
+    "width": 24,
+    "height": 24,
+    "body": "<g stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"7\" y=\"4\" width=\"10\" height=\"9\" rx=\"2\"/><path d=\"M3 15h4.5l2.5 2h6.5a1.5 1.5 0 0 0 0-3H12\"/><path d=\"M3 20h13l5-4\"/></g>"
+  },
+  "pt-conversation": {
+    "viewBox": "0 0 24 24",
+    "width": 24,
+    "height": 24,
+    "body": "<g stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 5.5A1.5 1.5 0 0 1 4.5 4h9A1.5 1.5 0 0 1 15 5.5v5a1.5 1.5 0 0 1-1.5 1.5H8l-3 2.5V12h-.5A1.5 1.5 0 0 1 3 10.5z\"/><path d=\"M18 9h1.5A1.5 1.5 0 0 1 21 10.5v5a1.5 1.5 0 0 1-1.5 1.5H19v2.5L16 17h-4.5a1.5 1.5 0 0 1-1.5-1.5V15\"/></g>"
+  },
+  "pt-face-to-face": {
+    "viewBox": "0 0 24 24",
+    "width": 24,
+    "height": 24,
+    "body": "<g stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"6.5\" cy=\"9\" r=\"3\"/><circle cx=\"17.5\" cy=\"9\" r=\"3\"/><path d=\"M2.5 19c0-2.5 1.8-4.5 4-4.5s4 2 4 4.5\"/><path d=\"M13.5 19c0-2.5 1.8-4.5 4-4.5s4 2 4 4.5\"/><path d=\"M10.5 9h3\"/></g>"
+  },
+  "pt-feedback": {
+    "viewBox": "0 0 24 24",
+    "width": 24,
+    "height": 24,
+    "body": "<g stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M7 10.5V20H4.5A1.5 1.5 0 0 1 3 18.5v-6.5a1.5 1.5 0 0 1 1.5-1.5z\"/><path d=\"M7 10.5l3.5-6.5a2 2 0 0 1 2 2.5L12 9.5h5.5a2 2 0 0 1 2 2.3l-1.1 6.5a2 2 0 0 1-2 1.7H7\"/></g>"
+  },
+  "pt-guiding": {
+    "viewBox": "0 0 24 24",
+    "width": 24,
+    "height": 24,
+    "body": "<g stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 3v18\"/><path d=\"M12 5h6.5l2 2.5-2 2.5H12\"/><path d=\"M12 12H5.5l-2 2.5 2 2.5H12\"/></g>"
+  },
+  "pt-leave": {
+    "viewBox": "0 0 24 24",
+    "width": 24,
+    "height": 24,
+    "body": "<g stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4\"/><path d=\"M14 8l4 4-4 4\"/><path d=\"M18 12H9\"/></g>"
+  },
+  "pt-pass-by": {
+    "viewBox": "0 0 24 24",
+    "width": 24,
+    "height": 24,
+    "body": "<g stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"7\" r=\"2.5\"/><path d=\"M9 13.5h6\"/><path d=\"M3 18.5h18\"/><path d=\"M17.5 15.5l3.5 3-3.5 3\"/></g>"
+  },
+  "pt-sudden": {
+    "viewBox": "0 0 24 24",
+    "width": 24,
+    "height": 24,
+    "body": "<g stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M13 2.5L5 13.5h6l-1 8 8-11h-6z\"/></g>"
+  },
+  "pt-touching": {
+    "viewBox": "0 0 24 24",
+    "width": 24,
+    "height": 24,
+    "body": "<g stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"16\" cy=\"8\" r=\"4.5\"/><path d=\"M4 20v-6.5a1.5 1.5 0 0 1 3 0V12l1.2-.9a1.5 1.5 0 0 1 2.3 1.2V15\"/><path d=\"M7 12V7.5a1.5 1.5 0 0 1 3 0V11\"/><path d=\"M10.5 9.5l1.5-1\"/></g>"
+  },
   "replay": {
     "viewBox": "0 0 24 24",
     "width": 24,
