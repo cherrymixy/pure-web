@@ -1290,6 +1290,7 @@ export function Editor({
               behaviors={expression?.motion.recipe.steps.map((st) => st.behavior) ?? []}
               steps={steps}
               patterns={expression && !busy ? appliedPatterns(expression.pattern, expression.components) : []}
+              status={(entries.find((h) => h.version === mentionVersion) ?? entries[0])?.request}
               busy={busy}
               onChange={(patch) => setContext((c) => ({ ...c, ...patch }))}
               onOpenReference={(r) => r.kind !== "userData" && setActiveRef(activeRef?.id === r.id ? null : r)}

@@ -45,6 +45,7 @@ export function ContextPanel({
   behaviors,
   steps = [],
   patterns = [],
+  status,
   busy,
   reading = [],
   activeReference,
@@ -59,6 +60,8 @@ export function ContextPanel({
   steps?: ChannelTile[];
   /** Situation patterns the current expression fits (data/patterns appliedPatterns) */
   patterns?: ReturnType<typeof appliedPatterns>;
+  /** The request of the motion picked in History: Current Status shows the same words */
+  status?: string;
   busy: boolean;
   reading?: string[];
   activeReference: string | null;
@@ -67,7 +70,11 @@ export function ContextPanel({
   /** Face / motion item of the referenced set → reference player */
   onOpenSetItem?: (item: ReferenceItem) => void;
 }) {
-  const { latest } = splitLog(context.inputs, true);
+  const { latest: last } = splitLog(context.inputs, true);
+  // Current Status follows the History pick; attachments stay when it is the last input itself.
+  const latest: InputEntry | undefined = status
+    ? last && last.text === status ? last : { id: "status", text: status, attachments: [], at: last?.at ?? "" }
+    : last;
   const used = usedChannels(steps);
 
   return (
