@@ -61,8 +61,18 @@ export interface GizmoHandlers {
 const RING_RADIUS = 0.055;
 const RING_TUBE = 0.0022;
 const RING_GRAB = 0.009;
-/** A pointer that moves less than this (px) between down and up is a click, not an orbit. */
-const CLICK_PX = 4;
+/** A pointer that moves less than this (px) between down and up is a click, not an orbit (8: a Magic Mouse click drifts a few px). */
+const CLICK_PX = 8;
+
+/** Safari still runs the old CSS zoom: rects come in the zoomed page's units while pointer coords stay in window px.
+ *  Returns the factor to divide pointer coords by (1 in browsers with the standard zoom, e.g. Chrome). */
+function legacyZoom(): number {
+  const root = document.documentElement;
+  const z = parseFloat(getComputedStyle(root).zoom) || 1;
+  if (z === 1) return 1;
+  const w = root.getBoundingClientRect().width;
+  return Math.abs(w * z - innerWidth) < Math.abs(w - innerWidth) ? z : 1;
+}
 
 const DEFAULT_OPTIONS: Required<ViewerOptions> = {
   stage: '#0a0a0d',
@@ -726,7 +736,8 @@ export class LampViewer {
 
   private rayAt(e: PointerEvent): THREE.Ray {
     const rect = this.renderer.domElement.getBoundingClientRect();
-    const ndc = new THREE.Vector2(((e.clientX - rect.left) / rect.width) * 2 - 1, -((e.clientY - rect.top) / rect.height) * 2 + 1);
+    const z = legacyZoom();
+    const ndc = new THREE.Vector2(((e.clientX / z - rect.left) / rect.width) * 2 - 1, -((e.clientY / z - rect.top) / rect.height) * 2 + 1);
     this.raycaster.setFromCamera(ndc, this.camera);
     return this.raycaster.ray;
   }

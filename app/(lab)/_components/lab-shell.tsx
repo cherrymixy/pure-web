@@ -4,7 +4,9 @@ import { usePathname } from "next/navigation";
 import { useLayoutEffect } from "react";
 
 const FRAME_W = 1920;
-const APP_ZOOM = 0.67; // = --app-zoom in styles/tokens.css
+const APP_ZOOM = 0.67; // = --base-zoom fallback in styles/tokens.css
+/** Below 1920 (a 1440–1512 Mac) everything read too small: text and UI run ~10 % larger there. */
+const SMALL_BOOST = 1.1;
 
 /** Live --frame-zoom = min(1, window width / 1920): the scale at which the 1× sidebar + home frame fit the window.
  *  --sidebar-zoom = that scale divided by the html zoom of a 67 % page (`zoom` can't take calc(), so it's a plain number).
@@ -15,9 +17,13 @@ function useFrameZoom(pathname: string) {
     const root = document.documentElement;
     const fit = () => {
       // clientWidth/Height leave out an always-on scrollbar (macOS with a mouse); innerWidth counted it and pushed the frame 15px wide.
-      const frame = Math.min(1, root.clientWidth / FRAME_W);
+      const w = root.clientWidth;
+      const boost = w < FRAME_W ? SMALL_BOOST : 1;
+      const frame = Math.min(1, (w / FRAME_W) * boost);
+      const base = APP_ZOOM * boost;
       root.style.setProperty("--frame-zoom", String(frame));
-      root.style.setProperty("--sidebar-zoom", String(frame / APP_ZOOM));
+      root.style.setProperty("--base-zoom", String(base));
+      root.style.setProperty("--sidebar-zoom", String(frame / base));
       // The window height in px: zoom scales px the same in every browser, unlike vh (Safari doesn't zoom vh, so 100vh / zoom overflowed).
       root.style.setProperty("--win-h", `${root.clientHeight}px`);
     };
@@ -30,6 +36,7 @@ function useFrameZoom(pathname: string) {
       ro.disconnect();
       root.style.removeProperty("--frame-zoom");
       root.style.removeProperty("--sidebar-zoom");
+      root.style.removeProperty("--base-zoom");
       root.style.removeProperty("--win-h");
     };
   }, [pathname]);

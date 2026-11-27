@@ -173,3 +173,4 @@ STEP마다 한 줄. `날짜 · STEP · 결정 · 근거`
 - 2026-11-27 [sim 승인] Safari 전용: 픽셀비 1·PCF 그림자·그림자맵 1024, 얼굴 영상 자동재생 막히면 첫 클릭/키에 재생
 - 2026-11-27 에디터 Situation Pattern 카드: 일러스트 → 패턴별 라인 아이콘(pt-*), Current Status의 show history 제거
 - 2026-11-27 Current Status 문장을 History에서 고른 동작의 요청 문장과 같게
+- 2026-11-27 [sim 승인] Safari 구형 CSS zoom 클릭 좌표 보정·클릭 허용 8px(매직마우스). 1920 미만 화면은 UI 10% 확대(--base-zoom)
