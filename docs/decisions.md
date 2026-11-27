@@ -170,3 +170,4 @@ STEP마다 한 줄. `날짜 · STEP · 결정 · 근거`
 - 2026-11-26 Lab 화면 맞춤: 프레임 폭은 clientWidth(스크롤바 제외), --app-vh는 JS가 넣는 px 창 높이 기준(Safari vh·zoom 차이) → Mac 전시에서 스크롤 제거
 - 2026-11-27 에디터 스테이지 위 Test on robot / Robot code 버튼 제거 (메뉴의 Test on robot은 유지)
 - 2026-11-27 에디터 History 탭 디자인 정리: 회색 박스·검정 선택 제거, Library식 섹션 제목, 정보는 작은 타일, 선택은 연한 하이라이트
+- 2026-11-27 [sim 승인] Safari 전용: 픽셀비 1·PCF 그림자·그림자맵 1024, 얼굴 영상 자동재생 막히면 첫 클릭/키에 재생

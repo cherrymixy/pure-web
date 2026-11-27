@@ -26,6 +26,8 @@ export type { CameraView };
 const MJ_TO_WORLD = -Math.PI / 2;
 
 /** 스테이지·조명 색. 기본값은 _ref(다크 스테이지 + 마젠타 림 + 바이올렛 필) 그대로. */
+const IS_SAFARI = typeof navigator !== 'undefined' && /^((?!chrome|chromium|android|crios|fxios).)*safari/i.test(navigator.userAgent);
+
 export interface ViewerOptions {
   /** Background colour; "transparent" = no background, the floor only shows the shadow (page shows through) */
   stage?: string;
@@ -147,9 +149,10 @@ export class LampViewer {
 
     const transparent = this.options.stage === 'transparent';
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: transparent });
-    this.renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    // Safari's WebGL is far slower than Chrome's on the same Mac: 1× pixels and plain PCF shadows keep it smooth there.
+    this.renderer.setPixelRatio(IS_SAFARI ? 1 : Math.min(devicePixelRatio, 2));
     this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.type = IS_SAFARI ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.5;
 
@@ -196,7 +199,7 @@ export class LampViewer {
     const k = this.lamp.robot.scale ?? 1;
     key.position.set(1.2 * k, 2.0 * k, 1.1 * k);
     key.castShadow = true;
-    key.shadow.mapSize.set(2048, 2048);
+    key.shadow.mapSize.set(IS_SAFARI ? 1024 : 2048, IS_SAFARI ? 1024 : 2048);
     key.shadow.camera.near = 0.4 * k;
     key.shadow.camera.far = 6 * k;
     const d = 1.0 * k;
@@ -398,11 +401,16 @@ export class LampViewer {
       video.preload = 'auto';
       // 새 영상의 첫 프레임이 준비된 뒤에 바꿔 끼워 검은 깜빡임을 줄인다.
       video.addEventListener('loadeddata', () => this.attachVideo());
+      video.addEventListener('playing', () => this.attachVideo());
       this.video = video;
     }
     this.video.src = url;
     this.video.play().catch(() => {
-      // 자동 재생이 막힌 경우 — 음소거 영상이라 보통은 막히지 않는다.
+      // Safari (low power mode / auto-play off) blocks it: play on the first click or key instead, then show it.
+      const video = this.video;
+      const retry = () => void video?.play().then(() => this.attachVideo()).catch(() => {});
+      window.addEventListener('pointerdown', retry, { once: true });
+      window.addEventListener('keydown', retry, { once: true });
     });
   }
 
