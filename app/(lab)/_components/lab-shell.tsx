@@ -5,7 +5,7 @@ import { useLayoutEffect } from "react";
 
 const FRAME_W = 1920;
 const APP_ZOOM = 0.67; // = --base-zoom fallback in styles/tokens.css
-/** Below 1920 the exhibition Mac (Safari) read too small, the designer's MacBook (Chrome) right at 1×: Safari runs 30 %
+/** Below 1920 the exhibition Mac (Safari) read too small, the designer's MacBook (Chrome) right at 1×: Safari runs 45 %
  *  larger. `?zoom=1.2` on any lab URL overrides it for that browser (kept in localStorage, `?zoom=auto` clears it). */
 function smallBoost(): number {
   const q = new URLSearchParams(location.search).get("zoom");
@@ -13,7 +13,7 @@ function smallBoost(): number {
   else if (q && parseFloat(q) > 0) localStorage.setItem("pure-zoom", q);
   const saved = parseFloat(localStorage.getItem("pure-zoom") ?? "");
   if (saved > 0) return saved;
-  return /^((?!chrome|chromium|android|crios|fxios|edg).)*safari/i.test(navigator.userAgent) ? 1.3 : 1;
+  return /^((?!chrome|chromium|android|crios|fxios|edg).)*safari/i.test(navigator.userAgent) ? 1.45 : 1;
 }
 
 /** Live --frame-zoom = min(1, window width / 1920): the scale at which the 1× sidebar + home frame fit the window.
@@ -27,7 +27,7 @@ function useFrameZoom(pathname: string) {
       // clientWidth/Height leave out an always-on scrollbar (macOS with a mouse); innerWidth counted it and pushed the frame 15px wide.
       const w = root.clientWidth;
       const boost = w < FRAME_W ? smallBoost() : 1;
-      const frame = Math.min(1, (w / FRAME_W) * boost);
+      const frame = Math.min(boost, (w / FRAME_W) * boost); // a boosted window may go past 1×
       const base = APP_ZOOM * boost;
       root.style.setProperty("--frame-zoom", String(frame));
       root.style.setProperty("--base-zoom", String(base));
