@@ -707,8 +707,10 @@ export function Editor({
           method: "POST",
           body: JSON.stringify({
             prompt: p,
-            components: ctx.components,
-            pattern: ctx.pattern || undefined,
+            // A plain request starts fresh: the last motion's components / situation (e.g. bow · face-to-face) steered every
+            // new request into a greeting. Only an @ edit or a component-chip regenerate keeps them.
+            components: mention || regenerate ? ctx.components : [],
+            pattern: (mention || regenerate) && ctx.pattern ? ctx.pattern : undefined,
             references: attachments,
             expressionId: expression?.id,
             baseVersion: mention && expression ? (mention.version === "current" ? expression.version : mention.version) : undefined,
