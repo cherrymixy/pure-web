@@ -16,7 +16,7 @@ export function GuidelineIndexPage({ title, doc, base, download }: { title: stri
   const section = doc.rows.flatMap((r) => (Array.isArray(r) ? r : [r])).find((s) => s.kind === "cards");
   const items = section?.kind === "cards" ? section.items : [];
   return (
-    <div data-fit-frame className="relative px-[var(--space-40)] py-[42px] leading-normal">
+    <div data-fit-frame className="relative overflow-x-clip px-[var(--space-40)] py-[42px] leading-normal">
       <img src="/figma/lab/home/glow.svg" alt="" aria-hidden className="pointer-events-none absolute left-[26px] top-[-360px] h-[680px] w-[1360px] max-w-none" />
 
       {/* Header lives in the content column so the download button ends exactly where the card grid ends; the rail starts at the top. */}

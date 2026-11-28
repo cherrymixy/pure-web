@@ -55,7 +55,7 @@ export function CommunityBrowser() {
   const list = robot === "joint-fixed" ? items : [];
 
   return (
-    <div data-fit-frame className="relative flex flex-col gap-[var(--space-40)] px-[var(--space-40)] py-[42px] leading-normal">
+    <div data-fit-frame className="relative overflow-x-clip flex flex-col gap-[var(--space-40)] px-[var(--space-40)] py-[42px] leading-normal">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/figma/lab/home/glow.svg" alt="" aria-hidden className="pointer-events-none absolute left-[26px] top-[-360px] h-[680px] w-[1360px] max-w-none" />
 

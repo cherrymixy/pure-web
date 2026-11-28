@@ -192,7 +192,7 @@ export const STRINGS = {
       none: "None",
       now: "Now",
       empty: "Motions you make here show up as a list. Pick one to load it on the robot and keep changing it.",
-      editHint: "Chat to change @{mention} (e.g. “bow a little deeper”). Remove the chip to start a new motion.",
+      editHint: "Click a motion below to attach @{mention}, then chat to change it (e.g. “bow a little deeper”). Without the chip, each request makes a new motion.",
     },
     mention: {
       placeholder: "How should it change? e.g. bow a little deeper",

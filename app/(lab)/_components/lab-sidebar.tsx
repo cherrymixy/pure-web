@@ -14,7 +14,7 @@ export function LabSidebar({ docPaths, favourites, name, email }: { docPaths: st
   const [collapsed, setCollapsed] = useState(false);
   return (
     // Same on-screen size on every lab page: undo the page zoom, apply the fitted frame zoom.
-    <div className="sticky top-0 shrink-0 py-[24px] pl-[26px]" style={{ zoom: "var(--sidebar-zoom)", height: "calc(100vh / var(--frame-zoom))" }}>
+    <div className="sticky top-0 shrink-0 py-[24px] pl-[26px]" style={{ zoom: "var(--sidebar-zoom)", height: "calc(var(--win-h, 100vh) / var(--frame-zoom))" }}>
       <aside
         className={`flex h-full flex-col gap-[6px] overflow-clip rounded-[var(--radius-lg)] border-r border-[var(--home-line)] bg-[var(--home-sidebar)] py-[var(--space-24)] transition-[width,padding] duration-[var(--motion-base)] ease-[var(--ease-standard)] motion-reduce:transition-none ${collapsed ? "w-[68px] px-[var(--space-12)]" : "w-[288px] px-[var(--space-24)]"}`}
       >

@@ -49,7 +49,7 @@ export function ComponentDocPage({
   const player = hasBehaviorDemo(behavior) ? behavior : undefined;
   const timeline = sections.find((s) => s.kind === "timeline");
   const page = (
-    <div data-fit-frame className="relative px-[var(--space-40)] py-[42px]">
+    <div data-fit-frame className="relative overflow-x-clip px-[var(--space-40)] py-[42px]">
       <img src="/figma/lab/home/glow.svg" alt="" aria-hidden className="pointer-events-none absolute left-[26px] top-[-360px] h-[680px] w-[1360px] max-w-none" />
 
       <div className="relative flex min-w-0 items-start gap-[var(--space-40)] leading-normal">

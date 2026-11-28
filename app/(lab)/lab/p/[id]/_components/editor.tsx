@@ -219,7 +219,7 @@ export function Editor({
   const [tab, setTab] = useState<Tab>("motion");
   const [leftTab, setLeftTab] = useState<"context" | "history" | "library">("context");
   /** The motion the next request edits ("@tired" chip); "current" follows the version on the robot. null = a new motion. */
-  const [mention, setMention] = useState<{ version: number | "current"; title: string } | null>(initialExpression ? { version: "current", title: initialExpression.name } : null);
+  const [mention, setMention] = useState<{ version: number | "current"; title: string } | null>(null); // only a History pick attaches @, so a plain request makes a new motion
   /** Library L3: the placed 3D asset being moved (slot key "<assetId>#n") */
   const [selectedProp, setSelectedProp] = useState<string | null>(null);
   const [robotMount, setRobotMount] = useState<string | null>(project.scene?.mount ?? null);
@@ -650,7 +650,7 @@ export function Editor({
         setLastResult(result);
         setExpression(e);
         resetTo(e);
-        setMention({ version: "current", title: e.name });
+        setMention(null); // the next request is a new motion again; pick it in History to keep editing it
         setAutoPlay(true);
         setCue((c) => c + 1);
         if (result.source === "demo" && !settings.demoMode) setFailure(result.fallbackReason ?? "");
@@ -1312,7 +1312,7 @@ export function Editor({
       </aside>
 
       {/* Bottom stack: play bar 20 above the composer, so it rides up when attach chips make the composer taller */}
-      <div className="pointer-events-none absolute bottom-[32px] left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-[20px]">
+      <div className="pointer-events-none absolute bottom-[32px] left-[494px] right-[512px] z-10 flex flex-col items-center gap-[20px]">
       {/* Generating (901:11082 ×2): pill with Stop, centred above the play bar (was a fixed Figma offset that no longer lined up) */}
       {busy && job && (
         <div className="pointer-events-auto flex flex-col items-center gap-[var(--space-8)]">
@@ -1409,7 +1409,7 @@ export function Editor({
       <form
         data-tour="composer"
         hidden={timelineOpen}
-        className="pointer-events-auto flex w-[646px] flex-col items-center gap-[var(--space-12)] [zoom:1.2]"
+        className="pointer-events-auto flex w-[calc(100%/1.2)] max-w-[760px] flex-col items-center gap-[var(--space-12)] [zoom:1.2]"
         onSubmit={(e) => {
           e.preventDefault();
           if (popover?.kind === "command") return void runCommand(popover.items[0].id);
@@ -1417,7 +1417,7 @@ export function Editor({
           if (!runCommand(prompt)) void generate();
         }}
       >
-        <div className="flex min-h-[106px] w-full flex-col justify-between gap-[var(--space-12)] rounded-[20px] border border-[var(--composer-border)] bg-[var(--neutral-0)] px-[16px] pb-[12px] pt-[16px] shadow-[var(--composer-shadow)]">
+        <div className="flex min-h-[124px] w-full flex-col justify-between gap-[var(--space-16)] rounded-[20px] border border-[var(--composer-border)] bg-[var(--neutral-0)] px-[16px] pb-[12px] pt-[16px] shadow-[var(--composer-shadow)]">
           {(context.references.length > 0 || pending.length > 0) && (
             <div className="flex flex-wrap items-center gap-[var(--space-8)] text-[14px] leading-[18px]" data-testid="attach-chips">
               {context.references.map((r) => (
@@ -1438,7 +1438,7 @@ export function Editor({
           )}
           <div className="relative flex w-full items-center gap-[var(--space-8)]">
             {mention && (
-              <span className="flex shrink-0 items-center gap-[2px] rounded-[var(--radius-full)] bg-[var(--home-ink)] py-[3px] pl-[10px] pr-[4px] text-[14px] font-medium leading-[18px] text-[var(--neutral-0)]" data-testid="mention-chip">
+              <span className="flex shrink-0 items-center gap-[2px] rounded-[var(--radius-full)] bg-[var(--home-ink)] py-[4px] pl-[12px] pr-[5px] text-[17px] font-medium leading-[22px] text-[var(--neutral-0)]" data-testid="mention-chip">
                 @{mentionOf(mention.title)}
                 <button type="button" aria-label={fmt(E.mention.remove, { mention: mentionOf(mention.title) })} title={fmt(E.mention.remove, { mention: mentionOf(mention.title) })} onClick={() => setMention(null)} className="flex size-[18px] items-center justify-center rounded-[var(--radius-full)] opacity-70 hover:opacity-100">
                   ×
@@ -1456,7 +1456,7 @@ export function Editor({
               placeholder={mention ? E.mention.placeholder : E.promptPlaceholder}
               aria-label={E.promptPlaceholder}
               maxLength={500}
-              className="min-w-0 flex-1 bg-transparent text-[16px] leading-none tracking-[-0.32px] text-[var(--home-ink)] outline-none placeholder:text-[var(--composer-placeholder)] disabled:opacity-60"
+              className="min-w-0 flex-1 bg-transparent py-[4px] text-[19px] leading-[24px] tracking-[-0.3px] text-[var(--home-ink)] outline-none placeholder:text-[var(--composer-placeholder)] disabled:opacity-60"
             />
             {popover && (
               <div role="listbox" aria-label={popover.kind === "command" ? E.mention.commands : E.mention.motions} className="absolute bottom-[calc(100%+12px)] left-0 z-20 flex w-[320px] flex-col gap-[2px] rounded-[14px] bg-[var(--neutral-0)] p-[6px] shadow-[var(--pure-shadow-modal)]">

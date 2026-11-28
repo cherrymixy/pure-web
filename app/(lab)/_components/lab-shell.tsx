@@ -5,8 +5,8 @@ import { useLayoutEffect } from "react";
 
 const FRAME_W = 1920;
 const APP_ZOOM = 0.67; // = --base-zoom fallback in styles/tokens.css
-/** Below 1920 (a 1440–1512 Mac) everything read too small: text and UI run ~10 % larger there. */
-const SMALL_BOOST = 1.1;
+/** Below 1920 (a 1440–1512 Mac) everything read too small: text and UI run 30 % larger there. */
+const SMALL_BOOST = 1.3;
 
 /** Live --frame-zoom = min(1, window width / 1920): the scale at which the 1× sidebar + home frame fit the window.
  *  --sidebar-zoom = that scale divided by the html zoom of a 67 % page (`zoom` can't take calc(), so it's a plain number).

@@ -106,7 +106,7 @@ export function LabHome({ author }: { author: string }) {
   const rangeLabel = S.updatedRanges.find((r) => r.days === days)?.label ?? S.filters.any;
 
   return (
-    <div data-fit-frame className="relative flex flex-col gap-[var(--space-40)] px-[var(--space-40)] py-[42px] leading-normal">
+    <div data-fit-frame className="relative overflow-x-clip flex flex-col gap-[var(--space-40)] px-[var(--space-40)] py-[42px] leading-normal">
       <img src={`${H}/glow.svg`} alt="" aria-hidden className="pointer-events-none absolute left-[26px] top-[-360px] h-[680px] w-[1360px] max-w-none" />
 
       <div className="relative flex flex-col gap-[var(--space-20)]">

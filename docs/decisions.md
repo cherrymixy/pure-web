@@ -174,3 +174,5 @@ STEP마다 한 줄. `날짜 · STEP · 결정 · 근거`
 - 2026-11-27 에디터 Situation Pattern 카드: 일러스트 → 패턴별 라인 아이콘(pt-*), Current Status의 show history 제거
 - 2026-11-27 Current Status 문장을 History에서 고른 동작의 요청 문장과 같게
 - 2026-11-27 [sim 승인] Safari 구형 CSS zoom 클릭 좌표 보정·클릭 허용 8px(매직마우스). 1920 미만 화면은 UI 10% 확대(--base-zoom)
+- 2026-11-28 1920 미만 화면 1.3배(SMALL_BOOST), 에디터 입력창 확대(최대 760, 글씨 19), Lab 배경 장식 가로 넘침 clip
+- 2026-11-28 @칩 기본 해제: 요청마다 새 동작 생성, History에서 고를 때만 @ 붙여 수정
